@@ -13,8 +13,22 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    hds_face.cpp \
+    hds_vertex.cpp \
+    hds_mesh.cpp \
+    hds_halfedge.cpp \
+    thirdparty/tinyobjloader/tiny_obj_loader.cc \
+    meshviewer.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    hds_face.h \
+    hds_vertex.h \
+    hds_mesh.h \
+    hds_halfedge.h \
+    thirdparty/tinyobjloader/tiny_obj_loader.h \
+    meshviewer.h \
+    common.h \
+    glutils.hpp
 
 FORMS    += mainwindow.ui
