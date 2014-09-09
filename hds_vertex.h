@@ -9,7 +9,7 @@ class HDS_Vertex
 {
 public:
     HDS_Vertex();
-    HDS_Vertex(const QVector3D &pos):pos(pos){}
+    HDS_Vertex(const QVector3D &pos);
     ~HDS_Vertex();
 
     HDS_Vertex(const HDS_Vertex &other);
@@ -21,6 +21,8 @@ public:
 
     QVector3D pos;
     HDS_HalfEdge *he;
+
+    bool isPicked;
 };
 
 #endif // HDS_VERTEX_H

@@ -16,6 +16,8 @@ public:
     HDS_Face *f;
     HDS_Vertex *v;
     HDS_HalfEdge *prev, *next, *flip;
+
+    bool isPicked;
 };
 
 #endif // HDS_EDGE_H

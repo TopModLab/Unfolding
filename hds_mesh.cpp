@@ -3,6 +3,9 @@
 
 HDS_Mesh::HDS_Mesh()
 {
+    showFace = false;
+    showVert = true;
+    showEdge = true;
 }
 
 HDS_Mesh::~HDS_Mesh() {
@@ -73,19 +76,19 @@ void HDS_Mesh::draw()
         glColor4f(0.25, 0.25, 0.25, 1);
         GLfloat line_mat_diffuse[4] = {0.25, 0.25, 0.25, 1};
         glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
-
+        glLineWidth(2.0);
         // render the boundaires
         for(auto eit=heSet.begin();eit!=heSet.end();eit++)
         {
             he_t* e = (*eit);
-            he_t* ef = e->flip;
-            GLUtils::drawLine(e->v->pos, ef->v->pos);
+            he_t* en = e->next;
+            GLUtils::drawLine(e->v->pos, en->v->pos, e->isPicked?Qt::red:Qt::black);
         }
     }
 
     if( showVert )
     {
-        glColor4f(1, 0, 0, 1);
+        glColor4f(0, 0, 1, 1);
         GLfloat line_mat_diffuse[4] = {1, 0, 0, 1};
         glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
 
@@ -98,7 +101,7 @@ void HDS_Mesh::draw()
 #if 0
             glutSolidSphere(0.125, 16, 16);
 #else
-            glPointSize(2.0);
+            glPointSize(10.0);
             glBegin(GL_POINTS);
             glVertex3f(0, 0, 0);
             glEnd();
@@ -106,4 +109,34 @@ void HDS_Mesh::draw()
             glPopMatrix();
         }
     }
+}
+
+template <typename T>
+__forceinline void encodeIndex(int idx, T& r, T& g, T& b, T scaler = 255.0) {
+  r = ((idx >> 16) & 0xff) / scaler;
+  g = ((idx >>  8) & 0xff) / scaler;
+  b = ( idx		 & 0xff) / scaler;
+}
+
+void HDS_Mesh::drawFaceIndices()
+{
+  int i=0;
+  for(auto &f : faceSet) {
+    float r, g, b;
+    encodeIndex<float>(i, r, g, b);
+    ++i;
+    glColor4f(r, g, b, 1.0);
+
+    he_t* he = f->he;
+    he_t* curHe = he;
+
+    glBegin(GL_POLYGON);
+    do
+    {
+        vert_t* v = curHe->v;
+        GLUtils::useVertex(v->pos);
+        curHe = curHe->next;
+    }while( curHe != he );
+    glEnd();
+  }
 }

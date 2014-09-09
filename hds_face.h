@@ -16,6 +16,8 @@ public:
 
     QVector3D normal;
     HDS_HalfEdge *he;
+
+    bool isPicked;
 };
 
 #endif // HDS_FACE_H

@@ -3,6 +3,7 @@
 
 HDS_Face::HDS_Face()
 {
+  isPicked = false;
 }
 
 HDS_Face::~HDS_Face(){}

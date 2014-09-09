@@ -27,6 +27,7 @@ public:
                  const vector<he_t*> &hes);
 
     void draw();
+    void drawFaceIndices();
 
     const unordered_set<he_t*>& halfedges() const { return heSet; }
     unordered_set<he_t*>& halfedges() { return heSet; }
