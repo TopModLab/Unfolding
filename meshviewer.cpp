@@ -1,6 +1,8 @@
 #include "meshviewer.h"
 #include "glutils.hpp"
 
+#include <QMouseEvent>
+
 MeshViewer::MeshViewer(QWidget *parent) :
     QGLWidget(qglformat_3d, parent)
 {
@@ -124,12 +126,7 @@ void MeshViewer::initializeGL()
 
 void MeshViewer::resizeGL(int w, int h)
 {
-    viewerState.viewport.x = 0;
-    viewerState.viewport.y = 0;
-    viewerState.viewport.w = w;
-    viewerState.viewport.h = h;
-
-    viewerState.aspect = (qreal)w / (qreal)h;
+    viewerState.updateViewport(w, h);
     viewerState.updateProjection();
 
     glViewport(viewerState.viewport.x, viewerState.viewport.y, viewerState.viewport.w, viewerState.viewport.h);

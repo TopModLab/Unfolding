@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Unfolding2
 TEMPLATE = app
 
+CONFIG += c++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -19,7 +20,10 @@ SOURCES += main.cpp\
     hds_mesh.cpp \
     hds_halfedge.cpp \
     thirdparty/tinyobjloader/tiny_obj_loader.cc \
-    meshviewer.cpp
+    meshviewer.cpp \
+    meshmanager.cpp \
+    meshloader.cpp \
+    stringutils.cpp
 
 HEADERS  += mainwindow.h \
     hds_face.h \
@@ -29,6 +33,9 @@ HEADERS  += mainwindow.h \
     thirdparty/tinyobjloader/tiny_obj_loader.h \
     meshviewer.h \
     common.h \
-    glutils.hpp
+    glutils.hpp \
+    meshmanager.h \
+    meshloader.h \
+    stringutils.h
 
 FORMS    += mainwindow.ui

@@ -6,8 +6,9 @@
 #include <QGLWidget>
 #include <QGLFunctions>
 #include <QGLFormat>
-
-#include "trackball.h"
+#include <QMatrix4x4>
+#include <QVector3D>
+#include <QVector2D>
 
 const QGLFormat qglformat_3d(
                 QGL::DoubleBuffer       |
@@ -48,12 +49,19 @@ public slots:
 
 
 private:
-    Trackball trackball;
-
     struct ViewerState {
         ViewerState():zNear(1.0), zFar(7000.0), fov(45.0){
             translation.setZ(-5.0);
         }
+        void updateViewport(int w, int h) {
+            viewport.x = 0;
+            viewport.y = 0;
+            viewport.w = w;
+            viewport.h = h;
+
+            aspect = (qreal)w / (qreal)h;
+        }
+
         void updateProjection() {
             projection.setToIdentity();
             projection.perspective(fov, aspect, zNear, zFar);

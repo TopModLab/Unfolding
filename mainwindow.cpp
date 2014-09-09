@@ -1,7 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "meshmanager.h"
 
 #include <QMessageBox>
+#include <QString>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -50,7 +53,11 @@ bool MainWindow::connectComponents()
 void MainWindow::createActions()
 {
     try {
-
+        QAction *newAct = new QAction(QIcon(":/images/document-new.png"), tr("&New"), this);
+        newAct->setShortcuts(QKeySequence::New);
+        newAct->setStatusTip(tr("Create a new file"));
+        connect(newAct, SIGNAL(triggered()), this, SLOT(slot_newFile()));
+        actionsMap["new"] = newAct;
     }
     catch(...) {
         throw UnfoldingAppException("Failed to create actions!");
@@ -60,7 +67,8 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
     try {
-
+        QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
+        fileMenu->addAction(actionsMap["new"]);
     }
     catch(...) {
         throw UnfoldingAppException("Failed to create menus!");
@@ -85,4 +93,11 @@ void MainWindow::createStatusBar()
     catch(...) {
         throw UnfoldingAppException("Failed to create status bar!");
     }
+}
+
+void MainWindow::slot_newFile()
+{
+    cout << "loading a new obj file." << endl;
+    QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
+    MeshManager::getInstance()->loadOBJFile(filename.toStdString());
 }

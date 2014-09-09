@@ -28,9 +28,17 @@ protected:
     void createDock();
     void createStatusBar();
 
+private slots:
+    void slot_newFile();
+
+private:
+    void loadOBJFile();
+
 private:
     Ui::MainWindow *ui;
+    QMap<QString, QAction*> actionsMap;
     MeshViewer *viewer;
+
 };
 
 #endif // MAINWINDOW_H
