@@ -3,3 +3,8 @@
 HDS_HalfEdge::HDS_HalfEdge()
 {
 }
+
+HDS_HalfEdge::~HDS_HalfEdge()
+{
+
+}

@@ -100,4 +100,5 @@ void MainWindow::slot_newFile()
     cout << "loading a new obj file." << endl;
     QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
     MeshManager::getInstance()->loadOBJFile(filename.toStdString());
+    viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 }

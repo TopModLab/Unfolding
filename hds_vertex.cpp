@@ -4,3 +4,5 @@
 HDS_Vertex::HDS_Vertex()
 {
 }
+
+HDS_Vertex::~HDS_Vertex(){}

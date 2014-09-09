@@ -4,3 +4,5 @@
 HDS_Face::HDS_Face()
 {
 }
+
+HDS_Face::~HDS_Face(){}

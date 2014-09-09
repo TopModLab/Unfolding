@@ -8,11 +8,17 @@ MeshViewer::MeshViewer(QWidget *parent) :
 {
     interactionState = Camera;
     viewerState.updateModelView();
+    heMesh = nullptr;
 }
 
 MeshViewer::~MeshViewer()
 {
 
+}
+
+void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh) {
+    heMesh = mesh;
+    updateGL();
 }
 
 void MeshViewer::mousePressEvent(QMouseEvent *e)
@@ -146,8 +152,13 @@ void MeshViewer::paintGL()
     // the model view matrix is updated somewhere else
     glMultMatrixf(viewerState.modelview.constData());
 
-    GLUtils::drawQuad(QVector3D(-1, -1, 0),
-                      QVector3D( 1, -1, 0),
-                      QVector3D( 1,  1, 0),
-                      QVector3D(-1,  1, 0));
+    if( heMesh == nullptr ) {
+        GLUtils::drawQuad(QVector3D(-1, -1, 0),
+                          QVector3D( 1, -1, 0),
+                          QVector3D( 1,  1, 0),
+                          QVector3D(-1,  1, 0));
+    }
+    else {
+        heMesh->draw();
+    }
 }

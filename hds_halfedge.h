@@ -13,7 +13,6 @@ public:
     HDS_HalfEdge();
     ~HDS_HalfEdge();
 
-private:
     HDS_Face *f;
     HDS_Vertex *v;
     HDS_HalfEdge *prev, *next, *flip;

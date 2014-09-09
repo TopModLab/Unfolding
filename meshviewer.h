@@ -10,6 +10,8 @@
 #include <QVector3D>
 #include <QVector2D>
 
+#include "hds_mesh.h"
+
 const QGLFormat qglformat_3d(
                 QGL::DoubleBuffer       |
                 QGL::DepthBuffer        |
@@ -29,6 +31,8 @@ class MeshViewer : public QGLWidget, protected QGLFunctions
 public:
     explicit MeshViewer(QWidget *parent = 0);
     virtual ~MeshViewer();
+
+    void bindHalfEdgeMesh(HDS_Mesh *mesh);
 
 signals:
 
@@ -104,6 +108,9 @@ private:
         SelectEdge
     };
     InteractionState interactionState;
+
+private:
+    HDS_Mesh *heMesh;   /// not own
 };
 
 #endif // MESHVIEWER_H

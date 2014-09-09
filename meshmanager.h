@@ -3,6 +3,14 @@
 
 #include "common.h"
 #include <QMutex>
+#include <QScopedPointer>
+
+#include "meshloader.h"
+
+#include "hds_mesh.h"
+#include "hds_face.h"
+#include "hds_halfedge.h"
+#include "hds_vertex.h"
 
 class MeshManager
 {
@@ -21,6 +29,10 @@ public:
         }
 
         return instance;
+    }
+
+    HDS_Mesh* getHalfEdgeMesh() {
+        return hds_mesh.data();
     }
 
 protected:
@@ -43,9 +55,15 @@ private:
 
 public:
     bool loadOBJFile(const string& filename);
+    void buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
 
 private:
+    typedef HDS_Mesh mesh_t;
+    typedef HDS_HalfEdge he_t;
+    typedef HDS_Face face_t;
+    typedef HDS_Vertex vert_t;
 
+    QScopedPointer<HDS_Mesh> hds_mesh;
 };
 
 #endif // MESHMANAGER_H
