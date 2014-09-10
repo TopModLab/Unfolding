@@ -13,6 +13,9 @@ public:
     HDS_HalfEdge();
     ~HDS_HalfEdge();
 
+    HDS_HalfEdge(const HDS_HalfEdge& other);
+    HDS_HalfEdge operator=(const HDS_HalfEdge& other);
+
     HDS_Face *f;
     HDS_Vertex *v;
     HDS_HalfEdge *prev, *next, *flip;

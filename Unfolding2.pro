@@ -19,25 +19,25 @@ SOURCES += main.cpp\
     hds_vertex.cpp \
     hds_mesh.cpp \
     hds_halfedge.cpp \
-    thirdparty/tinyobjloader/tiny_obj_loader.cc \
     meshviewer.cpp \
     meshmanager.cpp \
     meshloader.cpp \
-    stringutils.cpp
+    stringutils.cpp \
+    meshcutter.cpp
 
 HEADERS  += mainwindow.h \
     hds_face.h \
     hds_vertex.h \
     hds_mesh.h \
     hds_halfedge.h \
-    thirdparty/tinyobjloader/tiny_obj_loader.h \
     meshviewer.h \
     common.h \
     glutils.hpp \
     meshmanager.h \
     meshloader.h \
     stringutils.h \
-    mathutils.hpp
+    mathutils.hpp \
+    meshcutter.h
 
 FORMS    += mainwindow.ui
 

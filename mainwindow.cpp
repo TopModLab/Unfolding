@@ -87,7 +87,6 @@ void MainWindow::createActions()
 
     QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
     cutAct->setStatusTip(tr("Cut mesh"));
-    cutAct->setCheckable(true);
     connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
     actionsMap["mesh cut"] = cutAct;
   }
@@ -179,6 +178,7 @@ void MainWindow::slot_toggleVertexSelection()
   viewer->setInteractionMode(MeshViewer::SelectVertex);
 }
 
-void MainWindow::performMeshCut() {
-  MeshManager::instance()->cutMeshWithPickedEdges();
+void MainWindow::slot_performMeshCut() {
+  MeshManager::getInstance()->cutMeshWithSelectedEdges();
+  viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 }

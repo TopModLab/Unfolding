@@ -37,6 +37,8 @@ private slots:
     void slot_toggleEdgeSelection();
     void slot_toggleVertexSelection();
 
+    void slot_performMeshCut();
+
 private:
     void loadOBJFile();
 

@@ -1,4 +1,5 @@
 #include "meshmanager.h"
+#include "meshcutter.h"
 
 MeshManager* MeshManager::instance = NULL;
 
@@ -134,5 +135,24 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
 
 void MeshManager::cutMeshWithSelectedEdges()
 {
+  /// make a copy of the mesh with selected edges
   cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
+
+  /// cut the mesh using the selected edges
+  set<he_t*> selectedEdges;
+  for(auto he : cutted_mesh->halfedges()) {
+    if( he->isPicked ) {
+      if( selectedEdges.find(he) == selectedEdges.end() &&
+          selectedEdges.find(he->flip) == selectedEdges.end() ) {
+        selectedEdges.insert(he);
+      }
+    }
+  }
+
+  if( MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges) ) {
+
+  }
+  else {
+    /// can not cut it
+  }
 }

@@ -56,8 +56,9 @@ public slots:
 private:
   struct ViewerState {
     ViewerState():zNear(1.0), zFar(7000.0), fov(45.0){
-      translation.setZ(-5.0);
+      translation = QVector3D(0, 0, -5);
     }
+
     void updateViewport(int w, int h) {
       viewport.x = 0;
       viewport.y = 0;

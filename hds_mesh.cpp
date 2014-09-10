@@ -12,6 +12,60 @@ HDS_Mesh::HDS_Mesh()
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 {
   /// need a deep copy
+  showFace = other.showFace;
+  showEdge = other.showEdge;
+  showVert = other.showVert;
+
+  /// copy the vertices set
+  vertSet.clear();
+  vertMap.clear();
+  for( auto v : other.vertSet ) {
+    /// he is not set for this vertex
+    vert_t *nv = new vert_t(*v);
+    vertSet.insert(nv);
+    vertMap.insert(make_pair(v->index, nv));
+  }
+
+  faceSet.clear();
+  faceMap.clear();
+  for( auto f : other.faceSet ) {
+    /// he is not set for this vertex
+    face_t *nf = new face_t(*f);
+    faceSet.insert(nf);
+    faceMap.insert(make_pair(f->index, nf));
+  }
+
+  heSet.clear();
+  heMap.clear();
+  for( auto he : other.heSet ) {
+    /// face, vertex, prev, next, and flip are not set yet
+    he_t *nhe = new he_t(*he);
+    heSet.insert(nhe);
+    heMap.insert(make_pair(he->index, nhe));
+  }
+
+  /// connect the half edges
+  for( auto &he : heSet ) {
+    auto he_ref = other.heMap.at(he->index);
+    he->flip = heMap.at(he_ref->flip->index);
+    he->prev = heMap.at(he_ref->prev->index);
+    he->next = heMap.at(he_ref->next->index);
+
+    he->f = faceMap.at(he_ref->f->index);
+    he->v = vertMap.at(he_ref->v->index);
+  }
+
+  /// set the half edges for faces
+  for( auto &f : faceSet ) {
+    auto f_ref = other.faceMap.at(f->index);
+    f->he = heMap.at(f_ref->he->index);
+  }
+
+  /// set the half edges for vertices
+  for( auto &v : vertSet ) {
+    auto v_ref = other.vertMap.at(v->index);
+    v->he = heMap.at(v_ref->he->index);
+  }
 }
 
 HDS_Mesh::~HDS_Mesh() {
@@ -56,10 +110,13 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
   heSet.insert(hes.begin(), hes.end());
   int heIdx = 0;
   for(auto &he : heSet) {
-    heMap[heIdx] = he;
     if( he->index >= 0 ) continue;
+
+    heMap[heIdx] = he;
     he->index = heIdx;
-    he->flip->index = ++heIdx;
+    ++heIdx;
+
+    he->flip->index = heIdx;
     heMap[heIdx] = he->flip;
     ++heIdx;
   }
