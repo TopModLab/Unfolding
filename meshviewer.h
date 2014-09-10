@@ -124,9 +124,11 @@ public:
     QVector3D gcorners[4];
   } sbox;
   bool isSelecting;
+  vector<unsigned char> selectionBuffer;
 
   void computeGlobalSelectionBox();
   bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
+  int getSelectedElementIndex(const QPoint& p);
 
 private:
   InteractionState interactionState;

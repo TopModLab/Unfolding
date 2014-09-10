@@ -4,6 +4,7 @@
 HDS_Face::HDS_Face()
 {
   isPicked = false;
+  index = -1;
 }
 
 HDS_Face::~HDS_Face(){}

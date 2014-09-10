@@ -84,6 +84,12 @@ void MainWindow::createActions()
     vsAct->setCheckable(true);
     connect(vsAct, SIGNAL(triggered()), this, SLOT(slot_toggleVertexSelection()));
     actionsMap["vertex select"] = vsAct;
+
+    QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
+    cutAct->setStatusTip(tr("Cut mesh"));
+    cutAct->setCheckable(true);
+    connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
+    actionsMap["mesh cut"] = cutAct;
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create actions!");
@@ -121,10 +127,14 @@ void MainWindow::createToolBar()
     group->addAction(actionsMap["vertex select"]);
     group->setExclusive(true);
     ui->mainToolBar->addAction(actionsMap["camera"]);
+
+    ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(actionsMap["face select"]);
     ui->mainToolBar->addAction(actionsMap["edge select"]);
     ui->mainToolBar->addAction(actionsMap["vertex select"]);
 
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addAction(actionsMap["mesh cut"]);
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create status bar!");
@@ -167,4 +177,8 @@ void MainWindow::slot_toggleEdgeSelection()
 void MainWindow::slot_toggleVertexSelection()
 {
   viewer->setInteractionMode(MeshViewer::SelectVertex);
+}
+
+void MainWindow::performMeshCut() {
+  MeshManager::instance()->cutMeshWithPickedEdges();
 }

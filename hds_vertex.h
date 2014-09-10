@@ -22,6 +22,7 @@ public:
     QVector3D pos;
     HDS_HalfEdge *he;
 
+    int index;
     bool isPicked;
 };
 

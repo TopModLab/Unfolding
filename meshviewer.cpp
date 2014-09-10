@@ -1,5 +1,6 @@
 #include "meshviewer.h"
 #include "glutils.hpp"
+#include "mathutils.hpp"
 
 #include <QMouseEvent>
 
@@ -37,6 +38,55 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
   return isInvertible;
 }
 
+int MeshViewer::getSelectedElementIndex(const QPoint &p)
+{
+  int winX = p.x(), winY = height() - p.y();
+
+  auto max = [](int a, int b) { return a>b?a:b; };
+  auto min = [](int a, int b) { return a<b?a:b; };
+
+  // search for pixels within a small window
+  const int radius = 5;
+  map<int, int> counter;
+  int maxIdx = -1, maxCount = 0;
+  for(int y=max(winY - radius, 0); y<min(winY + radius, height()); ++y) {
+    int dy = y - winY;
+    for(int x=max(winX - radius, 0); x<min(winX + radius, width()); ++x) {
+      int dx = x - winX;
+      if( dx*dx + dy*dy <= radius*radius ) {
+        int offset = (y * width() + x)*4;
+        unsigned char r, g, b, a;
+        r = selectionBuffer[offset+0];
+        g = selectionBuffer[offset+1];
+        b = selectionBuffer[offset+2];
+        a = selectionBuffer[offset+3];
+
+        if( a == 0 ) continue;
+        else {
+          int idx = decodeIndex(r, g, b, 1.0);
+          auto it = counter.find(idx);
+          if( it == counter.end() ) {
+            counter.insert(make_pair(idx, 1));
+            if( maxCount == 0 ) {
+              maxCount = 1;
+              maxIdx = idx;
+            }
+          }
+          else {
+            ++it->second;
+            if( it->second > maxCount ) {
+              maxCount = it->second;
+              maxIdx = idx;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return maxIdx;
+}
+
 void MeshViewer::computeGlobalSelectionBox()
 {
   /// get GL state
@@ -54,30 +104,30 @@ void MeshViewer::computeGlobalSelectionBox()
   GLdouble winX = sbox.corner_win[0];
   GLdouble winY = sbox.corner_win[1];
   QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[0]);
-  qDebug()<<sbox.gcorners[0];
+  //qDebug()<<sbox.gcorners[0];
   gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global, sbox.corner_global+1, sbox.corner_global+2);//The new position of the mouse
-  qDebug()<<sbox.corner_global[0]<<sbox.corner_global[1]<<sbox.corner_global[2];
+  //qDebug()<<sbox.corner_global[0]<<sbox.corner_global[1]<<sbox.corner_global[2];
 
   winX = sbox.corner_win[0];
   winY = sbox.corner_win[3];
   QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[1]);
-  qDebug()<<sbox.gcorners[1];
+  //qDebug()<<sbox.gcorners[1];
   gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global+3, sbox.corner_global+4, sbox.corner_global+5);//The new position of the mouse
-  qDebug()<<sbox.corner_global[3]<<sbox.corner_global[4]<<sbox.corner_global[5];
+  //qDebug()<<sbox.corner_global[3]<<sbox.corner_global[4]<<sbox.corner_global[5];
 
   winX = sbox.corner_win[2];
   winY = sbox.corner_win[3];
   QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[2]);
-  qDebug()<<sbox.gcorners[2];
+  //qDebug()<<sbox.gcorners[2];
   gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global+6, sbox.corner_global+7, sbox.corner_global+8);//The new position of the mouse
-  qDebug() << sbox.corner_global[6] << sbox.corner_global[7]<< sbox.corner_global[8];
+  //qDebug() << sbox.corner_global[6] << sbox.corner_global[7]<< sbox.corner_global[8];
 
   winX = sbox.corner_win[2];
   winY = sbox.corner_win[1];
   QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[3]);
-  qDebug()<<sbox.gcorners[3];
+  //qDebug()<<sbox.gcorners[3];
   gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global+9, sbox.corner_global+10, sbox.corner_global+11);//The new position of the mouse
-  qDebug() << sbox.corner_global[9] << sbox.corner_global[10]<< sbox.corner_global[11];
+  //qDebug() << sbox.corner_global[9] << sbox.corner_global[10]<< sbox.corner_global[11];
 }
 
 void MeshViewer::mousePressEvent(QMouseEvent *e)
@@ -162,6 +212,18 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
     sbox.corner_win[3] = viewerState.viewport.h - e->y();
     computeGlobalSelectionBox();
     isSelecting = false;
+
+    int selectedElementIdx = getSelectedElementIndex(e->pos());
+    cout << "selected element " << selectedElementIdx << endl;
+    if( interactionState == SelectEdge ) {
+      heMesh->selectEdge(selectedElementIdx);
+    }
+    else if( interactionState == SelectFace ) {
+      heMesh->selectFace(selectedElementIdx);
+    }
+    else {
+      heMesh->selectVertex(selectedElementIdx);
+    }
     break;
   }
   }
@@ -216,6 +278,7 @@ void MeshViewer::initializeGL()
 
 void MeshViewer::initializeFBO() {
   fbo.reset(new QGLFramebufferObject(width(), height(), QGLFramebufferObject::Depth));
+  selectionBuffer.resize(width()*height()*4);
 }
 
 void MeshViewer::resizeGL(int w, int h)
@@ -242,6 +305,15 @@ void MeshViewer::paintGL()
   // the model view matrix is updated somewhere else
   glMultMatrixf(viewerState.modelview.constData());
 
+  glEnable(GL_SMOOTH);
+  glEnable(GL_LINE_SMOOTH);
+  glEnable(GL_POINT_SMOOTH);
+  glEnable(GL_POLYGON_SMOOTH);
+
+  glShadeModel(GL_SMOOTH);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   if( heMesh == nullptr ) {
     glLineWidth(2.0);
     GLUtils::drawQuad(QVector3D(-1, -1, 0),
@@ -251,14 +323,13 @@ void MeshViewer::paintGL()
   }
   else {
     heMesh->draw();
-  }
-
-  switch( interactionState ) {
-  case Camera:
-    break;
-  default:
-    drawSelectionBox();
-    drawMeshToFBO();
+    switch( interactionState ) {
+    case Camera:
+      break;
+    default:
+      drawSelectionBox();
+      drawMeshToFBO();
+    }
   }
 }
 
@@ -281,8 +352,10 @@ static QImage toQImage(const unsigned char* data, int w, int h) {
 void MeshViewer::drawMeshToFBO() {
   fbo->bind();
 
+#if 0
   cout << (fbo->isBound()?"bounded.":"not bounded.") << endl;
   cout << (fbo->isValid()?"valid.":"invalid.") << endl;
+#endif
 
   glPushMatrix();
 
@@ -296,16 +369,26 @@ void MeshViewer::drawMeshToFBO() {
 
   glDepthMask(GL_TRUE);
 
-  glClearColor(0, 0, 0, 1);
+  /// must set alpha to zero
+  glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-  glShadeModel(GL_SMOOTH);
+  glShadeModel(GL_FLAT);
+  glDisable(GL_BLEND);
 
-  heMesh->drawFaceIndices();
+  switch( interactionState ) {
+  case SelectFace:
+    heMesh->drawFaceIndices();
+    break;
+  case SelectEdge:
+    heMesh->drawEdgeIndices();
+    break;
+  case SelectVertex:
+    heMesh->drawVertexIndices();
+    break;
+  }
 
-  vector<unsigned char> colorBuffer(width()*height()*4);
-
-  glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, &(colorBuffer[0]));
+  glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, &(selectionBuffer[0]));
   GLenum errcode = glGetError();
   if (errcode != GL_NO_ERROR) {
     const GLubyte *errString = gluErrorString(errcode);
@@ -316,7 +399,7 @@ void MeshViewer::drawMeshToFBO() {
 
   fbo->release();
 
-  QImage img = toQImage(&(colorBuffer[0]), width(), height());
+  QImage img = toQImage(&(selectionBuffer[0]), width(), height());
   img.save("fbo.png");
 }
 

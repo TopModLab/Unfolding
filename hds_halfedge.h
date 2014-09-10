@@ -17,6 +17,7 @@ public:
     HDS_Vertex *v;
     HDS_HalfEdge *prev, *next, *flip;
 
+    int index;
     bool isPicked;
 };
 

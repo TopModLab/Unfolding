@@ -56,6 +56,7 @@ private:
 public:
     bool loadOBJFile(const string& filename);
     void buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
+    void cutMeshWithSelectedEdges();
 
 private:
     typedef HDS_Mesh mesh_t;
@@ -64,6 +65,7 @@ private:
     typedef HDS_Vertex vert_t;
 
     QScopedPointer<HDS_Mesh> hds_mesh;
+    QScopedPointer<HDS_Mesh> cutted_mesh;
 };
 
 #endif // MESHMANAGER_H
