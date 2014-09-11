@@ -11,4 +11,13 @@ Container filter(Container c, Pred p) {
   return res;
 }
 
+template <typename Container, typename Func>
+Container map(Container c, Func f) {
+  Container res;
+  for(auto x : c) {
+      res.insert(f(x));
+  }
+  return res;
+}
+
 #endif // UTILS_HPP
