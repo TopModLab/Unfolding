@@ -54,11 +54,17 @@ bool MainWindow::connectComponents()
 void MainWindow::createActions()
 {
   try {
-    QAction *newAct = new QAction(QIcon(":/images/document-new.png"), tr("&New"), this);
+    QAction *newAct = new QAction(QIcon(":/icons/open.png"), tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(slot_newFile()));
     actionsMap["new"] = newAct;
+
+    QAction *saveAct = new QAction(QIcon(":/icons/save.png"), tr("&Save"), this);
+    saveAct->setShortcuts(QKeySequence::Save);
+    saveAct->setStatusTip(tr("Save a file"));
+    connect(saveAct, SIGNAL(triggered()), this, SLOT(slot_saveFile()));
+    actionsMap["save"] = saveAct;
 
     QAction *camAct = new QAction(QIcon(":/icons/cube.png"), tr("Camera Operation"), this);
     camAct->setStatusTip(tr("Camera operation"));
@@ -124,6 +130,9 @@ void MainWindow::createDock()
 void MainWindow::createToolBar()
 {
   try {
+    ui->mainToolBar->addAction(actionsMap["new"]);
+    ui->mainToolBar->addAction(actionsMap["save"]);
+
     QActionGroup *group = new QActionGroup(ui->mainToolBar);
     group->addAction(actionsMap["camera"]);
     group->addAction(actionsMap["face select"]);
@@ -161,6 +170,12 @@ void MainWindow::slot_newFile()
   QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
   MeshManager::getInstance()->loadOBJFile(filename.toStdString());
   viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+}
+
+void MainWindow::slot_saveFile()
+{
+  QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
+  cout << "saving file " << filename.toStdString() << endl;
 }
 
 void MainWindow::slot_toggleCameraOperation()

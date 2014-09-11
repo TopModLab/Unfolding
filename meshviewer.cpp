@@ -215,14 +215,16 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 
     int selectedElementIdx = getSelectedElementIndex(e->pos());
     cout << "selected element " << selectedElementIdx << endl;
-    if( interactionState == SelectEdge ) {
-      heMesh->selectEdge(selectedElementIdx);
-    }
-    else if( interactionState == SelectFace ) {
-      heMesh->selectFace(selectedElementIdx);
-    }
-    else {
-      heMesh->selectVertex(selectedElementIdx);
+    if( selectedElementIdx >= 0 ) {
+      if( interactionState == SelectEdge ) {
+        heMesh->selectEdge(selectedElementIdx);
+      }
+      else if( interactionState == SelectFace ) {
+        heMesh->selectFace(selectedElementIdx);
+      }
+      else {
+        heMesh->selectVertex(selectedElementIdx);
+      }
     }
     break;
   }

@@ -148,6 +148,7 @@ void MeshManager::cutMeshWithSelectedEdges()
       }
     }
   }
+  cout << "Number of selected edges = " << selectedEdges.size() << endl;
   bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
   if( cutSucceeded ) {
     /// cutting performed successfully

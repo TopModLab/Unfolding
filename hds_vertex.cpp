@@ -21,4 +21,9 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
   he = nullptr;
 }
 
+HDS_Vertex HDS_Vertex::operator=(const HDS_Vertex &other)
+{
+    throw "Not implemented.";
+}
+
 HDS_Vertex::~HDS_Vertex(){}

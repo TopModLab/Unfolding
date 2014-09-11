@@ -19,3 +19,8 @@ HDS_Face::HDS_Face(const HDS_Face &other)
   normal = other.normal;
   he = nullptr;
 }
+
+HDS_Face HDS_Face::operator=(const HDS_Face &other)
+{
+    throw "Not implemented.";
+}

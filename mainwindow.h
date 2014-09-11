@@ -31,6 +31,7 @@ protected:
 
 private slots:
     void slot_newFile();
+    void slot_saveFile();
 
     void slot_toggleCameraOperation();
     void slot_toggleFaceSelection();
