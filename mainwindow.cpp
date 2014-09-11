@@ -89,6 +89,11 @@ void MainWindow::createActions()
     cutAct->setStatusTip(tr("Cut mesh"));
     connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
     actionsMap["mesh cut"] = cutAct;
+
+    QAction *unfoldAct = new QAction(QIcon(":/icons/unfold.png"), tr("Unfold"), this);
+    unfoldAct->setStatusTip(tr("Unfold mesh"));
+    connect(unfoldAct, SIGNAL(triggered()), this, SLOT(slot_unfoldMesh()));
+    actionsMap["mesh unfold"] = unfoldAct;
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create actions!");
@@ -180,5 +185,10 @@ void MainWindow::slot_toggleVertexSelection()
 
 void MainWindow::slot_performMeshCut() {
   MeshManager::getInstance()->cutMeshWithSelectedEdges();
-  viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+  viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+}
+
+void MainWindow::slot_unfoldMesh() {
+  MeshManager::getInstance()->unfoldMesh();
+  viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
 }

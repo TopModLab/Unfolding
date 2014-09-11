@@ -35,6 +35,14 @@ public:
         return hds_mesh.data();
     }
 
+    HDS_Mesh* getCuttedMesh() {
+        return cutted_mesh.data();
+    }
+
+    HDS_Mesh* getUnfoldedMesh() {
+        return unfolded_mesh.data();
+    }
+
 protected:
     /// should not be externally accessible
     static void drop()
@@ -57,6 +65,7 @@ public:
     bool loadOBJFile(const string& filename);
     void buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
     void cutMeshWithSelectedEdges();
+    void unfoldMesh();
 
 private:
     typedef HDS_Mesh mesh_t;
@@ -64,8 +73,7 @@ private:
     typedef HDS_Face face_t;
     typedef HDS_Vertex vert_t;
 
-    QScopedPointer<HDS_Mesh> hds_mesh;
-    QScopedPointer<HDS_Mesh> cutted_mesh;
+    QScopedPointer<HDS_Mesh> hds_mesh, cutted_mesh, unfolded_mesh;
 };
 
 #endif // MESHMANAGER_H

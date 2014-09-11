@@ -157,3 +157,8 @@ void MeshManager::cutMeshWithSelectedEdges()
     /// can not cut it
   }
 }
+
+void MeshManager::unfoldMesh()
+{
+  unfolded_mesh.reset(new HDS_Mesh(*cutted_mesh));
+}

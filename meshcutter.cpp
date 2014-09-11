@@ -130,6 +130,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
       int k = cutFaces.size();
 
       cout << "cut vertex degree = " << k << endl;
+      cout << "cut faces number = " << cutFaces.size() << endl;
       cout << "incident edges = " << incidentHEs.size() << endl;
       for(auto x : incidentHEs)
         cout << x->index << " @ " << x->f->index << "[" << x->v->index << ", " << x->flip->v->index << "]" << endl;
@@ -208,9 +209,9 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 
       /// remove the old cut faces and add the new unified cut face
       for(auto f : cutFaces) {
-        delete f;
         mesh->faceSet.erase(f);
         mesh->faceMap.erase(f->index);
+        delete f;
       }
 
       face_t *nf = new face_t;

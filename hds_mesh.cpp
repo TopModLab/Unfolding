@@ -215,6 +215,7 @@ void HDS_Mesh::draw()
       else {
         glColor4f(0.75, 0.75, 0.95, 0.5);
       }
+
       glBegin(GL_POLYGON);
       do
       {
