@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     meshmanager.cpp \
     meshloader.cpp \
     stringutils.cpp \
-    meshcutter.cpp
+    meshcutter.cpp \
+    meshunfolder.cpp
 
 HEADERS  += mainwindow.h \
     hds_face.h \
@@ -38,7 +39,8 @@ HEADERS  += mainwindow.h \
     stringutils.h \
     mathutils.hpp \
     meshcutter.h \
-    utils.hpp
+    utils.hpp \
+    meshunfolder.h
 
 FORMS    += mainwindow.ui
 

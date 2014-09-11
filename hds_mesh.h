@@ -30,6 +30,7 @@ public:
     HDS_Mesh operator=(const HDS_Mesh& rhs);
 
     void printInfo(const string &msg = "");
+    void printMesh(const string &msg = "");
     void releaseMesh();
 
     void setMesh(const vector<face_t*> &faces,
@@ -50,6 +51,7 @@ public:
 
     vector<face_t *> incidentFaces(vert_t *v);
     vector<he_t *> incidentEdges(vert_t *v);
+    vector<face_t *> incidentFaces(face_t *f);
 
     template <typename T>
     void flipSelectionState(int idx, unordered_map<int, T> &m);
@@ -65,6 +67,7 @@ private:
 
 protected:
     friend class MeshCutter;
+    friend class MeshUnfolder;
 
 private:
     unordered_set<he_t*> heSet;
@@ -78,5 +81,34 @@ private:
 private:
     bool showFace, showEdge, showVert;
 };
+
+inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
+  os << v.index
+     << ": (" << v.pos.x() << ", " << v.pos.y() << ", " << v.pos.z() << ")"
+     << "\t"
+     << v.he;
+  return os;
+}
+
+inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
+  os << e.index << "::"
+     << " prev: " << e.prev->index
+     << " next: " << e.next->index
+     << " flip: " << e.flip->index
+     << " v: " << e.v->index
+     << " f:" << e.f->index;
+  return os;
+}
+
+inline ostream& operator<<(ostream &os, const HDS_Face& f) {
+  os << "face #" << f.index << endl;
+  HDS_HalfEdge *he = f.he;
+  HDS_HalfEdge *curHE = he;
+  do {
+    os << curHE->index << ' ';
+    curHE = curHE->next;
+  } while( curHE != he );
+  return os;
+}
 
 #endif // HDS_MESH_H

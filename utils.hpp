@@ -1,6 +1,8 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include "common.h"
+
 namespace Utils {
 
 template <typename Container, typename Pred>
@@ -20,6 +22,14 @@ Container map(Container c, Func f) {
       res.push_back(f(x));
   }
   return res;
+}
+
+template <typename Container>
+void print(Container c, ostream& os = cout) {
+  for(auto x : c) {
+    os << x << ' ';
+  }
+  os << endl;
 }
 
 }

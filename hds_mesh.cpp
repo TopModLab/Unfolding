@@ -47,6 +47,7 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
   /// connect the half edges
   for( auto &he : heSet ) {
     auto he_ref = other.heMap.at(he->index);
+    cout << he_ref->index << endl;
     he->flip = heMap.at(he_ref->flip->index);
     he->prev = heMap.at(he_ref->prev->index);
     he->next = heMap.at(he_ref->next->index);
@@ -73,13 +74,18 @@ HDS_Mesh::~HDS_Mesh() {
 }
 
 bool HDS_Mesh::validateEdge(he_t *e) {
+  if( heMap.find(e->index) == heMap.end() ) return false;
   if( e->flip->flip != e ) return false;
   if( e->next->prev != e ) return false;
   if( e->prev->next != e ) return false;
+  if( e->f == nullptr ) return false;
+  if( e->v == nullptr ) return false;
   return true;
 }
 
 bool HDS_Mesh::validateFace(face_t *f) {
+  if( faceMap.find(f->index) == faceMap.end() ) return false;
+
   int maxEdges = 100;
   he_t *he = f->he;
   he_t *curHe = he;
@@ -93,6 +99,8 @@ bool HDS_Mesh::validateFace(face_t *f) {
 }
 
 bool HDS_Mesh::validateVertex(vert_t *v) {
+  if( vertMap.find(v->index) == vertMap.end() ) return false;
+
   int maxEdges =100;
   he_t *he = v->he;
   he_t *curHe = he;
@@ -134,6 +142,21 @@ void HDS_Mesh::printInfo(const string& msg)
   cout << "#vertices = " << vertSet.size() << endl;
   cout << "#faces = " << faceSet.size() << endl;
   cout << "#half edges = " << heSet.size() << endl;
+}
+
+void HDS_Mesh::printMesh(const string &msg)
+{
+  for(auto v : vertSet) {
+    cout << (*v) << endl;
+  }
+
+  for(auto f : faceSet) {
+    cout << (*f) << endl;
+  }
+
+  for(auto e : heSet) {
+    cout << (*e) << endl;
+  }
 }
 
 void HDS_Mesh::releaseMesh() {
@@ -338,6 +361,18 @@ vector<HDS_Mesh::he_t *> HDS_Mesh::incidentEdges(vert_t *v)
     curHe = curHe->flip->next;
   } while( curHe != he );
   return hes;
+}
+
+vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(HDS_Mesh::face_t *f)
+{
+  he_t *he = f->he;
+  he_t *curHe = he;
+  vector<face_t*> faces;
+  do {
+    faces.push_back(curHe->flip->f);
+    curHe = curHe->next;
+  } while( curHe != he );
+  return faces;
 }
 
 void HDS_Mesh::drawVertexIndices()

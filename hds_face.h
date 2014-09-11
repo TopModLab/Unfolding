@@ -1,6 +1,8 @@
 #ifndef HDS_FACE_H
 #define HDS_FACE_H
 
+#include "common.h"
+
 #include <QVector3D>
 
 class HDS_HalfEdge;

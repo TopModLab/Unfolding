@@ -1,6 +1,8 @@
 #ifndef HDS_VERTEX_H
 #define HDS_VERTEX_H
 
+#include "common.h"
+
 #include <QVector3D>
 
 class HDS_HalfEdge;

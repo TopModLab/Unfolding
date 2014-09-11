@@ -132,6 +132,7 @@ void MainWindow::createToolBar()
   try {
     ui->mainToolBar->addAction(actionsMap["new"]);
     ui->mainToolBar->addAction(actionsMap["save"]);
+    ui->mainToolBar->addSeparator();
 
     QActionGroup *group = new QActionGroup(ui->mainToolBar);
     group->addAction(actionsMap["camera"]);
@@ -148,6 +149,7 @@ void MainWindow::createToolBar()
 
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(actionsMap["mesh cut"]);
+    ui->mainToolBar->addAction(actionsMap["mesh unfold"]);
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create status bar!");
