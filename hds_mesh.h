@@ -48,13 +48,20 @@ public:
     const unordered_set<vert_t*>& verts() const { return vertSet; }
     unordered_set<vert_t*>& verts() { return vertSet; }
 
-    set<face_t *> incidentFaces(vert_t *v);
+    vector<face_t *> incidentFaces(vert_t *v);
+    vector<he_t *> incidentEdges(vert_t *v);
 
     template <typename T>
     void flipSelectionState(int idx, unordered_map<int, T> &m);
     void selectFace(int idx);
     void selectEdge(int idx);
     void selectVertex(int idx);
+
+    void validate();
+private:
+    bool validateVertex(vert_t *v);
+    bool validateFace(face_t *f);
+    bool validateEdge(he_t *e);
 
 protected:
     friend class MeshCutter;

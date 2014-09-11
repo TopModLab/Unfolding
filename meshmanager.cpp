@@ -151,6 +151,7 @@ void MeshManager::cutMeshWithSelectedEdges()
   bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
   if( cutSucceeded ) {
     /// cutting performed successfully
+    cutted_mesh->printInfo("cutted mesh:");
   }
   else {
     /// can not cut it

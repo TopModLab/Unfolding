@@ -5,5 +5,6 @@
         <file>icons/vertex.png</file>
         <file>icons/cube.png</file>
         <file>icons/cut.png</file>
+        <file>icons/unfold.png</file>
     </qresource>
 </RCC>

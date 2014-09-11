@@ -72,6 +72,60 @@ HDS_Mesh::~HDS_Mesh() {
   releaseMesh();
 }
 
+bool HDS_Mesh::validateEdge(he_t *e) {
+  if( e->flip->flip != e ) return false;
+  if( e->next->prev != e ) return false;
+  if( e->prev->next != e ) return false;
+  return true;
+}
+
+bool HDS_Mesh::validateFace(face_t *f) {
+  int maxEdges = 100;
+  he_t *he = f->he;
+  he_t *curHe = he;
+  int edgeCount = 0;
+  do {
+    curHe = curHe->next;
+    ++edgeCount;
+    if( edgeCount > maxEdges ) return false;
+  } while( curHe != he );
+  return true;
+}
+
+bool HDS_Mesh::validateVertex(vert_t *v) {
+  int maxEdges =100;
+  he_t *he = v->he;
+  he_t *curHe = he;
+  int edgeCount = 0;
+  do {
+    curHe = curHe->flip->next;
+    ++edgeCount;
+    if( edgeCount > maxEdges ) return false;
+  } while( curHe != he );
+  return true;
+}
+
+void HDS_Mesh::validate() {
+  /// verify that the mesh has good topology
+  for( auto v : vertSet ) {
+    if( !validateVertex(v) ) {
+      cout << "vertex #" << v->index << " is invalid." << endl;
+    }
+  }
+
+  for( auto f : faceSet ) {
+    if( !validateFace(f) ) {
+      cout << "face #" << f->index << " is invalid." << endl;
+    }
+  }
+
+  for( auto e : heSet ) {
+    if( !validateEdge(e) ) {
+      cout << "half edge #" << e->index << " is invalid." << endl;
+    }
+  }
+}
+
 void HDS_Mesh::printInfo(const string& msg)
 {
   if( !msg.empty() ) {
@@ -261,16 +315,28 @@ void HDS_Mesh::drawEdgeIndices()
   }
 }
 
-set<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
+vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
 {
   he_t *he = v->he;
   he_t *curHe = he;
-  set<face_t*> faces;
+  vector<face_t*> faces;
   do {
-    faces.insert(curHe->f);
+    faces.push_back(curHe->f);
     curHe = curHe->flip->next;
   } while( curHe != he );
   return faces;
+}
+
+vector<HDS_Mesh::he_t *> HDS_Mesh::incidentEdges(vert_t *v)
+{
+  he_t *he = v->he;
+  he_t *curHe = he;
+  vector<he_t*> hes;
+  do {
+    hes.push_back(curHe);
+    curHe = curHe->flip->next;
+  } while( curHe != he );
+  return hes;
 }
 
 void HDS_Mesh::drawVertexIndices()

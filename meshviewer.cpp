@@ -389,11 +389,13 @@ void MeshViewer::drawMeshToFBO() {
   }
 
   glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, &(selectionBuffer[0]));
+#if 0
   GLenum errcode = glGetError();
   if (errcode != GL_NO_ERROR) {
     const GLubyte *errString = gluErrorString(errcode);
     fprintf (stderr, "OpenGL Error: %s\n", errString);
   }
+#endif
 
   glPopMatrix();
 
