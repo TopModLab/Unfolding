@@ -146,16 +146,19 @@ void HDS_Mesh::printInfo(const string& msg)
 
 void HDS_Mesh::printMesh(const string &msg)
 {
-  for(auto v : vertSet) {
-    cout << (*v) << endl;
+  if( !msg.empty() ) {
+    cout << msg << endl;
+  }
+  for(int i=0;i<vertSet.size();++i) {
+    cout << *vertMap[i] << endl;
   }
 
-  for(auto f : faceSet) {
-    cout << (*f) << endl;
+  for(int i=0;i<faceSet.size();++i) {
+    cout << (*faceMap[i]) << endl;
   }
 
-  for(auto e : heSet) {
-    cout << (*e) << endl;
+  for(int i=0;i<heSet.size();++i) {
+    cout << (*heMap[i]) << endl;
   }
 }
 

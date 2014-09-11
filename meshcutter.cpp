@@ -100,10 +100,12 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
         return f->isCutFace;
       });
 
-#if 0
+#if 1
       /// test if we are merging the same face
       set<face_t*> cutFacesSet(cutFaces.begin(), cutFaces.end());
-      if( cutFacesSet.size() == 1 ) return false;
+      if( cutFacesSet.size() == 1 ) {
+
+      }
 #endif
 
       vector<he_t*> incidentHEs = mesh->incidentEdges(cv.first);
@@ -221,11 +223,12 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
       mesh->faceSet.insert(nf);
       mesh->faceMap.insert(make_pair(nf->index, nf));
 
-      /// update the incident face of all cut edges
-      for(auto he : cutEdges) {
-        he->f = nf;
-        he->next->f = nf;
-      }
+      /// update the incident face of all edges of this face
+      auto fhe = cutEdges.front();
+      do {
+        fhe->f = nf;
+        fhe = fhe->next;
+      } while( fhe != cutEdges.front() );
 
       mesh->printInfo("merged");
       mesh->validate();

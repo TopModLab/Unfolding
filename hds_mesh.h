@@ -105,7 +105,7 @@ inline ostream& operator<<(ostream &os, const HDS_Face& f) {
   HDS_HalfEdge *he = f.he;
   HDS_HalfEdge *curHE = he;
   do {
-    os << curHE->index << ' ';
+    os << "(" << curHE->index << ", " << curHE->v->index << ") ";
     curHE = curHE->next;
   } while( curHE != he );
   return os;
