@@ -104,7 +104,10 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
       /// test if we are merging the same face
       set<face_t*> cutFacesSet(cutFaces.begin(), cutFaces.end());
       if( cutFacesSet.size() == 1 ) {
-
+        cout << "merging the same face." << endl;
+      }
+      else {
+        cout << "merging different faces." << endl;
       }
 #endif
 
@@ -211,9 +214,11 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 
       /// remove the old cut faces and add the new unified cut face
       for(auto f : cutFaces) {
-        mesh->faceSet.erase(f);
-        mesh->faceMap.erase(f->index);
-        delete f;
+        if( mesh->faceSet.find(f) != mesh->faceSet.end() ) {
+          mesh->faceSet.erase(f);
+          mesh->faceMap.erase(f->index);
+          delete f;
+        }
       }
 
       face_t *nf = new face_t;

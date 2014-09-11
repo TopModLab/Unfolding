@@ -155,7 +155,7 @@ void MeshManager::cutMeshWithSelectedEdges()
   if( cutSucceeded ) {
     /// cutting performed successfully
     cutted_mesh->printInfo("cutted mesh:");
-    cutted_mesh->printMesh("cutted mesh:");
+    //cutted_mesh->printMesh("cutted mesh:");
   }
   else {
     /// can not cut it
@@ -168,7 +168,8 @@ void MeshManager::unfoldMesh()
 
   if( MeshUnfolder::unfold(unfolded_mesh.data(), cutted_mesh.data()) ) {
     /// unfolded successfully
-    unfolded_mesh->printMesh("unfolded mesh:");
+    unfolded_mesh->printInfo("unfolded mesh:");
+    //unfolded_mesh->printMesh("unfolded mesh:");
   }
   else {
     /// failed to unfold

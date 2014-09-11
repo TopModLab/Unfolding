@@ -16,6 +16,8 @@ public:
     HDS_Face(const HDS_Face &other);
     HDS_Face operator=(const HDS_Face &other);
 
+    QVector3D center() const;
+
     QVector3D normal;
     HDS_HalfEdge *he;
 
