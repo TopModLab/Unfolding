@@ -28,6 +28,8 @@ public:
     ~HDS_Mesh();
 
     HDS_Mesh operator=(const HDS_Mesh& rhs);
+
+    void printInfo(const string &msg = "");
     void releaseMesh();
 
     void setMesh(const vector<face_t*> &faces,
@@ -46,11 +48,16 @@ public:
     const unordered_set<vert_t*>& verts() const { return vertSet; }
     unordered_set<vert_t*>& verts() { return vertSet; }
 
+    set<face_t *> incidentFaces(vert_t *v);
+
     template <typename T>
     void flipSelectionState(int idx, unordered_map<int, T> &m);
     void selectFace(int idx);
     void selectEdge(int idx);
     void selectVertex(int idx);
+
+protected:
+    friend class MeshCutter;
 
 private:
     unordered_set<he_t*> heSet;

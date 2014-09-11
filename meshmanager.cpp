@@ -148,9 +148,9 @@ void MeshManager::cutMeshWithSelectedEdges()
       }
     }
   }
-
-  if( MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges) ) {
-
+  bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
+  if( cutSucceeded ) {
+    /// cutting performed successfully
   }
   else {
     /// can not cut it

@@ -37,7 +37,8 @@ HEADERS  += mainwindow.h \
     meshloader.h \
     stringutils.h \
     mathutils.hpp \
-    meshcutter.h
+    meshcutter.h \
+    utils.hpp
 
 FORMS    += mainwindow.ui
 

@@ -72,6 +72,16 @@ HDS_Mesh::~HDS_Mesh() {
   releaseMesh();
 }
 
+void HDS_Mesh::printInfo(const string& msg)
+{
+  if( !msg.empty() ) {
+    cout << msg << endl;
+  }
+  cout << "#vertices = " << vertSet.size() << endl;
+  cout << "#faces = " << faceSet.size() << endl;
+  cout << "#half edges = " << heSet.size() << endl;
+}
+
 void HDS_Mesh::releaseMesh() {
   for(auto vit=vertSet.begin();vit!=vertSet.end();vit++)
     if( (*vit) != nullptr )
@@ -249,6 +259,18 @@ void HDS_Mesh::drawEdgeIndices()
     glLineWidth(2.0);
     GLUtils::drawLine(e->v->pos, en->v->pos, QColor::fromRgbF(r, g, b));
   }
+}
+
+set<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
+{
+  he_t *he = v->he;
+  he_t *curHe = he;
+  set<face_t*> faces;
+  do {
+    faces.insert(curHe->f);
+    curHe = curHe->flip->next;
+  } while( curHe != he );
+  return faces;
 }
 
 void HDS_Mesh::drawVertexIndices()

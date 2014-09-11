@@ -19,6 +19,7 @@ public:
 
     int index;
     bool isPicked;
+    bool isCutFace;
 };
 
 #endif // HDS_FACE_H
