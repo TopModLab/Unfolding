@@ -6,18 +6,11 @@ MeshCutter::MeshCutter()
 {
 }
 
-bool MeshCutter::hasLoop(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges) {
-  return false;
-}
-
 bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 {
   typedef HDS_HalfEdge he_t;
   typedef HDS_Vertex vert_t;
   typedef HDS_Face face_t;
-
-  /// test if the supplied edges form any loop
-  if( MeshCutter::hasLoop(mesh, edges) ) return false;
 
   /// vertices connected to cut edges
   map<vert_t*, int> cutVerts;
@@ -57,6 +50,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
     he_new_flip->v = ve;
     he_new_flip->next = hef_new_flip;
     he_new_flip->prev = hef_new_flip;
+    he_new_flip->isCutEdge = true;
 
     he->flip = he_new_flip;
 
@@ -70,6 +64,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
     hef_new_flip->v = vs;
     hef_new_flip->next = he_new_flip;
     hef_new_flip->prev = he_new_flip;
+    hef_new_flip->isCutEdge = true;
 
     hef->flip = hef_new_flip;
 

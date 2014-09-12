@@ -144,6 +144,10 @@ void MeshManager::cutMeshWithSelectedEdges()
   set<he_t*> selectedEdges;
   for(auto he : cutted_mesh->halfedges()) {
     if( he->isPicked ) {
+      /// use picked edges as cut edges
+      he->setPicked(false);
+      he->setCutEdge(true);
+
       if( selectedEdges.find(he) == selectedEdges.end() &&
           selectedEdges.find(he->flip) == selectedEdges.end() ) {
         selectedEdges.insert(he);
@@ -175,4 +179,9 @@ void MeshManager::unfoldMesh()
     /// failed to unfold
   }
 
+}
+
+bool MeshManager::saveMeshes() {
+  /// save only the cutted and unfolded
+  return true;
 }

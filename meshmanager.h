@@ -43,6 +43,8 @@ public:
         return unfolded_mesh.data();
     }
 
+    bool saveMeshes();
+
 protected:
     /// should not be externally accessible
     static void drop()

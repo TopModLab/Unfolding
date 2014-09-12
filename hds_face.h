@@ -17,6 +17,8 @@ public:
     HDS_Face(const HDS_Face &other);
     HDS_Face operator=(const HDS_Face &other);
 
+    void setPicked(bool v) { isPicked = v; }
+
     QVector3D center() const;
     vector<HDS_Vertex*> corners() const;
 

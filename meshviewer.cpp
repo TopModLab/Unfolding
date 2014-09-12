@@ -134,6 +134,12 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 {
   mouseState.isPressed = true;
 
+  /// set interaction mode as camera if shift key is hold
+  if( e->modifiers() & Qt::AltModifier ) {
+    interactionStateStack.push(interactionState);
+    interactionState = Camera;
+  }
+
   switch( interactionState ) {
   case Camera:
     mouseState.prev_pos = QVector2D(e->pos());
@@ -151,11 +157,11 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 {
   switch( interactionState ) {
-  case Camera: {
+  case Camera: {    
     if( e->buttons() & Qt::LeftButton ) {
       QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
 
-      if((e->modifiers() & Qt::AltModifier) ) {
+      if((e->modifiers() & Qt::ShiftModifier) ) {
         viewerState.translation += QVector3D(diff.x()/100.0, -diff.y()/100.0, 0.0);
       }
       else if(e->modifiers() & Qt::ControlModifier)
@@ -178,6 +184,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
       viewerState.updateModelView();
       mouseState.prev_pos = QVector2D(e->pos());
     }
+    updateGL();
     break;
   }
   case SelectFace:
@@ -192,11 +199,10 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
     else {
       isSelecting = false;
     }
+    updateGL();
     break;
   }
   }
-
-  updateGL();
 }
 
 void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
@@ -230,6 +236,12 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
   }
   }
   mouseState.isPressed = false;
+
+  /// reset interaction mode if in camera mode triggered by holding alt
+  if( e->modifiers() & Qt::AltModifier ) {
+    interactionState = interactionStateStack.top();
+    interactionStateStack.pop();
+  }
   updateGL();
 }
 

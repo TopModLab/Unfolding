@@ -176,8 +176,9 @@ void MainWindow::slot_newFile()
 
 void MainWindow::slot_saveFile()
 {
-  QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
+  QString filename = QFileDialog::getSaveFileName(this, "Input a file name");
   cout << "saving file " << filename.toStdString() << endl;
+  MeshManager::getInstance()->saveMeshes();
 }
 
 void MainWindow::slot_toggleCameraOperation()

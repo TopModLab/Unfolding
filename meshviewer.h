@@ -57,6 +57,7 @@ private:
   struct ViewerState {
     ViewerState():zNear(1.0), zFar(7000.0), fov(45.0){
       translation = QVector3D(0, 0, -5);
+      angularChange = 0;
     }
 
     void updateViewport(int w, int h) {
@@ -87,6 +88,20 @@ private:
     struct {
       int x, y, w, h;
     } viewport;
+
+    void print() {
+      qDebug() << "viewstate:";
+      qDebug() << viewport.x << ", " << viewport.y << ", " << viewport.w << ", " << viewport.h;
+      qDebug() << modelview;
+      qDebug() << projection;
+      qDebug() << rotationAxis;
+      qDebug() << angularChange;
+      qDebug() << rotation;
+      qDebug() << translation;
+      qDebug() << zNear << ", " << zFar << ", " << fov;
+      qDebug() << aspect;
+    }
+
     QMatrix4x4 modelview;
     QMatrix4x4 projection;
 
@@ -133,6 +148,7 @@ public:
 
 private:
   InteractionState interactionState;
+  stack<InteractionState> interactionStateStack;
 
 private:
   HDS_Mesh *heMesh;   /// not own

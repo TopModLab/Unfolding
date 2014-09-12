@@ -16,7 +16,6 @@ public:
   static bool cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge*> &edges);
 
 private:
-  static bool hasLoop(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges);
 };
 
 #endif // MESHCUTTER_H

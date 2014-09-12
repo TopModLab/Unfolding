@@ -149,15 +149,15 @@ void HDS_Mesh::printMesh(const string &msg)
   if( !msg.empty() ) {
     cout << msg << endl;
   }
-  for(int i=0;i<vertSet.size();++i) {
+  for(size_t i=0;i<vertSet.size();++i) {
     cout << *vertMap[i] << endl;
   }
 
-  for(int i=0;i<faceSet.size();++i) {
+  for(size_t i=0;i<faceSet.size();++i) {
     cout << (*faceMap[i]) << endl;
   }
 
-  for(int i=0;i<heSet.size();++i) {
+  for(size_t i=0;i<heSet.size();++i) {
     cout << (*heMap[i]) << endl;
   }
 }
@@ -267,12 +267,14 @@ void HDS_Mesh::draw()
       he_t* e = (*eit);
       he_t* en = e->next;
 
+      QColor c = Qt::black;
       if( e->isPicked )
-        glColor4f(0.25, 0.25, 0.25, 1);
-      else
-        glColor4f(0.25, 0.75, 0.25, 1);
+        c = Qt::red;
+      else if( e->isCutEdge ) {
+        c = Qt::green;
+      }
 
-      GLUtils::drawLine(e->v->pos, en->v->pos, e->isPicked?Qt::red:Qt::black);
+      GLUtils::drawLine(e->v->pos, en->v->pos, c);
     }
   }
 
@@ -412,12 +414,9 @@ void HDS_Mesh::drawVertexIndices()
 template <typename T>
 void HDS_Mesh::flipSelectionState(int idx, unordered_map<int, T> &m) {
   auto it = m.find(idx);
-  auto flip = [=](bool &v) {
-    v = !v;
-  };
 
   if( it != m.end() ) {
-    flip(it->second->isPicked);
+    it->second->setPicked( !it->second->isPicked );
   }
 }
 
@@ -429,7 +428,6 @@ void HDS_Mesh::selectFace(int idx)
 void HDS_Mesh::selectEdge(int idx)
 {
   flipSelectionState(idx, heMap);
-  flipSelectionState(idx+1, heMap);
 }
 
 void HDS_Mesh::selectVertex(int idx)

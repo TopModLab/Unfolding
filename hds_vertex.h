@@ -17,6 +17,8 @@ public:
     HDS_Vertex(const HDS_Vertex &other);
     HDS_Vertex operator=(const HDS_Vertex &other);
 
+    void setPicked(bool v) { isPicked = v; }
+
     qreal x() { return pos.x(); }
     qreal y() { return pos.y(); }
     qreal z() { return pos.z(); }
