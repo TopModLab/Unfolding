@@ -25,6 +25,11 @@ HDS_Face HDS_Face::operator=(const HDS_Face &other)
   throw "Not implemented.";
 }
 
+set<HDS_Face *> HDS_Face::connectedFaces() const
+{
+  throw "Not implemented.";
+}
+
 QVector3D HDS_Face::center() const
 {
   auto cs = corners();

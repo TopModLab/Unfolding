@@ -89,48 +89,67 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_
   } while( curHE != he );
 }
 
-bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh)
+bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
 {
-  /// start from a face, expand all faces
-  queue<HDS_Face*> Q;
-  Q.push(unfolded_mesh->faceMap[0]);
-  vector<int> expSeq;     // sequence of expansion
-  map<int, int> parentMap;
-  set<int> visited;
-  while( !Q.empty() ) {
-    auto cur = Q.front();
-    Q.pop();
-    visited.insert(cur->index);
-    expSeq.push_back(cur->index);
-    /// get all neighbor faces
-    vector<HDS_Face*> neighborFaces = unfolded_mesh->incidentFaces(cur);
-    /// get all non-cut neighbor faces
-    vector<HDS_Face*> nonCutNeighborFaces = Utils::filter(neighborFaces, [](HDS_Face* f) {
-      return !(f->isCutFace);
-    });
+  if( fixedFaces.empty() ) {
+    /// find all fixed faces
+    unordered_set<int> visitedFaces;
 
-    for( auto f : nonCutNeighborFaces ) {
-      if( visited.find(f->index) == visited.end() ) {
-        Q.push(f);
-        parentMap.insert(make_pair(f->index, cur->index));
+    for(auto f : ref_mesh->faceSet) {
+      if( visitedFaces.find(f->index) == visitedFaces.end() ) {
+        visitedFaces.insert(f->index);
+        set<HDS_Face*> connectedFaces = f->connectedFaces();
+        for(auto cf : connectedFaces) {
+          visitedFaces.insert(cf->index);
+        }
       }
     }
+
+    Utils::print(fixedFaces);
   }
 
-  /// print out the sequence of performing unfolding
-  Utils::print(expSeq);
+  for( auto fid : fixedFaces ) {
+    /// start from a face, expand all faces
+    queue<HDS_Face*> Q;
+    Q.push(unfolded_mesh->faceMap[fid]);
+    vector<int> expSeq;     // sequence of expansion
+    map<int, int> parentMap;
+    set<int> visited;
+    while( !Q.empty() ) {
+      auto cur = Q.front();
+      Q.pop();
+      visited.insert(cur->index);
+      expSeq.push_back(cur->index);
+      /// get all neighbor faces
+      vector<HDS_Face*> neighborFaces = unfolded_mesh->incidentFaces(cur);
+      /// get all non-cut neighbor faces
+      vector<HDS_Face*> nonCutNeighborFaces = Utils::filter(neighborFaces, [](HDS_Face* f) {
+          return !(f->isCutFace);
+    });
 
-  /// compute the spanning vectors for the first face
-  QVector3D uvec, vvec;
-  HDS_Face *face0 = unfolded_mesh->faceMap.at(expSeq.front());
-  QVector3D cface0 = face0->center();
-  uvec = face0->he->v->pos - cface0;
-  vvec = face0->he->flip->v->pos - cface0;
+      for( auto f : nonCutNeighborFaces ) {
+        if( visited.find(f->index) == visited.end() ) {
+          Q.push(f);
+          parentMap.insert(make_pair(f->index, cur->index));
+        }
+      }
+    }
 
-  /// unfold the mesh using the sequence
-  /// update the vertex positions of the unfolded mesh base on the geometry of the reference mesh
-  for(int i=1;i<expSeq.size();++i) {
-    unfoldFace(parentMap.at(expSeq[i]), expSeq[i], unfolded_mesh, ref_mesh, uvec, vvec);
+    /// print out the sequence of performing unfolding
+    Utils::print(expSeq);
+
+    /// compute the spanning vectors for the first face
+    QVector3D uvec, vvec;
+    HDS_Face *face0 = unfolded_mesh->faceMap.at(expSeq.front());
+    QVector3D cface0 = face0->center();
+    uvec = face0->he->v->pos - cface0;
+    vvec = face0->he->flip->v->pos - cface0;
+
+    /// unfold the mesh using the sequence
+    /// update the vertex positions of the unfolded mesh base on the geometry of the reference mesh
+    for(int i=1;i<expSeq.size();++i) {
+      unfoldFace(parentMap.at(expSeq[i]), expSeq[i], unfolded_mesh, ref_mesh, uvec, vvec);
+    }
   }
 
   return true;

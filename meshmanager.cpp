@@ -170,7 +170,20 @@ void MeshManager::unfoldMesh()
 {
   unfolded_mesh.reset(new HDS_Mesh(*cutted_mesh));
 
-  if( MeshUnfolder::unfold(unfolded_mesh.data(), cutted_mesh.data()) ) {
+  /// cut the mesh using the selected edges
+  set<int> selectedFaces;
+  for(auto f : cutted_mesh->faces()) {
+    if( f->isPicked ) {
+      /// use picked edges as cut edges
+      f->setPicked(false);
+
+      if( selectedFaces.find(f->index) == selectedFaces.end() ) {
+        selectedFaces.insert(f->index);
+      }
+    }
+  }
+
+  if( MeshUnfolder::unfold(unfolded_mesh.data(), cutted_mesh.data(), selectedFaces) ) {
     /// unfolded successfully
     unfolded_mesh->printInfo("unfolded mesh:");
     //unfolded_mesh->printMesh("unfolded mesh:");

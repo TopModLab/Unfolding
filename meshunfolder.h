@@ -12,7 +12,7 @@ class MeshUnfolder
 public:
   MeshUnfolder();
 
-  static bool unfold(HDS_Mesh *mesh, HDS_Mesh *ref);
+  static bool unfold(HDS_Mesh *mesh, HDS_Mesh *ref, set<int> fixedFaces = set<int>());
 
 private:
   static void unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
