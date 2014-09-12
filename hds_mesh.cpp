@@ -220,6 +220,8 @@ void HDS_Mesh::draw()
     for(auto fit=faceSet.begin();fit!=faceSet.end();fit++)
     {
       face_t* f = (*fit);
+      if( f->isCutFace ) continue;
+
       // render the faces
       he_t* he = f->he;
       he_t* hen = he->next;

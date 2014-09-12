@@ -27,15 +27,22 @@ HDS_Face HDS_Face::operator=(const HDS_Face &other)
 
 QVector3D HDS_Face::center() const
 {
-  HDS_HalfEdge *curHE = he;
+  auto cs = corners();
   QVector3D c;
-  int count = 0;
+  for(auto p : cs) {
+    c += p->pos;
+  }
+  c /= (qreal) cs.size();
+  return c;
+}
+
+vector<HDS_Vertex*> HDS_Face::corners() const
+{
+  HDS_HalfEdge *curHE = he;
+  vector<HDS_Vertex*> corners;
   do {
-    c += curHE->v->pos;
-    ++count;
+    corners.push_back(curHE->v);
     curHE = curHE->next;
   } while( curHE != he );
-
-  c = c / (qreal) count;
-  return c;
+  return corners;
 }

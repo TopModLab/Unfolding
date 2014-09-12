@@ -6,6 +6,7 @@
 #include <QVector3D>
 
 class HDS_HalfEdge;
+class HDS_Vertex;
 
 class HDS_Face
 {
@@ -17,6 +18,7 @@ public:
     HDS_Face operator=(const HDS_Face &other);
 
     QVector3D center() const;
+    vector<HDS_Vertex*> corners() const;
 
     QVector3D normal;
     HDS_HalfEdge *he;
