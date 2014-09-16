@@ -22,8 +22,9 @@ public:
     set<HDS_Face *> connectedFaces();
     QVector3D center() const;
     vector<HDS_Vertex*> corners() const;
+    QVector3D computeNormal();
 
-    QVector3D normal;
+    QVector3D n;
     HDS_HalfEdge *he;
 
     int index;

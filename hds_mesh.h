@@ -101,7 +101,7 @@ inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
 }
 
 inline ostream& operator<<(ostream &os, const HDS_Face& f) {
-  os << "face #" << f.index << endl;
+  os << "face #" << f.index << " " << f.n << endl;
   HDS_HalfEdge *he = f.he;
   HDS_HalfEdge *curHE = he;
   do {

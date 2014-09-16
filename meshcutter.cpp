@@ -242,9 +242,16 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 {
   auto isBadVertex = [](HDS_Vertex* v) -> bool {
+    const double THRES = 1e-6;
+    const double PI2 = 3.1415926535897 * 2.0;
+
+    cout << "vert #" << v->index << "\t";
     double sum = 0;
     auto he = v->he;
     auto curHE = he->flip->next;
+    bool isPlanar = true;
+    QVector3D normal = he->f->n;
+    cout << normal << "\t";
     do {
       QVector3D v1 = he->flip->v->pos - he->v->pos;
       QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
@@ -254,14 +261,15 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
       double angle = acos(cosVal);
       sum += angle;
 
+      isPlanar &= fabs(QVector3D::dotProduct(normal, v1)) < THRES;
+
       he = curHE;
       curHE = he->flip->next;
     }while( he != v->he ) ;
 
-    const double THRES = 1e-6;
-    const double PI2 = 3.1415926535897 * 2.0;
+    cout << (isPlanar?"planar":"non-planar") << endl;
     /// either sums up to rought 2 * Pi, or has a cut face connected.
-    return fabs(sum - PI2) > THRES;
+    return fabs(sum - PI2) > THRES || (!isPlanar);
   };
 
   set<HDS_HalfEdge*> cutEdges;
@@ -284,6 +292,7 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
         auto he = cur->he;
         do {
           auto &vi = he->flip->v;
+          cout << "got " << vi->index << endl;
           if( isBadVertex(vi) && reachedVertex.find(vi) == reachedVertex.end() ) {
             cout << "pushing in " << vi->index << endl;
             Q.push(vi);

@@ -16,7 +16,7 @@ HDS_Face::HDS_Face(const HDS_Face &other)
   isPicked = other.isPicked;
   isCutFace = other.isCutFace;
   index = other.index;
-  normal = other.normal;
+  n = other.n;
   he = nullptr;
 }
 
@@ -67,4 +67,11 @@ vector<HDS_Vertex*> HDS_Face::corners() const
     curHE = curHE->next;
   } while( curHE != he );
   return corners;
+}
+
+QVector3D HDS_Face::computeNormal()
+{
+  QVector3D c = center();
+  n = QVector3D::crossProduct(he->v->pos - c, he->next->v->pos - c);
+  n.normalize();
 }

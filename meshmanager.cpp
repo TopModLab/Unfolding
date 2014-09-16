@@ -93,6 +93,7 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
     }
 
     curFace->he = hes[heIdx];
+    curFace->computeNormal();
 
     heIdx += Fi.v.size();
   }
