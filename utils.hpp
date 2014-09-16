@@ -15,11 +15,30 @@ Container filter(Container c, Pred p) {
   return res;
 }
 
+template <typename Container, typename Pred>
+Container filter_set(Container c, Pred p) {
+  Container res;
+  for(auto x : c) {
+    if( p(x) )
+      res.insert(x);
+  }
+  return res;
+}
+
 template <typename Container, typename Func>
 Container map(Container c, Func f) {
   Container res;
   for(auto x : c) {
       res.push_back(f(x));
+  }
+  return res;
+}
+
+template <typename Container, typename Func>
+Container map_set(Container c, Func f) {
+  Container res;
+  for(auto x : c) {
+      res.insert(f(x));
   }
   return res;
 }

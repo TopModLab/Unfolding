@@ -89,22 +89,64 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_
   } while( curHE != he );
 }
 
+bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
+  /// for each vertex in the cutted_mesh, check the condition
+  auto isBadVertex = [](HDS_Vertex* v) -> bool {
+    double sum = 0;
+    auto he = v->he;
+    auto curHE = he->flip->next;
+    bool hasCutFace = false;
+    do {
+      if( he->f->isCutFace ) { hasCutFace = true; break; }
+      QVector3D v1 = he->flip->v->pos - he->v->pos;
+      QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+      double nv1pnv2 = v1.length() * v2.length();
+      double inv_nv1pnv2 = 1.0 / nv1pnv2;
+      double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+      double angle = acos(cosVal);
+      sum += angle;
+
+      he = curHE;
+      curHE = he->flip->next;
+    }while( he != v->he ) ;
+
+    const double THRES = 1e-6;
+    const double PI2 = 3.1415926535897 * 2.0;
+    /// either sums up to rought 2 * Pi, or has a cut face connected.
+    return fabs(sum - PI2) > THRES && (!hasCutFace);
+  };
+
+  if( any_of(cutted_mesh->vertSet.begin(), cutted_mesh->vertSet.end(), isBadVertex) ) return false;
+  else return true;
+}
+
 bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
 {
+  if( !unfoldable(ref_mesh) ) {
+    cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
+    return false;
+  }
+
   if( fixedFaces.empty() ) {
+    cout << "No face is selected, finding fixed faces..." << endl;
     /// find all fixed faces
     unordered_set<int> visitedFaces;
 
     for(auto f : ref_mesh->faceSet) {
+      if( f->isCutFace ) continue;
       if( visitedFaces.find(f->index) == visitedFaces.end() ) {
         visitedFaces.insert(f->index);
-        set<HDS_Face*> connectedFaces = f->connectedFaces();
+        fixedFaces.insert(f->index);
+        set<HDS_Face*> connectedFaces = Utils::filter_set(f->connectedFaces(), [](HDS_Face* f){
+          return !(f->isCutFace);
+        });
         for(auto cf : connectedFaces) {
           visitedFaces.insert(cf->index);
         }
       }
     }
 
+    cout << "Fixed faces found:" << endl;
     Utils::print(fixedFaces);
   }
 
@@ -125,7 +167,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
       /// get all non-cut neighbor faces
       vector<HDS_Face*> nonCutNeighborFaces = Utils::filter(neighborFaces, [](HDS_Face* f) {
           return !(f->isCutFace);
-    });
+      });
 
       for( auto f : nonCutNeighborFaces ) {
         if( visited.find(f->index) == visited.end() ) {

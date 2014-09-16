@@ -190,6 +190,7 @@ void MeshManager::unfoldMesh()
   }
   else {
     /// failed to unfold
+    cout << "Failed to unfold." << endl;
   }
 
 }

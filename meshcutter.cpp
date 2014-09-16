@@ -2,15 +2,16 @@
 #include "hds_mesh.h"
 #include "utils.hpp"
 
-MeshCutter::MeshCutter()
-{
-}
-
 bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 {
   typedef HDS_HalfEdge he_t;
   typedef HDS_Vertex vert_t;
   typedef HDS_Face face_t;
+
+  if( edges.empty() ) {
+    edges = findCutEdges(mesh);
+  }
+
 
   /// vertices connected to cut edges
   map<vert_t*, int> cutVerts;
@@ -236,4 +237,65 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
   }
 
   return true;
+}
+
+set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
+{
+  auto isBadVertex = [](HDS_Vertex* v) -> bool {
+    double sum = 0;
+    auto he = v->he;
+    auto curHE = he->flip->next;
+    do {
+      QVector3D v1 = he->flip->v->pos - he->v->pos;
+      QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+      double nv1pnv2 = v1.length() * v2.length();
+      double inv_nv1pnv2 = 1.0 / nv1pnv2;
+      double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+      double angle = acos(cosVal);
+      sum += angle;
+
+      he = curHE;
+      curHE = he->flip->next;
+    }while( he != v->he ) ;
+
+    const double THRES = 1e-6;
+    const double PI2 = 3.1415926535897 * 2.0;
+    /// either sums up to rought 2 * Pi, or has a cut face connected.
+    return fabs(sum - PI2) > THRES;
+  };
+
+  set<HDS_HalfEdge*> cutEdges;
+  set<HDS_Vertex*> reachedVertex;
+
+  for(auto &v : mesh->vertSet) {
+    /// if this edge is connected to a non-planar vertex, cut this edge,
+    /// and form a cut edge tree starting from this edge
+    if( isBadVertex(v) && reachedVertex.find(v) == reachedVertex.end() ) {
+      /// add cut edges all the way until no more bad vertex could be reached
+      queue<HDS_Vertex*> Q;
+      Q.push(v);
+      reachedVertex.insert(v);
+      while(!Q.empty()) {
+        auto cur = Q.front();
+        Q.pop();
+
+        cout << "reached vertex " << cur->index << endl;
+        /// for all its bad vertex neighbor, add cut edges
+        auto he = cur->he;
+        do {
+          auto &vi = he->flip->v;
+          if( isBadVertex(vi) && reachedVertex.find(vi) == reachedVertex.end() ) {
+            cout << "pushing in " << vi->index << endl;
+            Q.push(vi);
+            reachedVertex.insert(vi);
+            cutEdges.insert(he);
+            he->setCutEdge(true);
+          }
+          he = he->flip->next;
+        } while( he != cur->he );
+      }
+    }
+  }
+  cout << "#cut edges = " << cutEdges.size() << endl;
+  return cutEdges;
 }

@@ -19,7 +19,7 @@ public:
 
     void setPicked(bool v) { isPicked = v; }
 
-    set<HDS_Face *> connectedFaces() const;
+    set<HDS_Face *> connectedFaces();
     QVector3D center() const;
     vector<HDS_Vertex*> corners() const;
 
