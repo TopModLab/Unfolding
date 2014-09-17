@@ -298,7 +298,7 @@ void HDS_Mesh::draw()
         glColor4f(1, 1, 0, 1);
       else {
         double c = clamp(v->curvature, -PI, PI) / PI2;
-        cout << v->curvature << ", " << c << endl;
+        cout << v->index << ":" << v->curvature << ", " << c << endl;
         if( c > 0.0 ) {
           glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
         }
