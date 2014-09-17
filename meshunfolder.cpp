@@ -2,6 +2,7 @@
 #include "hds_mesh.h"
 
 #include "utils.hpp"
+#include "mathutils.hpp"
 
 #include <QDebug>
 
@@ -111,7 +112,6 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
     }while( he != v->he ) ;
 
     const double THRES = 1e-6;
-    const double PI2 = 3.1415926535897 * 2.0;
     /// either sums up to rought 2 * Pi, or has a cut face connected.
     return fabs(sum - PI2) > THRES && (!hasCutFace);
   };

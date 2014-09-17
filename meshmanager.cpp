@@ -130,6 +130,10 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
     }
   }
 
+  for( auto &v : verts ) {
+    v->computeCurvature();
+  }
+
   hds_mesh->setMesh(faces, verts, hes);
   cout << "finished building halfedge structure." << endl;
   cout << "halfedge count = " << hds_mesh->halfedges().size() << endl;

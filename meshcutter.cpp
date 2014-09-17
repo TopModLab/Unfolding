@@ -1,6 +1,7 @@
 #include "meshcutter.h"
 #include "hds_mesh.h"
 #include "utils.hpp"
+#include "mathutils.hpp"
 
 bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 {
@@ -236,6 +237,11 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
     }
   }
 
+  /// update the curvature of each vertex
+  for( auto &v : mesh->vertSet ) {
+    v->computeCurvature();
+  }
+
   return true;
 }
 
@@ -243,7 +249,6 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 {
   auto isBadVertex = [](HDS_Vertex* v) -> bool {
     const double THRES = 1e-6;
-    const double PI2 = 3.1415926535897 * 2.0;
 
     cout << "vert #" << v->index << "\t";
     double sum = 0;

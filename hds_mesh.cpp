@@ -271,7 +271,7 @@ void HDS_Mesh::draw()
       if( e->isPicked )
         c = Qt::red;
       else if( e->isCutEdge ) {
-        c = Qt::green;
+        c = Qt::yellow;
       }
 
       GLUtils::drawLine(e->v->pos, en->v->pos, c);
@@ -295,9 +295,17 @@ void HDS_Mesh::draw()
 #else
       glPointSize(10.0);
       if( v->isPicked )
-        glColor4f(1, 0, 0, 1);
-      else
-        glColor4f(0, 0, 1, 1);
+        glColor4f(1, 1, 0, 1);
+      else {
+        double c = clamp(v->curvature, -PI, PI) / PI2;
+        cout << v->curvature << ", " << c << endl;
+        if( c > 0.0 ) {
+          glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
+        }
+        else {
+          glColor4f((0.5-c)*2, -c*2, 0.0, 1.0);
+        }
+      }
 
       glBegin(GL_POINTS);
       glVertex3f(0, 0, 0);

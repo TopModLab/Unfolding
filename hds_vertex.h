@@ -18,6 +18,7 @@ public:
     HDS_Vertex operator=(const HDS_Vertex &other);
 
     void setPicked(bool v) { isPicked = v; }
+    void computeCurvature();
 
     qreal x() { return pos.x(); }
     qreal y() { return pos.y(); }
@@ -27,6 +28,7 @@ public:
     HDS_HalfEdge *he;
 
     int index;
+    double curvature;
     bool isPicked;
 };
 
