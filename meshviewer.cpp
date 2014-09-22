@@ -22,6 +22,12 @@ void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh) {
   updateGL();
 }
 
+void MeshViewer::setCurvatureColormap(ColorMap cmap)
+{
+  colormap = cmap;
+  updateGL();
+}
+
 bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 {
   bool isInvertible;
@@ -243,6 +249,40 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
     interactionStateStack.pop();
   }
   updateGL();
+
+}
+
+void MeshViewer::keyPressEvent(QKeyEvent *e)
+{
+  switch(e->key()) {
+  case Qt::Key_E:
+  {
+    if( heMesh ) {
+      heMesh->flipShowEdges();
+    }
+    break;
+  }
+  case Qt::Key_V:
+  {
+    if( heMesh ) {
+      heMesh->flipShowVertices();
+    }
+    break;
+  }
+  case Qt::Key_F:
+  {
+    if( heMesh ) {
+      heMesh->flipShowFaces();
+    }
+    break;
+  }
+  }
+  updateGL();
+}
+
+void MeshViewer::keyReleaseEvent(QKeyEvent *e)
+{
+
 }
 
 void MeshViewer::wheelEvent(QWheelEvent *e)
@@ -311,7 +351,7 @@ void MeshViewer::resizeGL(int w, int h)
 
 void MeshViewer::paintGL()
 {
-  glClearColor(1, 1, 1, 0);
+  glClearColor(1., 1., 1., 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_MODELVIEW);
@@ -323,6 +363,8 @@ void MeshViewer::paintGL()
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POINT_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
+
+  glEnable(GL_DEPTH_TEST);
 
   glShadeModel(GL_SMOOTH);
   glEnable(GL_BLEND);
@@ -336,7 +378,7 @@ void MeshViewer::paintGL()
                       QVector3D(-1,  1, 0));
   }
   else {
-    heMesh->draw();
+    heMesh->draw(colormap);
     switch( interactionState ) {
     case Camera:
       break;

@@ -1,6 +1,7 @@
 #include "hds_mesh.h"
 #include "glutils.hpp"
 #include "mathutils.hpp"
+#include "utils.hpp"
 
 HDS_Mesh::HDS_Mesh()
 {
@@ -212,7 +213,7 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
   }
 }
 
-void HDS_Mesh::draw()
+void HDS_Mesh::draw(ColorMap cmap)
 {
   if( showFace )
   {
@@ -248,6 +249,13 @@ void HDS_Mesh::draw()
       do
       {
         vert_t* v = curHe->v;
+
+        const double R = PI/8;
+        double c = clamp(v->curvature, -R, R) / R; //[-0.5, 0.5]
+        cout << c << endl;
+        /// interpolation
+        QColor clr = cmap.getColor(c);
+        GLUtils::setColor(clr);
         GLUtils::useVertex(v->pos);
         curHe = curHe->next;
       }while( curHe != he );
@@ -260,7 +268,7 @@ void HDS_Mesh::draw()
     glColor4f(0.25, 0.25, 0.25, 1);
     GLfloat line_mat_diffuse[4] = {0.25, 0.25, 0.25, 1};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
-    glLineWidth(2.0);
+    //glLineWidth(2.0);
     // render the boundaires
     for(auto eit=heSet.begin();eit!=heSet.end();eit++)
     {
@@ -271,7 +279,7 @@ void HDS_Mesh::draw()
       if( e->isPicked )
         c = Qt::red;
       else if( e->isCutEdge ) {
-        c = Qt::yellow;
+        c = Qt::green;
       }
 
       GLUtils::drawLine(e->v->pos, en->v->pos, c);
@@ -293,18 +301,19 @@ void HDS_Mesh::draw()
 #if 0
       glutSolidSphere(0.125, 16, 16);
 #else
-      glPointSize(10.0);
+      glPointSize(4.0);
       if( v->isPicked )
         glColor4f(1, 1, 0, 1);
       else {
-        double c = clamp(v->curvature, -PI, PI) / PI2;
-        cout << v->index << ":" << v->curvature << ", " << c << endl;
-        if( c > 0.0 ) {
-          glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
-        }
-        else {
-          glColor4f((0.5-c)*2, -c*2, 0.0, 1.0);
-        }
+        double c = .5 - clamp(v->curvature, -PI/2, PI/2) / PI; //[0, 1]
+        //cout << v->index << ":" << v->curvature << ", " << c << endl;
+//        if( c < 0.5 ) {
+//          glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
+//        }
+//        else {
+//          glColor4f(c, (c-0.5, 0.0, 1.0);
+//        }
+        glColor4f(c, 1-c, 1-c, 1.0);
       }
 
       glBegin(GL_POINTS);
@@ -352,6 +361,21 @@ void HDS_Mesh::drawEdgeIndices()
     glLineWidth(2.0);
     GLUtils::drawLine(e->v->pos, en->v->pos, QColor::fromRgbF(r, g, b));
   }
+}
+
+void HDS_Mesh::flipShowEdges()
+{
+  showEdge = !showEdge;
+}
+
+void HDS_Mesh::flipShowFaces()
+{
+  showFace = !showFace;
+}
+
+void HDS_Mesh::flipShowVertices()
+{
+  showVert = !showVert;
 }
 
 vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)

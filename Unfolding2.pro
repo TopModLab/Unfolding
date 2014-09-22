@@ -24,7 +24,9 @@ SOURCES += main.cpp\
     meshloader.cpp \
     stringutils.cpp \
     meshcutter.cpp \
-    meshunfolder.cpp
+    meshunfolder.cpp \
+    extras/colormap_editor/colormapeditor.cpp \
+    colormap.cpp
 
 HEADERS  += mainwindow.h \
     hds_face.h \
@@ -40,9 +42,14 @@ HEADERS  += mainwindow.h \
     mathutils.hpp \
     meshcutter.h \
     utils.hpp \
-    meshunfolder.h
+    meshunfolder.h \
+    extras/colormap_editor/colormapeditor.h \
+    colormap.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    extras/colormap_editor/colormapeditor.ui
 
 RESOURCES += \
     icons.qrc
+
+OTHER_FILES +=

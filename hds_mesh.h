@@ -8,6 +8,8 @@
 #include "hds_vertex.h"
 #include "hds_face.h"
 
+#include "colormap.h"
+
 
 class HDS_Mesh
 {
@@ -37,10 +39,13 @@ public:
                  const vector<vert_t*> &verts,
                  const vector<he_t*> &hes);
 
-    void draw();
+    void draw(ColorMap cmap);
     void drawFaceIndices();
     void drawVertexIndices();
     void drawEdgeIndices();
+    void flipShowEdges();
+    void flipShowFaces();
+    void flipShowVertices();
 
     const unordered_set<he_t*>& halfedges() const { return heSet; }
     unordered_set<he_t*>& halfedges() { return heSet; }

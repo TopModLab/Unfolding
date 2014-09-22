@@ -12,6 +12,7 @@
 #include <QGLFramebufferObject>
 
 #include "hds_mesh.h"
+#include "colormap.h"
 
 const QGLFormat qglformat_3d(
     QGL::DoubleBuffer       |
@@ -34,10 +35,13 @@ public:
   virtual ~MeshViewer();
 
   void bindHalfEdgeMesh(HDS_Mesh *mesh);
+  void setCurvatureColormap(ColorMap cmap);
 
 signals:
 
 protected:
+  void keyPressEvent(QKeyEvent *e);
+  void keyReleaseEvent(QKeyEvent *e);
   void mousePressEvent(QMouseEvent *e);
   void mouseMoveEvent(QMouseEvent *e);
   void mouseReleaseEvent(QMouseEvent *event);
@@ -156,6 +160,8 @@ private:
 private:
   void drawSelectionBox();
 
+private:
+  ColorMap colormap;    /// color for negative curvature and positive curvature
 
 private:
   QScopedPointer<QGLFramebufferObject> fbo;

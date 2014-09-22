@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#include <QColor>
+
 namespace Utils {
 
 template <typename Container, typename Pred>
@@ -49,6 +51,10 @@ void print(Container c, ostream& os = cout) {
     os << x << ' ';
   }
   os << endl;
+}
+
+inline void printColor(QColor clr) {
+  cout << '(' << clr.red() << ' ' << clr.green() << ' ' << clr.blue() << ')' << endl;
 }
 
 }

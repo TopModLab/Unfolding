@@ -27,6 +27,7 @@ bool MainWindow::createComponents()
 {
   try {
     viewer = new MeshViewer(this);
+    ceditor = new ColormapEditor;
     createActions();
     createMenus();
     createToolBar();
@@ -48,6 +49,7 @@ bool MainWindow::layoutComponents()
 
 bool MainWindow::connectComponents()
 {
+  connect(ceditor, SIGNAL(colorChanged()), this, SLOT(slot_updateViewerColormap()));
   return true;
 }
 
@@ -100,6 +102,11 @@ void MainWindow::createActions()
     unfoldAct->setStatusTip(tr("Unfold mesh"));
     connect(unfoldAct, SIGNAL(triggered()), this, SLOT(slot_unfoldMesh()));
     actionsMap["mesh unfold"] = unfoldAct;
+
+    QAction *colormapAct = new QAction(QIcon(":/icons/colormap.png"), tr("Colormap"), this);
+    colormapAct->setStatusTip(tr("Color map"));
+    connect(colormapAct, SIGNAL(triggered()), this, SLOT(slot_triggerColormap()));
+    actionsMap["colormap"] = colormapAct;
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create actions!");
@@ -150,6 +157,9 @@ void MainWindow::createToolBar()
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(actionsMap["mesh cut"]);
     ui->mainToolBar->addAction(actionsMap["mesh unfold"]);
+
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addAction(actionsMap["colormap"]);
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create status bar!");
@@ -209,4 +219,16 @@ void MainWindow::slot_performMeshCut() {
 void MainWindow::slot_unfoldMesh() {
   MeshManager::getInstance()->unfoldMesh();
   viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+}
+
+void MainWindow::slot_triggerColormap() {
+  if( ceditor->isVisible() )
+    ceditor->hide();
+  else
+    ceditor->show();
+}
+
+void MainWindow::slot_updateViewerColormap()
+{
+  viewer->setCurvatureColormap(ceditor->getColormap());
 }

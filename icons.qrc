@@ -8,5 +8,6 @@
         <file>icons/unfold.png</file>
         <file>icons/open.png</file>
         <file>icons/save.png</file>
+        <file>icons/colormap.png</file>
     </qresource>
 </RCC>
