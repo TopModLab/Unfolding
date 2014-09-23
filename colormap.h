@@ -11,6 +11,7 @@ public:
   ColorMap();
 
   QColor getColor(double val);
+  QColor getColor_discrete(double val);
 
   void setColor(double val, QColor c);
 
@@ -20,6 +21,8 @@ public:
 
 private:
   vector<ColorPoint> colormap;
+  vector<QColor> colormap_discrete;
+  double minVal, maxVal, rangeVal;
 };
 
 

@@ -254,9 +254,6 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
     double sum = 0;
     auto he = v->he;
     auto curHE = he->flip->next;
-    bool isPlanar = true;
-    QVector3D normal = he->f->n;
-    cout << normal << "\t";
     do {
       QVector3D v1 = he->flip->v->pos - he->v->pos;
       QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
@@ -266,20 +263,23 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
       double angle = acos(cosVal);
       sum += angle;
 
-      isPlanar &= fabs(QVector3D::dotProduct(normal, v1)) < THRES;
-
       he = curHE;
       curHE = he->flip->next;
     }while( he != v->he ) ;
 
-    cout << (isPlanar?"planar":"non-planar") << endl;
     /// either sums up to rought 2 * Pi, or has a cut face connected.
-    return fabs(sum - PI2) > THRES || (!isPlanar);
+    return fabs(sum - PI2) > THRES;
   };
 
   set<HDS_HalfEdge*> cutEdges;
   set<HDS_Vertex*> reachedVertex;
 
+  /// find out all bad vertices
+  //set<HDS_Vertex*> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
+
+  /// generate a tree connecting all bad vertices using shortest path
+  /// this basically bacomes a minimum spanning tree.
+  ///
   for(auto &v : mesh->vertSet) {
     /// if this edge is connected to a non-planar vertex, cut this edge,
     /// and form a cut edge tree starting from this edge

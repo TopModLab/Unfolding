@@ -46,7 +46,7 @@ private slots:
   void slot_updateViewerColormap();
 
 private:
-  void loadOBJFile();
+  void closeEvent(QCloseEvent *e);
 
 private:
   Ui::MainWindow *ui;

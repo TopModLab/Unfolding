@@ -222,13 +222,15 @@ void MainWindow::slot_unfoldMesh() {
 }
 
 void MainWindow::slot_triggerColormap() {
-  if( ceditor->isVisible() )
-    ceditor->hide();
-  else
-    ceditor->show();
+  ceditor->show();
+  ceditor->activateWindow();
 }
 
 void MainWindow::slot_updateViewerColormap()
 {
   viewer->setCurvatureColormap(ceditor->getColormap());
+}
+
+void MainWindow::closeEvent(QCloseEvent *e) {
+  ceditor->close();
 }
