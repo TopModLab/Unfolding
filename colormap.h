@@ -16,6 +16,8 @@ public:
 
   void buildColormap();
 
+  static ColorMap getDefaultColorMap();
+
 private:
   vector<ColorPoint> colormap;
 };

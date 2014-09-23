@@ -10,6 +10,8 @@ MeshViewer::MeshViewer(QWidget *parent) :
   interactionState = Camera;
   viewerState.updateModelView();
   heMesh = nullptr;
+  colormap = ColorMap::getDefaultColorMap();
+  enableLighting = false;
 }
 
 MeshViewer::~MeshViewer()
@@ -276,6 +278,11 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
     }
     break;
   }
+  case Qt::Key_L:
+  {
+    enableLighting = !enableLighting;
+    break;
+  }
   }
   updateGL();
 }
@@ -289,7 +296,7 @@ void MeshViewer::wheelEvent(QWheelEvent *e)
 {
   switch(interactionState) {
   case Camera:{
-    double numSteps = e->delta()/100.0f;
+    double numSteps = e->delta()/200.0f;
     viewerState.translation.setZ(viewerState.translation.z() + numSteps);
     viewerState.updateModelView();
     break;
@@ -378,7 +385,12 @@ void MeshViewer::paintGL()
                       QVector3D(-1,  1, 0));
   }
   else {
+    if( enableLighting )
+      enableLights();
     heMesh->draw(colormap);
+    if( enableLighting )
+      disableLights();
+
     switch( interactionState ) {
     case Camera:
       break;
@@ -494,4 +506,40 @@ void MeshViewer::drawSelectionBox() {
   GLUtils::drawQuad(sbox.gcorners, QColor(0.0, 1.0, 19.0/255.0, 0.5));
   glPopMatrix();
 #endif
+}
+
+void MeshViewer::enableLights()
+{
+  GLfloat light_position[] = {10.0, 4.0, 10.0,1.0};
+  GLfloat mat_specular[] = {0.8, 0.8, 0.8, 1.0};
+  GLfloat mat_diffuse[] = {0.375, 0.375, 0.375, 1.0};
+  GLfloat mat_shininess[] = {25.0};
+  GLfloat light_ambient[] = {0.05, 0.05, 0.05, 1.0};
+  GLfloat white_light[] = {1.0, 1.0, 1.0, 1.0};
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
+
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+
+  light_position[0] = -10.0;
+  glLightfv(GL_LIGHT1, GL_POSITION, light_position);
+  glLightfv(GL_LIGHT1, GL_DIFFUSE, white_light);
+  glLightfv(GL_LIGHT1, GL_SPECULAR, white_light);
+  glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);
+
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_LIGHT1);
+}
+
+void MeshViewer::disableLights()
+{
+  glDisable(GL_LIGHT0);
+  glDisable(GL_LIGHT1);
+  glDisable(GL_LIGHTING);
 }

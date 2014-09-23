@@ -252,7 +252,6 @@ void HDS_Mesh::draw(ColorMap cmap)
 
         const double R = PI/8;
         double c = clamp(v->curvature, -R, R) / R; //[-0.5, 0.5]
-        cout << c << endl;
         /// interpolation
         QColor clr = cmap.getColor(c);
         GLUtils::setColor(clr);

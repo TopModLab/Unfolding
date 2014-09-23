@@ -43,10 +43,10 @@ void ColormapEditor::initializeComponents()
   ui->posSlider->setMaximum(10000);
 
   ui->negSpin->setMinimum(-PI);
-  ui->negSpin->setMaximum(0);
+  ui->negSpin->setMaximum(-0.01);
   ui->negSpin->setSingleStep(0.01);
 
-  ui->posSpin->setMinimum(0);
+  ui->posSpin->setMinimum(0.01);
   ui->posSpin->setMaximum(PI);
   ui->posSpin->setSingleStep(0.01);
 
@@ -69,13 +69,11 @@ void ColormapEditor::connectComponents()
 
 void ColormapEditor::slot_updateNegPatchWithSpin(double val)
 {
-  cout << val << endl;
   ui->negSlider->setValue(ui->negSlider->maximum() * (1.0 + val / PI));
 }
 
 void ColormapEditor::slot_updatePosPatchWithSpin(double val)
 {
-  cout << val << endl;
   ui->posSlider->setValue(val / PI * 10000);
 }
 
@@ -96,13 +94,13 @@ void ColormapEditor::slot_changeColor()
 void ColormapEditor::slot_updateNegPatchWithSlider(int val)
 {
   double dval = (ui->negSlider->maximum() - val) / (double) ui->negSlider->maximum() * PI;
-  cout << dval << endl;
   ui->negSpin->setValue(-dval);
+  emit colorChanged();
 }
 
 void ColormapEditor::slot_updatePosPatchWithSlider(int val)
 {
   double dval = val / (double) ui->posSlider->maximum() * PI;
-  cout << dval << endl;
   ui->posSpin->setValue(dval);
+  emit colorChanged();
 }

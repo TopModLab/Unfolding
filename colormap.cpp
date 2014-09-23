@@ -26,3 +26,14 @@ void ColorMap::buildColormap() {
     return a.first < b.first;
   });
 }
+
+ColorMap ColorMap::getDefaultColorMap()
+{
+  ColorMap cmap;
+
+  cmap.setColor(-PI/2.0, Qt::red);
+  cmap.setColor(0.0, Qt::gray);
+  cmap.setColor(PI/2.0, Qt::blue);
+
+  return cmap;
+}

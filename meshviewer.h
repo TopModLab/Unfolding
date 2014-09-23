@@ -163,6 +163,10 @@ private:
 private:
   ColorMap colormap;    /// color for negative curvature and positive curvature
 
+  bool enableLighting;
+  void enableLights();
+  void disableLights();
+
 private:
   QScopedPointer<QGLFramebufferObject> fbo;
   void initializeFBO();
