@@ -142,12 +142,9 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
 
 void MeshManager::cutMeshWithSelectedEdges()
 {
-  /// make a copy of the mesh with selected edges
-  cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-
   /// cut the mesh using the selected edges
   set<he_t*> selectedEdges;
-  for(auto he : cutted_mesh->halfedges()) {
+  for(auto he : hds_mesh->halfedges()) {
     if( he->isPicked ) {
       /// use picked edges as cut edges
       he->setPicked(false);
@@ -160,14 +157,29 @@ void MeshManager::cutMeshWithSelectedEdges()
     }
   }
   cout << "Number of selected edges = " << selectedEdges.size() << endl;
-  bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
-  if( cutSucceeded ) {
-    /// cutting performed successfully
-    cutted_mesh->printInfo("cutted mesh:");
-    //cutted_mesh->printMesh("cutted mesh:");
-  }
-  else {
-    /// can not cut it
+
+  bool isUnfoldable = false;
+  QScopedPointer<HDS_Mesh> ref_mesh;
+  ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+  while( !isUnfoldable ) {
+    /// make a copy of the mesh with selected edges
+    cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
+
+    bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
+    if( cutSucceeded ) {
+      /// cutting performed successfully
+      cutted_mesh->printInfo("cutted mesh:");
+      //cutted_mesh->printMesh("cutted mesh:");
+    }
+    else {
+      /// can not cut it
+    }
+
+    isUnfoldable = true;// MeshUnfolder::unfoldable(cutted_mesh.data());
+    /// replace the ref mesh with the cutted mesh
+    ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+    /// discard the selected edges now
+    selectedEdges.clear();
   }
 }
 

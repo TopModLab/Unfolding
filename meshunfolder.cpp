@@ -98,22 +98,23 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
     auto curHE = he->flip->next;
     bool hasCutFace = false;
     do {
-      if( he->f->isCutFace ) { hasCutFace = true; break; }
-      QVector3D v1 = he->flip->v->pos - he->v->pos;
-      QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
-      double nv1pnv2 = v1.length() * v2.length();
-      double inv_nv1pnv2 = 1.0 / nv1pnv2;
-      double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
-      double angle = acos(cosVal);
-      sum += angle;
+      if( !curHE->f->isCutFace ) {
+        QVector3D v1 = he->flip->v->pos - he->v->pos;
+        QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+        double nv1pnv2 = v1.length() * v2.length();
+        double inv_nv1pnv2 = 1.0 / nv1pnv2;
+        double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+        double angle = acos(cosVal);
+        sum += angle;
+      }
+      else hasCutFace = true;
 
       he = curHE;
       curHE = he->flip->next;
     }while( he != v->he ) ;
 
-    const double THRES = 1e-6;
-    /// either sums up to rought 2 * Pi, or has a cut face connected.
-    return fabs(sum - PI2) > THRES && (!hasCutFace);
+    /// the sum must be smaller than PI2.
+    return sum > PI2 || (sum < PI2 && !hasCutFace);
   };
 
   if( any_of(cutted_mesh->vertSet.begin(), cutted_mesh->vertSet.end(), isBadVertex) ) return false;

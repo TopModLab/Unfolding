@@ -12,6 +12,7 @@ TARGET = Unfolding2
 TEMPLATE = app
 
 CONFIG += c++11
+CONFIG += console
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -26,7 +27,8 @@ SOURCES += main.cpp\
     meshcutter.cpp \
     meshunfolder.cpp \
     extras/colormap_editor/colormapeditor.cpp \
-    colormap.cpp
+    colormap.cpp \
+    unionfind.cpp
 
 HEADERS  += mainwindow.h \
     hds_face.h \
@@ -44,8 +46,8 @@ HEADERS  += mainwindow.h \
     utils.hpp \
     meshunfolder.h \
     extras/colormap_editor/colormapeditor.h \
-    colormap.h
-
+    colormap.h \
+    unionfind.h
 FORMS    += mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui
 
