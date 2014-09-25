@@ -123,10 +123,10 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
 
 bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
 {
-  if( !unfoldable(ref_mesh) ) {
-    cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
-    return false;
-  }
+//  if( !unfoldable(ref_mesh) ) {
+//    cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
+//    return false;
+//  }
 
   if( fixedFaces.empty() ) {
     cout << "No face is selected, finding fixed faces..." << endl;
@@ -158,10 +158,12 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
     vector<int> expSeq;     // sequence of expansion
     map<int, int> parentMap;
     set<int> visited;
+    set<int> frontier;
     while( !Q.empty() ) {
       auto cur = Q.front();
       Q.pop();
       visited.insert(cur->index);
+      frontier.erase(cur->index);
       expSeq.push_back(cur->index);
       /// get all neighbor faces
       vector<HDS_Face*> neighborFaces = unfolded_mesh->incidentFaces(cur);
@@ -171,9 +173,10 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
       });
 
       for( auto f : nonCutNeighborFaces ) {
-        if( visited.find(f->index) == visited.end() ) {
+        if( visited.find(f->index) == visited.end() && frontier.find(f->index) == frontier.end() ) {
           Q.push(f);
           parentMap.insert(make_pair(f->index, cur->index));
+          frontier.insert(f->index);
         }
       }
     }

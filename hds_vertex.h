@@ -9,27 +9,33 @@ class HDS_HalfEdge;
 
 class HDS_Vertex
 {
+private:
+  static size_t uid;
+
 public:
-    HDS_Vertex();
-    HDS_Vertex(const QVector3D &pos);
-    ~HDS_Vertex();
+  static void resetIndex() { uid = 0; }
+  static size_t assignIndex() { return uid++; }
 
-    HDS_Vertex(const HDS_Vertex &other);
-    HDS_Vertex operator=(const HDS_Vertex &other);
+  HDS_Vertex();
+  HDS_Vertex(const QVector3D &pos);
+  ~HDS_Vertex();
 
-    void setPicked(bool v) { isPicked = v; }
-    void computeCurvature();
+  HDS_Vertex(const HDS_Vertex &other);
+  HDS_Vertex operator=(const HDS_Vertex &other);
 
-    qreal x() { return pos.x(); }
-    qreal y() { return pos.y(); }
-    qreal z() { return pos.z(); }
+  void setPicked(bool v) { isPicked = v; }
+  void computeCurvature();
 
-    QVector3D pos;
-    HDS_HalfEdge *he;
+  qreal x() { return pos.x(); }
+  qreal y() { return pos.y(); }
+  qreal z() { return pos.z(); }
 
-    int index;
-    double curvature;
-    bool isPicked;
+  QVector3D pos;
+  HDS_HalfEdge *he;
+
+  int index;
+  double curvature;
+  bool isPicked;
 };
 
 #endif // HDS_VERTEX_H

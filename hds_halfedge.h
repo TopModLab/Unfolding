@@ -9,23 +9,29 @@ class HDS_Vertex;
 
 class HDS_HalfEdge
 {
+private:
+  static size_t uid;
+
 public:
-    HDS_HalfEdge();
-    ~HDS_HalfEdge();
+  static void resetIndex() { uid = 0; }
+  static size_t assignIndex() { return uid++; }
 
-    HDS_HalfEdge(const HDS_HalfEdge& other);
-    HDS_HalfEdge operator=(const HDS_HalfEdge& other);
+  HDS_HalfEdge();
+  ~HDS_HalfEdge();
 
-    void setPicked(bool v) { isPicked = v; flip->isPicked = v; }
-    void setCutEdge(bool v) { isCutEdge = v; flip->isCutEdge = v; }
+  HDS_HalfEdge(const HDS_HalfEdge& other);
+  HDS_HalfEdge operator=(const HDS_HalfEdge& other);
 
-    HDS_Face *f;
-    HDS_Vertex *v;
-    HDS_HalfEdge *prev, *next, *flip;
+  void setPicked(bool v) { isPicked = v; flip->isPicked = v; }
+  void setCutEdge(bool v) { isCutEdge = v; flip->isCutEdge = v; }
 
-    int index;
-    bool isPicked;
-    bool isCutEdge;
+  HDS_Face *f;
+  HDS_Vertex *v;
+  HDS_HalfEdge *prev, *next, *flip;
+
+  int index;
+  bool isPicked;
+  bool isCutEdge;
 };
 
 #endif // HDS_EDGE_H

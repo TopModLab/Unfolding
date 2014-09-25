@@ -142,25 +142,29 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
 
 void MeshManager::cutMeshWithSelectedEdges()
 {
+  QScopedPointer<HDS_Mesh> ref_mesh;
+  ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+
+  cout << "validating reference mesh" << endl;
+  ref_mesh->validate();
+
   /// cut the mesh using the selected edges
-  set<he_t*> selectedEdges;
-  for(auto he : hds_mesh->halfedges()) {
+  set<int> selectedEdges;
+  for(auto he : ref_mesh->halfedges()) {
     if( he->isPicked ) {
       /// use picked edges as cut edges
       he->setPicked(false);
       he->setCutEdge(true);
 
-      if( selectedEdges.find(he) == selectedEdges.end() &&
-          selectedEdges.find(he->flip) == selectedEdges.end() ) {
-        selectedEdges.insert(he);
+      if( selectedEdges.find(he->index) == selectedEdges.end() &&
+          selectedEdges.find(he->flip->index) == selectedEdges.end() ) {
+        selectedEdges.insert(he->index);
       }
     }
   }
   cout << "Number of selected edges = " << selectedEdges.size() << endl;
 
   bool isUnfoldable = false;
-  QScopedPointer<HDS_Mesh> ref_mesh;
-  ref_mesh.reset(new HDS_Mesh(*hds_mesh));
   while( !isUnfoldable ) {
     /// make a copy of the mesh with selected edges
     cutted_mesh.reset(new HDS_Mesh(*ref_mesh));

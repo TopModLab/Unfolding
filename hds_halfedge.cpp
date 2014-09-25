@@ -1,5 +1,7 @@
 #include "hds_halfedge.h"
 
+size_t HDS_HalfEdge::uid = 0;
+
 HDS_HalfEdge::HDS_HalfEdge()
 {
   isPicked = false;

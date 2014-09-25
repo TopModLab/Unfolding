@@ -1,6 +1,8 @@
 #include "hds_face.h"
 #include "hds_halfedge.h"
 
+size_t HDS_Face::uid = 0;
+
 HDS_Face::HDS_Face()
 {
   isPicked = false;

@@ -2,6 +2,8 @@
 #include "hds_halfedge.h"
 #include "mathutils.hpp"
 
+size_t HDS_Vertex::uid = 0;
+
 HDS_Vertex::HDS_Vertex() {
   isPicked = false;
   index = -1;
@@ -40,7 +42,7 @@ void HDS_Vertex::computeCurvature()
       double nv1pnv2 = v1.length() * v2.length();
       double inv_nv1pnv2 = 1.0 / nv1pnv2;
       double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
-      double angle = acos(cosVal);
+      double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
       curvature += angle;
     }
     prevHE = curHE;

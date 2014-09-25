@@ -13,7 +13,7 @@ class MeshCutter
 {
 public:
 
-  static bool cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge*> &edges);
+  static bool cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges);
 
 private:
   struct Edge {
@@ -33,7 +33,7 @@ private:
   static PathInfo allPairShortestPath(HDS_Mesh *mesh);
   static vector<int> retrivePath(PathInfo m, int u, int v);
 
-  static set<HDS_HalfEdge*> findCutEdges(HDS_Mesh *mesh);
+  static set<int> findCutEdges(HDS_Mesh *mesh);
   static vector<Edge> minimumSpanningTree(PQ &edges, int);
 };
 

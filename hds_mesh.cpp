@@ -48,7 +48,7 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
   /// connect the half edges
   for( auto &he : heSet ) {
     auto he_ref = other.heMap.at(he->index);
-    cout << he_ref->index << endl;
+    //cout << he_ref->index << endl;
     he->flip = heMap.at(he_ref->flip->index);
     he->prev = heMap.at(he_ref->prev->index);
     he->next = heMap.at(he_ref->next->index);
@@ -81,6 +81,8 @@ bool HDS_Mesh::validateEdge(he_t *e) {
   if( e->prev->next != e ) return false;
   if( e->f == nullptr ) return false;
   if( e->v == nullptr ) return false;
+  if( faceSet.find(e->f) == faceSet.end() ) return false;
+  if( vertSet.find(e->v) == vertSet.end() ) return false;
   return true;
 }
 
@@ -150,16 +152,16 @@ void HDS_Mesh::printMesh(const string &msg)
   if( !msg.empty() ) {
     cout << msg << endl;
   }
-  for(size_t i=0;i<vertSet.size();++i) {
-    cout << *vertMap[i] << endl;
+  for(auto v : vertSet) {
+    cout << *v << endl;
   }
 
-  for(size_t i=0;i<faceSet.size();++i) {
-    cout << (*faceMap[i]) << endl;
+  for(auto f : faceSet) {
+    cout << *f << endl;
   }
 
-  for(size_t i=0;i<heSet.size();++i) {
-    cout << (*heMap[i]) << endl;
+  for(auto he : heSet) {
+    cout << he << endl;
   }
 }
 
@@ -182,34 +184,38 @@ void HDS_Mesh::releaseMesh() {
 
 void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex *> &verts, const vector<HDS_HalfEdge *> &hes) {
   releaseMesh();
+
+  // reset the UIDs, hack
+  HDS_Face::resetIndex();
+  HDS_Vertex::resetIndex();
+  HDS_HalfEdge::resetIndex();
+
   faceSet.insert(faces.begin(), faces.end());
-  int faceIdx = 0;
   for(auto &f : faceSet) {
+    int faceIdx = HDS_Face::assignIndex();
     faceMap[faceIdx] = f;
     f->index = faceIdx;
-    ++faceIdx;
   }
 
   vertSet.insert(verts.begin(), verts.end());
-  int vertIdx = 0;
   for(auto &v : vertSet) {
+    int vertIdx = HDS_Vertex::assignIndex();
     vertMap[vertIdx] = v;
     v->index = vertIdx;
     ++vertIdx;
   }
 
   heSet.insert(hes.begin(), hes.end());
-  int heIdx = 0;
   for(auto &he : heSet) {
     if( he->index >= 0 ) continue;
 
+    int heIdx = HDS_HalfEdge::assignIndex();
     heMap[heIdx] = he;
     he->index = heIdx;
-    ++heIdx;
 
-    he->flip->index = heIdx;
-    heMap[heIdx] = he->flip;
-    ++heIdx;
+    int hefIdx = HDS_HalfEdge::assignIndex();
+    he->flip->index = hefIdx;
+    heMap[hefIdx] = he->flip;
   }
 }
 

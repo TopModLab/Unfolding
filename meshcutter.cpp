@@ -3,7 +3,7 @@
 #include "utils.hpp"
 #include "mathutils.hpp"
 
-bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
+bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 {
   typedef HDS_HalfEdge he_t;
   typedef HDS_Vertex vert_t;
@@ -18,7 +18,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
   map<vert_t*, int> cutVerts;
 
   /// split each cut edge into 2 edges
-  for(auto he : edges) {
+  for(auto heIdx : edges) {
+    auto he = mesh->heMap[heIdx];
     auto hef = he->flip;
     auto vs = he->v;
     auto ve = hef->v;
@@ -56,7 +57,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 
     he->flip = he_new_flip;
 
-    he_new_flip->index = mesh->heSet.size();
+    he_new_flip->index = HDS_HalfEdge::assignIndex();
     mesh->heSet.insert(he_new_flip);
     mesh->heMap.insert(make_pair(he_new_flip->index, he_new_flip));
 
@@ -70,13 +71,13 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
 
     hef->flip = hef_new_flip;
 
-    hef_new_flip->index = mesh->heSet.size();
+    hef_new_flip->index = HDS_HalfEdge::assignIndex();
     mesh->heSet.insert(hef_new_flip);
     mesh->heMap.insert(make_pair(hef_new_flip->index, hef_new_flip));
 
     /// fix the new face
     nf->he = hef;
-    nf->index = mesh->faceSet.size();
+    nf->index = HDS_Face::assignIndex();
     nf->isCutFace = true;
     mesh->faceSet.insert(nf);
     mesh->faceMap.insert(make_pair(nf->index, nf));
@@ -152,10 +153,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
         cv_new[i] = new vert_t(*cv.first);
         cv_new[i]->he = cutEdges[i];
 
-        /// reuse the index of the original cut vertex, but use new indices for other vertices
-        if( i > 0 ) {
-          cv_new[i]->index = mesh->vertSet.size() + i - 1;
-        }
+        /// assign a new id to the vertex
+        cv_new[i]->index = HDS_Vertex::assignIndex();
       }
 
       /// divide all incident half edges into k group
@@ -198,20 +197,21 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
       }
 
       /// remove the old vertex and add new vertices
-      mesh->vertSet.erase(cv.first);
+      cout << "removing vertex " << cv.first->index << endl;
+      mesh->vertSet.erase(mesh->vertSet.find(cv.first));
       mesh->vertMap.erase(cv.first->index);
+      delete cv.first;
 
       for( auto v : cv_new ) {
+        cout << "inserting vertex " << v->index << endl;
         mesh->vertSet.insert(v);
         mesh->vertMap.insert(make_pair(v->index, v));
       }
 
-      /// delete the old vertex
-      delete cv.first;
-
       /// remove the old cut faces and add the new unified cut face
       for(auto f : cutFaces) {
         if( mesh->faceSet.find(f) != mesh->faceSet.end() ) {
+          cout << "removing face " << f->index << endl;
           mesh->faceSet.erase(f);
           mesh->faceMap.erase(f->index);
           delete f;
@@ -219,7 +219,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
       }
 
       face_t *nf = new face_t;
-      nf->index = mesh->faceSet.size();
+      nf->index = HDS_Face::assignIndex();
+      cout << "new cut face index = " << nf->index << endl;
       nf->isCutFace = true;
       nf->he = cutEdges.front();
       mesh->faceSet.insert(nf);
@@ -240,6 +241,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<HDS_HalfEdge *> &edges)
   /// update the curvature of each vertex
   for( auto &v : mesh->vertSet ) {
     v->computeCurvature();
+    cout << v->index << ": " << (*v) << endl;
   }
 
   return true;
@@ -305,8 +307,9 @@ vector<MeshCutter::Edge> MeshCutter::minimumSpanningTree(PQ &edges, int nVerts) 
   return mst;
 }
 
-set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
+set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 {
+  cout << "Finding cut edges..." << endl;
   auto isBadVertex = [](HDS_Vertex* v) -> bool {
     double sum = 0;
     auto he = v->he;
@@ -319,7 +322,7 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
         double nv1pnv2 = v1.length() * v2.length();
         double inv_nv1pnv2 = 1.0 / nv1pnv2;
         double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
-        double angle = acos(cosVal);
+        double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
         sum += angle;
       }
       else hasCutFace = true;
@@ -331,7 +334,7 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
     return (sum > PI2) || (sum < PI2 && !hasCutFace);
   };
 
-  set<HDS_HalfEdge*> cutEdges;
+  set<int> cutEdges;
 
   /// find out all bad vertices
   unordered_set<HDS_Vertex*> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
@@ -378,7 +381,7 @@ set<HDS_HalfEdge *> MeshCutter::findCutEdges(HDS_Mesh *mesh)
       auto curHE = he;
       do {
         if( curHE->flip->v == vv ) {
-          cutEdges.insert(curHE);
+          cutEdges.insert(curHE->index);
           curHE->setCutEdge(true);
           break;
         }

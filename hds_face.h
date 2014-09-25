@@ -10,26 +10,32 @@ class HDS_Vertex;
 
 class HDS_Face
 {
+private:
+  static size_t uid;
+
 public:
-    HDS_Face();
-    ~HDS_Face();
+  static void resetIndex() { uid = 0; }
+  static size_t assignIndex() { return uid++; }
 
-    HDS_Face(const HDS_Face &other);
-    HDS_Face operator=(const HDS_Face &other);
+  HDS_Face();
+  ~HDS_Face();
 
-    void setPicked(bool v) { isPicked = v; }
+  HDS_Face(const HDS_Face &other);
+  HDS_Face operator=(const HDS_Face &other);
 
-    set<HDS_Face *> connectedFaces();
-    QVector3D center() const;
-    vector<HDS_Vertex*> corners() const;
-    QVector3D computeNormal();
+  void setPicked(bool v) { isPicked = v; }
 
-    QVector3D n;
-    HDS_HalfEdge *he;
+  set<HDS_Face *> connectedFaces();
+  QVector3D center() const;
+  vector<HDS_Vertex*> corners() const;
+  QVector3D computeNormal();
 
-    int index;
-    bool isPicked;
-    bool isCutFace;
+  QVector3D n;
+  HDS_HalfEdge *he;
+
+  int index;
+  bool isPicked;
+  bool isCutFace;
 };
 
 #endif // HDS_FACE_H

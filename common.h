@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <cstdlib>
+#include <assert.h>
 #include <string>
 #include <list>
 #include <vector>
