@@ -4,11 +4,11 @@
 #include <QWidget>
 #include <QPainter>
 
-#include "common.h"
-#include "mathutils.hpp"
-#include "utils.hpp"
+#include "../../common.h"
+#include "../../mathutils.hpp"
+#include "../../utils.hpp"
 
-#include "colormap.h"
+#include "../../colormap.h"
 
 namespace Ui {
 class ColormapEditor;

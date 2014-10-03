@@ -161,7 +161,7 @@ void HDS_Mesh::printMesh(const string &msg)
   }
 
   for(auto he : heSet) {
-    cout << he << endl;
+    cout << *he << endl;
   }
 }
 
