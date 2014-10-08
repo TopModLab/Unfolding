@@ -35,6 +35,10 @@ public:
         return hds_mesh.data();
     }
 
+    HDS_Mesh* getSmoothedMesh() {
+        return smoothed_mesh.data();
+    }
+
     HDS_Mesh* getCuttedMesh() {
         return cutted_mesh.data();
     }
@@ -68,6 +72,7 @@ public:
     void buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
     void cutMeshWithSelectedEdges();
     void unfoldMesh();
+    void smoothMesh();
 
 private:
     typedef HDS_Mesh mesh_t;
@@ -75,7 +80,7 @@ private:
     typedef HDS_Face face_t;
     typedef HDS_Vertex vert_t;
 
-    QScopedPointer<HDS_Mesh> hds_mesh, cutted_mesh, unfolded_mesh;
+    QScopedPointer<HDS_Mesh> hds_mesh, smoothed_mesh, cutted_mesh, unfolded_mesh;
 };
 
 #endif // MESHMANAGER_H

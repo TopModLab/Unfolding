@@ -93,6 +93,11 @@ void MainWindow::createActions()
     connect(vsAct, SIGNAL(triggered()), this, SLOT(slot_toggleVertexSelection()));
     actionsMap["vertex select"] = vsAct;
 
+    QAction *smoothAct = new QAction(QIcon(":/icons/smooth.png"), tr("Smooth Mesh"), this);
+    smoothAct->setStatusTip(tr("Smooth mesh"));
+    connect(smoothAct, SIGNAL(triggered()), this, SLOT(slot_smoothMesh()));
+    actionsMap["smooth"] = smoothAct;
+
     QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
     cutAct->setStatusTip(tr("Cut mesh"));
     connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
@@ -153,6 +158,9 @@ void MainWindow::createToolBar()
     ui->mainToolBar->addAction(actionsMap["face select"]);
     ui->mainToolBar->addAction(actionsMap["edge select"]);
     ui->mainToolBar->addAction(actionsMap["vertex select"]);
+
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addAction(actionsMap["smooth"]);
 
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(actionsMap["mesh cut"]);
@@ -229,6 +237,11 @@ void MainWindow::slot_triggerColormap() {
 void MainWindow::slot_updateViewerColormap()
 {
   viewer->setCurvatureColormap(ceditor->getColormap());
+}
+
+void MainWindow::slot_smoothMesh() {
+  MeshManager::getInstance()->smoothMesh();
+  viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getSmoothedMesh());
 }
 
 void MainWindow::closeEvent(QCloseEvent *e) {

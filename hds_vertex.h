@@ -25,6 +25,7 @@ public:
 
   void setPicked(bool v) { isPicked = v; }
   void computeCurvature();
+  vector<HDS_Vertex *> neighbors() const;
 
   qreal x() { return pos.x(); }
   qreal y() { return pos.y(); }

@@ -14,6 +14,8 @@
 #include "hds_mesh.h"
 #include "colormap.h"
 
+#include "polymesh.h"
+
 const QGLFormat qglformat_3d(
     QGL::DoubleBuffer       |
     QGL::DepthBuffer        |
@@ -156,6 +158,7 @@ private:
 
 private:
   HDS_Mesh *heMesh;   /// not own
+  PolyMesh *polyMesh;   /// not own
 
 private:
   void drawSelectionBox();

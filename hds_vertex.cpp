@@ -30,6 +30,16 @@ HDS_Vertex HDS_Vertex::operator=(const HDS_Vertex &other)
   throw "Not implemented.";
 }
 
+vector<HDS_Vertex*> HDS_Vertex::neighbors() const {
+    HDS_HalfEdge *curHE = he;
+    vector<HDS_Vertex*> neighbors;
+    do {
+      neighbors.push_back(curHE->flip->v);
+      curHE = curHE->flip->next;
+    } while( curHE != he );
+    return neighbors;
+}
+
 void HDS_Vertex::computeCurvature()
 {
   curvature = 0;

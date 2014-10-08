@@ -45,6 +45,7 @@ private slots:
   void slot_triggerColormap();
   void slot_updateViewerColormap();
 
+  void slot_smoothMesh();
 private:
   void closeEvent(QCloseEvent *e);
 

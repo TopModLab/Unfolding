@@ -1,6 +1,7 @@
 #include "meshmanager.h"
 #include "meshcutter.h"
 #include "meshunfolder.h"
+#include "meshsmoother.h"
 
 MeshManager* MeshManager::instance = NULL;
 
@@ -138,6 +139,10 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
   cout << "finished building halfedge structure." << endl;
   cout << "halfedge count = " << hds_mesh->halfedges().size() << endl;
   hds_mesh->printMesh("original");
+
+  cutted_mesh.reset();
+  unfolded_mesh.reset();
+  smoothed_mesh.reset();
 }
 
 void MeshManager::cutMeshWithSelectedEdges()
@@ -187,8 +192,7 @@ void MeshManager::cutMeshWithSelectedEdges()
   }
 }
 
-void MeshManager::unfoldMesh()
-{
+void MeshManager::unfoldMesh() {
   unfolded_mesh.reset(new HDS_Mesh(*cutted_mesh));
 
   /// cut the mesh using the selected edges
@@ -214,6 +218,13 @@ void MeshManager::unfoldMesh()
     cout << "Failed to unfold." << endl;
   }
 
+}
+
+void MeshManager::smoothMesh() {
+  if( smoothed_mesh.isNull() )
+    smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
+
+  MeshSmoother::smoothMesh(smoothed_mesh.data());
 }
 
 bool MeshManager::saveMeshes() {
