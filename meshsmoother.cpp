@@ -7,6 +7,69 @@ MeshSmoother::MeshSmoother()
 {
 }
 
+void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
+  auto vertex_comp = [](const HDS_Vertex *a, const HDS_Vertex *b) {
+    return fabs(a->curvature) > fabs(b->curvature);
+  };
+
+  /// put all non-zero curvature vertices into a heap
+  const double CTHRES = 1e-6;
+  vector<HDS_Vertex*> H;
+  for (auto v : mesh->vertSet) {
+    if ( fabs(v->curvature) > CTHRES )
+      H.push_back(v);
+  }
+  std::make_heap(H.begin(), H.end(), vertex_comp);
+  
+  /// modify the curvature of the vertices one by one, making them 0
+  while (!H.empty()) {
+    auto v = H.front();
+    std::pop_heap(H.begin(), H.end(), vertex_comp);
+    H.pop_back();
+
+    /// make the curvature at this vertex 0
+    auto neighbors = v->neighbors();
+
+    /// update its neighbors
+    map<HDS_Vertex*, double> entries;
+    double sum_inv_dist = 0.0;
+    for (auto neighbor : neighbors) {
+      if (fabs(neighbor->curvature) < CTHRES) {
+        entries.insert(make_pair(neighbor, 0.0));
+      }
+      else {
+        double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
+        entries.insert(make_pair(neighbor, inv_dist));
+        sum_inv_dist += inv_dist;
+      }
+    }
+
+    if (sum_inv_dist > 0) {
+      for (auto entry : entries) {
+        double w = entry.second / sum_inv_dist;
+        entry.first->curvature += w * v->curvature;
+      }
+
+      v->curvature = 0;
+    }
+
+    /// remove
+    auto newEnd = std::remove_if(H.begin(), H.end(), [=](const HDS_Vertex *a) {
+      return fabs(a->curvature) <= CTHRES;
+    });
+
+    H.erase(newEnd, H.end());
+    std::make_heap(H.begin(), H.end(), vertex_comp);
+    cout << H.size() << endl;
+  }
+
+  double sum_curvature = std::accumulate(mesh->vertSet.begin(), mesh->vertSet.end(), 0.0, [](double val, HDS_Vertex* v) {
+    return val + v->curvature;
+  });
+
+  cout << "sum = " << sum_curvature << endl;
+}
+
 void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 {
   /// compute the smoothed curvature at each vertex

@@ -25,6 +25,7 @@ public:
 
   void setPicked(bool v) { isPicked = v; }
   void computeCurvature();
+  void computeNormal();
   vector<HDS_Vertex *> neighbors() const;
 
   qreal x() { return pos.x(); }
@@ -32,6 +33,7 @@ public:
   qreal z() { return pos.z(); }
 
   QVector3D pos;
+  QVector3D normal;
   HDS_HalfEdge *he;
 
   int index;

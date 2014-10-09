@@ -20,7 +20,7 @@ QColor ColorMap::getColor_discrete(double val) {
   if( val < minVal ) return colormap_discrete.front();
   if( val > maxVal ) return colormap_discrete.back();
   const int SEGMENTS = 65536;
-  int seg = (val - minVal)/rangeVal*SEGMENTS;
+  int seg = clamp<int>((val - minVal)/rangeVal*SEGMENTS, 0, SEGMENTS-1);
   return colormap_discrete[seg];
 }
 

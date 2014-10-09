@@ -1,6 +1,7 @@
 #ifndef TRIMESH_H
 #define TRIMESH_H
 
+#define _USE_MATH_DEFINES
 #include "OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh"
 
 using namespace OpenMesh;

@@ -21,6 +21,10 @@ inline void useVertex(const QVector3D& p) {
   glVertex3f(p.x(), p.y(), p.z());
 }
 
+inline void useNormal(const QVector3D& p) {
+  glNormal3f(p.x(), p.y(), p.z());
+}
+
 static void drawLine(const QVector3D& p0,
                      const QVector3D& p1,
                      const QColor& color = Qt::black) {

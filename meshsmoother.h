@@ -13,6 +13,7 @@ class MeshSmoother
 public:
     MeshSmoother();
 
+    static void smoothMesh_perVertex(HDS_Mesh *mesh);
     static void smoothMesh(HDS_Mesh *mesh);
 
 private:

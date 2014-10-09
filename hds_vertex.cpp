@@ -21,6 +21,7 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
   isPicked = v.isPicked;
   index = v.index;
   pos = v.pos;
+  normal = v.normal;
   curvature = v.curvature;
   he = nullptr;
 }
@@ -29,6 +30,8 @@ HDS_Vertex HDS_Vertex::operator=(const HDS_Vertex &other)
 {
   throw "Not implemented.";
 }
+
+HDS_Vertex::~HDS_Vertex(){}
 
 vector<HDS_Vertex*> HDS_Vertex::neighbors() const {
     HDS_HalfEdge *curHE = he;
@@ -61,4 +64,20 @@ void HDS_Vertex::computeCurvature()
   curvature = PI2 - curvature;
 }
 
-HDS_Vertex::~HDS_Vertex(){}
+void HDS_Vertex::computeNormal()
+{
+	auto prevHE = he;
+	auto curHE = he->flip->next;
+	normal = QVector3D(0, 0, 0);
+	do {
+		if (!prevHE->f->isCutFace) {
+			QVector3D v1 = prevHE->flip->v->pos - prevHE->v->pos;
+			QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+			normal += QVector3D::crossProduct(v2, v1);
+		}
+		prevHE = curHE;
+		curHE = prevHE->flip->next;
+	} while (prevHE != he);
+
+	normal.normalize();
+}

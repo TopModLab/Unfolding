@@ -133,12 +133,13 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
 
   for( auto &v : verts ) {
     v->computeCurvature();
+	v->computeNormal();
   }
 
   hds_mesh->setMesh(faces, verts, hes);
   cout << "finished building halfedge structure." << endl;
   cout << "halfedge count = " << hds_mesh->halfedges().size() << endl;
-  hds_mesh->printMesh("original");
+  //hds_mesh->printMesh("original");
 
   cutted_mesh.reset();
   unfolded_mesh.reset();
@@ -225,6 +226,7 @@ void MeshManager::smoothMesh() {
     smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
 
   MeshSmoother::smoothMesh(smoothed_mesh.data());
+  //MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
 }
 
 bool MeshManager::saveMeshes() {

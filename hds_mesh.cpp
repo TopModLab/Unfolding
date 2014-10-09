@@ -234,14 +234,6 @@ void HDS_Mesh::draw(ColorMap cmap)
       he_t* hen = he->next;
       he_t* hep = he->prev;
 
-      point_t v(he->v->x(), he->v->y(), he->v->z());
-      point_t vp(hep->v->x(), hep->v->y(), hep->v->z());
-      point_t vn(hen->v->x(), hen->v->y(), hen->v->z());
-
-      QVector3D n = QVector3D::crossProduct(vn - v, vp - v);
-      n.normalize();
-      glNormal3f(n.x(), n.y(), n.z());
-
       he_t* curHe = he;
 
       if( f->isPicked ) {
@@ -259,6 +251,7 @@ void HDS_Mesh::draw(ColorMap cmap)
         /// interpolation
         QColor clr = cmap.getColor_discrete(v->curvature);
         GLUtils::setColor(clr);
+		    GLUtils::useNormal(v->normal);
         GLUtils::useVertex(v->pos);
         curHe = curHe->next;
       }while( curHe != he );
@@ -321,6 +314,12 @@ void HDS_Mesh::draw(ColorMap cmap)
 
       glBegin(GL_POINTS);
       glVertex3f(0, 0, 0);
+      glEnd();
+
+      glBegin(GL_LINES);
+      GLUtils::setColor(Qt::green);
+      GLUtils::useVertex(QVector3D(0, 0, 0));
+      GLUtils::useVertex(v->normal);
       glEnd();
 #endif
       glPopMatrix();

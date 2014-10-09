@@ -18,6 +18,7 @@
 #include <sstream>
 #include <algorithm>
 #include <functional>
+#include <numeric>
 
 using namespace std;
 
