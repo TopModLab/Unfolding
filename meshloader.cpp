@@ -158,10 +158,11 @@ bool OBJLoader::load(const string& filename) {
         triangulated = true;
 
         while (!file.atEnd()) {
-            QString rline = file.readLine();
-            string line = rline.toStdString();
+            QString rline(file.readLine());
+            string line(rline.toUtf8().constData());
 
-            istringstream sline(line);
+            stringstream sline;
+			sline << line;
 
             string identifier;
             sline >> identifier;
