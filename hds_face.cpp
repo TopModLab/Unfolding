@@ -8,6 +8,7 @@ HDS_Face::HDS_Face()
   isPicked = false;
   isCutFace = false;
   isConnector = false;
+  isFlap = false;
   index = -1;
   he = nullptr;
 }
@@ -19,6 +20,7 @@ HDS_Face::HDS_Face(const HDS_Face &other)
   isPicked = other.isPicked;
   isCutFace = other.isCutFace;
   isConnector = other.isConnector;
+  isFlap = other.isFlap;
   index = other.index;
   n = other.n;
   he = nullptr;

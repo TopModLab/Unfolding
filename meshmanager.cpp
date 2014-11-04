@@ -195,11 +195,18 @@ void MeshManager::cutMeshWithSelectedEdges()
 }
 
 void MeshManager::unfoldMesh() {
-  unfolded_mesh.reset(new HDS_Mesh(*cutted_mesh));
+  HDS_Mesh* ref_mesh;
+
+  if (extended_mesh.isNull())
+    ref_mesh = cutted_mesh.data();    
+  else
+    ref_mesh = extended_mesh.data();
+
+  unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
   /// cut the mesh using the selected edges
   set<int> selectedFaces;
-  for(auto f : cutted_mesh->faces()) {
+  for (auto f : ref_mesh->faces()) {
     if( f->isPicked ) {
       /// use picked edges as cut edges
       f->setPicked(false);
@@ -210,7 +217,7 @@ void MeshManager::unfoldMesh() {
     }
   }
 
-  if( MeshUnfolder::unfold(unfolded_mesh.data(), cutted_mesh.data(), selectedFaces) ) {
+  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh, selectedFaces)) {
     /// unfolded successfully
     unfolded_mesh->printInfo("unfolded mesh:");
     //unfolded_mesh->printMesh("unfolded mesh:");
@@ -237,6 +244,9 @@ bool MeshManager::saveMeshes() {
 
 void MeshManager::extendMesh()
 {
-  extended_mesh.reset(new HDS_Mesh(*hds_mesh));
+  if ( cutted_mesh.isNull() )
+    extended_mesh.reset(new HDS_Mesh(*hds_mesh));
+  else
+    extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
   MeshExtender::extendMesh(extended_mesh.data(), 0.75);
 }

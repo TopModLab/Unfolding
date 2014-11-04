@@ -13,10 +13,12 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
   // convert all edges to a new face
   set<int> oldFaces;
   for (auto &f : mesh->faceSet) {
-    oldFaces.insert(f->index);
+    if (f->isCutFace) continue;
+    else oldFaces.insert(f->index);
   }
   cout << "number of old faces = " << oldFaces.size() << endl;
 
+  // find all edges
   set<int> edges;
   for (auto &he : mesh->heSet) {
     if (edges.find(he->index) == edges.end() && edges.find(he->flip->index) == edges.end()) {
@@ -92,6 +94,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
     nf->index = HDS_Face::assignIndex();
     nf->isCutFace = false;
     nf->isConnector = true;
+    nf->isFlap = hef->f->isCutFace || he->f->isCutFace;
     mesh->faceSet.insert(nf);
     mesh->faceMap.insert(make_pair(nf->index, nf));
   }
@@ -231,10 +234,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
         /// connect the he/flip pair
         newhe->flip = newhe_flip;
         newhe_flip->flip = newhe;
-        
+
         /// fix the flip's face
         newhe_flip->f = holeface;
-        newhe->f = connectorFaces[(i+1)%k];
+        newhe->f = connectorFaces[(i + 1) % k];
 
         newedges.push_back(newhe);
 
@@ -302,11 +305,13 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
       nf->index = HDS_Face::assignIndex();
       cout << "new cut face index = " << nf->index << endl;
       nf->isCutFace = true;
+      nf->isConnector = false;
+      nf->isFlap = false;
       nf->he = newedges.front()->flip;
       mesh->faceSet.insert(nf);
       mesh->faceMap.insert(make_pair(nf->index, nf));
 
-      mesh->printInfo("merged");
+      //mesh->printInfo("merged");
       mesh->validate();
     }
   }
@@ -315,7 +320,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
   for (auto &v : mesh->vertSet) {
     v->computeNormal();
     v->computeCurvature();
-    cout << v->index << ": " << (*v) << endl;
+    //cout << v->index << ": " << (*v) << endl;
   }
 
   /// update each face with the scaling factor
