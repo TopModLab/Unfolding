@@ -14,7 +14,7 @@ TEMPLATE = app
 CONFIG += c++11
 CONFIG += console
 
-INCLUDEPATH += /usr/local/include /Users/phg/Utils/armadillo-4.450.2/include
+INCLUDEPATH += /usr/local/include /Users/phg/Utils/armadillo-4.450.4/include
 LIBS += -L/usr/local/lib/OpenMesh -lOpenMeshCore -lOpenMeshTools -L/usr/local/lib -framework Accelerate
 
 SOURCES += main.cpp\
@@ -66,9 +66,9 @@ RESOURCES += \
 
 OTHER_FILES +=
 
-unix: LIBS += -L$$PWD/../../Utils/levmar-2.6/build/ -llevmar
+unix: LIBS += -L$$PWD/../../Utils/levmar-2.6/ -llevmar
 
 INCLUDEPATH += $$PWD/../../Utils/levmar-2.6
 DEPENDPATH += $$PWD/../../Utils/levmar-2.6
 
-unix: PRE_TARGETDEPS += $$PWD/../../Utils/levmar-2.6/build/liblevmar.a
+unix: PRE_TARGETDEPS += $$PWD/../../Utils/levmar-2.6/liblevmar.a
