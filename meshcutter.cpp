@@ -76,7 +76,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
     mesh->heMap.insert(make_pair(hef_new_flip->index, hef_new_flip));
 
     /// fix the new face
-    nf->he = hef;
+    nf->he = he_new_flip;
     nf->index = HDS_Face::assignIndex();
     nf->isCutFace = true;
     mesh->faceSet.insert(nf);

@@ -2,6 +2,7 @@
 #include "meshcutter.h"
 #include "meshunfolder.h"
 #include "meshsmoother.h"
+#include "MeshExtender.h"
 
 MeshManager* MeshManager::instance = NULL;
 
@@ -222,14 +223,20 @@ void MeshManager::unfoldMesh() {
 }
 
 void MeshManager::smoothMesh() {
-  if( smoothed_mesh.isNull() )
+  //if( smoothed_mesh.isNull() )
     smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
-
-  MeshSmoother::smoothMesh(smoothed_mesh.data());
-  //MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
+  
+  //MeshSmoother::smoothMesh(smoothed_mesh.data());
+  MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
 }
 
 bool MeshManager::saveMeshes() {
   /// save only the cutted and unfolded
   return true;
+}
+
+void MeshManager::extendMesh()
+{
+  extended_mesh.reset(new HDS_Mesh(*hds_mesh));
+  MeshExtender::extendMesh(extended_mesh.data(), 0.75);
 }

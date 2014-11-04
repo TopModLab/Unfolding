@@ -12,7 +12,6 @@ class HDS_Vertex;
 class MeshCutter
 {
 public:
-
   static bool cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges);
 
 private:

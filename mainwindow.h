@@ -34,6 +34,8 @@ private slots:
   void slot_newFile();
   void slot_saveFile();
 
+  void slot_reset();
+
   void slot_toggleCameraOperation();
   void slot_toggleFaceSelection();
   void slot_toggleEdgeSelection();
@@ -46,6 +48,7 @@ private slots:
   void slot_updateViewerColormap();
 
   void slot_smoothMesh();
+  void slot_extendMesh();
 private:
   void closeEvent(QCloseEvent *e);
 

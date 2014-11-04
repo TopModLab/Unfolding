@@ -74,6 +74,7 @@ protected:
     friend class MeshCutter;
     friend class MeshUnfolder;
     friend class MeshSmoother;
+    friend class MeshExtender;
 
 private:
     unordered_set<he_t*> heSet;

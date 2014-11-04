@@ -36,6 +36,7 @@ public:
   int index;
   bool isPicked;
   bool isCutFace;
+  bool isConnector;
 };
 
 #endif // HDS_FACE_H
