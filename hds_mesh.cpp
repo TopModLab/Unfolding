@@ -45,13 +45,16 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
     heMap.insert(make_pair(he->index, nhe));
   }
 
-  /// connect the half edges
+  /// fill in the pointers
   for( auto &he : heSet ) {
     auto he_ref = other.heMap.at(he->index);
     //cout << he_ref->index << endl;
     he->flip = heMap.at(he_ref->flip->index);
     he->prev = heMap.at(he_ref->prev->index);
     he->next = heMap.at(he_ref->next->index);
+
+    if (he_ref->twin != nullptr)
+      he->twin = heMap.at(he_ref->twin->index);
 
     he->f = faceMap.at(he_ref->f->index);
     he->v = vertMap.at(he_ref->v->index);

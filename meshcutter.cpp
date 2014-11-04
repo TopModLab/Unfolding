@@ -81,6 +81,10 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
     nf->isCutFace = true;
     mesh->faceSet.insert(nf);
     mesh->faceMap.insert(make_pair(nf->index, nf));
+
+    /// record this cut event using twin
+    he->twin = hef;
+    hef->twin = he;
   }
 
   mesh->printInfo();

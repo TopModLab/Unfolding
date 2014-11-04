@@ -30,6 +30,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
   // add new faces for each edge, same as cutting the mesh
   /// vertices connected to cut edges
   map<vert_t*, int> cutVerts;
+  map<he_t*, he_t*> twinmap;
 
   /// split each cut edge into 2 edges
   for (auto heIdx : edges) {
@@ -97,10 +98,15 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
     nf->isFlap = hef->f->isCutFace || he->f->isCutFace;
     mesh->faceSet.insert(nf);
     mesh->faceMap.insert(make_pair(nf->index, nf));
+
+    /// record this event with twin map
+    twinmap.insert(make_pair(he, hef));
   }
 
   mesh->printInfo();
   mesh->validate();
+
+  int woohoos = 0;
 
   // need to split each vertex in multiple way like cutting the mesh
 #if 0
@@ -311,10 +317,24 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
       mesh->faceSet.insert(nf);
       mesh->faceMap.insert(make_pair(nf->index, nf));
 
+      /// fix the hole if it is adjacent to a cut face
+      auto nfcorners = holeface->corners();
+      for (auto corner : nfcorners) {
+        auto cutfaces = Utils::filter(mesh->incidentFaces(corner), [](face_t* f){
+          return f->isCutFace;
+        });        
+        if (cutfaces.size() >= 2) {
+          cout << "Woohoo!" << cutfaces.size() << endl;
+          ++woohoos;
+        }
+      }
+
       //mesh->printInfo("merged");
       mesh->validate();
     }
   }
+
+  cout << "woohoos = " << woohoos << endl;
 
   /// update the curvature of each vertex
   for (auto &v : mesh->vertSet) {
@@ -334,5 +354,19 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
       v->pos = center + scale * vec_cv;
     }
   }
+  /*
+  cout << "number of flaps = " << twinmap.size() << endl;
+  /// update the shape of the flaps using the twin map
+  for (auto twinpair : twinmap) {
+    auto he = twinpair.first, the = twinpair.second;
+    if (he->twin == nullptr) continue;
+    cout << he->v->pos << ", " << he->flip->v->pos << ", " << he->twin->v->pos << he->twin->flip->v->pos << endl;
+    // match their end points
+    the->v->pos = he->twin->v->pos;
+    the->flip->v->pos = he->twin->flip->v->pos;
+  }
+  */
+  
+
   return true;
 }

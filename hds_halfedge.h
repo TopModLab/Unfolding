@@ -29,7 +29,7 @@ public:
   HDS_Vertex *v;
   HDS_HalfEdge *prev, *next, *flip;
 
-  HDS_HalfEdge *twin;    /// pointer to its twin halfedge created in a split event
+  HDS_HalfEdge *twin;    /// pointer to its twin halfedge created in a cut event
 
   int index;
   bool isPicked;
