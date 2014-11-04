@@ -47,6 +47,10 @@ public:
         return unfolded_mesh.data();
     }
 
+    HDS_Mesh* getExtendedMesh() {
+      return extended_mesh.data();
+    }
+
     bool saveMeshes();
 
 protected:
@@ -73,6 +77,7 @@ public:
     void cutMeshWithSelectedEdges();
     void unfoldMesh();
     void smoothMesh();
+    void extendMesh();
 
 private:
     typedef HDS_Mesh mesh_t;
@@ -80,7 +85,7 @@ private:
     typedef HDS_Face face_t;
     typedef HDS_Vertex vert_t;
 
-    QScopedPointer<HDS_Mesh> hds_mesh, smoothed_mesh, cutted_mesh, unfolded_mesh;
+    QScopedPointer<HDS_Mesh> hds_mesh, extended_mesh, smoothed_mesh, cutted_mesh, unfolded_mesh;
 };
 
 #endif // MESHMANAGER_H

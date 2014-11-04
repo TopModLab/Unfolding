@@ -22,10 +22,17 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
   std::make_heap(H.begin(), H.end(), vertex_comp);
   
   /// modify the curvature of the vertices one by one, making them 0
+  double CTHRES2;
+  cout << "threshold:" << endl;
+  cin >> CTHRES2;
   while (!H.empty()) {
     auto v = H.front();
     std::pop_heap(H.begin(), H.end(), vertex_comp);
     H.pop_back();
+    if (fabs(v->curvature) > CTHRES2) {
+      H.clear();
+      break;
+    }
 
     /// make the curvature at this vertex 0
     auto neighbors = v->neighbors();
@@ -34,6 +41,7 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
     map<HDS_Vertex*, double> entries;
     double sum_inv_dist = 0.0;
     for (auto neighbor : neighbors) {
+#if 1
       if (fabs(neighbor->curvature) < CTHRES) {
         entries.insert(make_pair(neighbor, 0.0));
       }
@@ -42,6 +50,11 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
         entries.insert(make_pair(neighbor, inv_dist));
         sum_inv_dist += inv_dist;
       }
+#else
+      double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
+      entries.insert(make_pair(neighbor, inv_dist));
+      sum_inv_dist += inv_dist;
+#endif
     }
 
     if (sum_inv_dist > 0) {
@@ -51,16 +64,23 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
       }
 
       v->curvature = 0;
+
+      /// add back the neighbors if they are not in queue
+      for (auto entry : entries) {
+        if (find(H.begin(), H.end(), entry.first) == H.end()) {
+          H.push_back(entry.first);
+        }
+      }
     }
 
-    /// remove
+    /// remove zero curvature vertices
     auto newEnd = std::remove_if(H.begin(), H.end(), [=](const HDS_Vertex *a) {
       return fabs(a->curvature) <= CTHRES;
     });
 
     H.erase(newEnd, H.end());
     std::make_heap(H.begin(), H.end(), vertex_comp);
-    cout << H.size() << endl;
+    cout << H.size() << ": " << H.front()->curvature << endl;
   }
 
   double sum_curvature = std::accumulate(mesh->vertSet.begin(), mesh->vertSet.end(), 0.0, [](double val, HDS_Vertex* v) {
@@ -137,4 +157,70 @@ void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
   cout << "sum = " << sum_curvature << endl;
 
   /// compute the new vertex positions using the new curvatures
+}
+
+/// cost function for computing new vertex positions
+void costfunction_vert(double *p, double *hx, int m, int n, void *adata) {
+  HDS_Mesh *mesh = (HDS_Mesh*)adata;
+
+  /// assemble matrix A with p
+
+  /// compute the new curvatures
+
+  /// compute the new positions for each vertex
+
+  /// compute the cost vector
+}
+
+/// cost function for computing new curvatures
+void costfunction(double *p, double *hx, int m, int n, void *adata) {
+  HDS_Mesh *mesh = (HDS_Mesh*)adata;
+
+  /// assemble matrix A with p
+
+  /// compute the new curvatures
+
+  /// compute the new positions for each vertex
+
+  /// compute the cost vector
+}
+
+void MeshSmoother::smoothMesh_wholeMesh(HDS_Mesh *mesh)
+{
+	/// compute the smoothed curvature at each vertex
+	int nVerts = mesh->vertSet.size();
+
+	/// update curvature and vertex normal
+	for (auto v : mesh->vertSet) {
+		v->computeCurvature();
+		v->computeNormal();
+	}
+
+	/// update face normals
+	for (auto f : mesh->faceSet) {
+		f->computeNormal();
+	}
+
+	/// find out the set of zero curvature and static curvature
+  set<int> V0, VS;
+
+  /// find out the coefficients of the manipulation matrix A
+  /*
+  /// interface
+  extern int dlevmar_lec_dif(
+    void(*func)(double *p, double *hx, int m, int n, void *adata),
+    double *p, double *x, int m, int n, double *A, double *b, int k,
+    int itmax, double *opts, double *info, double *work, double *covar, void *adata);
+  */
+
+  /// compute the new curvatures with A
+
+  /// compute the new positions for each vertex
+  /*
+  /// interface
+  extern int dlevmar_dif(
+    void(*func)(double *p, double *hx, int m, int n, void *adata),
+    double *p, double *x, int m, int n, int itmax, double *opts,
+    double *info, double *work, double *covar, void *adata);
+  */
 }

@@ -62,6 +62,11 @@ void MainWindow::createActions()
     connect(newAct, SIGNAL(triggered()), this, SLOT(slot_newFile()));
     actionsMap["new"] = newAct;
 
+    QAction *resetAct = new QAction(QIcon(":/icons/reset.png"), tr("&Reset"), this);
+    resetAct->setStatusTip(tr("Reset"));
+    connect(resetAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
+    actionsMap["reset"] = resetAct;
+
     QAction *saveAct = new QAction(QIcon(":/icons/save.png"), tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save a file"));
@@ -98,6 +103,11 @@ void MainWindow::createActions()
     connect(smoothAct, SIGNAL(triggered()), this, SLOT(slot_smoothMesh()));
     actionsMap["smooth"] = smoothAct;
 
+    QAction *extendAct = new QAction(QIcon(":/icons/extend.png"), tr("Extend Mesh"), this);
+    extendAct->setStatusTip(tr("Extend mesh"));
+    connect(extendAct, SIGNAL(triggered()), this, SLOT(slot_extendMesh()));
+    actionsMap["extend"] = extendAct;
+
     QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
     cutAct->setStatusTip(tr("Cut mesh"));
     connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
@@ -123,6 +133,9 @@ void MainWindow::createMenus()
   try {
     QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
     fileMenu->addAction(actionsMap["new"]);
+
+    QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
+    editMenu->addAction(actionsMap["reset"]);
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create menus!");
@@ -161,6 +174,7 @@ void MainWindow::createToolBar()
 
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(actionsMap["smooth"]);
+    ui->mainToolBar->addAction(actionsMap["extend"]);
 
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(actionsMap["mesh cut"]);
@@ -246,4 +260,15 @@ void MainWindow::slot_smoothMesh() {
 
 void MainWindow::closeEvent(QCloseEvent *e) {
   ceditor->close();
+}
+
+void MainWindow::slot_extendMesh()
+{
+  MeshManager::getInstance()->extendMesh();
+  viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+}
+
+void MainWindow::slot_reset()
+{
+  viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 }

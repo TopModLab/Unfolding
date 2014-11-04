@@ -239,18 +239,25 @@ void HDS_Mesh::draw(ColorMap cmap)
       if( f->isPicked ) {
         glColor4f(0.95, 0.75, 0.75, 0.5);
       }
+      else if (f->isConnector) {
+        glColor4f(0.75, 0.75, 0.95, 0.5);
+      }
       else {
         glColor4f(0.75, 0.75, 0.95, 0.5);
       }
 
+      int vcount = 0;
       glBegin(GL_POLYGON);
       do
       {
+        ++vcount;
         vert_t* v = curHe->v;
 
         /// interpolation
-        QColor clr = cmap.getColor_discrete(v->curvature);
-        GLUtils::setColor(clr);
+        if (!f->isConnector) {
+          QColor clr = cmap.getColor_discrete(v->curvature);
+          GLUtils::setColor(clr);
+        }
 		    GLUtils::useNormal(v->normal);
         GLUtils::useVertex(v->pos);
         curHe = curHe->next;
@@ -392,6 +399,7 @@ vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
   return faces;
 }
 
+/// all outgoing half edges of vertex v
 vector<HDS_Mesh::he_t *> HDS_Mesh::incidentEdges(vert_t *v)
 {
   he_t *he = v->he;
