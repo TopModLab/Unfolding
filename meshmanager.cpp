@@ -13,6 +13,10 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
     /// build a half edge mesh here
     buildHalfEdgeMesh(loader.getFaces(), loader.getVerts());
+
+    /// initialize the sparse graph
+    gcomp.reset(new GeodesicComputer(filename));
+
     return true;
   }
   else return false;
@@ -249,4 +253,24 @@ void MeshManager::extendMesh()
   else
     extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
   MeshExtender::extendMesh(extended_mesh.data(), 0.75);
+}
+
+void MeshManager::colorMeshByGeoDistance(int vidx)
+{
+  auto dists = gcomp->distanceTo(vidx);
+
+  // save it to a file
+  ofstream fout("geodist.txt");
+  for (auto x : dists) {
+    fout << x << endl;
+  }
+  fout.close();
+
+  double maxDist = *(std::max_element(dists.begin(), dists.end()));
+  std::for_each(dists.begin(), dists.end(), [=](double &x){
+    x /= maxDist;
+    x -= 0.5;
+    cout << x << endl;
+  });
+  hds_mesh->colorVertices(dists);
 }

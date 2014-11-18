@@ -14,6 +14,7 @@ QColor ColorMap::getColor(double val) {
       return interpolate(c, colormap[i].second, colormap[i+1].second);
     }
   }
+  return Qt::black;
 }
 
 QColor ColorMap::getColor_discrete(double val) {
@@ -53,9 +54,9 @@ ColorMap ColorMap::getDefaultColorMap()
 {
   ColorMap cmap;
 
-  cmap.setColor(-PI/2.0, Qt::red);
+  cmap.setColor(-Pi/2.0, Qt::red);
   cmap.setColor(0.0, Qt::gray);
-  cmap.setColor(PI/2.0, Qt::blue);
+  cmap.setColor(Pi/2.0, Qt::blue);
   cmap.buildColormap();
 
   return cmap;

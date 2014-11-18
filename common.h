@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <memory>
 
 using namespace std;
 

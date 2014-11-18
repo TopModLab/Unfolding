@@ -5,8 +5,8 @@
 
 #include <QColor>
 
-static const double PI = 3.14159265358979323846;
-static const double PI2 = PI * 2.0;
+static const double Pi = 3.14159265358979323846;
+static const double PI2 = Pi * 2.0;
 
 
 template <typename T>

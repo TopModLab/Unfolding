@@ -1,6 +1,8 @@
 #ifndef MESHMANAGER_H
 #define MESHMANAGER_H
 
+#include "GeodesicComputer.h"
+
 #include "common.h"
 #include <QMutex>
 #include <QScopedPointer>
@@ -51,6 +53,8 @@ public:
       return extended_mesh.data();
     }
 
+    void colorMeshByGeoDistance(int vidx);
+
     bool saveMeshes();
 
 protected:
@@ -84,8 +88,9 @@ private:
     typedef HDS_HalfEdge he_t;
     typedef HDS_Face face_t;
     typedef HDS_Vertex vert_t;
-
+    
     QScopedPointer<HDS_Mesh> hds_mesh, extended_mesh, smoothed_mesh, cutted_mesh, unfolded_mesh;
+    QScopedPointer<GeodesicComputer> gcomp;
 };
 
 #endif // MESHMANAGER_H

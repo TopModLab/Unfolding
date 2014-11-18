@@ -1,6 +1,8 @@
+#define NOMINMAX
+#include "meshmanager.h"
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "meshmanager.h"
 
 #include <QMessageBox>
 #include <QString>
@@ -50,6 +52,7 @@ bool MainWindow::layoutComponents()
 bool MainWindow::connectComponents()
 {
   connect(ceditor, SIGNAL(colorChanged()), this, SLOT(slot_updateViewerColormap()));
+  connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, SLOT(slot_updateMeshColorByGeoDistance(int)));
   return true;
 }
 
@@ -251,6 +254,11 @@ void MainWindow::slot_triggerColormap() {
 void MainWindow::slot_updateViewerColormap()
 {
   viewer->setCurvatureColormap(ceditor->getColormap());
+}
+
+void MainWindow::slot_updateMeshColorByGeoDistance(int vidx) {
+  MeshManager::getInstance()->colorMeshByGeoDistance(vidx);
+  viewer->update();
 }
 
 void MainWindow::slot_smoothMesh() {

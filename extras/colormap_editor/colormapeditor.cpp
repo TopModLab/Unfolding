@@ -42,12 +42,12 @@ void ColormapEditor::initializeComponents()
   ui->posSlider->setMinimum(0);
   ui->posSlider->setMaximum(10000);
 
-  ui->negSpin->setMinimum(-PI);
+  ui->negSpin->setMinimum(-Pi);
   ui->negSpin->setMaximum(-0.01);
   ui->negSpin->setSingleStep(0.01);
 
   ui->posSpin->setMinimum(0.01);
-  ui->posSpin->setMaximum(PI);
+  ui->posSpin->setMaximum(Pi);
   ui->posSpin->setSingleStep(0.01);
 
   pneg = new ColorPatch(Qt::red);
@@ -69,12 +69,12 @@ void ColormapEditor::connectComponents()
 
 void ColormapEditor::slot_updateNegPatchWithSpin(double val)
 {
-  ui->negSlider->setValue(ui->negSlider->maximum() * (1.0 + val / PI));
+  ui->negSlider->setValue(ui->negSlider->maximum() * (1.0 + val / Pi));
 }
 
 void ColormapEditor::slot_updatePosPatchWithSpin(double val)
 {
-  ui->posSlider->setValue(val / PI * 10000);
+  ui->posSlider->setValue(val / Pi * 10000);
 }
 
 void ColormapEditor::updatePatches()
@@ -93,14 +93,14 @@ void ColormapEditor::slot_changeColor()
 
 void ColormapEditor::slot_updateNegPatchWithSlider(int val)
 {
-  double dval = (ui->negSlider->maximum() - val) / (double) ui->negSlider->maximum() * PI;
+  double dval = (ui->negSlider->maximum() - val) / (double) ui->negSlider->maximum() * Pi;
   ui->negSpin->setValue(-dval);
   emit colorChanged();
 }
 
 void ColormapEditor::slot_updatePosPatchWithSlider(int val)
 {
-  double dval = val / (double) ui->posSlider->maximum() * PI;
+  double dval = val / (double) ui->posSlider->maximum() * Pi;
   ui->posSpin->setValue(dval);
   emit colorChanged();
 }

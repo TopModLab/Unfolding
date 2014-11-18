@@ -326,6 +326,11 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
         if (cutfaces.size() >= 2) {
           cout << "Woohoo!" << cutfaces.size() << endl;
           ++woohoos;
+          
+          // fix it here, the faces are already in correct order
+          for (int i = 0; i < cutfaces.size(); ++i) {
+
+          }
         }
       }
 

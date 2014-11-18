@@ -40,6 +40,7 @@ public:
   void setCurvatureColormap(ColorMap cmap);
 
 signals:
+  void updateMeshColorByGeoDistance(int vidx);
 
 protected:
   void keyPressEvent(QKeyEvent *e);
@@ -174,6 +175,12 @@ private:
   QScopedPointer<QGLFramebufferObject> fbo;
   void initializeFBO();
   void drawMeshToFBO();
+
+private:
+  bool showReebPoints;
+  void findReebPoints();
+  void drawReebPoints();
+  unordered_set<HDS_Vertex*> reebPoints;
 };
 
 #endif // MESHVIEWER_H

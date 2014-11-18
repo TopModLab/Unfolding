@@ -12,6 +12,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
   heMesh = nullptr;
   colormap = ColorMap::getDefaultColorMap();
   enableLighting = false;
+  showReebPoints = false;
 }
 
 MeshViewer::~MeshViewer()
@@ -21,6 +22,7 @@ MeshViewer::~MeshViewer()
 
 void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh) {
   heMesh = mesh;
+  findReebPoints();
   updateGL();
 }
 
@@ -257,6 +259,11 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 void MeshViewer::keyPressEvent(QKeyEvent *e)
 {
   switch(e->key()) {
+  case Qt::Key_C:
+  {
+    int vidx = 0;
+    emit updateMeshColorByGeoDistance(vidx);
+  }
   case Qt::Key_E:
   {
     if( heMesh ) {
@@ -281,6 +288,11 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
   case Qt::Key_L:
   {
     enableLighting = !enableLighting;
+    break;
+  }
+  case Qt::Key_R:
+  {    
+    showReebPoints = !showReebPoints;
     break;
   }
   }
@@ -397,6 +409,10 @@ void MeshViewer::paintGL()
     default:
       drawSelectionBox();
       drawMeshToFBO();
+    }
+
+    if (showReebPoints) {
+      drawReebPoints();
     }
   }
 }
@@ -542,4 +558,20 @@ void MeshViewer::disableLights()
   glDisable(GL_LIGHT0);
   glDisable(GL_LIGHT1);
   glDisable(GL_LIGHTING);
+}
+
+void MeshViewer::drawReebPoints()
+{
+  glColor4f(1.0, 0.0, 0.0, 1.0);
+  glPointSize(8.0);
+  glBegin(GL_POINTS);
+  for (auto p : reebPoints) {
+    GLUtils::useVertex(p->pos);
+  }
+  glEnd();
+}
+
+void MeshViewer::findReebPoints()
+{
+  reebPoints = heMesh->getReebPoints();
 }

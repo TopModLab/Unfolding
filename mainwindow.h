@@ -49,8 +49,12 @@ private slots:
 
   void slot_smoothMesh();
   void slot_extendMesh();
+
+  void slot_updateMeshColorByGeoDistance(int vidx);
+
 private:
   void closeEvent(QCloseEvent *e);
+  
 
 private:
   Ui::MainWindow *ui;

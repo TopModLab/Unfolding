@@ -262,7 +262,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 
         /// interpolation
         if (!f->isConnector) {
-          QColor clr = cmap.getColor_discrete(v->curvature);
+          QColor clr = cmap.getColor_discrete(v->colorVal);
           GLUtils::setColor(clr);
         }
 		    GLUtils::useNormal(v->normal);
@@ -315,7 +315,7 @@ void HDS_Mesh::draw(ColorMap cmap)
       if( v->isPicked )
         glColor4f(1, 1, 0, 1);
       else {
-        double c = .5 - clamp(v->curvature, -PI/2, PI/2) / PI; //[0, 1]
+        double c = .5 - clamp(v->curvature, -Pi/2, Pi/2) / Pi; //[0, 1]
         //cout << v->index << ":" << v->curvature << ", " << c << endl;
 //        if( c < 0.5 ) {
 //          glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
@@ -482,4 +482,70 @@ void HDS_Mesh::selectEdge(int idx)
 void HDS_Mesh::selectVertex(int idx)
 {
   flipSelectionState(idx, vertMap);
+}
+
+unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints()
+{
+  auto moorseFunc = [&](vert_t* v, float a, float b, float c) {
+    return a * v->pos.x() + b * v->pos.y() + c * v->pos.z();
+  };
+
+  auto isReebPoint = [&](vert_t* v) {
+    const int n = 10;
+    for (int tid = 0; tid < n; ++tid) {
+      // perform n tests
+      float a = (rand() / (float)RAND_MAX - 0.5) * 1e-5;
+      float b = (rand() / (float)RAND_MAX - 0.5) * 1e-5;
+      float c = (rand() / (float)RAND_MAX - 0.5) * 1e-5 + 1;
+
+      auto neighbors = v->neighbors();
+
+      // if all neighbors have smaller z-values
+      bool allSmaller = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
+        return moorseFunc(n, a, b, c) <= moorseFunc(v, a, b, c);
+      });
+
+      // if all neighbors have larger z-values
+      bool allLarger = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
+        return moorseFunc(n, a, b, c) >= moorseFunc(v, a, b, c);
+      });
+
+      // if this is a saddle point
+      bool isSaddle = false;
+      vector<float> diffs;
+      for (auto n : neighbors) {
+        diffs.push_back(moorseFunc(n, a, b, c) - moorseFunc(v, a, b, c));
+      }
+      int ngroups = 1, sign = diffs.front() >= 0 ? 1 : -1;
+      for (int i = 1; i < diffs.size(); ++i) {
+        if (diffs[i] * sign > 0) continue;
+        else {
+          sign = -sign;
+          ++ngroups;
+        }
+      }
+      isSaddle = (ngroups == 4);
+
+      if (allSmaller || allLarger || isSaddle) {}
+      else { return false; }
+    }
+    return true;
+  };
+  return Utils::filter_set(vertSet, isReebPoint);
+}
+
+void HDS_Mesh::colorVertices(const vector<double> &val)
+{
+#if 1
+  int nverts = vertSet.size();
+  for (int i = 0; i < nverts; ++i) {
+    vertMap[i]->colorVal = val[i];
+  }
+
+#else
+  int i = 0;
+  for (auto v : vertSet) {
+    v->colorVal = val[i++];
+  }
+#endif
 }

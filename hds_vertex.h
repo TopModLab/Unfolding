@@ -39,6 +39,7 @@ public:
   int index;
   double curvature;
   bool isPicked;
+  double colorVal;
 };
 
 #endif // HDS_VERTEX_H

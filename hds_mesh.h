@@ -10,7 +10,6 @@
 
 #include "colormap.h"
 
-
 class HDS_Mesh
 {
 public:
@@ -38,6 +37,10 @@ public:
     void setMesh(const vector<face_t*> &faces,
                  const vector<vert_t*> &verts,
                  const vector<he_t*> &hes);
+
+    unordered_set<vert_t*> getReebPoints();
+
+    void colorVertices(const vector<double> &val);
 
     void draw(ColorMap cmap);
     void drawFaceIndices();

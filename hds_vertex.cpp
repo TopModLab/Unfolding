@@ -7,6 +7,7 @@ size_t HDS_Vertex::uid = 0;
 HDS_Vertex::HDS_Vertex() {
   isPicked = false;
   index = -1;
+  colorVal = 0;
   he = nullptr;
 }
 
@@ -23,6 +24,7 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
   pos = v.pos;
   normal = v.normal;
   curvature = v.curvature;
+  colorVal = v.colorVal;
   he = nullptr;
 }
 
