@@ -25,8 +25,6 @@ vector<double> GeodesicComputer::distanceTo(int vIdx) const
   vector<double> dists(s_graph->NodeNum());
   for (int i = 0; i < s_graph->NodeNum(); ++i) {
      dists[i] = s_graph->distanceToSource(i);
-     
-     cout << dists[i] << endl;
   }
   return dists;
 }

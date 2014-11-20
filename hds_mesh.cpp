@@ -193,19 +193,18 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
   HDS_Vertex::resetIndex();
   HDS_HalfEdge::resetIndex();
 
-  faceSet.insert(faces.begin(), faces.end());
-  for(auto &f : faceSet) {
+  for (auto &f : faces) {
     int faceIdx = HDS_Face::assignIndex();
     faceMap[faceIdx] = f;
     f->index = faceIdx;
+    faceSet.insert(f);
   }
 
-  vertSet.insert(verts.begin(), verts.end());
-  for(auto &v : vertSet) {
+  for (auto &v : verts) {
     int vertIdx = HDS_Vertex::assignIndex();
     vertMap[vertIdx] = v;
     v->index = vertIdx;
-    ++vertIdx;
+    vertSet.insert(v);
   }
 
   heSet.insert(hes.begin(), hes.end());
@@ -484,10 +483,15 @@ void HDS_Mesh::selectVertex(int idx)
   flipSelectionState(idx, vertMap);
 }
 
-unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints()
+unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &funcval)
 {
   auto moorseFunc = [&](vert_t* v, float a, float b, float c) {
-    return a * v->pos.x() + b * v->pos.y() + c * v->pos.z();
+    if (!funcval.empty()) {
+      return (float)(funcval[v->index]);
+    }
+    else {
+      return a * v->pos.x() + b * v->pos.y() + c * v->pos.z();
+    }
   };
 
   auto isReebPoint = [&](vert_t* v) {
@@ -524,7 +528,7 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints()
           ++ngroups;
         }
       }
-      isSaddle = (ngroups == 4);
+      isSaddle = (ngroups >= 4 && ngroups & 0x1 == 0);
 
       if (allSmaller || allLarger || isSaddle) {}
       else { return false; }

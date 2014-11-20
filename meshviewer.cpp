@@ -1,3 +1,6 @@
+#define NOMINMAX
+#include "meshmanager.h"
+
 #include "meshviewer.h"
 #include "glutils.hpp"
 #include "mathutils.hpp"
@@ -13,6 +16,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
   colormap = ColorMap::getDefaultColorMap();
   enableLighting = false;
   showReebPoints = false;
+  lastSelectedIndex = 0;
 }
 
 MeshViewer::~MeshViewer()
@@ -93,6 +97,8 @@ int MeshViewer::getSelectedElementIndex(const QPoint &p)
       }
     }
   }
+
+  lastSelectedIndex = maxIdx;
 
   return maxIdx;
 }
@@ -261,8 +267,8 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
   switch(e->key()) {
   case Qt::Key_C:
   {
-    int vidx = 0;
-    emit updateMeshColorByGeoDistance(vidx);
+    emit updateMeshColorByGeoDistance(lastSelectedIndex);
+    break;
   }
   case Qt::Key_E:
   {
@@ -562,6 +568,7 @@ void MeshViewer::disableLights()
 
 void MeshViewer::drawReebPoints()
 {
+  findReebPoints();
   glColor4f(1.0, 0.0, 0.0, 1.0);
   glPointSize(8.0);
   glBegin(GL_POINTS);
@@ -573,5 +580,6 @@ void MeshViewer::drawReebPoints()
 
 void MeshViewer::findReebPoints()
 {
-  reebPoints = heMesh->getReebPoints();
+  auto dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
+  reebPoints = heMesh->getReebPoints(dists);
 }

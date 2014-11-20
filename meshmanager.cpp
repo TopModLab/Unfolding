@@ -3,6 +3,7 @@
 #include "meshunfolder.h"
 #include "meshsmoother.h"
 #include "MeshExtender.h"
+#include "MeshIterator.h"
 
 MeshManager* MeshManager::instance = NULL;
 
@@ -257,7 +258,17 @@ void MeshManager::extendMesh()
 
 void MeshManager::colorMeshByGeoDistance(int vidx)
 {
+#if 1
   auto dists = gcomp->distanceTo(vidx);
+#else
+  auto Q = MeshIterator::BFS(hds_mesh.data(), vidx);
+  vector<double> dists(hds_mesh->verts().size());
+  while (!Q.empty()){
+    auto cur = Q.front();
+    Q.pop();
+    dists[cur.first->index] = cur.second;
+  }
+#endif
 
   // save it to a file
   ofstream fout("geodist.txt");
@@ -270,7 +281,7 @@ void MeshManager::colorMeshByGeoDistance(int vidx)
   std::for_each(dists.begin(), dists.end(), [=](double &x){
     x /= maxDist;
     x -= 0.5;
-    cout << x << endl;
+    //cout << x << endl;
   });
   hds_mesh->colorVertices(dists);
 }

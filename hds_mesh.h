@@ -38,7 +38,7 @@ public:
                  const vector<vert_t*> &verts,
                  const vector<he_t*> &hes);
 
-    unordered_set<vert_t*> getReebPoints();
+    unordered_set<vert_t*> getReebPoints(const vector<double> &val);
 
     void colorVertices(const vector<double> &val);
 
@@ -78,6 +78,7 @@ protected:
     friend class MeshUnfolder;
     friend class MeshSmoother;
     friend class MeshExtender;
+    friend class MeshIterator;
 
 private:
     unordered_set<he_t*> heSet;

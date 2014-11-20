@@ -148,6 +148,7 @@ public:
   } sbox;
   bool isSelecting;
   vector<unsigned char> selectionBuffer;
+  int lastSelectedIndex;
 
   void computeGlobalSelectionBox();
   bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);

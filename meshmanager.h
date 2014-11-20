@@ -75,6 +75,8 @@ private:
 
     static MeshManager* instance;
 
+    friend class MeshViewer;
+
 public:
     bool loadOBJFile(const string& filename);
     void buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
