@@ -4,6 +4,7 @@
 #include "meshviewer.h"
 #include "glutils.hpp"
 #include "mathutils.hpp"
+#include "utils.hpp"
 
 #include <QMouseEvent>
 
@@ -17,6 +18,8 @@ MeshViewer::MeshViewer(QWidget *parent) :
   enableLighting = false;
   showReebPoints = false;
   lastSelectedIndex = 0;
+  cmode = Geodesics;
+  cp_smoothing_times = 0;
 }
 
 MeshViewer::~MeshViewer()
@@ -248,6 +251,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
         heMesh->selectVertex(selectedElementIdx);
       }
     }
+    findReebPoints();
     break;
   }
   }
@@ -257,9 +261,9 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
   if( e->modifiers() & Qt::AltModifier ) {
     interactionState = interactionStateStack.top();
     interactionStateStack.pop();
-  }
-  updateGL();
+  }  
 
+  updateGL();
 }
 
 void MeshViewer::keyPressEvent(QKeyEvent *e)
@@ -298,9 +302,13 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
   }
   case Qt::Key_R:
   {    
-    showReebPoints = !showReebPoints;
+    toggleCriticalPoints();
     break;
   }
+  case Qt::Key_M:
+    cmode = CriticalPointMode((cmode + 1) % NCModes);
+    findReebPoints();
+    break;
   }
   updateGL();
 }
@@ -376,6 +384,7 @@ void MeshViewer::resizeGL(int w, int h)
 
 void MeshViewer::paintGL()
 {
+  //glEnable(GL_DEPTH_TEST);
   glClearColor(1., 1., 1., 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -388,12 +397,11 @@ void MeshViewer::paintGL()
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POINT_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
-
-  glEnable(GL_DEPTH_TEST);
-
+  
   glShadeModel(GL_SMOOTH);
-  glEnable(GL_BLEND);
+  glEnable(GL_BLEND);  
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  //glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 
   if( heMesh == nullptr ) {
     glLineWidth(2.0);
@@ -567,12 +575,23 @@ void MeshViewer::disableLights()
 }
 
 void MeshViewer::drawReebPoints()
-{
-  findReebPoints();
-  glColor4f(1.0, 0.0, 0.0, 1.0);
+{  
+  cout << "nReebPoints = " << reebPoints.size() << endl;  
   glPointSize(8.0);
   glBegin(GL_POINTS);
   for (auto p : reebPoints) {
+    switch (p->rtype) {
+    case HDS_Vertex::Maximum:
+      glColor4f(1, 0.5, 0, 1);
+      break;
+    case HDS_Vertex::Minimum:
+      glColor4f(1, 0, 0.5, 1);
+      break;
+    case HDS_Vertex::Saddle:
+      glColor4f(0, 0, 1, 1);
+      break;
+    }
+
     GLUtils::useVertex(p->pos);
   }
   glEnd();
@@ -580,6 +599,100 @@ void MeshViewer::drawReebPoints()
 
 void MeshViewer::findReebPoints()
 {
-  auto dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
+  auto laplacianSmoother = [&](const vector<double> &val, HDS_Mesh *mesh) {
+    const double lambda = 0.25;
+    const double sigma = 1.0;
+    unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
+    vector<double> newval(mesh->verts().size());
+    for (auto vi : mesh->verts()) {
+      auto neighbors = vi->neighbors();
+
+      double denom = 0.0;
+      double numer = 0.0;
+
+      for (auto vj : neighbors) {
+        //double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
+        double wij = 1.0 / neighbors.size();
+        denom += wij;
+        numer += wij * val[vj->index];
+      }
+
+      L.insert(make_pair(vi, numer / denom - val[vi->index]));
+    }
+    for (auto p : L) {
+      newval[p.first->index] = val[p.first->index] + lambda * p.second;
+    }
+
+    return newval;
+  };
+  
+  int nverts = heMesh->vertSet.size();
+  int nedges = heMesh->heSet.size() / 2;
+  int nfaces = heMesh->faceSet.size();
+  int genus = (2 - (nverts - nedges + nfaces)) / 2;
+
+  // find the seeds of the laplacian smoothing
+  // pick a few vertices based on their curvatures
+  
+  auto dists = vector<double>();
+  switch (cmode) {
+  case Geodesics: {
+    // use geodesic distance
+    dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
+    break;
+  }
+  case Z: {
+    dists = vector<double>(heMesh->verts().size());
+    for (auto v : heMesh->verts()) {
+      dists[v->index] = v->pos.z();
+    }
+    break;
+  }
+  case PointNormal: {
+    dists = vector<double>(heMesh->verts().size());
+    QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
+    for (auto v : heMesh->verts()) {
+      dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+    }
+    break;
+  }
+  case Curvature: {
+    dists = vector<double>(heMesh->verts().size());
+    for (auto v : heMesh->verts()) {
+      dists[v->index] = v->curvature;
+    }
+    break;
+  }
+  }
+
+  // find the points to keep
+
+  int niters = cp_smoothing_times;
+  for (int i = 0; i < niters; ++i)
+    dists = laplacianSmoother(dists, heMesh);
+
   reebPoints = heMesh->getReebPoints(dists);
+  int sum_cp = 0;
+  for (auto cp : reebPoints) {
+    if (cp->rtype == HDS_Vertex::Maximum) sum_cp += 1;
+    else if (cp->rtype == HDS_Vertex::Minimum) sum_cp += 1;
+    else sum_cp -= cp->sdegree;
+  }
+  cout << "sum = " << sum_cp << endl;
+}
+
+void MeshViewer::toggleCriticalPoints() {
+  showReebPoints = !showReebPoints;
+}
+
+void MeshViewer::setCriticalPointsMethod(int midx)
+{
+  cmode = (CriticalPointMode)midx;
+  findReebPoints();
+}
+
+void MeshViewer::setCriticalPointsSmoothingTimes(int times)
+{
+  cp_smoothing_times = times;
+  findReebPoints();
 }

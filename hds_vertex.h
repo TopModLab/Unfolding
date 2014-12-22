@@ -40,6 +40,12 @@ public:
   double curvature;
   bool isPicked;
   double colorVal;
+  enum ReebsPointType{
+    Minimum,
+    Maximum,
+    Saddle
+  } rtype;
+  int sdegree;  // the degree of saddle point
 };
 
 #endif // HDS_VERTEX_H

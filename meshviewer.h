@@ -39,6 +39,10 @@ public:
   void bindHalfEdgeMesh(HDS_Mesh *mesh);
   void setCurvatureColormap(ColorMap cmap);
 
+  void toggleCriticalPoints();
+  void setCriticalPointsMethod(int midx);
+  void setCriticalPointsSmoothingTimes(int times);
+
 signals:
   void updateMeshColorByGeoDistance(int vidx);
 
@@ -179,8 +183,17 @@ private:
 
 private:
   bool showReebPoints;
+  enum CriticalPointMode {
+    Geodesics = 0,
+    Z,
+    PointNormal,
+    Curvature,
+    NCModes
+  } cmode;
+  int cp_smoothing_times;
   void findReebPoints();
   void drawReebPoints();
+  
   unordered_set<HDS_Vertex*> reebPoints;
 };
 

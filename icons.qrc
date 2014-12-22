@@ -11,5 +11,7 @@
         <file>icons/colormap.png</file>
         <file>icons/smooth.png</file>
         <file>icons/extend.png</file>
+        <file>icons/cp.png</file>
+      
     </qresource>
 </RCC>

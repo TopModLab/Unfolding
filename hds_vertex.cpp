@@ -26,6 +26,7 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
   curvature = v.curvature;
   colorVal = v.colorVal;
   he = nullptr;
+  rtype = v.rtype;
 }
 
 HDS_Vertex HDS_Vertex::operator=(const HDS_Vertex &other)
@@ -75,7 +76,7 @@ void HDS_Vertex::computeNormal()
 		if (!prevHE->f->isCutFace) {
 			QVector3D v1 = prevHE->flip->v->pos - prevHE->v->pos;
 			QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
-			normal += QVector3D::crossProduct(v2, v1);
+			normal += QVector3D::crossProduct(v2, v1) * acos(QVector3D::dotProduct(v2.normalized(), v1.normalized()));
 		}
 		prevHE = curHE;
 		curHE = prevHE->flip->next;

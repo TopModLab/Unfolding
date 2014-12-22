@@ -30,6 +30,7 @@ bool MainWindow::createComponents()
   try {
     viewer = new MeshViewer(this);
     ceditor = new ColormapEditor;
+    cppanel = new CriticalPointsPanel;
     createActions();
     createMenus();
     createToolBar();
@@ -53,6 +54,9 @@ bool MainWindow::connectComponents()
 {
   connect(ceditor, SIGNAL(colorChanged()), this, SLOT(slot_updateViewerColormap()));
   connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, SLOT(slot_updateMeshColorByGeoDistance(int)));
+
+  connect(cppanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCriticalPointsMethod(int)));
+  connect(cppanel, SIGNAL(sig_smoothingTimesChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingTimes(int)));
   return true;
 }
 
@@ -125,6 +129,12 @@ void MainWindow::createActions()
     colormapAct->setStatusTip(tr("Color map"));
     connect(colormapAct, SIGNAL(triggered()), this, SLOT(slot_triggerColormap()));
     actionsMap["colormap"] = colormapAct;
+
+    QAction *cpAct = new QAction(QIcon(":/icons/cp.png"), tr("Critical Points"), this);
+    cpAct->setStatusTip(tr("Critical points"));
+    cpAct->setCheckable(true);
+    connect(cpAct, SIGNAL(triggered()), this, SLOT(slot_triggerCriticalPoints()));
+    actionsMap["critical_points"] = cpAct;
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create actions!");
@@ -185,6 +195,7 @@ void MainWindow::createToolBar()
 
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(actionsMap["colormap"]);
+    ui->mainToolBar->addAction(actionsMap["critical_points"]);
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create status bar!");
@@ -251,6 +262,12 @@ void MainWindow::slot_triggerColormap() {
   ceditor->activateWindow();
 }
 
+void MainWindow::slot_triggerCriticalPoints() {
+  viewer->toggleCriticalPoints();
+  viewer->update();
+  cppanel->show();
+}
+
 void MainWindow::slot_updateViewerColormap()
 {
   viewer->setCurvatureColormap(ceditor->getColormap());
@@ -279,4 +296,15 @@ void MainWindow::slot_extendMesh()
 void MainWindow::slot_reset()
 {
   viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+}
+
+
+void MainWindow::slot_updateCriticalPointsMethod(int midx) {
+  viewer->setCriticalPointsMethod(midx);
+  viewer->update();
+}
+
+void MainWindow::slot_updateCriticalPointsSmoothingTimes(int times) {
+  viewer->setCriticalPointsSmoothingTimes(times);
+  viewer->update();
 }

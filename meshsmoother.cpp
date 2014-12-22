@@ -224,3 +224,29 @@ void MeshSmoother::smoothMesh_wholeMesh(HDS_Mesh *mesh)
     double *info, double *work, double *covar, void *adata);
   */
 }
+
+void MeshSmoother::smoothMesh_Laplacian(HDS_Mesh *mesh)
+{
+  const double lambda = 0.25;
+  const double sigma = 1.0;
+
+  unordered_map<HDS_Vertex*, QVector3D> L(mesh->vertSet.size());
+  for (auto vi : mesh->vertSet) {
+    auto neighbors = vi->neighbors();
+
+    double denom = 0.0;
+    QVector3D numer(0, 0, 0);
+
+    for (auto vj : neighbors) {
+      double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
+      denom += wij;
+      numer += wij * vj->pos;
+    }
+
+    L.insert(make_pair(vi, numer/denom-vi->pos));
+  }
+
+  for (auto vi : mesh->vertSet) {
+    vi->pos += lambda * L.at(vi);
+  }
+}

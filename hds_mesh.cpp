@@ -219,6 +219,21 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
     he->flip->index = hefIdx;
     heMap[hefIdx] = he->flip;
   }
+
+  /// sort the face set
+  sortedFaces.assign(faceSet.begin(), faceSet.end());
+  std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
+    auto ca = fa->corners();
+    auto cb = fb->corners();
+    float minZa = 1e9, minZb = 1e9;
+    for (auto va : ca) {
+      minZa = std::min(va->pos.z(), minZa);
+    }
+    for (auto vb : cb) {
+      minZb = std::min(vb->pos.z(), minZb);
+    }
+    return minZa < minZb;
+  });
 }
 
 void HDS_Mesh::draw(ColorMap cmap)
@@ -226,7 +241,8 @@ void HDS_Mesh::draw(ColorMap cmap)
   if( showFace )
   {
     /// traverse the mesh and render every single face
-    for(auto fit=faceSet.begin();fit!=faceSet.end();fit++)
+    cout << "sorted faces = " << sortedFaces.size() << endl;
+    for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
     {
       face_t* f = (*fit);
       if( f->isCutFace ) continue;
@@ -262,9 +278,9 @@ void HDS_Mesh::draw(ColorMap cmap)
         /// interpolation
         if (!f->isConnector) {
           QColor clr = cmap.getColor_discrete(v->colorVal);
-          GLUtils::setColor(clr);
+          GLUtils::setColor(clr, 0.5);
         }
-		    GLUtils::useNormal(v->normal);
+	      GLUtils::useNormal(v->normal);
         GLUtils::useVertex(v->pos);
         curHe = curHe->next;
       }while( curHe != he );
@@ -483,52 +499,99 @@ void HDS_Mesh::selectVertex(int idx)
   flipSelectionState(idx, vertMap);
 }
 
-unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &funcval)
+unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &funcval, const QVector3D &normdir)
 {
-  auto moorseFunc = [&](vert_t* v, float a, float b, float c) {
+  auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
     if (!funcval.empty()) {
-      return (float)(funcval[v->index]);
+      return (funcval[v->index]);
     }
     else {
       return a * v->pos.x() + b * v->pos.y() + c * v->pos.z();
     }
   };
 
+  int n = 10;
+  vector<tuple<double, double, double>> randvals;
+  for (int i = 0; i < 10; ++i) {
+    double a = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.x();
+    double b = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.y();
+    double c = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.z();
+    randvals.push_back(make_tuple(a, b, c));
+  }
+
   auto isReebPoint = [&](vert_t* v) {
     const int n = 10;
     for (int tid = 0; tid < n; ++tid) {
       // perform n tests
-      float a = (rand() / (float)RAND_MAX - 0.5) * 1e-5;
-      float b = (rand() / (float)RAND_MAX - 0.5) * 1e-5;
-      float c = (rand() / (float)RAND_MAX - 0.5) * 1e-5 + 1;
+      
+#if 1
+      double a = std::get<0>(randvals[tid]);
+      double b = std::get<1>(randvals[tid]);
+      double c = std::get<2>(randvals[tid]);
+#else
+      double a = 0, b = 0, c = 0;
+#endif
 
       auto neighbors = v->neighbors();
 
       // if all neighbors have smaller z-values
       bool allSmaller = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
-        return moorseFunc(n, a, b, c) <= moorseFunc(v, a, b, c);
+        return moorseFunc(n, a, b, c) < moorseFunc(v, a, b, c);
       });
 
       // if all neighbors have larger z-values
       bool allLarger = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
-        return moorseFunc(n, a, b, c) >= moorseFunc(v, a, b, c);
+        return moorseFunc(n, a, b, c) > moorseFunc(v, a, b, c);
       });
 
       // if this is a saddle point
       bool isSaddle = false;
-      vector<float> diffs;
+      vector<double> diffs;
       for (auto n : neighbors) {
         diffs.push_back(moorseFunc(n, a, b, c) - moorseFunc(v, a, b, c));
       }
-      int ngroups = 1, sign = diffs.front() >= 0 ? 1 : -1;
+      int ngroups = 1, sign = diffs.front() > 0 ? 1 : -1;
       for (int i = 1; i < diffs.size(); ++i) {
-        if (diffs[i] * sign > 0) continue;
+        if (diffs[i] * sign >= 0) continue;
         else {
           sign = -sign;
           ++ngroups;
+          if (i == diffs.size() - 1 && sign == diffs.front()) {
+            --ngroups;
+          }
         }
       }
-      isSaddle = (ngroups >= 4 && ngroups & 0x1 == 0);
+      if (ngroups % 2 == 1) {
+        cout << "error in computing groups!" << endl;
+        ngroups = ngroups - 1;
+      }
+      isSaddle = (ngroups >= 4 && ngroups % 2 == 0);
+
+      if (isSaddle) {
+        v->rtype = HDS_Vertex::Saddle;
+        v->sdegree = (ngroups - 2) / 2;
+        cout << "Saddle: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+        for (auto neighbor : neighbors) {
+          cout << moorseFunc(neighbor, a, b, c) << " ";
+        }
+        cout << endl;
+      }
+      if (allSmaller) {
+        v->rtype = HDS_Vertex::Maximum;
+        cout << "Maximum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+        for (auto neighbor : neighbors) {
+          cout << moorseFunc(neighbor, a, b, c) << " ";
+        }
+        cout << endl;
+      }
+      if (allLarger) {
+        v->rtype = HDS_Vertex::Minimum;
+        cout << "Minimum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+        for (auto neighbor : neighbors) {
+          cout << moorseFunc(neighbor, a, b, c) << " ";
+        }
+        cout << endl;
+      }
 
       if (allSmaller || allLarger || isSaddle) {}
       else { return false; }

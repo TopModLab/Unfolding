@@ -17,6 +17,12 @@ inline void setColor(const QColor& color) {
   glColor4fv(colorv);
 }
 
+inline void setColor(const QColor& color, float alpha) {
+  GLfloat colorv[] = { (GLfloat)color.redF(), (GLfloat)color.greenF(), (GLfloat)color.blueF(), alpha };
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorv);
+  glColor4fv(colorv);
+}
+
 inline void useVertex(const QVector3D& p) {
   glVertex3f(p.x(), p.y(), p.z());
 }

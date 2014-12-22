@@ -235,11 +235,12 @@ void MeshManager::unfoldMesh() {
 }
 
 void MeshManager::smoothMesh() {
-  //if( smoothed_mesh.isNull() )
+  if( smoothed_mesh.isNull() )
     smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
   
   //MeshSmoother::smoothMesh(smoothed_mesh.data());
-  MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
+  //MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
+  MeshSmoother::smoothMesh_Laplacian(smoothed_mesh.data());
 }
 
 bool MeshManager::saveMeshes() {
@@ -258,8 +259,37 @@ void MeshManager::extendMesh()
 
 void MeshManager::colorMeshByGeoDistance(int vidx)
 {
+  auto laplacianSmoother = [&](const vector<double> &val, HDS_Mesh *mesh) {
+    const double lambda = 0.25;
+    const double sigma = 1.0;
+    unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
+    vector<double> newval(mesh->verts().size());
+    for (auto vi : mesh->verts()) {
+      auto neighbors = vi->neighbors();
+
+      double denom = 0.0;
+      double numer = 0.0;
+
+      for (auto vj : neighbors) {
+        //double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
+        double wij = 1.0 / neighbors.size();
+        denom += wij;
+        numer += wij * val[vj->index];
+      }
+
+      L.insert(make_pair(vi, numer / denom - val[vi->index]));
+  }
+    for (auto p : L) {
+      newval[p.first->index] = val[p.first->index] + lambda * p.second;
+    }
+
+    return newval;
+  };
 #if 1
   auto dists = gcomp->distanceTo(vidx);
+  int niters = 100;
+  for (int i = 0; i < niters; ++i)
+    dists = laplacianSmoother(dists, hds_mesh.data());
 #else
   auto Q = MeshIterator::BFS(hds_mesh.data(), vidx);
   vector<double> dists(hds_mesh->verts().size());

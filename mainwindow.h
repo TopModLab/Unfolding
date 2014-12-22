@@ -5,6 +5,7 @@
 
 #include "meshviewer.h"
 #include "extras/colormap_editor/colormapeditor.h"
+#include "criticalpointspanel.h"
 
 namespace Ui {
 class MainWindow;
@@ -51,16 +52,19 @@ private slots:
   void slot_extendMesh();
 
   void slot_updateMeshColorByGeoDistance(int vidx);
+  void slot_triggerCriticalPoints();
+  void slot_updateCriticalPointsSmoothingTimes(int);
+  void slot_updateCriticalPointsMethod(int);
 
 private:
   void closeEvent(QCloseEvent *e);
-  
 
 private:
   Ui::MainWindow *ui;
   QMap<QString, QAction*> actionsMap;
   MeshViewer *viewer;
   ColormapEditor *ceditor;
+  CriticalPointsPanel *cppanel;
 };
 
 #endif // MAINWINDOW_H

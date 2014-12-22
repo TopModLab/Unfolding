@@ -38,7 +38,7 @@ public:
                  const vector<vert_t*> &verts,
                  const vector<he_t*> &hes);
 
-    unordered_set<vert_t*> getReebPoints(const vector<double> &val);
+    unordered_set<vert_t*> getReebPoints(const vector<double> &val = vector<double>(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
     void colorVertices(const vector<double> &val);
 
@@ -79,11 +79,14 @@ protected:
     friend class MeshSmoother;
     friend class MeshExtender;
     friend class MeshIterator;
+    friend class MeshViewer;
 
 private:
     unordered_set<he_t*> heSet;
     unordered_set<face_t*> faceSet;
     unordered_set<vert_t*> vertSet;
+
+    vector<face_t*> sortedFaces;
 
     unordered_map<int, he_t*> heMap;
     unordered_map<int, face_t*> faceMap;
