@@ -81,6 +81,7 @@ protected:
     friend class MeshIterator;
     friend class MeshViewer;
 
+    friend class ReebGraph;
 private:
     unordered_set<he_t*> heSet;
     unordered_set<face_t*> faceSet;

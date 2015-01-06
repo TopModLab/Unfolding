@@ -630,6 +630,7 @@ void MeshViewer::findReebPoints()
   int nedges = heMesh->heSet.size() / 2;
   int nfaces = heMesh->faceSet.size();
   int genus = (2 - (nverts - nedges + nfaces)) / 2;
+  cout << "genus = " << genus << endl;
 
   // find the seeds of the laplacian smoothing
   // pick a few vertices based on their curvatures
@@ -667,7 +668,7 @@ void MeshViewer::findReebPoints()
 
   // find the points to keep
 
-  int niters = cp_smoothing_times;
+  int niters = pow(2, cp_smoothing_times);
   for (int i = 0; i < niters; ++i)
     dists = laplacianSmoother(dists, heMesh);
 

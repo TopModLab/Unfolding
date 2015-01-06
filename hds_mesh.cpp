@@ -562,7 +562,7 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
         }
       }
       if (ngroups % 2 == 1) {
-        cout << "error in computing groups!" << endl;
+        //cout << "error in computing groups!" << endl;
         ngroups = ngroups - 1;
       }
       isSaddle = (ngroups >= 4 && ngroups % 2 == 0);
@@ -570,27 +570,27 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
       if (isSaddle) {
         v->rtype = HDS_Vertex::Saddle;
         v->sdegree = (ngroups - 2) / 2;
-        cout << "Saddle: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
-        for (auto neighbor : neighbors) {
-          cout << moorseFunc(neighbor, a, b, c) << " ";
-        }
-        cout << endl;
+        //cout << "Saddle: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+        //for (auto neighbor : neighbors) {
+        //  cout << moorseFunc(neighbor, a, b, c) << " ";
+        //}
+        //cout << endl;
       }
       if (allSmaller) {
         v->rtype = HDS_Vertex::Maximum;
-        cout << "Maximum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
-        for (auto neighbor : neighbors) {
-          cout << moorseFunc(neighbor, a, b, c) << " ";
-        }
-        cout << endl;
+        //cout << "Maximum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+        //for (auto neighbor : neighbors) {
+        //  cout << moorseFunc(neighbor, a, b, c) << " ";
+        //}
+        //cout << endl;
       }
       if (allLarger) {
         v->rtype = HDS_Vertex::Minimum;
-        cout << "Minimum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
-        for (auto neighbor : neighbors) {
-          cout << moorseFunc(neighbor, a, b, c) << " ";
-        }
-        cout << endl;
+        //cout << "Minimum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+        //for (auto neighbor : neighbors) {
+        //  cout << moorseFunc(neighbor, a, b, c) << " ";
+        //}
+        //cout << endl;
       }
 
       if (allSmaller || allLarger || isSaddle) {}
