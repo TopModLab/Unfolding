@@ -88,7 +88,13 @@ void svg_precompute(const string& input_obj_name, const int fixed_k, string& svg
   if (begin_vertex_index == 0 && end_vertex_index == model.GetNumOfVerts() - 1) {
     svg_file_name = input_obj_name.substr(0,input_obj_name.length() - 4 ) 
       + "_SVG_k" + to_string(fixed_k) +  ".binary";
-  } 
+  }
+
+  // see if the file exists, if so, skip the computation
+  if (std::ifstream(svg_file_name).good()) {
+    cout << "SVG file exists, skipping SVG computation." << endl;
+    return;
+  }
 
   ofstream output_file (svg_file_name.c_str() , ios::out | ios::binary);
   int num_of_vertex = end_vertex_index - begin_vertex_index + 1;

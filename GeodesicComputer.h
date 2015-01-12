@@ -16,7 +16,7 @@ public:
   ~GeodesicComputer();
 
   vector<double> distanceTo(int vIdx) const;
-  
+
 private:
   unique_ptr<SparseGraph<float>> s_graph;
 };

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>CriticalPointsPanel</class>
- <widget class="QWidget" name="CritialPointsPanel">
+ <widget class="QWidget" name="CriticalPointsPanel">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -76,6 +76,17 @@
       </item>
       <item>
        <widget class="QSpinBox" name="smoothingSpinBox"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QCheckBox" name="smoothingTypeCheckBox">
+        <property name="text">
+         <string>Smoothing on Actual Mesh</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

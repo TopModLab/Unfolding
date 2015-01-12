@@ -28,3 +28,4 @@ vector<double> GeodesicComputer::distanceTo(int vIdx) const
   }
   return dists;
 }
+

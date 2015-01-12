@@ -5,27 +5,94 @@
 #include "MeshExtender.h"
 #include "MeshIterator.h"
 
+#include "utils.hpp"
+
+#include <vtkPolyDataToReebGraphFilter.h>
+#include <vtkDirectedGraph.h>
+#include <vtkReebGraph.h>
+#include <vtkDoubleArray.h>
+#include <vtkCellArray.h>
+#include <vtkVertexListIterator.h>
+#include <vtkEdgeListIterator.h>
+#include <vtkGraphEdge.h>
+#include <vtkDataSetAttributes.h>
+#include <vtkVariantArray.h>
+
 MeshManager* MeshManager::instance = NULL;
 
 bool MeshManager::loadOBJFile(const string& filename) {
+  try {
+    cout << "[VTK] Reading mesh file ..." << endl;
+    vtkSmartPointer<vtkOBJReader> vtkReader = vtkSmartPointer<vtkOBJReader>::New();
+    vtkReader->SetFileName(filename.c_str());
+    vtkReader->Update();
+    vtkMesh = vtkReader->GetOutput();
+    cout << "[VTK] Creating reeb graph ..." << endl;
+
+    updateReebGraph();
+  }
+  catch (exception e) {
+    cerr << e.what() << endl;
+  }
+
   OBJLoader loader;
   if( loader.load(filename) ) {
     cout << "file " << filename << " loaded." << endl;
 
     /// build a half edge mesh here
-    buildHalfEdgeMesh(loader.getFaces(), loader.getVerts());
+    //hds_mesh->printMesh("original");
+    hds_mesh.reset(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
+
+    cutted_mesh.reset();
+    unfolded_mesh.reset();
+    smoothed_mesh.reset();
+
+    /// save the half edge mesh out to a temporary file
+    hds_mesh->save("temp.obj");
+    
+    /// preprocess the mesh with smoothing
+    const int nsmooth = 10;
+    QScopedPointer<HDS_Mesh> tmp_mesh;
+    vector<string> smoothed_mesh_filenames;
+    tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
+    hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
+    for (int i = 0; i < nsmooth; ++i) {
+      const int stepsize = 10;
+      string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
+      smoothed_mesh_filenames.push_back(smesh_filename);
+      
+      if (Utils::exists(smesh_filename)) {
+        // load the mesh directly
+        OBJLoader tmploader;
+        tmploader.load(smesh_filename);
+        tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
+      }
+      else {
+        for (int j = 0; j < stepsize; ++j) {
+          MeshSmoother::smoothMesh_Laplacian(tmp_mesh.data());
+        }
+        tmp_mesh->save(smesh_filename);
+      }
+      hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
+    }
+    cout << "smoothed meshes computed finished." << endl;
 
     /// initialize the sparse graph
     gcomp.reset(new GeodesicComputer(filename));
-
+    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
+    for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
+      // compute or load SVG for smoothed meshes
+      gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));
+    }
+    cout << "SVGs computed." << endl;
     return true;
   }
   else return false;
 }
 
-void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
+HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
                                     const vector<MeshLoader::vert_t> &inVerts) {
-  hds_mesh.reset(new mesh_t);
+  mesh_t *thismesh = new mesh_t;
 
   cout << "building the half edge mesh ..." << endl;
 
@@ -142,14 +209,11 @@ void MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
 	v->computeNormal();
   }
 
-  hds_mesh->setMesh(faces, verts, hes);
+  thismesh->setMesh(faces, verts, hes);
   cout << "finished building halfedge structure." << endl;
-  cout << "halfedge count = " << hds_mesh->halfedges().size() << endl;
-  //hds_mesh->printMesh("original");
+  cout << "halfedge count = " << thismesh->halfedges().size() << endl;
 
-  cutted_mesh.reset();
-  unfolded_mesh.reset();
-  smoothed_mesh.reset();
+  return thismesh;
 }
 
 void MeshManager::cutMeshWithSelectedEdges()
@@ -315,3 +379,158 @@ void MeshManager::colorMeshByGeoDistance(int vidx)
   });
   hds_mesh->colorVertices(dists);
 }
+
+void MeshManager::colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ratio)
+{
+  auto dists = getInterpolatedGeodesics(vidx, lev0, lev1, ratio);
+  double maxDist = *(std::max_element(dists.begin(), dists.end()));
+  std::for_each(dists.begin(), dists.end(), [=](double &x){
+    x /= maxDist;
+    x -= 0.5;
+    //cout << x << endl;
+  });
+  hds_mesh->colorVertices(dists);
+}
+
+void MeshManager::updateReebGraph(const vector<double> &fvals)
+{
+  vtkSmartPointer<vtkReebGraph> surfaceReebGraph = vtkSmartPointer<vtkReebGraph>::New();
+  int nverts = vtkMesh->GetNumberOfPoints();
+  cout << "number of points = " << vtkMesh->GetNumberOfPoints() << endl;
+  cout << "[VTK] Preparing scalar data ..." << endl;
+  vtkSmartPointer<vtkDoubleArray> scalarField = vtkSmartPointer<vtkDoubleArray>::New();
+  scalarField->Resize(nverts);
+  if (fvals.empty() || fvals.size() != nverts) {
+    for (int i = 0; i < nverts; ++i) {
+      auto pt = vtkMesh->GetPoint(i);
+      scalarField->SetValue(i, pt[2]);
+    }
+  }
+  else {
+    for (int i = 0; i < nverts; ++i) {
+      scalarField->SetValue(i, fvals[i]);
+    }
+  }
+
+  cout << "[VTK] Building reeb graph ..." << endl;
+  int ret = surfaceReebGraph->Build(vtkMesh, scalarField);
+  switch (ret) {
+  case vtkReebGraph::ERR_INCORRECT_FIELD:
+    cout << "[VTK] ERR_INCORRECT_FIELD" << endl;
+    break;
+  case vtkReebGraph::ERR_NOT_A_SIMPLICIAL_MESH:
+    cout << "[VTK] ERR NOT A SIMPLICIAL MESH" << endl;
+    break;
+  default:
+    cout << "[VTK] Succeeded." << endl;
+    break;
+  }
+  surfaceReebGraph->Print(std::cout);
+  
+  rbGraph.clear();
+
+  // print the information of this graph
+  vtkSmartPointer<vtkVertexListIterator> it = vtkVertexListIterator::New();
+  surfaceReebGraph->GetVertices(it);
+  while (it->HasNext()) {
+    auto vidx = it->Next();
+    auto vdata = surfaceReebGraph->GetVertexData();
+    auto refidx = vdata->GetArray("Vertex Ids")->GetComponent(vidx, 0);
+    cout << refidx << endl;
+    rbGraph.V.push_back(SimpleNode(vidx, refidx));
+    auto ptdata = vtkMesh->GetPoint(refidx);
+    cout << ptdata[0] << ", " << ptdata[1] << ", " << ptdata[2] << endl;
+  }
+
+  vtkSmartPointer<vtkEdgeListIterator> eit = vtkEdgeListIterator::New();
+  surfaceReebGraph->GetEdges(eit);
+  while (eit->HasNext()) {
+    auto edge = eit->NextGraphEdge();
+    rbGraph.E.push_back(SimpleEdge(edge->GetSource(), edge->GetTarget()));
+    cout << edge->GetSource() << " -> " << edge->GetTarget() << endl;
+  }
+
+  vtkDataArray *vertexInfo = vtkDataArray::SafeDownCast(surfaceReebGraph->GetVertexData()->GetAbstractArray("Vertex Ids"));
+  vtkVariantArray *edgeInfo = vtkVariantArray::SafeDownCast(surfaceReebGraph->GetEdgeData()->GetAbstractArray("Vertex Ids"));
+  surfaceReebGraph->GetEdges(eit);
+  while (eit->HasNext()) {
+    vtkEdgeType e = eit->Next();
+    vtkAbstractArray *deg2NodeList = edgeInfo->GetPointer(e.Id)->ToArray();
+    cout << "     Arc #" << e.Id << ": "
+      //<< *(vertexInfo->GetTuple(e.Source)) 
+      << vertexInfo->GetComponent(e.Source, 0)
+      << " -> "
+      //<< *(vertexInfo->GetTuple(e.Target)) 
+      << vertexInfo->GetComponent(e.Target, 0)
+      << " (" << deg2NodeList->GetNumberOfTuples() << " degree-2 nodes)" << endl;
+
+    int ntuples = deg2NodeList->GetNumberOfTuples();
+    if (ntuples > 0) {
+      rbGraph.Es.push_back(SimpleEdge(vertexInfo->GetComponent(e.Source, 0), deg2NodeList->GetVariantValue(0).ToInt()));
+      for (int j = 0; j < ntuples - 1; ++j) {
+        rbGraph.Es.push_back(SimpleEdge(deg2NodeList->GetVariantValue(j).ToInt(), deg2NodeList->GetVariantValue(j + 1).ToInt()));
+      }
+      rbGraph.Es.push_back(SimpleEdge(deg2NodeList->GetVariantValue(ntuples - 1).ToInt(), vertexInfo->GetComponent(e.Target, 0)));
+    }
+    else {
+      rbGraph.Es.push_back(SimpleEdge(vertexInfo->GetComponent(e.Source, 0), vertexInfo->GetComponent(e.Target, 0)));
+    }
+  }
+}
+
+vector<double> MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
+{
+  auto dist0 = gcomp_smoothed[lev0]->distanceTo(vidx);
+  auto dist1 = gcomp_smoothed[lev1]->distanceTo(vidx);
+  return Utils::interpolate(dist0, dist1, alpha);
+}
+
+
+vector<double> MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
+{
+  auto m0 = hds_mesh_smoothed[lev0];
+  auto m1 = hds_mesh_smoothed[lev1];
+
+  auto dist0 = vector<double>(hds_mesh->verts().size());
+  auto dist1 = vector<double>(hds_mesh->verts().size());
+  for (auto v : m0->verts()) {
+    dist0[v->index] = v->pos.z();
+  }
+  for (auto v : m1->verts()) {
+    dist1[v->index] = v->pos.z();
+  }
+  return Utils::interpolate(dist0, dist1, alpha);
+}
+
+vector<double> MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
+{
+  auto m0 = hds_mesh_smoothed[lev0];
+  auto m1 = hds_mesh_smoothed[lev1];
+
+  auto dist0 = vector<double>(hds_mesh->verts().size());
+  auto dist1 = vector<double>(hds_mesh->verts().size());
+  for (auto v : m0->verts()) {
+    dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+  }
+  for (auto v : m1->verts()) {
+    dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+  }
+  return Utils::interpolate(dist0, dist1, alpha);
+}
+
+vector<double> MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
+{
+  auto m0 = hds_mesh_smoothed[lev0];
+  auto m1 = hds_mesh_smoothed[lev1];
+
+  auto dist0 = vector<double>(hds_mesh->verts().size());
+  auto dist1 = vector<double>(hds_mesh->verts().size());
+  for (auto v : m0->verts()) {
+    dist0[v->index] = v->curvature;
+  }
+  for (auto v : m1->verts()) {
+    dist1[v->index] = v->curvature;
+  }
+  return Utils::interpolate(dist0, dist1, alpha);
+}
+

@@ -16,6 +16,15 @@ public:
   
   typedef pair<int, int> Edge;
 
+  struct EdgeHasher {
+    std::size_t operator()(Edge const& e) const
+    {
+      std::size_t h1 = std::hash<int>()(e.first);
+      std::size_t h2 = std::hash<int>()(e.second);
+      return h1 ^ (h2 << 1);
+    }
+  };
+
   struct Arc {
     Arc(const Edge &edge) {
       e.push_back(edge);
@@ -44,6 +53,6 @@ protected:
 private:
   unordered_set<Node*> nodes;
   unordered_set<Arc*> arcs;
-  unordered_map<Edge, Arc*> edgeArcMap;
+  unordered_map<Edge, Arc*, EdgeHasher> edgeArcMap;
 };
 

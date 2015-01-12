@@ -18,7 +18,7 @@ void ReebGraph::build(HDS_Mesh *mesh, const vector<double> &fval)
     createNode(v, fval[v->index]);
   }
 
-  unordered_set<pair<int, int>> edgeSet;
+  unordered_set<Edge, EdgeHasher> edgeSet;
   // process the triangles
   for (auto f : mesh->faceSet) {
     // for each edge in the triangle, create an arc
@@ -90,9 +90,10 @@ void ReebGraph::glueByMergeSorting(Arc *a0, Arc *a1, const Edge& e0, const Edge&
   }
 }
 
-Node* ReebGraph::bottomNode(Arc *a)
+ReebGraph::Node* ReebGraph::bottomNode(Arc *a)
 {
-
+  Node *n;
+  return n;
 }
 
 void ReebGraph::mergeArcs(Arc *a0, Arc *a1)
@@ -100,12 +101,13 @@ void ReebGraph::mergeArcs(Arc *a0, Arc *a1)
   // merge the arcs based on the embedding information
 }
 
-Arc* ReebGraph::nextArcMappedToEdge(Arc *a, const Edge &e)
+ReebGraph::Arc* ReebGraph::nextArcMappedToEdge(Arc *a, const Edge &e)
 {
-
+  Arc *arc;
+  return arc;
 }
 
 bool ReebGraph::isValidArc(Arc *a)
 {
-
+  return false;
 }

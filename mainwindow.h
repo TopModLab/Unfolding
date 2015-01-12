@@ -52,8 +52,10 @@ private slots:
   void slot_extendMesh();
 
   void slot_updateMeshColorByGeoDistance(int vidx);
+  void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
   void slot_triggerCriticalPoints();
   void slot_updateCriticalPointsSmoothingTimes(int);
+  void slot_updateCriticalPointsSmoothingType(int);
   void slot_updateCriticalPointsMethod(int);
 
 private:

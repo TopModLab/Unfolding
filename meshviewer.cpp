@@ -9,7 +9,7 @@
 #include <QMouseEvent>
 
 MeshViewer::MeshViewer(QWidget *parent) :
-  QGLWidget(qglformat_3d, parent)
+QGLWidget(qglformat_3d, parent)
 {
   interactionState = Camera;
   viewerState.updateModelView();
@@ -20,6 +20,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
   lastSelectedIndex = 0;
   cmode = Geodesics;
   cp_smoothing_times = 0;
+  cp_smoothing_type = 0;
 }
 
 MeshViewer::~MeshViewer()
@@ -43,12 +44,12 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 {
   bool isInvertible;
   QMatrix4x4 proj_modelview_inv = viewerState.projectionModelView().inverted(&isInvertible);
-  if(isInvertible)
+  if (isInvertible)
   {
     QVector3D pos_camera;
-    pos_camera.setX((pos_screen.x()-(float)viewerState.viewport.x)/(float)viewerState.viewport.w*2.0-1.0);
-    pos_camera.setY((pos_screen.y()-(float)viewerState.viewport.y)/(float)viewerState.viewport.h*2.0-1.0);
-    pos_camera.setZ(2.0*pos_camera.z()-1.0);
+    pos_camera.setX((pos_screen.x() - (float)viewerState.viewport.x) / (float)viewerState.viewport.w*2.0 - 1.0);
+    pos_camera.setY((pos_screen.y() - (float)viewerState.viewport.y) / (float)viewerState.viewport.h*2.0 - 1.0);
+    pos_camera.setZ(2.0*pos_camera.z() - 1.0);
     pos_world = (proj_modelview_inv*QVector4D(pos_camera, 1.0f)).toVector3DAffine();
   }
 
@@ -59,39 +60,39 @@ int MeshViewer::getSelectedElementIndex(const QPoint &p)
 {
   int winX = p.x(), winY = height() - p.y();
 
-  auto max = [](int a, int b) { return a>b?a:b; };
-  auto min = [](int a, int b) { return a<b?a:b; };
+  auto max = [](int a, int b) { return a > b ? a : b; };
+  auto min = [](int a, int b) { return a < b ? a : b; };
 
   // search for pixels within a small window
   const int radius = 5;
   map<int, int> counter;
   int maxIdx = -1, maxCount = 0;
-  for(int y=max(winY - radius, 0); y<min(winY + radius, height()); ++y) {
+  for (int y = max(winY - radius, 0); y < min(winY + radius, height()); ++y) {
     int dy = y - winY;
-    for(int x=max(winX - radius, 0); x<min(winX + radius, width()); ++x) {
+    for (int x = max(winX - radius, 0); x < min(winX + radius, width()); ++x) {
       int dx = x - winX;
-      if( dx*dx + dy*dy <= radius*radius ) {
-        int offset = (y * width() + x)*4;
+      if (dx*dx + dy*dy <= radius*radius) {
+        int offset = (y * width() + x) * 4;
         unsigned char r, g, b, a;
-        r = selectionBuffer[offset+0];
-        g = selectionBuffer[offset+1];
-        b = selectionBuffer[offset+2];
-        a = selectionBuffer[offset+3];
+        r = selectionBuffer[offset + 0];
+        g = selectionBuffer[offset + 1];
+        b = selectionBuffer[offset + 2];
+        a = selectionBuffer[offset + 3];
 
-        if( a == 0 ) continue;
+        if (a == 0) continue;
         else {
           int idx = decodeIndex(r, g, b, 1.0);
           auto it = counter.find(idx);
-          if( it == counter.end() ) {
+          if (it == counter.end()) {
             counter.insert(make_pair(idx, 1));
-            if( maxCount == 0 ) {
+            if (maxCount == 0) {
               maxCount = 1;
               maxIdx = idx;
             }
           }
           else {
             ++it->second;
-            if( it->second > maxCount ) {
+            if (it->second > maxCount) {
               maxCount = it->second;
               maxIdx = idx;
             }
@@ -117,35 +118,35 @@ void MeshViewer::computeGlobalSelectionBox()
   glGetDoublev(GL_PROJECTION_MATRIX, m_GLprojection);     // Retrieve The Projection Matrix
 
   //Not know why, but it solves the problem, maybe some issue with QT
-  if(width()<height())
+  if (width() < height())
     m_GLviewport[1] = -m_GLviewport[1];
 
   GLdouble winX = sbox.corner_win[0];
   GLdouble winY = sbox.corner_win[1];
-  QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[0]);
+  QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[0]);
   //qDebug()<<sbox.gcorners[0];
-  gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global, sbox.corner_global+1, sbox.corner_global+2);//The new position of the mouse
+  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global, sbox.corner_global + 1, sbox.corner_global + 2);//The new position of the mouse
   //qDebug()<<sbox.corner_global[0]<<sbox.corner_global[1]<<sbox.corner_global[2];
 
   winX = sbox.corner_win[0];
   winY = sbox.corner_win[3];
-  QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[1]);
+  QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[1]);
   //qDebug()<<sbox.gcorners[1];
-  gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global+3, sbox.corner_global+4, sbox.corner_global+5);//The new position of the mouse
+  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 3, sbox.corner_global + 4, sbox.corner_global + 5);//The new position of the mouse
   //qDebug()<<sbox.corner_global[3]<<sbox.corner_global[4]<<sbox.corner_global[5];
 
   winX = sbox.corner_win[2];
   winY = sbox.corner_win[3];
-  QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[2]);
+  QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[2]);
   //qDebug()<<sbox.gcorners[2];
-  gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global+6, sbox.corner_global+7, sbox.corner_global+8);//The new position of the mouse
+  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 6, sbox.corner_global + 7, sbox.corner_global + 8);//The new position of the mouse
   //qDebug() << sbox.corner_global[6] << sbox.corner_global[7]<< sbox.corner_global[8];
 
   winX = sbox.corner_win[2];
   winY = sbox.corner_win[1];
-  QtUnProject(QVector3D(winX,winY,0.001), sbox.gcorners[3]);
+  QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[3]);
   //qDebug()<<sbox.gcorners[3];
-  gluUnProject( winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global+9, sbox.corner_global+10, sbox.corner_global+11);//The new position of the mouse
+  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 9, sbox.corner_global + 10, sbox.corner_global + 11);//The new position of the mouse
   //qDebug() << sbox.corner_global[9] << sbox.corner_global[10]<< sbox.corner_global[11];
 }
 
@@ -154,12 +155,12 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
   mouseState.isPressed = true;
 
   /// set interaction mode as camera if shift key is hold
-  if( e->modifiers() & Qt::AltModifier ) {
+  if (e->modifiers() & Qt::AltModifier) {
     interactionStateStack.push(interactionState);
     interactionState = Camera;
   }
 
-  switch( interactionState ) {
+  switch (interactionState) {
   case Camera:
     mouseState.prev_pos = QVector2D(e->pos());
     break;
@@ -175,17 +176,17 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 
 void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 {
-  switch( interactionState ) {
-  case Camera: {    
-    if( e->buttons() & Qt::LeftButton ) {
+  switch (interactionState) {
+  case Camera: {
+    if (e->buttons() & Qt::LeftButton) {
       QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
 
-      if((e->modifiers() & Qt::ShiftModifier) ) {
-        viewerState.translation += QVector3D(diff.x()/100.0, -diff.y()/100.0, 0.0);
+      if ((e->modifiers() & Qt::ShiftModifier)) {
+        viewerState.translation += QVector3D(diff.x() / 100.0, -diff.y() / 100.0, 0.0);
       }
-      else if(e->modifiers() & Qt::ControlModifier)
+      else if (e->modifiers() & Qt::ControlModifier)
       {
-        viewerState.translation += QVector3D(0.0, 0.0, diff.x()/100.0-diff.y()/100.0);
+        viewerState.translation += QVector3D(0.0, 0.0, diff.x() / 100.0 - diff.y() / 100.0);
       }
       else{
         // Rotation axis is perpendicular to the mouse position difference
@@ -209,7 +210,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
   case SelectFace:
   case SelectEdge:
   case SelectVertex: {
-    if( mouseState.isPressed ) {
+    if (mouseState.isPressed) {
       isSelecting = true;
       sbox.corner_win[2] = e->x();
       sbox.corner_win[3] = viewerState.viewport.h - e->y();
@@ -226,7 +227,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 
 void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 {
-  switch( interactionState ) {
+  switch (interactionState) {
   case Camera:
     mouseState.prev_pos = QVector2D(e->pos());
     break;
@@ -240,11 +241,11 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 
     int selectedElementIdx = getSelectedElementIndex(e->pos());
     cout << "selected element " << selectedElementIdx << endl;
-    if( selectedElementIdx >= 0 ) {
-      if( interactionState == SelectEdge ) {
+    if (selectedElementIdx >= 0) {
+      if (interactionState == SelectEdge) {
         heMesh->selectEdge(selectedElementIdx);
       }
-      else if( interactionState == SelectFace ) {
+      else if (interactionState == SelectFace) {
         heMesh->selectFace(selectedElementIdx);
       }
       else {
@@ -258,39 +259,45 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
   mouseState.isPressed = false;
 
   /// reset interaction mode if in camera mode triggered by holding alt
-  if( e->modifiers() & Qt::AltModifier ) {
+  if (e->modifiers() & Qt::AltModifier) {
     interactionState = interactionStateStack.top();
     interactionStateStack.pop();
-  }  
+  }
 
   updateGL();
 }
 
 void MeshViewer::keyPressEvent(QKeyEvent *e)
 {
-  switch(e->key()) {
+  switch (e->key()) {
   case Qt::Key_C:
   {
-    emit updateMeshColorByGeoDistance(lastSelectedIndex);
+    int lev0 = cp_smoothing_times / 10;
+    int lev1 = lev0 + 1;
+    const int maxLev = 10;
+    if (lev1 > 10) return;
+
+    double ratio = (cp_smoothing_times - lev0) / (double)(lev1 - lev0);
+    emit updateMeshColorByGeoDistance(lastSelectedIndex, lev0, lev1, ratio);
     break;
   }
   case Qt::Key_E:
   {
-    if( heMesh ) {
+    if (heMesh) {
       heMesh->flipShowEdges();
     }
     break;
   }
   case Qt::Key_V:
   {
-    if( heMesh ) {
+    if (heMesh) {
       heMesh->flipShowVertices();
     }
     break;
   }
   case Qt::Key_F:
   {
-    if( heMesh ) {
+    if (heMesh) {
       heMesh->flipShowFaces();
     }
     break;
@@ -301,7 +308,7 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
     break;
   }
   case Qt::Key_R:
-  {    
+  {
     toggleCriticalPoints();
     break;
   }
@@ -320,9 +327,9 @@ void MeshViewer::keyReleaseEvent(QKeyEvent *e)
 
 void MeshViewer::wheelEvent(QWheelEvent *e)
 {
-  switch(interactionState) {
+  switch (interactionState) {
   case Camera:{
-    double numSteps = e->delta()/200.0f;
+    double numSteps = e->delta() / 200.0f;
     viewerState.translation.setZ(viewerState.translation.z() + numSteps);
     viewerState.updateModelView();
     break;
@@ -365,7 +372,7 @@ void MeshViewer::initializeGL()
 
 void MeshViewer::initializeFBO() {
   fbo.reset(new QGLFramebufferObject(width(), height(), QGLFramebufferObject::Depth));
-  selectionBuffer.resize(width()*height()*4);
+  selectionBuffer.resize(width()*height() * 4);
 }
 
 void MeshViewer::resizeGL(int w, int h)
@@ -397,27 +404,27 @@ void MeshViewer::paintGL()
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POINT_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
-  
+
   glShadeModel(GL_SMOOTH);
-  glEnable(GL_BLEND);  
+  glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   //glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 
-  if( heMesh == nullptr ) {
+  if (heMesh == nullptr) {
     glLineWidth(2.0);
     GLUtils::drawQuad(QVector3D(-1, -1, 0),
-                      QVector3D( 1, -1, 0),
-                      QVector3D( 1,  1, 0),
-                      QVector3D(-1,  1, 0));
+      QVector3D(1, -1, 0),
+      QVector3D(1, 1, 0),
+      QVector3D(-1, 1, 0));
   }
   else {
-    if( enableLighting )
+    if (enableLighting)
       enableLights();
     heMesh->draw(colormap);
-    if( enableLighting )
+    if (enableLighting)
       disableLights();
 
-    switch( interactionState ) {
+    switch (interactionState) {
     case Camera:
       break;
     default:
@@ -427,17 +434,18 @@ void MeshViewer::paintGL()
 
     if (showReebPoints) {
       drawReebPoints();
+      drawReebGraph();
     }
   }
 }
 
 static QImage toQImage(const unsigned char* data, int w, int h) {
   QImage qimg(w, h, QImage::Format_ARGB32);
-  for(int i=0, idx=0;i<h;i++) {
-    for(int j=0;j<w;j++, idx+=4)
+  for (int i = 0, idx = 0; i < h; i++) {
+    for (int j = 0; j < w; j++, idx += 4)
     {
-      unsigned char r = data[idx+2];
-      unsigned char g = data[idx+1];
+      unsigned char r = data[idx + 2];
+      unsigned char g = data[idx + 1];
       unsigned char b = data[idx];
       unsigned char a = 255;
       QRgb qp = qRgba(r, g, b, a);
@@ -469,12 +477,12 @@ void MeshViewer::drawMeshToFBO() {
 
   /// must set alpha to zero
   glClearColor(0, 0, 0, 0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glShadeModel(GL_FLAT);
   glDisable(GL_BLEND);
 
-  switch( interactionState ) {
+  switch (interactionState) {
   case SelectFace:
     heMesh->drawFaceIndices();
     break;
@@ -504,26 +512,26 @@ void MeshViewer::drawMeshToFBO() {
 }
 
 void MeshViewer::drawSelectionBox() {
-  if( !isSelecting ) return;
+  if (!isSelecting) return;
 
 #if 1
   //draw selection box
-  glColor4f(0.0, 1.0, 19.0/255, 0.2);
+  glColor4f(0.0, 1.0, 19.0 / 255, 0.2);
   glBegin(GL_QUADS);
   glVertex3dv(sbox.corner_global);
-  glVertex3dv(sbox.corner_global+3);
-  glVertex3dv(sbox.corner_global+6);
-  glVertex3dv(sbox.corner_global+9);
+  glVertex3dv(sbox.corner_global + 3);
+  glVertex3dv(sbox.corner_global + 6);
+  glVertex3dv(sbox.corner_global + 9);
   glEnd();
 
   //draw selection box
   glLineWidth(3.0);
-  glColor4f(0.0, 1.0, 19.0/255, 0.5);
+  glColor4f(0.0, 1.0, 19.0 / 255, 0.5);
   glBegin(GL_LINE_LOOP);
   glVertex3dv(sbox.corner_global);
-  glVertex3dv(sbox.corner_global+3);
-  glVertex3dv(sbox.corner_global+6);
-  glVertex3dv(sbox.corner_global+9);
+  glVertex3dv(sbox.corner_global + 3);
+  glVertex3dv(sbox.corner_global + 6);
+  glVertex3dv(sbox.corner_global + 9);
   glEnd();
 #else
   glPushMatrix();
@@ -540,12 +548,12 @@ void MeshViewer::drawSelectionBox() {
 
 void MeshViewer::enableLights()
 {
-  GLfloat light_position[] = {10.0, 4.0, 10.0,1.0};
-  GLfloat mat_specular[] = {0.8, 0.8, 0.8, 1.0};
-  GLfloat mat_diffuse[] = {0.375, 0.375, 0.375, 1.0};
-  GLfloat mat_shininess[] = {25.0};
-  GLfloat light_ambient[] = {0.05, 0.05, 0.05, 1.0};
-  GLfloat white_light[] = {1.0, 1.0, 1.0, 1.0};
+  GLfloat light_position[] = { 10.0, 4.0, 10.0, 1.0 };
+  GLfloat mat_specular[] = { 0.8, 0.8, 0.8, 1.0 };
+  GLfloat mat_diffuse[] = { 0.375, 0.375, 0.375, 1.0 };
+  GLfloat mat_shininess[] = { 25.0 };
+  GLfloat light_ambient[] = { 0.05, 0.05, 0.05, 1.0 };
+  GLfloat white_light[] = { 1.0, 1.0, 1.0, 1.0 };
 
   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
   glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
@@ -575,8 +583,8 @@ void MeshViewer::disableLights()
 }
 
 void MeshViewer::drawReebPoints()
-{  
-  cout << "nReebPoints = " << reebPoints.size() << endl;  
+{
+  cout << "nReebPoints = " << reebPoints.size() << endl;
   glPointSize(8.0);
   glBegin(GL_POINTS);
   for (auto p : reebPoints) {
@@ -625,7 +633,7 @@ void MeshViewer::findReebPoints()
 
     return newval;
   };
-  
+
   int nverts = heMesh->vertSet.size();
   int nedges = heMesh->heSet.size() / 2;
   int nfaces = heMesh->faceSet.size();
@@ -634,45 +642,86 @@ void MeshViewer::findReebPoints()
 
   // find the seeds of the laplacian smoothing
   // pick a few vertices based on their curvatures
-  
+
   auto dists = vector<double>();
-  switch (cmode) {
-  case Geodesics: {
-    // use geodesic distance
-    dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
-    break;
-  }
-  case Z: {
-    dists = vector<double>(heMesh->verts().size());
-    for (auto v : heMesh->verts()) {
-      dists[v->index] = v->pos.z();
+  int isSmoothingOnActualMeshChecked = cp_smoothing_type;
+  switch (isSmoothingOnActualMeshChecked) {
+  case Qt::Checked:
+  {
+    // get the function values from the smoothed meshes
+    int lev0 = cp_smoothing_times / 10;
+    int lev1 = lev0 + 1;
+    const int maxLev = 10;
+    if (lev1 > 10) return;
+
+    double ratio = (cp_smoothing_times-lev0)/10.0;
+    switch (cmode) {
+    case Geodesics: {
+      dists = MeshManager::getInstance()->getInterpolatedGeodesics(lastSelectedIndex, lev0, lev1, ratio);
+      break;
+    }
+    case Z: {
+      dists = MeshManager::getInstance()->getInterpolatedZValue(lev0, lev1, ratio);
+      break;
+    }
+    case PointNormal: {
+      QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
+      dists = MeshManager::getInstance()->getInterpolatedPointNormalValue(lev0, lev1, ratio, pnormal);
+      break;
+    }
+    case Curvature:
+    {
+      dists = MeshManager::getInstance()->getInterpolatedCurvature(lev0, lev1, ratio);
+      break;
+    }
     }
     break;
   }
-  case PointNormal: {
-    dists = vector<double>(heMesh->verts().size());
-    QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
-    for (auto v : heMesh->verts()) {
-      dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+  case Qt::Unchecked:
+  {
+    switch (cmode) {
+    case Geodesics: {
+      // use geodesic distance
+      dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
+      break;
     }
-    break;
-  }
-  case Curvature: {
-    dists = vector<double>(heMesh->verts().size());
-    for (auto v : heMesh->verts()) {
-      dists[v->index] = v->curvature;
+    case Z: {
+      dists = vector<double>(heMesh->verts().size());
+      for (auto v : heMesh->verts()) {
+        dists[v->index] = v->pos.z();
+      }
+      break;
     }
+    case PointNormal: {
+      dists = vector<double>(heMesh->verts().size());
+      QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
+      for (auto v : heMesh->verts()) {
+        dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+      }
+      break;
+    }
+    case Curvature: {
+      dists = vector<double>(heMesh->verts().size());
+      for (auto v : heMesh->verts()) {
+        dists[v->index] = v->curvature;
+      }
+      break;
+    }
+    }
+
+    // find the points to keep
+    int niters = cp_smoothing_times;// pow(2, cp_smoothing_times);
+    cout << "smoothing = " << niters << endl;
+    for (int i = 0; i < niters; ++i)
+      dists = laplacianSmoother(dists, heMesh);
+
     break;
   }
   }
 
-  // find the points to keep
-
-  int niters = pow(2, cp_smoothing_times);
-  for (int i = 0; i < niters; ++i)
-    dists = laplacianSmoother(dists, heMesh);
-
+  MeshManager::getInstance()->updateReebGraph(dists);
   reebPoints = heMesh->getReebPoints(dists);
+
   int sum_cp = 0;
   for (auto cp : reebPoints) {
     if (cp->rtype == HDS_Vertex::Maximum) sum_cp += 1;
@@ -696,4 +745,37 @@ void MeshViewer::setCriticalPointsSmoothingTimes(int times)
 {
   cp_smoothing_times = times;
   findReebPoints();
+}
+
+void MeshViewer::setCriticalPointsSmoothingType(int t)
+{
+  cp_smoothing_type = t;
+  findReebPoints();
+}
+
+void MeshViewer::bindReebGraph(SimpleGraph *g)
+{
+  rbgraph = g;
+}
+
+void MeshViewer::drawReebGraph()
+{
+  // draw edges
+#if 0
+  for (auto i = 0; i < rbgraph->E.size(); ++i) {
+    int s = rbgraph->E[i].s;
+    int t = rbgraph->E[i].t;
+    int v0 = rbgraph->V[s].idxref;
+    int v1 = rbgraph->V[t].idxref;
+
+    GLUtils::drawLine(heMesh->vertMap[v0]->pos, heMesh->vertMap[v1]->pos);
+  }
+#else
+  for (auto i = 0; i < rbgraph->Es.size(); ++i) {
+    int v0 = rbgraph->Es[i].s;
+    int v1 = rbgraph->Es[i].t;
+
+    GLUtils::drawLine(heMesh->vertMap[v0]->pos, heMesh->vertMap[v1]->pos, Qt::red);
+  }
+#endif
 }

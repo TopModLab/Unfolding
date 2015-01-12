@@ -616,3 +616,29 @@ void HDS_Mesh::colorVertices(const vector<double> &val)
   }
 #endif
 }
+
+void HDS_Mesh::save(const string &filename)
+{
+  // the vertices and faces are saved in the same order they are loaded in
+  stringstream ss;
+
+  // save the vertices first
+  for (int i = 0; i < vertMap.size(); ++i) {
+    auto v = vertMap[i];
+    ss << "v " << v->pos.x() << ' ' << v->pos.y() << ' ' << v->pos.z() << endl;
+  }
+
+  // save the faces
+  for (int i = 0; i < faceMap.size(); ++i) {
+    auto corners = faceMap[i]->corners();
+    ss << "f ";
+    for (auto v : corners) {
+      ss << v->index + 1 << ' ';
+    }
+    ss << endl;
+  }
+
+  ofstream fout(filename);
+  fout << ss.str();
+  fout.close();
+}

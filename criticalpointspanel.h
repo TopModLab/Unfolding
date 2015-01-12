@@ -15,6 +15,7 @@ public:
 signals:
     void sig_methodChanged(int);
     void sig_smoothingTimesChanged(int);
+    void sig_smoothingTypeChanged(int);
 
 private:
     Ui::CriticalPointsPanel ui;

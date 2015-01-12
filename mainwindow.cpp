@@ -54,9 +54,11 @@ bool MainWindow::connectComponents()
 {
   connect(ceditor, SIGNAL(colorChanged()), this, SLOT(slot_updateViewerColormap()));
   connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, SLOT(slot_updateMeshColorByGeoDistance(int)));
+  connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int, int, int, double)), this, SLOT(slot_updateMeshColorByGeoDistance(int, int, int, double)));
 
   connect(cppanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCriticalPointsMethod(int)));
   connect(cppanel, SIGNAL(sig_smoothingTimesChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingTimes(int)));
+  connect(cppanel, SIGNAL(sig_smoothingTypeChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingType(int)));
   return true;
 }
 
@@ -218,6 +220,7 @@ void MainWindow::slot_newFile()
   QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
   MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
   viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+  viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 }
 
 void MainWindow::slot_saveFile()
@@ -278,6 +281,11 @@ void MainWindow::slot_updateMeshColorByGeoDistance(int vidx) {
   viewer->update();
 }
 
+void MainWindow::slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio) {
+  MeshManager::getInstance()->colorMeshByGeoDistance(vidx, lev0, lev1, ratio);
+  viewer->update();
+}
+
 void MainWindow::slot_smoothMesh() {
   MeshManager::getInstance()->smoothMesh();
   viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getSmoothedMesh());
@@ -306,5 +314,11 @@ void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 
 void MainWindow::slot_updateCriticalPointsSmoothingTimes(int times) {
   viewer->setCriticalPointsSmoothingTimes(times);
+  viewer->update();
+}
+
+void MainWindow::slot_updateCriticalPointsSmoothingType(int t) {
+  cout << "Smoothing type = " << t << endl;
+  viewer->setCriticalPointsSmoothingType(t);
   viewer->update();
 }

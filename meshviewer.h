@@ -13,7 +13,7 @@
 
 #include "hds_mesh.h"
 #include "colormap.h"
-
+#include "Graph.hpp"
 #include "polymesh.h"
 
 const QGLFormat qglformat_3d(
@@ -37,14 +37,17 @@ public:
   virtual ~MeshViewer();
 
   void bindHalfEdgeMesh(HDS_Mesh *mesh);
+  void bindReebGraph(SimpleGraph *g);
   void setCurvatureColormap(ColorMap cmap);
 
   void toggleCriticalPoints();
   void setCriticalPointsMethod(int midx);
   void setCriticalPointsSmoothingTimes(int times);
+  void setCriticalPointsSmoothingType(int t);
 
 signals:
   void updateMeshColorByGeoDistance(int vidx);
+  void updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double alpha);
 
 protected:
   void keyPressEvent(QKeyEvent *e);
@@ -191,10 +194,13 @@ private:
     NCModes
   } cmode;
   int cp_smoothing_times;
+  int cp_smoothing_type;
   void findReebPoints();
   void drawReebPoints();
-  
+  void drawReebGraph();
+
   unordered_set<HDS_Vertex*> reebPoints;
+  SimpleGraph * rbgraph;
 };
 
 #endif // MESHVIEWER_H
