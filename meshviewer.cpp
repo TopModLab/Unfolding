@@ -5,6 +5,7 @@
 #include "glutils.hpp"
 #include "mathutils.hpp"
 #include "utils.hpp"
+#include "morsesmalecomplex.h"
 
 #include <QMouseEvent>
 
@@ -30,7 +31,7 @@ MeshViewer::~MeshViewer()
 
 void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh) {
   heMesh = mesh;
-  findReebPoints();
+  //findReebPoints();
   updateGL();
 }
 
@@ -434,7 +435,7 @@ void MeshViewer::paintGL()
 
     if (showReebPoints) {
       drawReebPoints();
-      drawReebGraph();
+      //drawReebGraph();
     }
   }
 }
@@ -674,6 +675,14 @@ void MeshViewer::findReebPoints()
       dists = MeshManager::getInstance()->getInterpolatedCurvature(lev0, lev1, ratio);
       break;
     }
+    case Random:
+    {
+      dists = vector<double>(heMesh->verts().size());
+      for (auto &x : dists) {
+        x = rand() / (double)RAND_MAX - 0.5;
+      }
+      break;
+    }
     }
     break;
   }
@@ -707,6 +716,14 @@ void MeshViewer::findReebPoints()
       }
       break;
     }
+    case Random:
+    {
+      dists = vector<double>(heMesh->verts().size());
+      for (auto &x : dists) {
+        x = rand() / (double)RAND_MAX - 0.5;
+      }
+      break;
+    }
     }
 
     // find the points to keep
@@ -729,6 +746,9 @@ void MeshViewer::findReebPoints()
     else sum_cp -= cp->sdegree;
   }
   cout << "sum = " << sum_cp << endl;
+
+  // generate morse-smale complex
+  msc = MorseSmaleComplex(reebPoints);
 }
 
 void MeshViewer::toggleCriticalPoints() {
@@ -771,11 +791,22 @@ void MeshViewer::drawReebGraph()
     GLUtils::drawLine(heMesh->vertMap[v0]->pos, heMesh->vertMap[v1]->pos);
   }
 #else
+#if 0
   for (auto i = 0; i < rbgraph->Es.size(); ++i) {
     int v0 = rbgraph->Es[i].s;
     int v1 = rbgraph->Es[i].t;
 
     GLUtils::drawLine(heMesh->vertMap[v0]->pos, heMesh->vertMap[v1]->pos, Qt::red);
   }
+#else
+  auto paths = msc.getPaths();
+  for (auto p : paths) {
+    for (auto i = 0; i < p.edges.size(); ++i) {
+      auto v0 = p.edges[i].s;
+      auto v1 = p.edges[i].t;
+      GLUtils::drawLine(v0->pos, v1->pos, Qt::green);
+    }
+  }
+#endif
 #endif
 }

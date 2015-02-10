@@ -15,6 +15,7 @@
 #include "colormap.h"
 #include "Graph.hpp"
 #include "polymesh.h"
+#include "morsesmalecomplex.h"
 
 const QGLFormat qglformat_3d(
     QGL::DoubleBuffer       |
@@ -191,6 +192,7 @@ private:
     Z,
     PointNormal,
     Curvature,
+    Random,
     NCModes
   } cmode;
   int cp_smoothing_times;
@@ -201,6 +203,7 @@ private:
 
   unordered_set<HDS_Vertex*> reebPoints;
   SimpleGraph * rbgraph;
+  MorseSmaleComplex msc;
 };
 
 #endif // MESHVIEWER_H

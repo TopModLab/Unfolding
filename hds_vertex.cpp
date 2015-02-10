@@ -27,6 +27,7 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
   colorVal = v.colorVal;
   he = nullptr;
   rtype = v.rtype;
+  morseFunctionVal = v.morseFunctionVal;
 }
 
 HDS_Vertex HDS_Vertex::operator=(const HDS_Vertex &other)

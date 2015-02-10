@@ -40,12 +40,15 @@ public:
   double curvature;
   bool isPicked;
   double colorVal;
+
   enum ReebsPointType{
     Minimum,
     Maximum,
-    Saddle
+    Saddle,
+    Regular
   } rtype;
   int sdegree;  // the degree of saddle point
+  double morseFunctionVal;
 };
 
 #endif // HDS_VERTEX_H

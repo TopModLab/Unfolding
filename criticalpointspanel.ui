@@ -54,6 +54,11 @@
           <string>Curvature</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Random</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

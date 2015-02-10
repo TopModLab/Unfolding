@@ -503,6 +503,8 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
 {
   auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
     if (!funcval.empty()) {
+      // assign the function value to the vertex
+      v->morseFunctionVal = funcval[v->index];
       return (funcval[v->index]);
     }
     else {
@@ -510,7 +512,7 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
     }
   };
 
-  int n = 10;
+  const int n = 3;
   vector<tuple<double, double, double>> randvals;
   for (int i = 0; i < 10; ++i) {
     double a = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.x();
@@ -520,7 +522,6 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
   }
 
   auto isReebPoint = [&](vert_t* v) {
-    const int n = 10;
     for (int tid = 0; tid < n; ++tid) {
       // perform n tests
       
@@ -594,7 +595,10 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
       }
 
       if (allSmaller || allLarger || isSaddle) {}
-      else { return false; }
+      else { 
+        v->rtype = HDS_Vertex::Regular;
+        return false; 
+      }
     }
     return true;
   };
