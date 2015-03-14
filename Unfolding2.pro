@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     colormap.cpp \
     unionfind.cpp \
     trimesh.cpp \
-    polymesh.cpp \
     meshsmoother.cpp
 
 HEADERS  += mainwindow.h \
@@ -55,7 +54,6 @@ HEADERS  += mainwindow.h \
     colormap.h \
     unionfind.h \
     trimesh.h \
-    polymesh.h \
     meshsmoother.h \
     numerical.h
 FORMS    += mainwindow.ui \

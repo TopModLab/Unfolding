@@ -14,7 +14,6 @@
 #include "hds_mesh.h"
 #include "colormap.h"
 #include "Graph.hpp"
-#include "polymesh.h"
 #include "morsesmalecomplex.h"
 
 const QGLFormat qglformat_3d(
@@ -168,7 +167,6 @@ private:
 
 private:
   HDS_Mesh *heMesh;   /// not own
-  PolyMesh *polyMesh;   /// not own
 
 private:
   void drawSelectionBox();
