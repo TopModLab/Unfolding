@@ -724,6 +724,21 @@ void MeshViewer::findReebPoints()
       }
       break;
     }
+    case Quadratic:
+    {
+      // compute the center of the shape
+      QVector3D c(0, 0, 0);
+      for (auto &v : heMesh->vertSet) {
+        c += v->pos;
+      }
+      c /= heMesh->vertSet.size();
+      // compute per-vertex distance
+      dists = vector<double>(heMesh->verts().size());
+      for (auto &v : heMesh->vertSet) {
+        dists[v->index] = heMesh->vertMap[0]->pos.distanceToPoint(v->pos);
+      }
+      break;
+    }
     }
 
     // find the points to keep

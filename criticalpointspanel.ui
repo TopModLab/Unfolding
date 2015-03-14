@@ -56,6 +56,11 @@
         </item>
         <item>
          <property name="text">
+          <string>Quadratic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Random</string>
          </property>
         </item>

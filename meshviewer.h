@@ -193,6 +193,7 @@ private:
     PointNormal,
     Curvature,
     Random,
+    Quadratic,
     NCModes
   } cmode;
   int cp_smoothing_times;
