@@ -9,6 +9,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 #include "BaseModel.h"
+#include <cstdlib>
+#include <cmath>
+
 class CRichModel : virtual public CBaseModel 
 {
 public:
@@ -212,7 +215,7 @@ double CRichModel::ProportionOnRightEdgeByImage(int edgeIndex, double x, double 
 void CRichModel::GetPointByRotatingAround(int edgeIndex, double leftLen, double rightLen, double &xNew, double &yNew) const
 {
 	xNew = ((leftLen * leftLen - rightLen * rightLen) / Edge(edgeIndex).length + Edge(edgeIndex).length) / 2.0;
-	yNew = -sqrt(max(leftLen * leftLen - xNew * xNew, 0));	
+    yNew = -sqrt(std::max(leftLen * leftLen - xNew * xNew, 0.0));
 }
 
 void CRichModel::GetPointByRotatingAroundLeftChildEdge(int edgeIndex, double x, double y, double &xNew, double &yNew) const

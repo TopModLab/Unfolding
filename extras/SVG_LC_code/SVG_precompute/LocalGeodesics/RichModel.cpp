@@ -74,7 +74,11 @@ void CRichModel::CreateEdgesFromVertsAndFaces()
 			m_Edges[threeIndices[j]].indexOfRightEdge = Edge(threeIndices[(j + 1) % 3]).indexOfReverseEdge;
 		}
 	}
+#if 0 // use shrink to fit
 	m_Edges.swap(vector<CEdge>(m_Edges));
+#else
+    m_Edges.shrink_to_fit();
+#endif
 }
 
 void CRichModel::CollectAndArrangeNeighs()

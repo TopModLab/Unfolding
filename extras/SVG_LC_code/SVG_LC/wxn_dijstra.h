@@ -10,7 +10,7 @@
 #include <map>
 #include <fstream>
 #include <assert.h>
-
+#include <cfloat>
 
 template<typename T>  class SparseGraph{
 private:
@@ -52,7 +52,7 @@ private:
     BodyPartOfSVG(){}
     BodyPartOfSVG(int _dest_index , float _dest_dis):
       dest_index(_dest_index),
-      dest_dis(_dest_dis),
+      dest_dis(_dest_dis)
     {
       dest_index = _dest_index;
       dest_dis = _dest_dis;
@@ -175,11 +175,11 @@ public:
   
   void findShortestDistance(int source)
   {
-    fathers.resize(node_number_);
+    fathers.resize(this->node_number_);
     fill(fathers.begin(),fathers.end(),-1);
-    dis.resize(node_number_);
+    dis.resize(this->node_number_);
     fill(dis.begin(), dis.end(), FLT_MAX);
-    visited.resize(node_number_);
+    visited.resize(this->node_number_);
     fill(visited.begin(), visited.end(), false);
     std::deque<int> que;
     double dis_sum = 0.0;
@@ -203,10 +203,10 @@ public:
           break;
         }
       }
-      for (int i = 0; i < graph_neighbor[u].size(); ++i) {
-        if (dis[graph_neighbor[u][i]] > dis[u] + graph_neighbor_dis[u][i]) {
-          int v = graph_neighbor[u][i];
-          T w = graph_neighbor_dis[u][i];
+      for (int i = 0; i < this->graph_neighbor[u].size(); ++i) {
+        if (dis[this->graph_neighbor[u][i]] > dis[u] + this->graph_neighbor_dis[u][i]) {
+          int v = this->graph_neighbor[u][i];
+          T w = this->graph_neighbor_dis[u][i];
           double old_v = dis[v];
           dis[v] = dis[u] + w;
           fathers[v] = u;
@@ -233,7 +233,7 @@ public:
   }
 
   inline T distanceToSource(int index) {
-    if(index < 0 || index >= node_number_ ){
+    if(index < 0 || index >= this->node_number_ ){
       std::cerr << "wrong index " << index << "\n";
       return 0;
     }

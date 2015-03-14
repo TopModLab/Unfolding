@@ -4,6 +4,8 @@
 #pragma once
 
 #include "Point3d.h"
+#include <algorithm>
+
 class CBaseModel  
 {
 public:	
@@ -33,8 +35,8 @@ public:
 			int b[3];
 			a[0]=verts[0];a[1]=verts[1];a[2]=verts[2];
 			b[0] = f[0];b[1]=f[1];b[2]=f[2];
-			sort(a,a+3);
-			sort(b,b+3);
+            std::sort(a,a+3);
+            std::sort(b,b+3);
 			if( a[0] != b[0] || a[1] != b[1] || a[2] != b[2] ) return false;
 			return true;
 		}

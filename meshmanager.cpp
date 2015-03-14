@@ -7,6 +7,7 @@
 
 #include "utils.hpp"
 
+#if USE_REEB_GRAPH
 #include <vtkPolyDataToReebGraphFilter.h>
 #include <vtkDirectedGraph.h>
 #include <vtkReebGraph.h>
@@ -17,10 +18,12 @@
 #include <vtkGraphEdge.h>
 #include <vtkDataSetAttributes.h>
 #include <vtkVariantArray.h>
+#endif
 
 MeshManager* MeshManager::instance = NULL;
 
 bool MeshManager::loadOBJFile(const string& filename) {
+#if USE_REEB_GRAPH
   try {
     cout << "[VTK] Reading mesh file ..." << endl;
     vtkSmartPointer<vtkOBJReader> vtkReader = vtkSmartPointer<vtkOBJReader>::New();
@@ -34,6 +37,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
   catch (exception e) {
     cerr << e.what() << endl;
   }
+#endif
 
   OBJLoader loader;
   if( loader.load(filename) ) {
@@ -392,6 +396,7 @@ void MeshManager::colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ra
   hds_mesh->colorVertices(dists);
 }
 
+#if USE_REEB_GRAPH
 void MeshManager::updateReebGraph(const vector<double> &fvals)
 {
   vtkSmartPointer<vtkReebGraph> surfaceReebGraph = vtkSmartPointer<vtkReebGraph>::New();
@@ -477,6 +482,7 @@ void MeshManager::updateReebGraph(const vector<double> &fvals)
     }
   }
 }
+#endif
 
 vector<double> MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
 {

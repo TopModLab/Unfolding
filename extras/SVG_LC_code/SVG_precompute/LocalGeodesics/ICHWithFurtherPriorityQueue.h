@@ -17,7 +17,7 @@ protected:
 	priority_queue<QuoteWindow> m_QueueForWindows;
 	priority_queue<QuoteInfoAtVertex> m_QueueForPseudoSources;
 protected:
-	inline void AddIntoQueueOfPseudoSources(QuoteInfoAtVertex& quoteOfPseudoSource);
+    inline void AddIntoQueueOfPseudoSources(const QuoteInfoAtVertex& quoteOfPseudoSource);
 	inline void AddIntoQueueOfWindows(QuoteWindow& quoteW);
 	inline bool UpdateTreeDepthBackWithChoice();
 	inline double GetMinDisOfWindow(const Window& w) const;
@@ -140,7 +140,7 @@ double CICHWithFurtherPriorityQueue::GetMinDisOfWindow(const Window& w) const
 }
 #endif
 
-void CICHWithFurtherPriorityQueue::AddIntoQueueOfPseudoSources(QuoteInfoAtVertex& quoteOfPseudoSource)
+void CICHWithFurtherPriorityQueue::AddIntoQueueOfPseudoSources(const QuoteInfoAtVertex& quoteOfPseudoSource)
 {
 	m_QueueForPseudoSources.push(quoteOfPseudoSource);
 }

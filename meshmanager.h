@@ -17,8 +17,11 @@
 
 #include "Graph.hpp"
 
+#define USE_REEB_GRAPH 0
+#if USE_REEB_GRAPH
 #include <vtkOBJReader.h>
 #include <vtkSmartPointer.h>
+#endif
 
 class MeshManager
 {
@@ -56,13 +59,15 @@ public:
     }
 
     HDS_Mesh* getExtendedMesh() {
-      return extended_mesh.data();
+        return extended_mesh.data();
     }
 
+#if USE_REEB_GRAPH
     void updateReebGraph(const vector<double> &fvals = vector<double>());
     SimpleGraph* getReebGraph() {
-      return &rbGraph;
+        return &rbGraph;
     }
+#endif
 
     vector<double> getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha);
     vector<double> getInterpolatedCurvature(int lev0, int lev1, double alpha);
@@ -112,8 +117,10 @@ private:
 
     vector<QSharedPointer<HDS_Mesh>> hds_mesh_smoothed;
     vector<QSharedPointer<GeodesicComputer>> gcomp_smoothed;
+#if USE_REEB_GRAPH
     vtkSmartPointer<vtkPolyData> vtkMesh;
     SimpleGraph rbGraph;
+#endif
 };
 
 #endif // MESHMANAGER_H

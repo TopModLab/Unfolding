@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 #include "RichModel.h"
-
+#include <cfloat>
 
 struct IntersectionWithPath
 {
@@ -97,7 +97,7 @@ public:
 	inline int GetRootSourceOfVert(int index) const;
 	int FindSourceVertex(int indexOfVert, vector<IntersectionWithPath>& resultingPath) const; 
 	int FindSourceVertex(int indexOfVert, vector<CPoint3D>& resultingPath) const; 
-    CPoint3D CExactMethodForDGP::BackTraceDirectionOnly(int indexOfVert);
+    CPoint3D BackTraceDirectionOnly(int indexOfVert);
 	void PickShortestPaths(int num);
 	virtual void Execute();
 	virtual void InitContainers() = 0;

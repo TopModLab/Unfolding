@@ -4,12 +4,15 @@
 //
 
 #pragma once
+
+#ifdef WIN32
 #define _AFXDLL
 #include <afx.h>
 #include <Windows.h>
 #include "targetver.h"
 #include <stdio.h>
 #include <tchar.h>
+#endif
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -40,3 +43,20 @@ const double PI = 3.14159265359;
 const double RateOfNormalShift = 1.5e-3;
 const double ToleranceOfConvexAngle = 5e-3;
 // TODO: reference additional headers your program requires here
+
+#ifndef WIN32
+// XXX, MinGW fix
+inline double GetTickCount_linux() {
+    struct timespec ts;
+    if(clock_gettime(CLOCK_MONOTONIC,&ts) != 0) {
+        cerr << "Failed to get time." << endl;
+        return -1.0;
+    }
+    else {
+        return ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
+    }
+}
+inline double GetCurrentTime() { return GetTickCount_linux(); }
+#else
+inline double GetCurrentTime() { return GetTickCount()); }
+#endif

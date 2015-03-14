@@ -62,7 +62,7 @@ protected:
 	virtual void InitContainers();
 	virtual void ClearContainers();	
 	virtual void BuildSequenceTree();
-	virtual void AddIntoQueueOfPseudoSources(QuoteInfoAtVertex& quoteOfPseudoSource);
+    virtual void AddIntoQueueOfPseudoSources(const QuoteInfoAtVertex& quoteOfPseudoSource);
 	virtual void AddIntoQueueOfWindows(QuoteWindow& quoteW);	
 	virtual bool UpdateTreeDepthBackWithChoice();
 	virtual bool CheckValidityOfWindow(Window& w);
@@ -360,10 +360,10 @@ void CPreviousCH::ComputeTheOnlyLeftChild(const Window& w, double disToAngle)
 	quoteW.pWindow = new Window;
 	quoteW.pWindow->proportions[0] = model.ProportionOnLeftEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[0]);
-	quoteW.pWindow->proportions[0] = max(0, quoteW.pWindow->proportions[0]);
+    quoteW.pWindow->proportions[0] = max(0.0, quoteW.pWindow->proportions[0]);
 	quoteW.pWindow->proportions[1] = model.ProportionOnLeftEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[1]);
-	quoteW.pWindow->proportions[1] = min(1, quoteW.pWindow->proportions[1]);
+    quoteW.pWindow->proportions[1] = min(1.0, quoteW.pWindow->proportions[1]);
 	if (IsTooNarrowWindow(*quoteW.pWindow))
 	{
 		delete quoteW.pWindow;
@@ -401,10 +401,10 @@ void CPreviousCH::ComputeTheOnlyRightChild(const Window& w, double disToAngle)
 	quoteW.pWindow = new Window;
 	quoteW.pWindow->proportions[0] = model.ProportionOnRightEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[0]);
-	quoteW.pWindow->proportions[0] = max(0, quoteW.pWindow->proportions[0]);
+    quoteW.pWindow->proportions[0] = max(0.0, quoteW.pWindow->proportions[0]);
 	quoteW.pWindow->proportions[1] = model.ProportionOnRightEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[1]);
-	quoteW.pWindow->proportions[1] = min(1, quoteW.pWindow->proportions[1]);
+    quoteW.pWindow->proportions[1] = min(1.0, quoteW.pWindow->proportions[1]);
 	if (IsTooNarrowWindow(*quoteW.pWindow))
 	{
 		delete quoteW.pWindow;
@@ -442,7 +442,7 @@ void CPreviousCH::ComputeTheOnlyLeftTrimmedChild(const Window& w, double disToAn
 	quoteW.pWindow = new Window;
 	quoteW.pWindow->proportions[0] = model.ProportionOnLeftEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[0]);
-	quoteW.pWindow->proportions[0] = max(0, quoteW.pWindow->proportions[0]);
+    quoteW.pWindow->proportions[0] = max(0.0, quoteW.pWindow->proportions[0]);
 	quoteW.pWindow->proportions[1] = 1;
 	if (IsTooNarrowWindow(*quoteW.pWindow))
 	{
@@ -482,7 +482,7 @@ void CPreviousCH::ComputeTheOnlyRightTrimmedChild(const Window& w, double disToA
 	quoteW.pWindow->proportions[0] = 0;
 	quoteW.pWindow->proportions[1] = model.ProportionOnRightEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[1]);
-	quoteW.pWindow->proportions[1] = min(1, quoteW.pWindow->proportions[1]);
+    quoteW.pWindow->proportions[1] = min(1.0, quoteW.pWindow->proportions[1]);
 	if (IsTooNarrowWindow(*quoteW.pWindow))
 	{
 		delete quoteW.pWindow;
@@ -520,7 +520,7 @@ void CPreviousCH::ComputeLeftTrimmedChildWithParent(const Window& w, double disT
 	quoteW.pWindow = new Window;
 	quoteW.pWindow->proportions[0] = model.ProportionOnLeftEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[0]);
-	quoteW.pWindow->proportions[0] = max(0, quoteW.pWindow->proportions[0]);
+    quoteW.pWindow->proportions[0] = max(0.0, quoteW.pWindow->proportions[0]);
 	quoteW.pWindow->proportions[1] = 1;
 	if (IsTooNarrowWindow(*quoteW.pWindow))
 	{
@@ -561,7 +561,7 @@ void CPreviousCH::ComputeRightTrimmedChildWithParent(const Window& w, double dis
 	quoteW.pWindow->proportions[0] = 0;
 	quoteW.pWindow->proportions[1] = model.ProportionOnRightEdgeByImage(w.indexOfCurEdge,
 		w.xUponUnfolding, w.yUponUnfolding, w.proportions[1]);
-	quoteW.pWindow->proportions[1] = min(1, quoteW.pWindow->proportions[1]);
+    quoteW.pWindow->proportions[1] = min(1.0, quoteW.pWindow->proportions[1]);
 	if (IsTooNarrowWindow(*quoteW.pWindow))
 	{
 		delete quoteW.pWindow;

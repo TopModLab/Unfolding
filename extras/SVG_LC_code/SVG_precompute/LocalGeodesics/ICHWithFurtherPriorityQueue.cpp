@@ -36,9 +36,9 @@ void CICHWithFurtherPriorityQueue::ExecuteLocally_Dis(double distThreshold, set<
 		nMaxLenOfWindowQueue = 0;
 		depthOfResultingTree = 0;
 		InitContainers();
-		nTotalMilliSeconds = GetTickCount();	
+        nTotalMilliSeconds = GetCurrentTime();
 		BuildSequenceTree_Dis(distThreshold, fixedDests);
-		nTotalMilliSeconds = GetTickCount() - nTotalMilliSeconds;
+        nTotalMilliSeconds = GetCurrentTime() - nTotalMilliSeconds;
 		//FillExperimentalResults();
 		ClearContainers();
 
@@ -58,9 +58,9 @@ void CICHWithFurtherPriorityQueue::ExecuteLocally_SVG(double distThreshold, set<
 		nMaxLenOfWindowQueue = 0;
 		depthOfResultingTree = 0;
 		InitContainers();
-		nTotalMilliSeconds = GetTickCount();	
+        nTotalMilliSeconds = GetCurrentTime();
 		BuildSequenceTree_SVG(distThreshold, fixedDests,max_covered_points);
-		nTotalMilliSeconds = GetTickCount() - nTotalMilliSeconds;
+        nTotalMilliSeconds = GetCurrentTime() - nTotalMilliSeconds;
 		//FillExperimentalResults();
 		ClearContainers();
 
@@ -84,9 +84,9 @@ double CICHWithFurtherPriorityQueue::ExecuteLocally_vertNum(int levelNum, set<in
 		nMaxLenOfWindowQueue = 0;
 		depthOfResultingTree = 0;
 		InitContainers();
-		nTotalMilliSeconds = GetTickCount();	
+        nTotalMilliSeconds = GetCurrentTime();
 		dis = BuildSequenceTree_vertNum(levelNum, fixedDests);
-		nTotalMilliSeconds = GetTickCount() - nTotalMilliSeconds;
+        nTotalMilliSeconds = GetCurrentTime() - nTotalMilliSeconds;
 		//FillExperimentalResults();
 		ClearContainers();
 

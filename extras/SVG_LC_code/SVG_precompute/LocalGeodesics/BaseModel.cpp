@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "BaseModel.h"
+#include <cfloat>
+#include <cstring>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -206,8 +208,13 @@ void CBaseModel::ReadObjFile(const string& filename)
 			continue;
 		}
 	}
+#if 0   // XXX use shrink to fit
 	m_Verts.swap(vector<CPoint3D>(m_Verts));
 	m_Faces.swap(vector<CFace>(m_Faces));
+#else
+    m_Verts.shrink_to_fit();
+    m_Faces.shrink_to_fit();
+#endif
 	//printf("file %s num of verts %d num of faces %d\n" , filename.c_str() , m_Verts.size(),m_Faces.size());
 	in.close();
 }
@@ -248,8 +255,13 @@ void CBaseModel::FastReadObjFile(const string& filename)
 		}
 	}
 	fclose(fin);
+#if 0   // XXX use shrink to fit
 	m_Verts.swap(vector<CPoint3D>(m_Verts));
 	m_Faces.swap(vector<CFace>(m_Faces));
+#else
+    m_Verts.shrink_to_fit();
+    m_Faces.shrink_to_fit();
+#endif
 	printf("read %d verts %d faces from file %s \n" , m_Verts.size(),m_Faces.size(), filename.c_str() );
 }
 
@@ -309,7 +321,11 @@ void CBaseModel::ReadOffFile(const string& filename)
 		in >> pt.z;
 		m_Verts.push_back(pt);
 	}
+#if 0 // XXX use shrink to fit
 	m_Verts.swap(vector<CPoint3D>(m_Verts));
+#else
+    m_Verts.shrink_to_fit();
+#endif
 	
 	int degree;
 	while (in >> degree)
@@ -329,7 +345,11 @@ void CBaseModel::ReadOffFile(const string& filename)
 	}
 
 	in.close();
+#if 0   // XXX use shrink to fit
 	m_Faces.swap(vector<CFace>(m_Faces));
+#else
+    m_Faces.shrink_to_fit();
+#endif
 }
 
 void CBaseModel::ReadMFile(const string& filename)
@@ -382,8 +402,13 @@ void CBaseModel::ReadMFile(const string& filename)
 			continue;
 		}
 	}
+#if 0   // XXX use shrink to fit
 	m_Verts.swap(vector<CPoint3D>(m_Verts));
 	m_Faces.swap(vector<CFace>(m_Faces));
+#else
+    m_Verts.shrink_to_fit();
+    m_Faces.shrink_to_fit();
+#endif
 	in.close();
 }
 

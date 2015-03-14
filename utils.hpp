@@ -72,7 +72,7 @@ inline void printColor(QColor clr) {
 
 template<typename T, typename mesh_t>
 vector<T> laplacianSmooth(const vector<T> &val, mesh_t *mesh, double lambda = 0.25, double sigma = 1.0) {
-  unordered_map<mesh_t::vert_t*, double> L(mesh->verts().size());
+  unordered_map<typename mesh_t::vert_t*, double> L(mesh->verts().size());
   vector<T> newval(mesh->verts().size());
   for (auto vi : mesh->verts()) {
     auto neighbors = vi->neighbors();

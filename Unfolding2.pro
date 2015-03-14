@@ -14,8 +14,10 @@ TEMPLATE = app
 CONFIG += c++11
 CONFIG += console
 
-INCLUDEPATH += /usr/local/include /Users/phg/Utils/armadillo-4.450.4/include
-LIBS += -L/usr/local/lib/OpenMesh -lOpenMeshCore -lOpenMeshTools -L/usr/local/lib -framework Accelerate
+QMAKE_CXXFLAGS += -std=c++11
+
+#INCLUDEPATH += /usr/local/include /Users/phg/Utils/armadillo-4.450.4/include
+#LIBS += -L/usr/local/lib/OpenMesh -lOpenMeshCore -lOpenMeshTools -L/usr/local/lib -framework Accelerate
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -32,8 +34,20 @@ SOURCES += main.cpp\
     extras/colormap_editor/colormapeditor.cpp \
     colormap.cpp \
     unionfind.cpp \
-    trimesh.cpp \
-    meshsmoother.cpp
+    meshsmoother.cpp \
+    criticalpointspanel.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/BaseModel.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ExactMethodForDGP.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ICHWithFurtherPriorityQueue.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ImprovedCHWithEdgeValve.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/Point3D.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/PreviousCH.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/RichModel.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/stdafx.cpp \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/svg_precompute.cpp \
+    morsesmalecomplex.cpp \
+    GeodesicComputer.cpp \
+    MeshExtender.cpp
 
 HEADERS  += mainwindow.h \
     hds_face.h \
@@ -53,20 +67,32 @@ HEADERS  += mainwindow.h \
     extras/colormap_editor/colormapeditor.h \
     colormap.h \
     unionfind.h \
-    trimesh.h \
     meshsmoother.h \
-    numerical.h
+    criticalpointspanel.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/BaseModel.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ExactMethodForDGP.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ICHWithFurtherPriorityQueue.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ImprovedCHWithEdgeValve.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/Point3D.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/PreviousCH.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/RichModel.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/stdafx.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/svg_precompute.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/targetver.h \
+    extras/SVG_LC_code/SVG_precompute/LocalGeodesics/wxnTime.h \
+    morsesmalecomplex.h \
+    GeodesicComputer.h \
+    MeshExtender.h
 FORMS    += mainwindow.ui \
-    extras/colormap_editor/colormapeditor.ui
+    extras/colormap_editor/colormapeditor.ui \
+    criticalpointspanel.ui
 
 RESOURCES += \
     icons.qrc
 
 OTHER_FILES +=
 
-unix: LIBS += -L$$PWD/../../Utils/levmar-2.6/ -llevmar
-
-INCLUDEPATH += $$PWD/../../Utils/levmar-2.6
-DEPENDPATH += $$PWD/../../Utils/levmar-2.6
-
-unix: PRE_TARGETDEPS += $$PWD/../../Utils/levmar-2.6/liblevmar.a
+#unix: LIBS += -L$$PWD/../../Utils/levmar-2.6/ -llevmar
+#INCLUDEPATH += $$PWD/../../Utils/levmar-2.6
+#DEPENDPATH += $$PWD/../../Utils/levmar-2.6
+#unix: PRE_TARGETDEPS += $$PWD/../../Utils/levmar-2.6/liblevmar.a

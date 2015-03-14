@@ -220,7 +220,9 @@ void MainWindow::slot_newFile()
   QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
   MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
   viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+#if USE_REEB_GRAPH
   viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
+#endif
 }
 
 void MainWindow::slot_saveFile()

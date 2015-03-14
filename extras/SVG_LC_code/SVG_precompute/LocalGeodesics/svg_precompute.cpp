@@ -63,7 +63,7 @@ void generate_output(const string& output_file_name,stringstream& output_str,boo
         }else{
             fout = fopen(output_file_name.c_str(),"a");
         }
-        string& str = output_str.str();
+        const string& str = output_str.str();
         ElapasedTime time;
         fwrite(str.c_str(),1,str.length(),fout);
         fclose(fout);

@@ -57,7 +57,7 @@ void CExactMethodForDGP::PickShortestPaths(int num)
 		else
 		{
 			float step = model.GetNumOfVerts() / float(num);
-			step = max(1, step);
+            step = max(1.0f, step);
 			m_tableOfResultingPaths.reserve(int(model.GetNumOfVerts() / step) + 1);
 			for (float i = FLT_EPSILON; i < model.GetNumOfVerts(); i += step)
 			{
@@ -125,15 +125,15 @@ void CExactMethodForDGP::BackTrace(int indexOfVert)
 			proportion = model.ProportionOnLeftEdgeByImage(edgeIndex,xBack, yBack, oldProprotion);
 			if (proportion >= -LENGTH_EPSILON_CONTROL && proportion <= 1)
 			{
-				proportion = max(proportion, 0);
+                proportion = max(proportion, 0.0);
 				edgeIndex = model.Edge(edgeIndex).indexOfLeftEdge;
 				rightLen = disToAngle;				
 			}
 			else
 			{
 				proportion = model.ProportionOnRightEdgeByImage(edgeIndex, xBack, yBack, oldProprotion);
-				proportion = max(proportion, 0);
-				proportion = min(proportion, 1);
+                proportion = max(proportion, 0.0);
+                proportion = min(proportion, 1.0);
 				edgeIndex = model.Edge(edgeIndex).indexOfRightEdge;
 				leftLen = disToAngle;				
 			}
@@ -211,15 +211,15 @@ int CExactMethodForDGP::FindSourceVertex(int indexOfVert, vector<CPoint3D>& resu
 
 			if (proportion >= -LENGTH_EPSILON_CONTROL && proportion <= 1)
 			{
-				proportion = max(proportion, 0);
+                proportion = max(proportion, 0.0);
 				edgeIndex = model.Edge(edgeIndex).indexOfLeftEdge;
 				rightLen = disToAngle;				
 			}
 			else
 			{
 				proportion = model.ProportionOnRightEdgeByImage(edgeIndex, xBack, yBack, oldProprotion);
-				proportion = max(proportion, 0);
-				proportion = min(proportion, 1);
+                proportion = max(proportion, 0.0);
+                proportion = min(proportion, 1.0);
 				edgeIndex = model.Edge(edgeIndex).indexOfRightEdge;
 				leftLen = disToAngle;				
 			}
@@ -297,15 +297,15 @@ int CExactMethodForDGP::FindSourceVertex(int indexOfVert, vector<IntersectionWit
 
 			if (proportion >= -LENGTH_EPSILON_CONTROL && proportion <= 1)
 			{
-				proportion = max(proportion, 0);
+                proportion = max(proportion, 0.0);
 				edgeIndex = model.Edge(edgeIndex).indexOfLeftEdge;
 				rightLen = disToAngle;				
 			}
 			else
 			{
 				proportion = model.ProportionOnRightEdgeByImage(edgeIndex, xBack, yBack, oldProprotion);
-				proportion = max(proportion, 0);
-				proportion = min(proportion, 1);
+                proportion = max(proportion, 0.0);
+                proportion = min(proportion, 1.0);
 				edgeIndex = model.Edge(edgeIndex).indexOfRightEdge;
 				leftLen = disToAngle;				
 			}
@@ -328,9 +328,9 @@ void CExactMethodForDGP::Execute()
 		nMaxLenOfWindowQueue = 0;
 		depthOfResultingTree = 0;
 		InitContainers();
-		nTotalMilliSeconds = GetTickCount();	
+        nTotalMilliSeconds = GetCurrentTime();
 		BuildSequenceTree();
-		nTotalMilliSeconds = GetTickCount() - nTotalMilliSeconds;
+        nTotalMilliSeconds = GetCurrentTime() - nTotalMilliSeconds;
 		//FillExperimentalResults();
 		ClearContainers();
 		

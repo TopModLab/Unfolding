@@ -751,7 +751,9 @@ void MeshViewer::findReebPoints()
   }
   }
 
+#if USE_REEB_GRAPH
   MeshManager::getInstance()->updateReebGraph(dists);
+#endif
   reebPoints = heMesh->getReebPoints(dists);
 
   int sum_cp = 0;

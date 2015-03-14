@@ -1,8 +1,6 @@
 #include "meshsmoother.h"
 #include "hds_mesh.h"
 
-#include "numerical.h"
-
 MeshSmoother::MeshSmoother()
 {
 }
@@ -90,6 +88,8 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
   cout << "sum = " << sum_curvature << endl;
 }
 
+#if 0
+// smooth the mesh by minimizing vertex movement and removing as much as possible curvature deficit
 void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 {
   /// compute the smoothed curvature at each vertex
@@ -158,6 +158,7 @@ void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 
   /// compute the new vertex positions using the new curvatures
 }
+#endif
 
 /// cost function for computing new vertex positions
 void costfunction_vert(double *p, double *hx, int m, int n, void *adata) {
