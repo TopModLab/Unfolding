@@ -2,6 +2,9 @@
 #include "hds_halfedge.h"
 #include "mathutils.hpp"
 
+#include <iostream>
+using namespace std;
+
 size_t HDS_Vertex::uid = 0;
 
 HDS_Vertex::HDS_Vertex() {
@@ -43,6 +46,9 @@ vector<HDS_Vertex*> HDS_Vertex::neighbors() const {
     do {
       neighbors.push_back(curHE->flip->v);
       curHE = curHE->flip->next;
+
+ //      cout<<"neighbors() matters; ";   //later added;
+
     } while( curHE != he );
     return neighbors;
 }
@@ -66,6 +72,7 @@ void HDS_Vertex::computeCurvature()
     curHE = prevHE->flip->next;
   }while( prevHE != he );
   curvature = PI2 - curvature;
+
 }
 
 void HDS_Vertex::computeNormal()

@@ -3,6 +3,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "meshviewer.h"
 
 #include <QMessageBox>
 #include <QString>
@@ -58,7 +59,7 @@ bool MainWindow::connectComponents()
 
   connect(cppanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCriticalPointsMethod(int)));
   connect(cppanel, SIGNAL(sig_smoothingTimesChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingTimes(int)));
-  connect(cppanel, SIGNAL(sig_smoothingTypeChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingType(int)));
+  connect(cppanel, SIGNAL(sig_smoothingTypeChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingType(int)));      //parameter is where?
   return true;
 }
 
@@ -70,6 +71,12 @@ void MainWindow::createActions()
     newAct->setStatusTip(tr("Create a new file"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(slot_newFile()));
     actionsMap["new"] = newAct;
+
+    QAction *closeAct = new QAction(QIcon(":/icons/open.png"), tr("&Close"), this);//later added
+    closeAct->setShortcuts(QKeySequence::Quit);
+    closeAct->setStatusTip(tr("close a file"));
+    connect(closeAct, SIGNAL(triggered()), this, SLOT(slot_closeFile()));
+    actionsMap["close"] = closeAct;
 
     QAction *resetAct = new QAction(QIcon(":/icons/reset.png"), tr("&Reset"), this);
     resetAct->setStatusTip(tr("Reset"));
@@ -147,10 +154,17 @@ void MainWindow::createMenus()
 {
   try {
     QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
-    fileMenu->addAction(actionsMap["new"]);
+
+
+
+      fileMenu->addAction(actionsMap["new"]);
+      fileMenu->addAction(actionsMap["close"]);//later added;
+      fileMenu->addAction(actionsMap["print"]);//later added
+
 
     QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
     editMenu->addAction(actionsMap["reset"]);
+    editMenu->addAction(actionsMap["erase"]);//later added
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create menus!");
@@ -217,12 +231,19 @@ void MainWindow::createStatusBar()
 void MainWindow::slot_newFile()
 {
   cout << "loading a new obj file." << endl;
-  QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file");
+
+  QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "D:/Unfolding2-master/Unfolding2-master/meshes"  ); //later added
   MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
   viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 #if USE_REEB_GRAPH
   viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
+}
+
+void MainWindow::slot_closeFile()          //later add this function
+{
+    QMessageBox::warning(this, tr("提示"), tr("你点击了~关闭文件~菜单"), QMessageBox::Yes | QMessageBox::No);
+    this->close();
 }
 
 void MainWindow::slot_saveFile()
@@ -322,5 +343,6 @@ void MainWindow::slot_updateCriticalPointsSmoothingTimes(int times) {
 void MainWindow::slot_updateCriticalPointsSmoothingType(int t) {
   cout << "Smoothing type = " << t << endl;
   viewer->setCriticalPointsSmoothingType(t);
+
   viewer->update();
 }

@@ -33,6 +33,7 @@ protected:
 
 private slots:
   void slot_newFile();
+  void slot_closeFile();
   void slot_saveFile();
 
   void slot_reset();

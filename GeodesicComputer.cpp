@@ -9,10 +9,11 @@ GeodesicComputer::GeodesicComputer(const string &filename)
   const int fixed_K = 50;
   string svg_file_name = "svg.binary";
   svg_precompute(filename, fixed_K, svg_file_name);
-
+   cout<<"svg_precompute finished"<<endl;
   s_graph.reset(new LC_LLL<float>());
+
   s_graph->read_svg_file_binary(svg_file_name);
-  cout << "done." << endl;
+  cout << "computing geodesics done." << endl;
 }
 
 GeodesicComputer::~GeodesicComputer()

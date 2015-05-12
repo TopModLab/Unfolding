@@ -269,5 +269,5 @@ double CRichModel::GetGaussCurvature(int vertIndex) const
 	{
 		angleSum += Neigh(vertIndex)[i].second;
 	}
-	return 2 * M_PI - angleSum;
+    return 2 * M_PI - angleSum;
 }

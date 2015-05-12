@@ -18,6 +18,7 @@ public:
     typedef HDS_Vertex vert_t;
     typedef HDS_HalfEdge he_t;
 
+
     enum ElementType {
       Face = 0,
       Edge,

@@ -331,6 +331,9 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
       }
       else hasCutFace = true;
       he = curHE;
+
+      cout<<"he != v->he";                        //not be shown, so paragraph not matter.
+
       curHE = he->flip->next;
     }while( he != v->he ) ;
 

@@ -2,12 +2,19 @@
 #include "glutils.hpp"
 #include "mathutils.hpp"
 #include "utils.hpp"
+#include "meshviewer.h"
+#include <GL/glu.h>
+#include <glut.h>
+#include<iostream>
+using namespace std;
 
 HDS_Mesh::HDS_Mesh()
 {
   showFace = true;
   showVert = true;
   showEdge = true;
+
+
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
@@ -236,12 +243,62 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
   });
 }
 
+
+
+// below newly added;
+
+#define MAX_CHAR        128
+
+void drawString(const char* str, int numb) {
+    static int isFirstCall = 1;
+    static GLuint lists;
+
+    if( isFirstCall ) { // 如果是第一次调用，执行初始化
+                         // 为每一个ASCII字符产生一个显示列表
+         isFirstCall = 0;
+
+         // 申请MAX_CHAR个连续的显示列表编号
+         lists = glGenLists(MAX_CHAR);
+
+         // 把每个字符的绘制命令都装到对应的显示列表中
+         wglUseFontBitmaps(wglGetCurrentDC(), 0, MAX_CHAR, lists);
+     }
+     // 调用每个字符对应的显示列表，绘制每个字符
+
+    //for(int i=0; i<numb; i++){
+
+         glCallList(lists+*str);
+         cout<<"ok"<<*str<<endl;
+
+//}
+}
+void display(int num) {
+//     glClear(GL_COLOR_BUFFER_BIT);
+
+     glColor3f(1.0f, 1.0f, 1.0f);
+ //    glRasterPos2f(0.0f, 0.0f);
+  //     glScalef(100,100,100);
+     char ss[20];
+     itoa(num,ss,10);
+     drawString(ss, num);
+     num=0;
+
+}
+
+
+
+//   above newly adde;
+
+
 void HDS_Mesh::draw(ColorMap cmap)
 {
+      QGLWidget  aaa;
   if( showFace )
   {
     /// traverse the mesh and render every single face
-    cout << "sorted faces = " << sortedFaces.size() << endl;
+  //  cout << "sorted faces = " << sortedFaces.size() << endl;
+    MeshViewer dd;
+
     for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
     {
       face_t* f = (*fit);
@@ -327,8 +384,13 @@ void HDS_Mesh::draw(ColorMap cmap)
       glutSolidSphere(0.125, 16, 16);
 #else
       glPointSize(4.0);
-      if( v->isPicked )
+      if( v->isPicked ){
         glColor4f(1, 1, 0, 1);
+  //       display(v->index);
+
+}
+
+
       else {
         double c = .5 - clamp(v->curvature, -Pi/2, Pi/2) / Pi; //[0, 1]
         //cout << v->index << ":" << v->curvature << ", " << c << endl;
@@ -346,15 +408,24 @@ void HDS_Mesh::draw(ColorMap cmap)
       glEnd();
 
       glBegin(GL_LINES);
+
+
       GLUtils::setColor(Qt::green);
       GLUtils::useVertex(QVector3D(0, 0, 0));
       GLUtils::useVertex(v->normal);
+
+
+
+
       glEnd();
 #endif
       glPopMatrix();
     }
   }
 }
+
+
+
 
 void HDS_Mesh::drawFaceIndices()
 {
@@ -501,14 +572,17 @@ void HDS_Mesh::selectVertex(int idx)
 
 unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &funcval, const QVector3D &normdir)
 {
+
   auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
     if (!funcval.empty()) {
       // assign the function value to the vertex
       v->morseFunctionVal = funcval[v->index];
       return (funcval[v->index]);
+      cout<<"v->index="<<v->index<<endl;
     }
     else {
       return a * v->pos.x() + b * v->pos.y() + c * v->pos.z();
+       cout<<"a="<<a<<endl;      //later added;
     }
   };
 
@@ -519,12 +593,20 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
     double b = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.y();
     double c = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.z();
     randvals.push_back(make_tuple(a, b, c));
+
+
+
   }
 
+    int s11=0,s22=0,s33=0;
   auto isReebPoint = [&](vert_t* v) {
-    for (int tid = 0; tid < n; ++tid) {
+
+
+      int s1=0,s2=0,s3=0;
+ for (int tid = 0; tid < n; ++tid) {
+
       // perform n tests
-      
+
 #if 1
       double a = std::get<0>(randvals[tid]);
       double b = std::get<1>(randvals[tid]);
@@ -533,25 +615,48 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
       double a = 0, b = 0, c = 0;
 #endif
 
+
+
+
       auto neighbors = v->neighbors();
 
       // if all neighbors have smaller z-values
       bool allSmaller = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
-        return moorseFunc(n, a, b, c) < moorseFunc(v, a, b, c);
+
+          //    cout<<"moorseFunc(n"<<n->index<<", a, b, c) = "<<moorseFunc(n, a, b, c)<<endl;
+          //    cout<<"moorseFunc(v"<<v->index<<", a, b, c) = "<<moorseFunc(v, a, b, c)<<endl;
+              return moorseFunc(n, a, b, c) > moorseFunc(v, a, b, c);
+
       });
 
       // if all neighbors have larger z-values
       bool allLarger = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
-        return moorseFunc(n, a, b, c) > moorseFunc(v, a, b, c);
+        return moorseFunc(n, a, b, c) < moorseFunc(v, a, b, c);
       });
-
+   //   cout<<" moorseFunc("<<v->index<<", a, b, c) = "<< moorseFunc(v, a, b, c);
       // if this is a saddle point
       bool isSaddle = false;
       vector<double> diffs;
+
+      if(!allSmaller&&!allLarger)                 //later added;
+      {
+
       for (auto n : neighbors) {
-        diffs.push_back(moorseFunc(n, a, b, c) - moorseFunc(v, a, b, c));
+        double st= moorseFunc(n, a, b, c) - moorseFunc(v, a, b, c);
+    //     if(abs(st)<1e-5) st=0;                                             //later changed;
+          diffs.push_back(st);
+      //   diffs[n->index]=st;
+        if(v->index==6||v->index==7||v->index==5||v->index==8||v->index==100){
+  //          cout<<"moorseFunc("<<n->index<<", a, b, c) - moorseFunc("<<v->index<<", a, b, c) = "<<st<<endl;
+        }
+
       }
+//      cout<<"diffs[0]="<<diffs[0]<<"diffs[1]="<<diffs[1]<<"diffs[2]="<<diffs[2]<<endl; //later added;
+
+//      cout<<"diffs.size()"<<diffs.size()<<endl;                                    //later added;
+//      cout<<"diffs.front()"<<diffs.front()<<endl;                                   //later added;
       int ngroups = 1, sign = diffs.front() > 0 ? 1 : -1;
+
       for (int i = 1; i < diffs.size(); ++i) {
         if (diffs[i] * sign >= 0) continue;
         else {
@@ -561,48 +666,78 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
             --ngroups;
           }
         }
+
       }
+
+
       if (ngroups % 2 == 1) {
         //cout << "error in computing groups!" << endl;
         ngroups = ngroups - 1;
       }
+   //   cout<<v->index<<"ngroups = "<<ngroups<<endl;
       isSaddle = (ngroups >= 4 && ngroups % 2 == 0);
 
       if (isSaddle) {
         v->rtype = HDS_Vertex::Saddle;
         v->sdegree = (ngroups - 2) / 2;
-        //cout << "Saddle: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+  //     cout << "Saddle: " << v->index << ",moorseFunc(v, a, b, c) =  " << moorseFunc(v, a, b, c) << endl;
         //for (auto neighbor : neighbors) {
         //  cout << moorseFunc(neighbor, a, b, c) << " ";
         //}
         //cout << endl;
+        s1+=1;
+     //    cout<<"saddle !!!!!!!!!"<<s1<<endl;
       }
+
+      }
+
       if (allSmaller) {
-        v->rtype = HDS_Vertex::Maximum;
-        //cout << "Maximum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
-        //for (auto neighbor : neighbors) {
-        //  cout << moorseFunc(neighbor, a, b, c) << " ";
-        //}
-        //cout << endl;
-      }
-      if (allLarger) {
         v->rtype = HDS_Vertex::Minimum;
-        //cout << "Minimum: " << v->index << ", " << moorseFunc(v, a, b, c) << ": ";
+ //       cout << "Minimum: " << v->index << ",moorseFunc(v, a, b, c) =  " << moorseFunc(v, a, b, c) << endl;
         //for (auto neighbor : neighbors) {
         //  cout << moorseFunc(neighbor, a, b, c) << " ";
         //}
         //cout << endl;
+      s2+=1;
+   //    cout<<"minimum  !!!!!!!!!"<<s2<<endl;
       }
+
+
+      if (allLarger) {
+        v->rtype = HDS_Vertex::Maximum;
+  //     cout << "Maximum: " << v->index << ",moorseFunc(v, a, b, c) =  " << moorseFunc(v, a, b, c) << endl;
+        //for (auto neighbor : neighbors) {
+        //  cout << moorseFunc(neighbor, a, b, c) << " ";
+        //}
+        //cout << endl;
+      s3+=1;
+  //    cout<<"maximum  !!!!!!!!!"<<s3<<endl;
+
+      }
+
 
       if (allSmaller || allLarger || isSaddle) {}
       else { 
         v->rtype = HDS_Vertex::Regular;
         return false; 
       }
-    }
+
+
+   }
+     if(s1==3)s11+=v->sdegree;
+     if(s2==3)s22+=1;
+     if(s3==3)s33+=1;
+      cout<<"maximum = "<<s33<<endl;
+      cout<<"minimum = "<<s22<<endl;
+
+      cout<<"saddle = "<< s11<<endl;
     return true;
   };
+
+
+
   return Utils::filter_set(vertSet, isReebPoint);
+
 }
 
 void HDS_Mesh::colorVertices(const vector<double> &val)

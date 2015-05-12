@@ -91,7 +91,8 @@ RESOURCES += \
     icons.qrc
 
 OTHER_FILES +=
-
+LIBS += -glut32
+LIBS += -Lc:\glut
 #unix: LIBS += -L$$PWD/../../Utils/levmar-2.6/ -llevmar
 #INCLUDEPATH += $$PWD/../../Utils/levmar-2.6
 #DEPENDPATH += $$PWD/../../Utils/levmar-2.6

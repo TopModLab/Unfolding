@@ -3,6 +3,7 @@
 
 MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalPoints)
 {
+    int ii=0;
   for (auto cp : criticalPoints) {
     if (cp->rtype == HDS_Vertex::Saddle) {
        // trace lines in each segment
@@ -33,9 +34,9 @@ MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalP
         groups.front().insert(groups.front().end(), groups.back().begin(), groups.back().end());
         groups.pop_back();
       }
-      
+      // above find saddle points and their group;
       // for each group, find the steepest direction
-      cout << "number of groups = " << groups.size() << endl;
+    //  cout << "number of groups = " << groups.size() << endl;
       for (auto g : groups) {
         HDS_Vertex *steepestV = g.front();
         double vdiff = fabs(steepestV->morseFunctionVal - cp->morseFunctionVal);
@@ -46,30 +47,36 @@ MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalP
             vdiff = gidiff;
           }
         }
+
+
         // trace the steepest vertex until reaches a maximum or minimum
         Path path;
+
         HDS_Vertex *v0 = cp, *v1 = steepestV;
-        bool climbingHill = v1->morseFunctionVal > v0->morseFunctionVal;
-        while (v0->rtype != HDS_Vertex::Maximum && v0->rtype != HDS_Vertex::Minimum) {
+        bool climbingHill = v1->morseFunctionVal >= v0->morseFunctionVal;//add an extral = sign, later added;
+        while (v0->rtype != HDS_Vertex::Maximum && v0->rtype != HDS_Vertex::Minimum&&ii<1000) {   //sometimes it can't find max or min points, so recycle always runs;
           path.edges.push_back(Edge(v0, v1));
           v0 = v1;
+
           // find the steepest neighbor of v1
-          auto v1_neighbors = Utils::filter(v1->neighbors(), [&](HDS_Vertex* v){return v != v1; });
+          auto v1_neighbors = Utils::filter(v1->neighbors(), [&](HDS_Vertex* v){return v != v1; });//find neighbors of steepest point
 
           if (climbingHill) {
             // find the highest neighbor of v1
             auto nv = std::max_element(v1_neighbors.begin(), v1_neighbors.end(), [&](HDS_Vertex *vstar, HDS_Vertex *v){
-              return vstar->morseFunctionVal < v->morseFunctionVal;
+              return vstar->morseFunctionVal >= v->morseFunctionVal;//change < to >; later changed;//add an extral = sign, later added;
             });
             v1 = *nv;
           }
           else {
             // find the lowest neighbor of v1
             auto nv = std::min_element(v1_neighbors.begin(), v1_neighbors.end(), [&](HDS_Vertex *vstar, HDS_Vertex *v){
-              return vstar->morseFunctionVal < v->morseFunctionVal;
+              return vstar->morseFunctionVal <= v->morseFunctionVal;//add an extral = sign, later added;
             });
             v1 = *nv;
           }
+    //        cout<<"anything"<<endl;
+            ii+=1;                          //later added;
         }
         paths.push_back(path);
       }

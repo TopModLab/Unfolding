@@ -1,6 +1,6 @@
 #define NOMINMAX
 #include "meshmanager.h"
-
+#include <iostream>
 #include "meshviewer.h"
 #include "glutils.hpp"
 #include "mathutils.hpp"
@@ -8,6 +8,8 @@
 #include "morsesmalecomplex.h"
 
 #include <QMouseEvent>
+
+using namespace std;
 
 MeshViewer::MeshViewer(QWidget *parent) :
 QGLWidget(qglformat_3d, parent)
@@ -19,9 +21,15 @@ QGLWidget(qglformat_3d, parent)
   enableLighting = false;
   showReebPoints = false;
   lastSelectedIndex = 0;
-  cmode = Geodesics;
+  cmode =Random;//PointNormal;//Geodesics;
   cp_smoothing_times = 0;
   cp_smoothing_type = 0;
+  scale = 1.0f;
+  nn=0;
+  nm=0;
+  mm=0;
+
+
 }
 
 MeshViewer::~MeshViewer()
@@ -44,7 +52,7 @@ void MeshViewer::setCurvatureColormap(ColorMap cmap)
 bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 {
   bool isInvertible;
-  QMatrix4x4 proj_modelview_inv = viewerState.projectionModelView().inverted(&isInvertible);
+  QMatrix4x4 proj_modelview_inv = viewerState.projectionModelView().inverted(&isInvertible);//not understood
   if (isInvertible)
   {
     QVector3D pos_camera;
@@ -52,6 +60,7 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
     pos_camera.setY((pos_screen.y() - (float)viewerState.viewport.y) / (float)viewerState.viewport.h*2.0 - 1.0);
     pos_camera.setZ(2.0*pos_camera.z() - 1.0);
     pos_world = (proj_modelview_inv*QVector4D(pos_camera, 1.0f)).toVector3DAffine();
+
   }
 
   return isInvertible;
@@ -111,6 +120,7 @@ int MeshViewer::getSelectedElementIndex(const QPoint &p)
 void MeshViewer::computeGlobalSelectionBox()
 {
   /// get GL state
+  BOOL DD=0,ED=0,DF=0,EF=0;
   GLint m_GLviewport[4];
   GLdouble m_GLmodelview[16];
   GLdouble m_GLprojection[16];
@@ -119,36 +129,44 @@ void MeshViewer::computeGlobalSelectionBox()
   glGetDoublev(GL_PROJECTION_MATRIX, m_GLprojection);     // Retrieve The Projection Matrix
 
   //Not know why, but it solves the problem, maybe some issue with QT
-  if (width() < height())
+   if (width() < height())
     m_GLviewport[1] = -m_GLviewport[1];
 
   GLdouble winX = sbox.corner_win[0];
   GLdouble winY = sbox.corner_win[1];
-  QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[0]);
+  QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[0]);//return isVisible
   //qDebug()<<sbox.gcorners[0];
-  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global, sbox.corner_global + 1, sbox.corner_global + 2);//The new position of the mouse
+  DD = gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global, sbox.corner_global + 1, sbox.corner_global + 2);//The new position of the mouse
   //qDebug()<<sbox.corner_global[0]<<sbox.corner_global[1]<<sbox.corner_global[2];
-
+ /*
+  cout<<"DD"<<endl<<DD<<endl;
+  cout<<&sbox.corner_global<<endl;
+  cout<<&sbox.corner_global+1<<endl;
+  cout<<&sbox.corner_global+2<<endl;
+ */
   winX = sbox.corner_win[0];
   winY = sbox.corner_win[3];
   QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[1]);
   //qDebug()<<sbox.gcorners[1];
-  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 3, sbox.corner_global + 4, sbox.corner_global + 5);//The new position of the mouse
+  ED = gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 3, sbox.corner_global + 4, sbox.corner_global + 5);//The new position of the mouse
   //qDebug()<<sbox.corner_global[3]<<sbox.corner_global[4]<<sbox.corner_global[5];
-
+  /*
+  cout<<"ED"<<endl<<ED<<endl;
+  */
   winX = sbox.corner_win[2];
   winY = sbox.corner_win[3];
   QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[2]);
   //qDebug()<<sbox.gcorners[2];
-  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 6, sbox.corner_global + 7, sbox.corner_global + 8);//The new position of the mouse
+  DF = gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 6, sbox.corner_global + 7, sbox.corner_global + 8);//The new position of the mouse
   //qDebug() << sbox.corner_global[6] << sbox.corner_global[7]<< sbox.corner_global[8];
-
+  cout<<"DF"<<endl<<DF<<endl;
   winX = sbox.corner_win[2];
   winY = sbox.corner_win[1];
   QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[3]);
   //qDebug()<<sbox.gcorners[3];
-  gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 9, sbox.corner_global + 10, sbox.corner_global + 11);//The new position of the mouse
+ EF = gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 9, sbox.corner_global + 10, sbox.corner_global + 11);//The new position of the mouse
   //qDebug() << sbox.corner_global[9] << sbox.corner_global[10]<< sbox.corner_global[11];
+// cout<<"EF"<<endl<<EF<<endl;
 }
 
 void MeshViewer::mousePressEvent(QMouseEvent *e)
@@ -170,6 +188,11 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
   case SelectVertex: {
     sbox.corner_win[0] = e->x();
     sbox.corner_win[1] = viewerState.viewport.h - e->y();
+   /*
+    cout<<"e->x(win[0])"<<endl<<e->x()<<endl;
+    cout<<"e->y(win[1])"<<endl<<e->y()<<endl;
+    viewerState.print();
+    */
     break;
   }
   }
@@ -182,13 +205,14 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
     if (e->buttons() & Qt::LeftButton) {
       QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
 
-      if ((e->modifiers() & Qt::ShiftModifier)) {
+      if ((e->modifiers() & Qt::ShiftModifier)) {      //press "shift" key
         viewerState.translation += QVector3D(diff.x() / 100.0, -diff.y() / 100.0, 0.0);
       }
-      else if (e->modifiers() & Qt::ControlModifier)
+      else if (e->modifiers() & Qt::ControlModifier)   //press "crl" key
       {
         viewerState.translation += QVector3D(0.0, 0.0, diff.x() / 100.0 - diff.y() / 100.0);
       }
+
       else{
         // Rotation axis is perpendicular to the mouse position difference
         // vector
@@ -204,6 +228,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
       }
       viewerState.updateModelView();
       mouseState.prev_pos = QVector2D(e->pos());
+
     }
     updateGL();
     break;
@@ -215,11 +240,18 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
       isSelecting = true;
       sbox.corner_win[2] = e->x();
       sbox.corner_win[3] = viewerState.viewport.h - e->y();
+      /*
+      cout<<"e->x(win[2])"<<endl<<e->x()<<endl;
+      cout<<"e->y(win[3])"<<endl<<e->y()<<endl;
+      viewerState.print();
+      */
       computeGlobalSelectionBox();
     }
     else {
       isSelecting = false;
+      mouseState.isPressed = false;//later added
     }
+  //  cout<<"moving mousestate"<<mouseState.isPressed<<endl;
     updateGL();
     break;
   }
@@ -237,10 +269,16 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
   case SelectVertex: {
     sbox.corner_win[2] = e->x();
     sbox.corner_win[3] = viewerState.viewport.h - e->y();
+/*
+    cout<<"e->rx(win[2])"<<endl<<e->x()<<endl;
+    cout<<"e->ry(win[3])"<<endl<<e->y()<<endl;
+    viewerState.print();
+ */
     computeGlobalSelectionBox();
     isSelecting = false;
-
-    int selectedElementIdx = getSelectedElementIndex(e->pos());
+    mouseState.isPressed = false;   //later added
+    cout<<"releasing mousestate"<<mouseState.isPressed<<endl;
+    int selectedElementIdx = getSelectedElementIndex(e->pos());//mouse positon;
     cout << "selected element " << selectedElementIdx << endl;
     if (selectedElementIdx >= 0) {
       if (interactionState == SelectEdge) {
@@ -251,14 +289,17 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
       }
       else {
         heMesh->selectVertex(selectedElementIdx);
+        findReebPoints();     //later change its position from below;
       }
     }
-    findReebPoints();
+    else     //later added
+        return;
+ //   findReebPoints();
     break;
   }
   }
   mouseState.isPressed = false;
-
+//cout<<"releasing mousestate"<<mouseState.isPressed<<endl; //later added;
   /// reset interaction mode if in camera mode triggered by holding alt
   if (e->modifiers() & Qt::AltModifier) {
     interactionState = interactionStateStack.top();
@@ -292,7 +333,7 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
   case Qt::Key_V:
   {
     if (heMesh) {
-      heMesh->flipShowVertices();
+     heMesh->flipShowVertices();
     }
     break;
   }
@@ -314,9 +355,40 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
     break;
   }
   case Qt::Key_M:
+  {
     cmode = CriticalPointMode((cmode + 1) % NCModes);
     findReebPoints();
     break;
+  }
+  case Qt::Key_Down:
+  {
+      double numSteps = .20f;
+      viewerState.translation.setY(viewerState.translation.y() - numSteps);
+      viewerState.updateModelView();
+       break;
+  }
+  case  Qt::Key_Up:
+  {
+      double numSteps =  .20f;
+      viewerState.translation.setY(viewerState.translation.y() + numSteps);
+      viewerState.updateModelView();
+       break;
+  }
+  case Qt::Key_Left:
+  {
+      double numSteps = .20f;
+      viewerState.translation.setX(viewerState.translation.x() - numSteps);
+      viewerState.updateModelView();
+       break;
+  }
+  case Qt::Key_Right:
+  {
+      double numSteps = .20f;
+      viewerState.translation.setX(viewerState.translation.x() + numSteps);
+      viewerState.updateModelView();
+       break;
+  }
+
   }
   updateGL();
 }
@@ -328,6 +400,7 @@ void MeshViewer::keyReleaseEvent(QKeyEvent *e)
 
 void MeshViewer::wheelEvent(QWheelEvent *e)
 {
+
   switch (interactionState) {
   case Camera:{
     double numSteps = e->delta() / 200.0f;
@@ -338,7 +411,39 @@ void MeshViewer::wheelEvent(QWheelEvent *e)
   default:
     break;
   }
+
+
+
+
   updateGL();
+/*
+  int numDegrees = e->delta();
+      int num = numDegrees / 120;
+      if(num < 0)
+      {
+          num = 0 - num;
+      }
+
+      if (e->orientation() == Qt::Horizontal) {
+
+          //scrollHorizontally(numSteps);
+          scale *= 1.25;
+//          resize(this->scale *this->size());
+      } else {
+          //scrollVertically(numSteps);
+          if(numDegrees > 0)
+          {
+              //scale *= 0.75;
+            resize(num * 0.95 *this->size());
+          }
+          else if(numDegrees < 0)
+          {
+              //scale *= 1.25;
+ //          move(100,200);
+          }
+      }*/
+      e->accept();
+
 }
 
 void MeshViewer::enterEvent(QEvent *e)
@@ -429,13 +534,28 @@ void MeshViewer::paintGL()
     case Camera:
       break;
     default:
+          if (mouseState.isPressed)
+          {
+
       drawSelectionBox();
+          }
       drawMeshToFBO();
     }
 
     if (showReebPoints) {
       drawReebPoints();
       //drawReebGraph();
+    }
+//    glColor4b(1.0,0,0,0);
+ //   glEnable(GL_DEPTH_TEST);
+    QFont fnt;
+    fnt.setPointSize(10);
+    for(auto vit=heMesh->vertSet.begin();vit!=heMesh->vertSet.end();vit++)
+    {
+     HDS_Vertex * v = (*vit);
+    QString *name;
+
+    this->renderText(v->x(),v->y(),v->z(),name->number(v->index),fnt);
     }
   }
 }
@@ -477,7 +597,7 @@ void MeshViewer::drawMeshToFBO() {
   glDepthMask(GL_TRUE);
 
   /// must set alpha to zero
-  glClearColor(0, 0, 0, 0);
+  glClearColor(11, 22, 33, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glShadeModel(GL_FLAT);
@@ -515,6 +635,7 @@ void MeshViewer::drawMeshToFBO() {
 void MeshViewer::drawSelectionBox() {
   if (!isSelecting) return;
 
+  cout<<"drawingSelectionBox mousestate"<<mouseState.isPressed<<endl;
 #if 1
   //draw selection box
   glColor4f(0.0, 1.0, 19.0 / 255, 0.2);
@@ -526,6 +647,7 @@ void MeshViewer::drawSelectionBox() {
   glEnd();
 
   //draw selection box
+
   glLineWidth(3.0);
   glColor4f(0.0, 1.0, 19.0 / 255, 0.5);
   glBegin(GL_LINE_LOOP);
@@ -534,6 +656,7 @@ void MeshViewer::drawSelectionBox() {
   glVertex3dv(sbox.corner_global + 6);
   glVertex3dv(sbox.corner_global + 9);
   glEnd();
+
 #else
   glPushMatrix();
   glTranslatef(0, 0, 0.5);
@@ -591,19 +714,29 @@ void MeshViewer::drawReebPoints()
   for (auto p : reebPoints) {
     switch (p->rtype) {
     case HDS_Vertex::Maximum:
-      glColor4f(1, 0.5, 0, 1);
+      glColor4f(1,0.5, 0, 1);
+       mm+=1;
       break;
     case HDS_Vertex::Minimum:
       glColor4f(1, 0, 0.5, 1);
+      nm+=1;
       break;
     case HDS_Vertex::Saddle:
       glColor4f(0, 0, 1, 1);
+      nn+=1;
       break;
     }
 
     GLUtils::useVertex(p->pos);
   }
   glEnd();
+ // cout<<"Maximum P : " <<mm<<endl;
+ // cout<<"Minimum P : " <<nm<<endl;
+ // cout<<"Saddle P : " <<nn<<endl;
+  nn=0;
+  nm=0;
+  mm=0;
+
 }
 
 void MeshViewer::findReebPoints()
@@ -646,6 +779,15 @@ void MeshViewer::findReebPoints()
 
   auto dists = vector<double>();
   int isSmoothingOnActualMeshChecked = cp_smoothing_type;
+ /* if(isSmoothingOnActualMeshChecked==NULL)        //later added;
+  {
+      dists = vector<double>(heMesh->verts().size());
+      QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
+      for (auto v : heMesh->verts()) {
+        dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+      }
+  }
+*/                                            //later added;
   switch (isSmoothingOnActualMeshChecked) {
   case Qt::Checked:
   {
@@ -679,8 +821,9 @@ void MeshViewer::findReebPoints()
     {
       dists = vector<double>(heMesh->verts().size());
       for (auto &x : dists) {
-        x = rand() / (double)RAND_MAX - 0.5;
+       x= rand()/ (double)RAND_MAX - 0.5;
       }
+     cout<<dists.front()<<"random number binded"<<endl;
       break;
     }
     }
@@ -691,19 +834,25 @@ void MeshViewer::findReebPoints()
     switch (cmode) {
     case Geodesics: {
       // use geodesic distance
+        if(heMesh->verts().size()>10){
       dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
+
+      cout<<"Geodesics method"<<endl;
+        }
+        else
+          break;
       break;
     }
     case Z: {
       dists = vector<double>(heMesh->verts().size());
       for (auto v : heMesh->verts()) {
-        dists[v->index] = v->pos.z();
+        dists[v->index] = v->pos.z();//here pos.z() can be changed to pos.y(); later
       }
       break;
     }
     case PointNormal: {
       dists = vector<double>(heMesh->verts().size());
-      QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
+      QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;//last selected point normal dotproduct other points vector;
       for (auto v : heMesh->verts()) {
         dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
       }
@@ -718,10 +867,109 @@ void MeshViewer::findReebPoints()
     }
     case Random:
     {
+     /*   dists = vector<double>(heMesh->verts().size());
+        for (auto &x : dists) {
+         x= rand()/ (double)RAND_MAX - 0.5;
+        }
+  */
+         vector<double> y(heMesh->verts().size());
+        int ty=0;
+        int tt=0;
+        int ts=0;
+        int ta=heMesh->verts().size();
+        int tq;
+        tq=ta;
+          int id=0;
+        vector<double> memo(ta);
+        for(int i=0;i<ta;i++){
+            memo[i]=(double)i;
+
+        }
+
+
       dists = vector<double>(heMesh->verts().size());
       for (auto &x : dists) {
-        x = rand() / (double)RAND_MAX - 0.5;
+
+
+
+
+               id = rand()%tq;
+               x= memo[id];
+               for(int j=id;j<tq;j++){
+                   memo[j]=memo[j+1];
+              //     cout<<"random number = "<<j<<endl;
+               }
+               memo.pop_back();
+               tq-=1;
+                cout<<"dists["<<tt<<"] = "<<x<<endl;
+
+
+                tt+=1;
+
+           cout<<"--------------------------"<<endl;
+
+
+     //   x = rand()/ (double)RAND_MAX -0.5;
+    //     cout<<"random number = "<<x<<endl;
+   //       srand((unsigned)time(0));
+    /*      if(tt<=heMesh->verts().size())
+           {
+           x=rand()%(heMesh->verts().size());
+         cout<<"dists["<<tt<<"] = "<<x<<endl;
+         y[tt]=x;
+         ts+=1;
+         if(tt>=1){
+
+            for(int ii=0;ii<tt;ii++){
+              if(y[ii]==y[tt])
+                 ty+=1;
+       //       cout<<"ty1 = "<<ty<<endl;
+              if(ty==1){
+                  y.erase(y.begin()+tt-1,y.end());
+                  x=rand()%(heMesh->verts().size());
+                  cout<<"dists["<<tt<<"] = "<<x<<endl;
+                  y[tt]=x;
+                  ts+=1;
+                ty=0;
+                for(int ij=0;ij<ii;ij++){
+                    if(y[ij]==y[tt])
+                        ty+=1;
+                    if(ty==1){
+                        y.erase(y.begin()+tt-1,y.end());
+                        x=rand()%(heMesh->verts().size());
+                        cout<<"dists["<<tt<<"] = "<<x<<endl;
+                        y[tt]=x;
+                        ts+=1;
+                      ty=0;
+                      for(int jj=0;jj<ii;jj++){
+                      if(y[jj]==y[tt])
+                          ty+=1;
+                      if(ty==1){
+                          y.erase(y.begin()+tt-1,y.end());
+                          x=rand()%(heMesh->verts().size());
+                         cout<<"dists["<<tt<<"] = "<<x<<endl;
+                          y[tt]=x;
+                          ts+=1;
+                        ty=0;
+          }
+
+
+          }
+          tt+=1;
+          ty=0;
+          cout<<"----------------------------"<<endl;
+ //         cout<<"tt = "<<tt<<endl;
       }
+          else
+          break;*/
+      }
+      memo.clear();
+
+       cout<<"sum of vertexes = "<<heMesh->verts().size()<<endl;
+       cout<<"cout times = "<<ts<<endl;
+       cout<<dists.front()<<"random number binded"<<endl;
+       cout<<"dists[7] = "<<dists[7]<<endl;
+       cout<<"heMesh->verts().size() = "<<heMesh->verts().size()<<" and heMesh->faces().size() = "<<heMesh->faces().size()<<" and halfedges().size() = "<<heMesh->halfedges().size()<<endl;
       break;
     }
     case Quadratic:
@@ -756,6 +1004,8 @@ void MeshViewer::findReebPoints()
 #endif
   reebPoints = heMesh->getReebPoints(dists);
 
+
+
   int sum_cp = 0;
   for (auto cp : reebPoints) {
     if (cp->rtype == HDS_Vertex::Maximum) sum_cp += 1;
@@ -775,6 +1025,9 @@ void MeshViewer::toggleCriticalPoints() {
 void MeshViewer::setCriticalPointsMethod(int midx)
 {
   cmode = (CriticalPointMode)midx;
+
+  cout<<"setCriticalPointsMethod midx = "<<midx<<endl;
+  cout<<"setCriticalPointsMethod cmode = "<<cmode<<endl;
   findReebPoints();
 }
 
@@ -787,6 +1040,7 @@ void MeshViewer::setCriticalPointsSmoothingTimes(int times)
 void MeshViewer::setCriticalPointsSmoothingType(int t)
 {
   cp_smoothing_type = t;
+  cout<<"setCriticalPointssmoothingtype cp_smoothing_type"<<cp_smoothing_type<<endl;
   findReebPoints();
 }
 

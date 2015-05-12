@@ -104,17 +104,18 @@ private:
     } viewport;
 
     void print() {
-      qDebug() << "viewstate:";
-      qDebug() << viewport.x << ", " << viewport.y << ", " << viewport.w << ", " << viewport.h;
-      qDebug() << modelview;
-      qDebug() << projection;
-      qDebug() << rotationAxis;
-      qDebug() << angularChange;
-      qDebug() << rotation;
-      qDebug() << translation;
-      qDebug() << zNear << ", " << zFar << ", " << fov;
-      qDebug() << aspect;
-    }
+     qDebug() << "viewstate:";
+     qDebug() << viewport.x << ", " << viewport.y << ", " << viewport.w << ", " << viewport.h;
+/*     qDebug() << modelview;
+     qDebug() << projection;
+     qDebug() << rotationAxis;
+     qDebug() << angularChange;
+     qDebug() << rotation;
+     qDebug() << translation;
+     qDebug() << zNear << ", " << zFar << ", " << fov;
+     qDebug() << aspect;
+     */
+   }
 
     QMatrix4x4 modelview;
     QMatrix4x4 projection;
@@ -139,6 +140,9 @@ private:
   MouseState mouseState;
 
 public:
+
+ int  nn, nm, mm;
+
   enum InteractionState {
     Camera = 0,
     SelectVertex,
@@ -167,7 +171,7 @@ private:
 
 private:
   HDS_Mesh *heMesh;   /// not own
-
+  float scale;
 private:
   void drawSelectionBox();
 
@@ -187,11 +191,11 @@ private:
   bool showReebPoints;
   enum CriticalPointMode {
     Geodesics = 0,
-    Z,
-    PointNormal,
-    Curvature,
-    Random,
-    Quadratic,
+    Z=1,              //this line and below later added "= number";
+    PointNormal=2,
+    Curvature=3,
+    Random=5,
+    Quadratic=4,
     NCModes
   } cmode;
   int cp_smoothing_times;

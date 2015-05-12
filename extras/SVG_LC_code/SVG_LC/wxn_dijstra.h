@@ -108,7 +108,8 @@ public:
     std::ifstream input_file (svg_file_name, std::ios::in | std::ios::binary);
     HeadOfSVG head_of_svg;
     input_file.read( (char*)&head_of_svg , sizeof(head_of_svg));
-    head_of_svg.print();
+    head_of_svg.print();//cube_frame show a too big  number of vertexes at 10th loop;
+     std::cout<<"something wrong!"<<endl;
     initialize(head_of_svg.num_of_vertex);
 
     double average_neighbor_number(0.0);

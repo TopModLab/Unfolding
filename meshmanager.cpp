@@ -27,6 +27,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
   try {
     cout << "[VTK] Reading mesh file ..." << endl;
     vtkSmartPointer<vtkOBJReader> vtkReader = vtkSmartPointer<vtkOBJReader>::New();
+
     vtkReader->SetFileName(filename.c_str());
     vtkReader->Update();
     vtkMesh = vtkReader->GetOutput();
@@ -40,6 +41,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 #endif
 
   OBJLoader loader;
+
   if( loader.load(filename) ) {
     cout << "file " << filename << " loaded." << endl;
 
@@ -64,16 +66,19 @@ bool MeshManager::loadOBJFile(const string& filename) {
       const int stepsize = 10;
       string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
       smoothed_mesh_filenames.push_back(smesh_filename);
+      cout<<" smesh_filename is "<< smesh_filename<<endl;
       
       if (Utils::exists(smesh_filename)) {
         // load the mesh directly
         OBJLoader tmploader;
         tmploader.load(smesh_filename);
         tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
+      //  cout<<"load mesh directly"<<endl;
       }
       else {
         for (int j = 0; j < stepsize; ++j) {
           MeshSmoother::smoothMesh_Laplacian(tmp_mesh.data());
+    //      cout<<"smoothMesh_Laplacian"<<endl;
         }
         tmp_mesh->save(smesh_filename);
       }
@@ -82,13 +87,19 @@ bool MeshManager::loadOBJFile(const string& filename) {
     cout << "smoothed meshes computed finished." << endl;
 
     /// initialize the sparse graph
+   if(hds_mesh->verts().size()>10){                         //later added;
     gcomp.reset(new GeodesicComputer(filename));
     gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
     for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
       // compute or load SVG for smoothed meshes
-      gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));
+  //    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
+
+      cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
     }
     cout << "SVGs computed." << endl;
+    }
+    else
+       return true;
     return true;
   }
   else return false;
@@ -99,7 +110,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
   mesh_t *thismesh = new mesh_t;
 
   cout << "building the half edge mesh ..." << endl;
-
+  int ss=0;
   size_t vertsCount = inVerts.size();
   size_t facesCount = inFaces.size();
   size_t curFaceCount = facesCount;
@@ -124,7 +135,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
   for(size_t i=0;i<facesCount;i++)
   {
-    faces[i] = new face_t;
+    faces[i] = new face_t;              //no value;
   }
 
   map<pair<int, int>, he_t*> heMap;
@@ -160,16 +171,23 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
       hes[heIdx+j]->next = hes[heIdx+jn];
 
       int vj = Fi.v[j];
+ //     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
       int vjn = Fi.v[jn];
-
+ //      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
       pair<int, int> vPair = make_pair(vj, vjn);
-
-      if( heMap.find(vPair) == heMap.end() )
+      cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
+      cout<<"vPair.sencond = "<<vPair.second<<endl;
+      if( heMap.find(vPair) == heMap.end() )//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
       {
-        heMap[vPair] = hes[heIdx+j];
-      }
-    }
 
+        heMap[vPair] = hes[heIdx+j];  //address transport; hes[heIdx + j] = curHe; *****critical******
+  //      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
+  //      ss+=1;  //later added;
+      }
+      else
+          return thismesh;
+    }
+//    cout<<"ss = "<<ss<<endl;    //later added;
     curFace->he = hes[heIdx];
     curFace->computeNormal();
 
@@ -251,7 +269,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 
     bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
     if( cutSucceeded ) {
-      /// cutting performed successfully
+      /// cutting performed successfullyas
       cutted_mesh->printInfo("cutted mesh:");
       //cutted_mesh->printMesh("cutted mesh:");
     }
@@ -304,7 +322,10 @@ void MeshManager::unfoldMesh() {
 
 void MeshManager::smoothMesh() {
   if( smoothed_mesh.isNull() )
+  {
+      cout<<"smoothmesh@@@"<<endl;
     smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
+  }
   
   //MeshSmoother::smoothMesh(smoothed_mesh.data());
   //MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
