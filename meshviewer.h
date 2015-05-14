@@ -196,6 +196,7 @@ private:
     Curvature=3,
     Random=5,
     Quadratic=4,
+    CutLocus=5,
     NCModes
   } cmode;
   int cp_smoothing_times;

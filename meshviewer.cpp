@@ -987,6 +987,10 @@ void MeshViewer::findReebPoints()
       }
       break;
     }
+    case CutLocus:
+    {
+
+    }
     }
 
     // find the points to keep

@@ -4,7 +4,6 @@
 #include "utils.hpp"
 #include "meshviewer.h"
 #include <GL/glu.h>
-#include <glut.h>
 #include<iostream>
 using namespace std;
 

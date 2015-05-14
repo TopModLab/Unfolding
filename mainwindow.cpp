@@ -159,12 +159,12 @@ void MainWindow::createMenus()
 
       fileMenu->addAction(actionsMap["new"]);
       fileMenu->addAction(actionsMap["close"]);//later added;
-      fileMenu->addAction(actionsMap["print"]);//later added
+      //fileMenu->addAction(actionsMap["print"]);//later added
 
 
     QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
     editMenu->addAction(actionsMap["reset"]);
-    editMenu->addAction(actionsMap["erase"]);//later added
+    //editMenu->addAction(actionsMap["erase"]);//later added
   }
   catch(...) {
     throw UnfoldingAppException("Failed to create menus!");
@@ -242,7 +242,7 @@ void MainWindow::slot_newFile()
 
 void MainWindow::slot_closeFile()          //later add this function
 {
-    QMessageBox::warning(this, tr("提示"), tr("你点击了~关闭文件~菜单"), QMessageBox::Yes | QMessageBox::No);
+    QMessageBox::warning(this, tr("Warning"), tr("Do you want to quit?"), QMessageBox::Yes | QMessageBox::No);
     this->close();
 }
 
