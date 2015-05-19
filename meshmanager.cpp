@@ -24,84 +24,89 @@ MeshManager* MeshManager::instance = NULL;
 
 bool MeshManager::loadOBJFile(const string& filename) {
 #if USE_REEB_GRAPH
-  try {
-    cout << "[VTK] Reading mesh file ..." << endl;
-    vtkSmartPointer<vtkOBJReader> vtkReader = vtkSmartPointer<vtkOBJReader>::New();
+    try {
+        cout << "[VTK] Reading mesh file ..." << endl;
+        vtkSmartPointer<vtkOBJReader> vtkReader = vtkSmartPointer<vtkOBJReader>::New();
 
-    vtkReader->SetFileName(filename.c_str());
-    vtkReader->Update();
-    vtkMesh = vtkReader->GetOutput();
-    cout << "[VTK] Creating reeb graph ..." << endl;
+        vtkReader->SetFileName(filename.c_str());
+        vtkReader->Update();
+        vtkMesh = vtkReader->GetOutput();
+        cout << "[VTK] Creating reeb graph ..." << endl;
 
-    updateReebGraph();
-  }
-  catch (exception e) {
-    cerr << e.what() << endl;
-  }
+        updateReebGraph();
+    }
+    catch (exception e) {
+        cerr << e.what() << endl;
+    }
 #endif
 
-  OBJLoader loader;
+    OBJLoader loader;
 
-  if( loader.load(filename) ) {
-    cout << "file " << filename << " loaded." << endl;
+    if( loader.load(filename) ) {
+        cout << "file " << filename << " loaded." << endl;
 
-    /// build a half edge mesh here
-    //hds_mesh->printMesh("original");
-    hds_mesh.reset(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
+        /// build a half edge mesh here
+        //hds_mesh->printMesh("original");
+        hds_mesh.reset(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
 
-    cutted_mesh.reset();
-    unfolded_mesh.reset();
-    smoothed_mesh.reset();
+        cutted_mesh.reset();
+        unfolded_mesh.reset();
+        smoothed_mesh.reset();
 
-    /// save the half edge mesh out to a temporary file
-    hds_mesh->save("temp.obj");
-    
-    /// preprocess the mesh with smoothing
-    const int nsmooth = 10;
-    QScopedPointer<HDS_Mesh> tmp_mesh;
-    vector<string> smoothed_mesh_filenames;
-    tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
-    hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
-    for (int i = 0; i < nsmooth; ++i) {
-      const int stepsize = 10;
-      string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
-      smoothed_mesh_filenames.push_back(smesh_filename);
-      cout<<" smesh_filename is "<< smesh_filename<<endl;
-      
-      if (Utils::exists(smesh_filename)) {
-        // load the mesh directly
-        OBJLoader tmploader;
-        tmploader.load(smesh_filename);
-        tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
-      //  cout<<"load mesh directly"<<endl;
-      }
-      else {
-        for (int j = 0; j < stepsize; ++j) {
-          MeshSmoother::smoothMesh_Laplacian(tmp_mesh.data());
-    //      cout<<"smoothMesh_Laplacian"<<endl;
+        /// save the half edge mesh out to a temporary file
+        hds_mesh->save("temp.obj");
+
+        /// preprocess the mesh with smoothing
+        const int nsmooth = 10;
+        QScopedPointer<HDS_Mesh> tmp_mesh;
+        vector<string> smoothed_mesh_filenames;
+        tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
+        hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
+        for (int i = 0; i < nsmooth; ++i) {
+            const int stepsize = 10;
+            string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
+            smoothed_mesh_filenames.push_back(smesh_filename);
+            cout<<" smesh_filename is "<< smesh_filename<<endl;
+
+            if (Utils::exists(smesh_filename)) {
+                // load the mesh directly
+                OBJLoader tmploader;
+                tmploader.load(smesh_filename);
+                tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
+                //  cout<<"load mesh directly"<<endl;
+            }
+            else {
+                for (int j = 0; j < stepsize; ++j) {
+                    MeshSmoother::smoothMesh_Laplacian(tmp_mesh.data());
+                    //      cout<<"smoothMesh_Laplacian"<<endl;
+                }
+                tmp_mesh->save(smesh_filename);
+            }
+            hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
         }
-        tmp_mesh->save(smesh_filename);
-      }
-      hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
-    }
-    cout << "smoothed meshes computed finished." << endl;
+        cout << "smoothed meshes computed finished." << endl;
 
-    /// initialize the sparse graph
-   if(hds_mesh->verts().size()>10){                         //later added;
-    gcomp.reset(new GeodesicComputer(filename));
-    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
-    for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
-      // compute or load SVG for smoothed meshes
-  //    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
+        /// initialize the sparse graph
+        if(hds_mesh->verts().size()>10){                         //later added;
+            gcomp.reset(new GeodesicComputer(filename));
+            gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
+            for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
+                // compute or load SVG for smoothed meshes
+                //    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
 
-      cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
+                cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
+            }
+            cout << "SVGs computed." << endl;
+        }
+        else
+            return true;
+
+        //set the graph for discrete geodesics computer
+        dis_gcomp.reset(new DiscreteGeoComputer(getHalfEdgeMesh()));
+
+
+        return true;
     }
-    cout << "SVGs computed." << endl;
-    }
-    else
-       return true;
-    return true;
-  }
   else return false;
 }
 
@@ -234,6 +239,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
   thismesh->setMesh(faces, verts, hes);
   cout << "finished building halfedge structure." << endl;
   cout << "halfedge count = " << thismesh->halfedges().size() << endl;
+
 
   return thismesh;
 }

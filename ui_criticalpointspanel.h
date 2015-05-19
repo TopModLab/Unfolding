@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'criticalpointspanel.ui'
 **
-** Created by: Qt User Interface Compiler version 5.1.0
+** Created by: Qt User Interface Compiler version 5.4.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -44,10 +44,10 @@ public:
     {
         if (CriticalPointsPanel->objectName().isEmpty())
             CriticalPointsPanel->setObjectName(QStringLiteral("CriticalPointsPanel"));
-        CriticalPointsPanel->resize(210, 130);
+        CriticalPointsPanel->resize(291, 130);
         verticalLayoutWidget = new QWidget(CriticalPointsPanel);
         verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(10, 10, 191, 111));
+        verticalLayoutWidget->setGeometry(QRect(10, 10, 261, 111));
         verticalLayout = new QVBoxLayout(verticalLayoutWidget);
         verticalLayout->setSpacing(6);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
@@ -120,6 +120,7 @@ public:
          << QApplication::translate("CriticalPointsPanel", "Curvature", 0)
          << QApplication::translate("CriticalPointsPanel", "Quadratic", 0)
          << QApplication::translate("CriticalPointsPanel", "Random", 0)
+         << QApplication::translate("CriticalPointsPanel", "Cut-Locus", 0)
         );
         label_2->setText(QApplication::translate("CriticalPointsPanel", "Smoothing", 0));
         smoothingTypeCheckBox->setText(QApplication::translate("CriticalPointsPanel", "Smoothing on Actual Mesh", 0));

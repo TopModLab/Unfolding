@@ -2,6 +2,7 @@
 #define MESHMANAGER_H
 
 #include "GeodesicComputer.h"
+#include "DiscreteGeoComputer.h"
 
 #include "common.h"
 #include <QMutex>
@@ -114,6 +115,8 @@ private:
     
     QScopedPointer<HDS_Mesh> hds_mesh, extended_mesh, smoothed_mesh, cutted_mesh, unfolded_mesh;
     QScopedPointer<GeodesicComputer> gcomp;
+    QScopedPointer<DiscreteGeoComputer> dis_gcomp;
+
 
     vector<QSharedPointer<HDS_Mesh>> hds_mesh_smoothed;
     vector<QSharedPointer<GeodesicComputer>> gcomp_smoothed;

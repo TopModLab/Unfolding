@@ -15,6 +15,11 @@ public:
     explicit CutLocusPanel(QWidget *parent = 0);
     ~CutLocusPanel();
 
+signals:
+    void sig_methodChanged(int);
+    void sig_displayCut();
+    void sig_displayMinMax();
+
 private:
     Ui::CutLocusPanel *ui;
 };

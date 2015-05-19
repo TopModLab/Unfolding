@@ -6,6 +6,7 @@
 #include "meshviewer.h"
 #include "extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
+#include "cutlocuspanel.h"
 
 namespace Ui {
 class MainWindow;
@@ -54,10 +55,16 @@ private slots:
 
   void slot_updateMeshColorByGeoDistance(int vidx);
   void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
+
   void slot_triggerCriticalPoints();
   void slot_updateCriticalPointsSmoothingTimes(int);
   void slot_updateCriticalPointsSmoothingType(int);
   void slot_updateCriticalPointsMethod(int);
+
+  void slot_triggerCutLocusPanel();
+  void slot_updateCutLocusMethod(int);
+  void slot_displayMinMaxPoints();
+
 
 private:
   void closeEvent(QCloseEvent *e);
@@ -68,6 +75,7 @@ private:
   MeshViewer *viewer;
   ColormapEditor *ceditor;
   CriticalPointsPanel *cppanel;
+  CutLocusPanel *clpanel;
 };
 
 #endif // MAINWINDOW_H

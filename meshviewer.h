@@ -45,6 +45,10 @@ public:
   void setCriticalPointsSmoothingTimes(int times);
   void setCriticalPointsSmoothingType(int t);
 
+  void setCutLocusMethod(int midx);
+  void displayMinMaxPoints();
+
+
 signals:
   void updateMeshColorByGeoDistance(int vidx);
   void updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double alpha);
@@ -196,18 +200,29 @@ private:
     Curvature=3,
     Random=5,
     Quadratic=4,
-    CutLocus=5,
+    CutLocus=6,
     NCModes
   } cmode;
+
   int cp_smoothing_times;
   int cp_smoothing_type;
   void findReebPoints();
   void drawReebPoints();
   void drawReebGraph();
 
+private:
+  enum CutLocusMode {
+      GraphDist = 0,
+      GeodesicsDist = 1
+  }lmode;
+
+  void findCutLocusPoints();
+
   unordered_set<HDS_Vertex*> reebPoints;
   SimpleGraph * rbgraph;
   MorseSmaleComplex msc;
+
+
 };
 
 #endif // MESHVIEWER_H

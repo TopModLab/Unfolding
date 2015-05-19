@@ -47,7 +47,9 @@ SOURCES += main.cpp\
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/svg_precompute.cpp \
     morsesmalecomplex.cpp \
     GeodesicComputer.cpp \
-    MeshExtender.cpp
+    MeshExtender.cpp \
+    discretegeocomputer.cpp \
+    cutlocuspanel.cpp
 
 HEADERS  += mainwindow.h \
     hds_face.h \
@@ -82,10 +84,13 @@ HEADERS  += mainwindow.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/wxnTime.h \
     morsesmalecomplex.h \
     GeodesicComputer.h \
-    MeshExtender.h
+    MeshExtender.h \
+    discretegeocomputer.h \
+    cutlocuspanel.h
 FORMS    += mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
-    criticalpointspanel.ui
+    criticalpointspanel.ui \
+    cutlocuspanel.ui
 
 RESOURCES += \
     icons.qrc
