@@ -49,7 +49,6 @@ public:
   void setCriticalPointsSmoothingType(int t);
 
   void setCutLocusMethod(int midx);
-  void displayMinMaxPoints();
 
 
 signals:
@@ -172,6 +171,10 @@ public:
   bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
   int getSelectedElementIndex(const QPoint& p);
 
+public:
+  int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
+  int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
+
 private:
   InteractionState interactionState;
   stack<InteractionState> interactionStateStack;
@@ -196,6 +199,7 @@ private:
 
 private:
   bool showReebPoints;
+  bool isCriticalPointModeSet = false;
   enum CriticalPointMode {
     Geodesics = 0,
     Z=1,              //this line and below later added "= number";
@@ -203,7 +207,6 @@ private:
     Curvature=3,
     Random=5,
     Quadratic=4,
-    CutLocus=6,
     NCModes
   } cmode;
 
@@ -214,6 +217,7 @@ private:
   void drawReebGraph();
 
 private:
+  bool isCutLocusModeset = false;
   enum CutLocusMode {
       GraphDist = 0,
       GeodesicsDist = 1

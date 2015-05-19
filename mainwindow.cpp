@@ -302,12 +302,14 @@ void MainWindow::slot_triggerColormap() {
 
 void MainWindow::slot_triggerCriticalPoints() {
     viewer->showCriticalPoints();
+    viewer->setCriticalPointsMethod(viewer->getCmode());
     viewer->update();
     cppanel->show();
 }
 
 void MainWindow::slot_triggerCutLocusPanel() {
     viewer->showCriticalPoints();
+    viewer->setCutLocusMethod(viewer->getLmode());
     viewer->update();
     clpanel->show();
 }
@@ -334,6 +336,9 @@ void MainWindow::slot_smoothMesh() {
 
 void MainWindow::closeEvent(QCloseEvent *e) {
     ceditor->close();
+    cppanel->close();
+    clpanel->close();
+
 }
 
 void MainWindow::slot_extendMesh()

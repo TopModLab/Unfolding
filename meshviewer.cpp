@@ -289,12 +289,16 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
             }
             else {
                 heMesh->selectVertex(selectedElementIdx);
-                findReebPoints();     //later change its position from below;
+                if (isCriticalPointModeSet)
+                    findReebPoints();
+                if  (isCutLocusModeset)
+                    findCutLocusPoints();
             }
         }
         else     //later added
             return;
-        //   findReebPoints();
+
+
         break;
     }
     }
@@ -993,6 +997,7 @@ void MeshViewer::findReebPoints()
 
         }
 
+
         // find the points to keep
         int niters = cp_smoothing_times;// pow(2, cp_smoothing_times);
         cout << "smoothing = " << niters << endl;
@@ -1075,6 +1080,7 @@ void MeshViewer::showCriticalPoints() {
     showReebPoints = true;
 
 }
+
 void MeshViewer::hideCriticalPoints() {
     showReebPoints = false;
 
@@ -1083,7 +1089,7 @@ void MeshViewer::hideCriticalPoints() {
 void MeshViewer::setCriticalPointsMethod(int midx)
 {
     cmode = (CriticalPointMode)midx;
-
+    isCriticalPointModeSet = true;
     cout<<"setCriticalPointsMethod midx = "<<midx<<endl;
     cout<<"setCriticalPointsMethod cmode = "<<cmode<<endl;
     findReebPoints();
@@ -1105,15 +1111,13 @@ void MeshViewer::setCriticalPointsSmoothingType(int t)
 void MeshViewer::setCutLocusMethod(int midx)
 {
     lmode = (CutLocusMode)midx;
-
+    isCutLocusModeset = true;
     cout<<"setCutLocusMethod midx = "<<midx<<endl;
     cout<<"setCutLocusMethod lmode = "<<lmode<<endl;
+    findCutLocusPoints();
+
 }
 
-void MeshViewer::displayMinMaxPoints()
-{
-    findCutLocusPoints();
-}
 
 
 void MeshViewer::bindReebGraph(SimpleGraph *g)
