@@ -792,7 +792,7 @@ void MeshViewer::findReebPoints()
 */                                            //later added;
 
     switch (isSmoothingOnActualMeshChecked) {
-    case Qt::Checked:
+    case Qt::Checked: //bugs with this checked operation
     {
         // get the function values from the smoothed meshes
         int lev0 = cp_smoothing_times / 10;
@@ -1069,6 +1069,15 @@ void MeshViewer::findCutLocusPoints()
 
 void MeshViewer::toggleCriticalPoints() {
     showReebPoints = !showReebPoints;
+
+}
+void MeshViewer::showCriticalPoints() {
+    showReebPoints = true;
+
+}
+void MeshViewer::hideCriticalPoints() {
+    showReebPoints = false;
+
 }
 
 void MeshViewer::setCriticalPointsMethod(int midx)

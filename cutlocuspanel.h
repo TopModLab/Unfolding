@@ -17,8 +17,8 @@ public:
 
 signals:
     void sig_methodChanged(int);
-    void sig_displayCut();
-    void sig_displayMinMax();
+    void sig_displayCut(bool);
+    void sig_displayMinMax(bool);
 
 private:
     Ui::CutLocusPanel *ui;

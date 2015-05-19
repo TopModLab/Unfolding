@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>375</width>
-    <height>150</height>
+    <width>261</width>
+    <height>122</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Cut Locus Panel</string>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>19</x>
-     <y>19</y>
-     <width>331</width>
-     <height>109</height>
+     <x>20</x>
+     <y>20</y>
+     <width>221</width>
+     <height>81</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -59,22 +59,32 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="spacing">
-       <number>70</number>
-      </property>
       <item>
-       <widget class="QPushButton" name="minmaxPushButton">
-        <property name="text">
-         <string>Min Max Points</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cutPushButton">
-        <property name="text">
-         <string>Cut</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QRadioButton" name="MinmaxRadioButton">
+          <property name="text">
+           <string>Min Max Points</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">buttonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="CutRadioButton">
+          <property name="text">
+           <string>Cut</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">buttonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -83,4 +93,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

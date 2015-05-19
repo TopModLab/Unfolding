@@ -63,7 +63,7 @@ private slots:
 
   void slot_triggerCutLocusPanel();
   void slot_updateCutLocusMethod(int);
-  void slot_displayMinMaxPoints();
+  void slot_toggleMinMaxPoints(bool);
 
 
 private:

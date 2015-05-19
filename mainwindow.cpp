@@ -63,8 +63,8 @@ bool MainWindow::connectComponents()
     connect(cppanel, SIGNAL(sig_smoothingTypeChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingType(int)));
 
     connect(clpanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCutLocusMethod(int)));
-    //connect(clpanel, SIGNAL(sig_displayCut()), this, );  //perform cut based on selected vertices
-    connect(clpanel, SIGNAL(sig_displayMinMax()), this, SLOT(slot_displayMinMaxPoints()));
+    //connect(clpanel, SIGNAL(sig_displayCut(bool)), this, );  //perform cut based on selected vertices
+    connect(clpanel, SIGNAL(sig_displayMinMax(bool)), this, SLOT(slot_toggleMinMaxPoints(bool)));
 
     return true;
 }
@@ -95,7 +95,7 @@ void MainWindow::createActions()
         connect(saveAct, SIGNAL(triggered()), this, SLOT(slot_saveFile()));
         actionsMap["save"] = saveAct;
 
-        QAction *camAct = new QAction(QIcon(":/icons/cube.png"), tr("Camera Operation"), this);
+        QAction *camAct = new QAction(QIcon(":/icons/select.png"), tr("Camera Operation"), this);
         camAct->setStatusTip(tr("Camera operation"));
         camAct->setCheckable(true);
         camAct->setChecked(true);
@@ -147,13 +147,11 @@ void MainWindow::createActions()
 
         QAction *cpAct = new QAction(QIcon(":/icons/cp.png"), tr("Critical Points"), this);
         cpAct->setStatusTip(tr("Critical points"));
-        cpAct->setCheckable(true);
         connect(cpAct, SIGNAL(triggered()), this, SLOT(slot_triggerCriticalPoints()));
         actionsMap["critical_points"] = cpAct;
 
         QAction *clAct = new QAction(QIcon(":/icons/cl.png"), tr("Cut Locus"), this);
         clAct->setStatusTip(tr("Cut Locus"));
-        clAct->setCheckable(true);
         connect(clAct, SIGNAL(triggered()), this, SLOT(slot_triggerCutLocusPanel()));
         actionsMap["cut_locus"] = clAct;
 
@@ -303,12 +301,14 @@ void MainWindow::slot_triggerColormap() {
 }
 
 void MainWindow::slot_triggerCriticalPoints() {
-    viewer->toggleCriticalPoints();
+    viewer->showCriticalPoints();
     viewer->update();
     cppanel->show();
 }
 
 void MainWindow::slot_triggerCutLocusPanel() {
+    viewer->showCriticalPoints();
+    viewer->update();
     clpanel->show();
 }
 
@@ -372,10 +372,10 @@ void MainWindow::slot_updateCutLocusMethod(int midx)
 
 }
 
-void MainWindow::slot_displayMinMaxPoints()
+void MainWindow::slot_toggleMinMaxPoints(bool checked)
 {
     //show min max points
-    viewer->displayMinMaxPoints();
+    viewer->toggleCriticalPoints();
     viewer->update();
 }
 

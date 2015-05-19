@@ -3,7 +3,6 @@
         <file>icons/edge.png</file>
         <file>icons/face.png</file>
         <file>icons/vertex.png</file>
-        <file>icons/cube.png</file>
         <file>icons/cut.png</file>
         <file>icons/unfold.png</file>
         <file>icons/open.png</file>
@@ -12,6 +11,7 @@
         <file>icons/smooth.png</file>
         <file>icons/extend.png</file>
         <file>icons/cp.png</file>
-      
+        <file>icons/cl.png</file>
+        <file>icons/select.png</file>
     </qresource>
 </RCC>

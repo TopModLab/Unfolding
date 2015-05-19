@@ -41,6 +41,9 @@ public:
   void setCurvatureColormap(ColorMap cmap);
 
   void toggleCriticalPoints();
+  void showCriticalPoints();
+  void hideCriticalPoints();
+
   void setCriticalPointsMethod(int midx);
   void setCriticalPointsSmoothingTimes(int times);
   void setCriticalPointsSmoothingType(int t);

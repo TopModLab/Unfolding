@@ -44,10 +44,10 @@ public:
     {
         if (CriticalPointsPanel->objectName().isEmpty())
             CriticalPointsPanel->setObjectName(QStringLiteral("CriticalPointsPanel"));
-        CriticalPointsPanel->resize(291, 130);
+        CriticalPointsPanel->resize(293, 130);
         verticalLayoutWidget = new QWidget(CriticalPointsPanel);
         verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(10, 10, 261, 111));
+        verticalLayoutWidget->setGeometry(QRect(10, 10, 271, 111));
         verticalLayout = new QVBoxLayout(verticalLayoutWidget);
         verticalLayout->setSpacing(6);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
@@ -120,7 +120,6 @@ public:
          << QApplication::translate("CriticalPointsPanel", "Curvature", 0)
          << QApplication::translate("CriticalPointsPanel", "Quadratic", 0)
          << QApplication::translate("CriticalPointsPanel", "Random", 0)
-         << QApplication::translate("CriticalPointsPanel", "Cut-Locus", 0)
         );
         label_2->setText(QApplication::translate("CriticalPointsPanel", "Smoothing", 0));
         smoothingTypeCheckBox->setText(QApplication::translate("CriticalPointsPanel", "Smoothing on Actual Mesh", 0));
