@@ -137,8 +137,18 @@ void MainWindow::createActions()
 
         QAction *unfoldAct = new QAction(QIcon(":/icons/unfold.png"), tr("Unfold"), this);
         unfoldAct->setStatusTip(tr("Unfold mesh"));
+        unfoldAct->setCheckable(true);
+        unfoldAct->setChecked(false);
         connect(unfoldAct, SIGNAL(triggered()), this, SLOT(slot_unfoldMesh()));
         actionsMap["mesh unfold"] = unfoldAct;
+
+        QAction *foldAct = new QAction(QIcon(":/icons/fold.png"), tr("Fold"), this);
+        foldAct->setStatusTip(tr("Fold"
+                                 " mesh"));
+        foldAct->setCheckable(true);
+        foldAct->setChecked(true);
+        connect(foldAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
+        actionsMap["mesh fold"] = foldAct;
 
         QAction *colormapAct = new QAction(QIcon(":/icons/colormap.png"), tr("Colormap"), this);
         colormapAct->setStatusTip(tr("Color map"));
@@ -199,12 +209,18 @@ void MainWindow::createToolBar()
         ui->mainToolBar->addAction(actionsMap["save"]);
         ui->mainToolBar->addSeparator();
 
-        QActionGroup *group = new QActionGroup(ui->mainToolBar);
-        group->addAction(actionsMap["camera"]);
-        group->addAction(actionsMap["face select"]);
-        group->addAction(actionsMap["edge select"]);
-        group->addAction(actionsMap["vertex select"]);
-        group->setExclusive(true);
+        QActionGroup *selectGroup = new QActionGroup(ui->mainToolBar);
+        selectGroup->addAction(actionsMap["camera"]);
+        selectGroup->addAction(actionsMap["face select"]);
+        selectGroup->addAction(actionsMap["edge select"]);
+        selectGroup->addAction(actionsMap["vertex select"]);
+        selectGroup->setExclusive(true);
+
+        QActionGroup *unfoldGroup = new QActionGroup(ui->mainToolBar);
+        unfoldGroup->addAction(actionsMap["mesh unfold"]);
+        unfoldGroup->addAction(actionsMap["mesh fold"]);
+        unfoldGroup->setExclusive(true);
+
         ui->mainToolBar->addAction(actionsMap["camera"]);
 
         ui->mainToolBar->addSeparator();
@@ -219,6 +235,7 @@ void MainWindow::createToolBar()
         ui->mainToolBar->addSeparator();
         ui->mainToolBar->addAction(actionsMap["mesh cut"]);
         ui->mainToolBar->addAction(actionsMap["mesh unfold"]);
+        ui->mainToolBar->addAction(actionsMap["mesh fold"]);
 
         ui->mainToolBar->addSeparator();
         ui->mainToolBar->addAction(actionsMap["colormap"]);

@@ -30,6 +30,8 @@ MeshViewer::MeshViewer(QWidget *parent) :
     mm=0;
 
 
+    setStatusTip(tr("C: mesh color  E: edges  V : vertices  F : faces  L : lighting  R : critical points  M : change critical point mode "));
+
 }
 
 MeshViewer::~MeshViewer()
@@ -295,7 +297,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
                     findCutLocusPoints();
             }
         }
-        else     //later added
+        else
             return;
 
 
@@ -362,6 +364,7 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
     }
     case Qt::Key_M:
     {
+        //loop through all critical point modes
         cmode = CriticalPointMode((cmode + 1) % NCModes);
         findReebPoints();
         break;
@@ -844,13 +847,14 @@ void MeshViewer::findReebPoints()
             if(heMesh->verts().size()>10){
                 dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
 
-                cout<<"Geodesics method on "<<lastSelectedIndex<<endl;
+                cout<<"Geodesics method on "<<lastSelectedIndex<<"..."<<endl;
             }
             else
                 break;
             break;
         }
         case Z: {
+            cout<<"Z value method..."<<endl;
             dists = vector<double>(heMesh->verts().size());
             for (auto v : heMesh->verts()) {
                 dists[v->index] = v->pos.z();//here pos.z() can be changed to pos.y(); later
@@ -858,6 +862,8 @@ void MeshViewer::findReebPoints()
             break;
         }
         case PointNormal: {
+            cout<<"Point normal method..."<<endl;
+
             dists = vector<double>(heMesh->verts().size());
             QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;//last selected point normal dotproduct other points vector;
             for (auto v : heMesh->verts()) {
@@ -866,6 +872,8 @@ void MeshViewer::findReebPoints()
             break;
         }
         case Curvature: {
+            cout<<"Curvature method..."<<endl;
+
             dists = vector<double>(heMesh->verts().size());
             for (auto v : heMesh->verts()) {
                 dists[v->index] = v->curvature;
@@ -874,6 +882,8 @@ void MeshViewer::findReebPoints()
         }
         case Random:
         {
+            cout<<"Random method..."<<endl;
+
             /*   dists = vector<double>(heMesh->verts().size());
         for (auto &x : dists) {
          x= rand()/ (double)RAND_MAX - 0.5;
@@ -981,6 +991,8 @@ void MeshViewer::findReebPoints()
         }
         case Quadratic:
         {
+            cout<<"Quadratic method..."<<endl;
+
             // compute the center of the shape
             QVector3D c(0, 0, 0);
             for (auto &v : heMesh->vertSet) {
@@ -1037,14 +1049,14 @@ void MeshViewer::findCutLocusPoints()
         if(heMesh->verts().size()>10){
             dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
 
-            cout<<"Geodesics method on "<<lastSelectedIndex<<endl;
+            cout<<"Geodesics method on "<<lastSelectedIndex<<"..."<<endl;
         }
         else
             break;
         break;
     }
     case GraphDist:
-        cout<<"Graph Distance method on vertex "<<lastSelectedIndex<<endl;
+        cout<<"Graph Distance method on vertex "<<lastSelectedIndex<<"..."<<endl;
 
         dists = MeshManager::getInstance()->dis_gcomp->discreteDistanceTo(heMesh->vertMap[lastSelectedIndex]);
         cout << "Graph distance calculated."<<endl;

@@ -13,5 +13,6 @@
         <file>icons/cp.png</file>
         <file>icons/cl.png</file>
         <file>icons/select.png</file>
+        <file>icons/fold.png</file>
     </qresource>
 </RCC>
