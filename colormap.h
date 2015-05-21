@@ -7,22 +7,22 @@
 
 class ColorMap {
 public:
-  typedef pair<double, QColor> ColorPoint;
-  ColorMap();
+	typedef pair<double, QColor> ColorPoint;
+	ColorMap();
 
-  QColor getColor(double val);
-  QColor getColor_discrete(double val);
+	QColor getColor(double val);
+	QColor getColor_discrete(double val);
 
-  void setColor(double val, QColor c);
+	void setColor(double val, QColor c);
 
-  void buildColormap();
+	void buildColormap();
 
-  static ColorMap getDefaultColorMap();
+	static ColorMap getDefaultColorMap();
 
 private:
-  vector<ColorPoint> colormap;
-  vector<QColor> colormap_discrete;
-  double minVal, maxVal, rangeVal;
+	vector<ColorPoint> colormap;
+	vector<QColor> colormap_discrete;
+	double minVal, maxVal, rangeVal;
 };
 
 
