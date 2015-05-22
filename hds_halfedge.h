@@ -10,30 +10,30 @@ class HDS_Vertex;
 class HDS_HalfEdge
 {
 private:
-  static size_t uid;
+	static size_t uid;
 
 public:
-  static void resetIndex() { uid = 0; }
-  static size_t assignIndex() { return uid++; }
+	static void resetIndex() { uid = 0; }
+	static size_t assignIndex() { return uid++; }
 
-  HDS_HalfEdge();
-  ~HDS_HalfEdge();
+	HDS_HalfEdge();
+	~HDS_HalfEdge();
 
-  HDS_HalfEdge(const HDS_HalfEdge& other);
-  HDS_HalfEdge operator=(const HDS_HalfEdge& other);
+	HDS_HalfEdge(const HDS_HalfEdge& other);
+	HDS_HalfEdge operator=(const HDS_HalfEdge& other);
 
-  void setPicked(bool v) { isPicked = v; flip->isPicked = v; }
-  void setCutEdge(bool v) { isCutEdge = v; flip->isCutEdge = v; }
+	void setPicked(bool v) { isPicked = v; flip->isPicked = v; }
+	void setCutEdge(bool v) { isCutEdge = v; flip->isCutEdge = v; }
 
-  HDS_Face *f;
-  HDS_Vertex *v;
-  HDS_HalfEdge *prev, *next, *flip;
+	HDS_Face *f;
+	HDS_Vertex *v;
+	HDS_HalfEdge *prev, *next, *flip;
 
-  HDS_HalfEdge *twin;    /// pointer to its twin halfedge created in a cut event
+	HDS_HalfEdge *twin;  // pointer to its twin halfedge created in a cut event
 
-  int index;
-  bool isPicked;
-  bool isCutEdge;
+	int index;
+	bool isPicked;
+	bool isCutEdge;
 };
 
 #endif // HDS_EDGE_H
