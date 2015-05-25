@@ -59,5 +59,5 @@ inline double GetTickCount_linux() {
 }
 inline double GetCurrentTime() { return GetTickCount_linux(); }
 #else
-inline double GetCurrentTime() { return GetTickCount()); }
+//inline double GetCurrentTime() { return GetTickCount(); }
 #endif
