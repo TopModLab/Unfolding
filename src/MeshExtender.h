@@ -10,7 +10,7 @@ class HDS_Vertex;
 class MeshExtender
 {
 public:
-  static bool extendMesh(HDS_Mesh *mesh, float scale);
+	static bool extendMesh(HDS_Mesh *mesh, float scale);
 
 private:
 

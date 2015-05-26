@@ -8,7 +8,7 @@ QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Unfolding2
+TARGET = Unfolding
 TEMPLATE = app
 
 CONFIG += c++11
@@ -19,23 +19,23 @@ QMAKE_CXXFLAGS += -std=c++11
 #INCLUDEPATH += /usr/local/include /Users/phg/Utils/armadillo-4.450.4/include
 #LIBS += -L/usr/local/lib/OpenMesh -lOpenMeshCore -lOpenMeshTools -L/usr/local/lib -framework Accelerate
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    hds_face.cpp \
-    hds_vertex.cpp \
-    hds_mesh.cpp \
-    hds_halfedge.cpp \
-    meshviewer.cpp \
-    meshmanager.cpp \
-    meshloader.cpp \
-    stringutils.cpp \
-    meshcutter.cpp \
-    meshunfolder.cpp \
+SOURCES += src/main.cpp\
+        src/mainwindow.cpp \
+    src/hds_face.cpp \
+    src/hds_vertex.cpp \
+    src/hds_mesh.cpp \
+    src/hds_halfedge.cpp \
+    src/meshviewer.cpp \
+    src/meshmanager.cpp \
+    src/meshloader.cpp \
+    src/stringutils.cpp \
+    src/meshcutter.cpp \
+    src/meshunfolder.cpp \
     extras/colormap_editor/colormapeditor.cpp \
-    colormap.cpp \
-    unionfind.cpp \
-    meshsmoother.cpp \
-    criticalpointspanel.cpp \
+    src/colormap.cpp \
+    src/unionfind.cpp \
+    src/meshsmoother.cpp \
+    src/criticalpointspanel.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/BaseModel.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ExactMethodForDGP.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ICHWithFurtherPriorityQueue.cpp \
@@ -45,32 +45,32 @@ SOURCES += main.cpp\
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/RichModel.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/stdafx.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/svg_precompute.cpp \
-    morsesmalecomplex.cpp \
-    GeodesicComputer.cpp \
-    MeshExtender.cpp \
-    discretegeocomputer.cpp \
-    cutlocuspanel.cpp
+    src/morsesmalecomplex.cpp \
+    src/GeodesicComputer.cpp \
+    src/MeshExtender.cpp \
+    src/discretegeocomputer.cpp \
+    src/cutlocuspanel.cpp
 
-HEADERS  += mainwindow.h \
-    hds_face.h \
-    hds_vertex.h \
-    hds_mesh.h \
-    hds_halfedge.h \
-    meshviewer.h \
-    common.h \
-    glutils.hpp \
-    meshmanager.h \
-    meshloader.h \
-    stringutils.h \
-    mathutils.hpp \
-    meshcutter.h \
-    utils.hpp \
-    meshunfolder.h \
+HEADERS  += src/mainwindow.h \
+    src/hds_face.h \
+    src/hds_vertex.h \
+    src/hds_mesh.h \
+    src/hds_halfedge.h \
+    src/meshviewer.h \
+    src/common.h \
+    src/glutils.hpp \
+    src/meshmanager.h \
+    src/meshloader.h \
+    src/stringutils.h \
+    src/mathutils.hpp \
+    src/meshcutter.h \
+    src/utils.hpp \
+    src/meshunfolder.h \
     extras/colormap_editor/colormapeditor.h \
-    colormap.h \
-    unionfind.h \
-    meshsmoother.h \
-    criticalpointspanel.h \
+    src/colormap.h \
+    src/unionfind.h \
+    src/meshsmoother.h \
+    src/criticalpointspanel.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/BaseModel.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ExactMethodForDGP.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ICHWithFurtherPriorityQueue.h \
@@ -82,15 +82,15 @@ HEADERS  += mainwindow.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/svg_precompute.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/targetver.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/wxnTime.h \
-    morsesmalecomplex.h \
-    GeodesicComputer.h \
-    MeshExtender.h \
-    discretegeocomputer.h \
-    cutlocuspanel.h
-FORMS    += mainwindow.ui \
+    src/morsesmalecomplex.h \
+    src/GeodesicComputer.h \
+    src/MeshExtender.h \
+    src/discretegeocomputer.h \
+    src/cutlocuspanel.h
+FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
-    criticalpointspanel.ui \
-    cutlocuspanel.ui
+    forms/criticalpointspanel.ui \
+    forms/cutlocuspanel.ui
 
 RESOURCES += \
     icons.qrc
