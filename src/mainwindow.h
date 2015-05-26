@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-//#include <QMainWindow>
-#include <QtWidgets/QMainWindow>
+#include <QMainWindow>
+//#include <QtWidgets/QMainWindow>
 #include "meshviewer.h"
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
