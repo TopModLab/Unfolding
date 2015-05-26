@@ -37,6 +37,14 @@ private slots:
   void slot_closeFile();
   void slot_saveFile();
 
+  void slot_selectAll();
+  void slot_selectInverse();
+  void slot_selectMultiple();
+  void slot_selectCC();
+  void slot_selectGrow();
+  void slot_selectShrink();
+  void slot_selectClear();
+
   void slot_reset();
 
   void slot_toggleCameraOperation();
