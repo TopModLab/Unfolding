@@ -9,6 +9,7 @@
 #include <QString>
 #include <QFileDialog>
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -72,22 +73,74 @@ bool MainWindow::connectComponents()
 void MainWindow::createActions()
 {
     try {
+        //file menu
         QAction *newAct = new QAction(QIcon(":/icons/open.png"), tr("&New"), this);
         newAct->setShortcuts(QKeySequence::New);
         newAct->setStatusTip(tr("Create a new file"));
         connect(newAct, SIGNAL(triggered()), this, SLOT(slot_newFile()));
         actionsMap["new"] = newAct;
 
-        QAction *closeAct = new QAction(QIcon(":/icons/open.png"), tr("&Close"), this);//later added
+        QAction *closeAct = new QAction(QIcon(":/icons/close.png"), tr("&Close"), this);//later added
         closeAct->setShortcuts(QKeySequence::Quit);
         closeAct->setStatusTip(tr("close a file"));
         connect(closeAct, SIGNAL(triggered()), this, SLOT(slot_closeFile()));
         actionsMap["close"] = closeAct;
 
-        QAction *resetAct = new QAction(QIcon(":/icons/reset.png"), tr("&Reset"), this);
+        //Edit Menu
+        QAction *resetAct = new QAction(tr("&Reset"), this);
         resetAct->setStatusTip(tr("Reset"));
         connect(resetAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
         actionsMap["reset"] = resetAct;
+
+        //selection menu
+
+        QAction *selectAllAct = new QAction(tr("&Select All"), this);
+        selectAllAct->setShortcut(QKeySequence::SelectAll);
+        selectAllAct->setStatusTip(tr("Select All"));
+        connect(selectAllAct, SIGNAL(triggered()), this, SLOT(slot_selectAll()));
+        actionsMap["select all"] = selectAllAct;
+
+        QAction *selectInverseAct = new QAction(tr("&Select Inverse"), this);
+        selectInverseAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+        selectInverseAct->setStatusTip(tr("Select Inverse"));
+        connect(selectInverseAct, SIGNAL(triggered()), this, SLOT(slot_selectInverse()));
+        actionsMap["select inverse"] = selectInverseAct;
+
+        QAction *selectMultipleAct = new QAction(tr("&Select Multiple"), this);
+        selectMultipleAct->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_M));
+        selectMultipleAct->setStatusTip(tr("Select Multiple"));
+        connect(selectMultipleAct, SIGNAL(triggered()), this, SLOT(slot_selectMultiple()));
+        actionsMap["select multiple"] = selectMultipleAct;
+        
+        QAction *selectCCAct = new QAction(tr("&Select Connected Component"), this);
+        selectCCAct->setShortcut(QKeySequence(Qt::Key_Asterisk));
+        selectCCAct->setStatusTip(tr("Select Connected Component"));
+        connect(selectCCAct, SIGNAL(triggered()), this, SLOT(slot_selectCC()));
+        actionsMap["select cc"] = selectCCAct;
+        
+        QAction *selectGrowAct = new QAction(tr("Grow &Selection"), this);
+        selectGrowAct->setShortcut(QKeySequence(Qt::Key_Equal));
+        selectGrowAct->setStatusTip(tr("Select Connected Component"));
+        connect(selectGrowAct, SIGNAL(triggered()), this, SLOT(slot_selectGrow()));
+        actionsMap["select grow"] = selectGrowAct;
+
+        QAction *selectShrinkAct = new QAction(tr("Shrink &Selection"), this);
+        selectShrinkAct->setShortcut(QKeySequence(Qt::Key_Minus));
+        selectShrinkAct->setStatusTip(tr("Select Connected Component"));
+        connect(selectShrinkAct, SIGNAL(triggered()), this, SLOT(slot_selectShrink()));
+        actionsMap["select shrink"] = selectShrinkAct;
+
+        QAction *selectClearAct = new QAction(tr("Clear &Selection"), this);
+        selectClearAct->setShortcut(QKeySequence(Qt::Key_Backspace));
+        selectClearAct->setStatusTip(tr("Clear Selection"));
+        connect(selectClearAct, SIGNAL(triggered()), this, SLOT(slot_selectClear()));
+        actionsMap["select clear"] = selectClearAct;
+
+        
+        //display menu
+
+
+        //main menu bar
 
         QAction *saveAct = new QAction(QIcon(":/icons/save.png"), tr("&Save"), this);
         saveAct->setShortcuts(QKeySequence::Save);
@@ -185,6 +238,18 @@ void MainWindow::createMenus()
 
         QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
         editMenu->addAction(actionsMap["reset"]);
+
+        QMenu *selectionMenu = ui->menuBar->addMenu(tr("&Selection"));
+        selectionMenu->addAction(actionsMap["select all"]);
+        selectionMenu->addAction(actionsMap["select inverse"]);
+        selectionMenu->addAction(actionsMap["select multiple"]);
+        selectionMenu->addAction(actionsMap["select cc"]);
+        selectionMenu->addAction(actionsMap["select grow"]);
+        selectionMenu->addAction(actionsMap["select shrink"]);
+        selectionMenu->addAction(actionsMap["select clear"]);
+
+        QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
+
         //editMenu->addAction(actionsMap["erase"]);//later added
     }
     catch(...) {
