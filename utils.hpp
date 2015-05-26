@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#include <QColor>
+#include <QtGui/QColor>
 
 namespace Utils {
 	template <typename Container>

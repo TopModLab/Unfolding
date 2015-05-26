@@ -1,7 +1,7 @@
 #ifndef CRITIALPOINTSPANEL_H
 #define CRITIALPOINTSPANEL_H
 
-#include <QWidget>
+#include <QtWidgets/QWidget>
 #include "ui_criticalpointspanel.h"
 
 class CriticalPointsPanel : public QWidget

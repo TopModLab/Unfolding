@@ -1,15 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-
+//#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include "meshviewer.h"
-#include "extras/colormap_editor/colormapeditor.h"
+#include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
 
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow

@@ -1,7 +1,7 @@
 #ifndef HDS_MESH_H
 #define HDS_MESH_H
 
-#include <QVector3D>
+#include <QtGui/QVector3D>
 
 #include "common.h"
 #include "hds_halfedge.h"

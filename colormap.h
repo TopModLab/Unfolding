@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#include <QColor>
+#include <QtGui/QColor>
 
 class ColorMap {
 public:

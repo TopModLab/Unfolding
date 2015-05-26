@@ -3,7 +3,8 @@
 
 #include "math.h"
 
-#include <QColor>
+#include <QtGui/QColor>
+//#include <QColor>
 
 static const double Pi = 3.14159265358979323846;
 static const double PI2 = Pi * 2.0;

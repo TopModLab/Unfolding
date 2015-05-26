@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#include <QVector3D>
+#include <QtGui/QVector3D>
 
 class HDS_HalfEdge;
 
