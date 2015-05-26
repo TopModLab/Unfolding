@@ -144,7 +144,7 @@ void MainWindow::createActions()
         showEdgesAct->setChecked(true);
         showEdgesAct->setStatusTip(tr("Show &Edges"));
         connect(showEdgesAct, SIGNAL(triggered()), this, SLOT(slot_showEdges()));
-        actionsMap["show edges"] = showEdgeAct;
+        actionsMap["show edges"] = showEdgesAct;
 
         //main menu bar
 
