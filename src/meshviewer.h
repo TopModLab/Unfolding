@@ -10,6 +10,7 @@
 #include <QtGui/QVector3D>
 #include <QtGui/QVector2D>
 #include <QtOpenGL/QGLFramebufferObject>
+
 /*
 #include <QGLWidget>
 #include <QGLFunctions>
@@ -49,7 +50,7 @@ public:
 	void bindReebGraph(SimpleGraph *g);
 	void setCurvatureColormap(ColorMap cmap);
 
-	void toggleCriticalPoints();
+
 	void showCriticalPoints();
 	void hideCriticalPoints();
 
@@ -80,7 +81,8 @@ protected:
 	void paintGL();
 
 public slots:
-
+    void slot_toggleLighting();
+    void slot_toggleCriticalPoints();
 
 private:
 	struct ViewerState {

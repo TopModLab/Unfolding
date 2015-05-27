@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+
 #include "meshviewer.h"
 #include "extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
@@ -45,6 +46,12 @@ private slots:
   void slot_selectShrink();
   void slot_selectClear();
 
+  void slot_toggleEdges();
+  void slot_toggleFaces();
+  void slot_toggleVertices();
+  void slot_toggleNormals();
+
+
   void slot_reset();
 
   void slot_toggleCameraOperation();
@@ -71,7 +78,6 @@ private slots:
 
   void slot_triggerCutLocusPanel();
   void slot_updateCutLocusMethod(int);
-  void slot_toggleMinMaxPoints(bool);
 
 
 private:

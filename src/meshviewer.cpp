@@ -30,7 +30,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
     mm=0;
 
 
-    setStatusTip(tr("C: mesh color  E: edges  V : vertices  F : faces  L : lighting  R : critical points  M : change critical point mode "));
+    //setStatusTip(tr("C: mesh color  E: edges  V : vertices  F : faces  L : lighting  R : critical points  M : change critical point mode "));
 
 }
 
@@ -39,7 +39,8 @@ MeshViewer::~MeshViewer()
 
 }
 
-void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh) {
+void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh)
+{
     heMesh = mesh;
     //findReebPoints();
     updateGL();
@@ -331,37 +332,37 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
 
         break;
     }
-    case Qt::Key_E:
-    {
-        if (heMesh) {
-            heMesh->flipShowEdges();
-        }
-        break;
-    }
-    case Qt::Key_V:
-    {
-        if (heMesh) {
-            heMesh->flipShowVertices();
-        }
-        break;
-    }
-    case Qt::Key_F:
-    {
-        if (heMesh) {
-            heMesh->flipShowFaces();
-        }
-        break;
-    }
-    case Qt::Key_L:
-    {
-        enableLighting = !enableLighting;
-        break;
-    }
-    case Qt::Key_R:
-    {
-        toggleCriticalPoints();
-        break;
-    }
+//    case Qt::Key_E:
+//    {
+//        if (heMesh) {
+//            heMesh->flipShowEdges();
+//        }
+//        break;
+//    }
+//    case Qt::Key_V:
+//    {
+//        if (heMesh) {
+//            heMesh->flipShowVertices();
+//        }
+//        break;
+//    }
+//    case Qt::Key_F:
+//    {
+//        if (heMesh) {
+//            heMesh->flipShowFaces();
+//        }
+//        break;
+//    }
+//    case Qt::Key_L:
+//    {
+//        enableLighting = !enableLighting;
+//        break;
+//    }
+//    case Qt::Key_R:
+//    {
+//        toggleCriticalPoints();
+//        break;
+//    }
     case Qt::Key_M:
     {
         //loop through all critical point modes
@@ -1084,10 +1085,17 @@ void MeshViewer::findCutLocusPoints()
 
 }
 
-void MeshViewer::toggleCriticalPoints() {
+void MeshViewer::slot_toggleLighting()
+{
+    enableLighting = !enableLighting;
+}
+
+void MeshViewer::slot_toggleCriticalPoints() {
     showReebPoints = !showReebPoints;
 
 }
+
+
 void MeshViewer::showCriticalPoints() {
     showReebPoints = true;
 

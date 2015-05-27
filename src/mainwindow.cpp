@@ -65,7 +65,7 @@ bool MainWindow::connectComponents()
 
     connect(clpanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCutLocusMethod(int)));
     //connect(clpanel, SIGNAL(sig_displayCut(bool)), this, );  //perform cut based on selected vertices
-    connect(clpanel, SIGNAL(sig_displayMinMax(bool)), this, SLOT(slot_toggleMinMaxPoints(bool)));
+    connect(clpanel, SIGNAL(sig_displayMinMax(bool)), viewer, SLOT(slot_toggleCriticalPoints()));
 
     return true;
 }
@@ -120,13 +120,13 @@ void MainWindow::createActions()
         
         QAction *selectGrowAct = new QAction(tr("Grow Selection"), this);
         selectGrowAct->setShortcut(QKeySequence(Qt::Key_Equal));
-        selectGrowAct->setStatusTip(tr("Select Connected Component"));
+        selectGrowAct->setStatusTip(tr("Grow Selection"));
         connect(selectGrowAct, SIGNAL(triggered()), this, SLOT(slot_selectGrow()));
         actionsMap["select grow"] = selectGrowAct;
 
         QAction *selectShrinkAct = new QAction(tr("Shrink Selection"), this);
         selectShrinkAct->setShortcut(QKeySequence(Qt::Key_Minus));
-        selectShrinkAct->setStatusTip(tr("Select Connected Component"));
+        selectShrinkAct->setStatusTip(tr("Shrink Selection"));
         connect(selectShrinkAct, SIGNAL(triggered()), this, SLOT(slot_selectShrink()));
         actionsMap["select shrink"] = selectShrinkAct;
 
@@ -138,13 +138,54 @@ void MainWindow::createActions()
 
         
         //display menu
-        //"C: mesh color  E: edges  V : vertices  F : faces  L : lighting  R : critical points  M : change critical point mode "
-        QAction *showEdgesAct = new QAction(tr("Show &Edges"), this);
+        //"E: edges  V : vertices  F : faces  N: Normals L : lighting  C : critical points"
+        QAction *showEdgesAct = new QAction(tr("Show Edges"), this);
+        showEdgesAct->setShortcut(Qt::Key_E);
         showEdgesAct->setCheckable(true);
         showEdgesAct->setChecked(true);
-        showEdgesAct->setStatusTip(tr("Show &Edges"));
-        connect(showEdgesAct, SIGNAL(triggered()), this, SLOT(slot_showEdges()));
+        showEdgesAct->setStatusTip(tr("Show Edges"));
+        connect(showEdgesAct, SIGNAL(triggered()), this, SLOT(slot_toggleEdges()));
         actionsMap["show edges"] = showEdgesAct;
+
+        QAction *showVerticesAct = new QAction(tr("Show &Vertices"), this);
+        showVerticesAct->setShortcut(Qt::Key_V);
+        showVerticesAct->setCheckable(true);
+        showVerticesAct->setChecked(true);
+        showVerticesAct->setStatusTip(tr("Show Vertices"));
+        connect(showVerticesAct, SIGNAL(triggered()), this, SLOT(slot_toggleVertices()));
+        actionsMap["show vertices"] = showVerticesAct;
+
+        QAction *showFacesAct = new QAction(tr("Show &Faces"), this);
+        showFacesAct->setShortcut(Qt::Key_F);
+        showFacesAct->setCheckable(true);
+        showFacesAct->setChecked(true);
+        showFacesAct->setStatusTip(tr("Show Faces"));
+        connect(showFacesAct, SIGNAL(triggered()), this, SLOT(slot_toggleFaces()));
+        actionsMap["show faces"] = showFacesAct;
+
+        QAction *showNormalsAct = new QAction(tr("Show &Normals"), this);
+        showNormalsAct->setShortcut(Qt::Key_V);
+        showNormalsAct->setCheckable(true);
+        showNormalsAct->setChecked(true);
+        showNormalsAct->setStatusTip(tr("Show Vertex Normals"));
+        connect(showNormalsAct, SIGNAL(triggered()), this, SLOT(slot_toggleNormals()));
+        actionsMap["show normals"] = showNormalsAct;
+
+        QAction *showLightingAct = new QAction(tr("Show &Lighting"), this);
+        showLightingAct->setShortcut(Qt::Key_L);
+        showLightingAct->setCheckable(true);
+        showLightingAct->setChecked(true);
+        showLightingAct->setStatusTip(tr("Show Lighting"));
+        connect(showLightingAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLighting()));
+        actionsMap["show lighting"] = showLightingAct;
+
+        QAction *showCPAct = new QAction(tr("Show &Critical Points"), this);
+        showCPAct->setShortcut(Qt::Key_C);
+        showCPAct->setCheckable(true);
+        showCPAct->setChecked(true);
+        showCPAct->setStatusTip(tr("Show Critical Points"));
+        connect(showCPAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleCriticalPoints()));
+        actionsMap["show CP"] = showCPAct;
 
         //main menu bar
 
@@ -256,7 +297,17 @@ void MainWindow::createMenus()
         selectionMenu->addAction(actionsMap["select clear"]);
 
         QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
+        displayMenu->addAction(actionsMap["show vertices"]);
         displayMenu->addAction(actionsMap["show edges"]);
+        displayMenu->addAction(actionsMap["show faces"]);
+        displayMenu->addAction(actionsMap["show normals"]);
+        displayMenu->addSeparator();
+        displayMenu->addAction(actionsMap["show lighting"]);
+
+        displayMenu->addSeparator();
+        displayMenu->addAction(actionsMap["show CP"]);
+
+
 
         //editMenu->addAction(actionsMap["erase"]);//later added
     }
@@ -390,6 +441,38 @@ void MainWindow::slot_selectClear()
 
 }
 
+void MainWindow::slot_toggleEdges()
+{
+    if (MeshManager::getInstance()->getHalfEdgeMesh())
+    {
+        MeshManager::getInstance()->getHalfEdgeMesh()->flipShowEdges();
+    }
+}
+
+void MainWindow::slot_toggleVertices()
+{
+    if (MeshManager::getInstance()->getHalfEdgeMesh())
+    {
+        MeshManager::getInstance()->getHalfEdgeMesh()->flipShowVertices();
+    }
+}
+void MainWindow::slot_toggleFaces()
+{
+    if (MeshManager::getInstance()->getHalfEdgeMesh())
+    {
+        MeshManager::getInstance()->getHalfEdgeMesh()->flipShowFaces();
+    }
+}
+
+void MainWindow::slot_toggleNormals()
+{
+    if (MeshManager::getInstance()->getHalfEdgeMesh())
+    {
+        MeshManager::getInstance()->getHalfEdgeMesh()->flipShowNormals();
+
+    }
+}
+
 void MainWindow::slot_toggleCameraOperation()
 {
     viewer->setInteractionMode(MeshViewer::Camera);
@@ -502,10 +585,4 @@ void MainWindow::slot_updateCutLocusMethod(int midx)
 
 }
 
-void MainWindow::slot_toggleMinMaxPoints(bool checked)
-{
-    //show min max points
-    viewer->toggleCriticalPoints();
-    viewer->update();
-}
 

@@ -50,6 +50,7 @@ public:
     void flipShowEdges();
     void flipShowFaces();
     void flipShowVertices();
+    void flipShowNormals();
 
     const unordered_set<he_t*>& halfedges() const { return heSet; }
     unordered_set<he_t*>& halfedges() { return heSet; }
@@ -97,7 +98,7 @@ private:
     unordered_map<int, vert_t*> vertMap;
 
 private:
-    bool showFace, showEdge, showVert;
+    bool showFace, showEdge, showVert, showNormals;
 };
 
 inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
