@@ -166,7 +166,14 @@ public:
 	SelectFace,
 	SelectEdge
 	};
-	void setInteractionMode(InteractionState state) { interactionState = state; }
+    void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdx.empty()) selectedElementsIdx.pop();}
+
+    enum SelectionMode {
+        single = 0,
+        multiple,
+
+    };
+    void setSelectionMode(SelectionMode mode) {selectionMode = mode; }
 
 	struct SelectionBox
 	{
@@ -181,15 +188,20 @@ public:
 	void computeGlobalSelectionBox();
 	bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
 	int getSelectedElementIndex(const QPoint& p);
-
-public:
-	int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
-	int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
+public slots:
+    void slot_selectAll();
+    void slot_selectInverse();
+    void slot_selectCC();
+    void slot_selectGrow();
+    void slot_selectShrink();
+    void slot_selectClear();
 
 private:
 	InteractionState interactionState;
+    SelectionMode selectionMode;
 	stack<InteractionState> interactionStateStack;
 
+    queue<int> selectedElementsIdx;
 private:
 	HDS_Mesh *heMesh;   /// not own
 	float scale;
@@ -207,6 +219,10 @@ private:
 	QScopedPointer<QGLFramebufferObject> fbo;
 	void initializeFBO();
 	void drawMeshToFBO();
+
+public:
+    int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
+    int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
 
 private:
 	bool showReebPoints;

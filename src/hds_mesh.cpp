@@ -537,7 +537,7 @@ void HDS_Mesh::drawVertexIndices()
 #if 0
         glutSolidSphere(0.125, 16, 16);
 #else
-        glPointSize(10.0);
+        glPointSize(15.0);
 
         float r, g, b;
         encodeIndex<float>(v->index, r, g, b);

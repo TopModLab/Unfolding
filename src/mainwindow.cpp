@@ -97,13 +97,13 @@ void MainWindow::createActions()
         QAction *selectAllAct = new QAction(tr("Select All"), this);
         selectAllAct->setShortcut(QKeySequence::SelectAll);
         selectAllAct->setStatusTip(tr("Select All"));
-        connect(selectAllAct, SIGNAL(triggered()), this, SLOT(slot_selectAll()));
+        connect(selectAllAct, SIGNAL(triggered()), viewer, SLOT(slot_selectAll()));
         actionsMap["select all"] = selectAllAct;
 
         QAction *selectInverseAct = new QAction(tr("Select Inverse"), this);
         selectInverseAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
         selectInverseAct->setStatusTip(tr("Select Inverse"));
-        connect(selectInverseAct, SIGNAL(triggered()), this, SLOT(slot_selectInverse()));
+        connect(selectInverseAct, SIGNAL(triggered()), viewer, SLOT(slot_selectInverse()));
         actionsMap["select inverse"] = selectInverseAct;
 
         QAction *selectMultipleAct = new QAction(tr("Select Multiple"), this);
@@ -115,25 +115,25 @@ void MainWindow::createActions()
         QAction *selectCCAct = new QAction(tr("Select Connected Component"), this);
         selectCCAct->setShortcut(QKeySequence(Qt::Key_Asterisk));
         selectCCAct->setStatusTip(tr("Select Connected Component"));
-        connect(selectCCAct, SIGNAL(triggered()), this, SLOT(slot_selectCC()));
+        connect(selectCCAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCC()));
         actionsMap["select cc"] = selectCCAct;
         
         QAction *selectGrowAct = new QAction(tr("Grow Selection"), this);
         selectGrowAct->setShortcut(QKeySequence(Qt::Key_Equal));
         selectGrowAct->setStatusTip(tr("Grow Selection"));
-        connect(selectGrowAct, SIGNAL(triggered()), this, SLOT(slot_selectGrow()));
+        connect(selectGrowAct, SIGNAL(triggered()), viewer, SLOT(slot_selectGrow()));
         actionsMap["select grow"] = selectGrowAct;
 
         QAction *selectShrinkAct = new QAction(tr("Shrink Selection"), this);
         selectShrinkAct->setShortcut(QKeySequence(Qt::Key_Minus));
         selectShrinkAct->setStatusTip(tr("Shrink Selection"));
-        connect(selectShrinkAct, SIGNAL(triggered()), this, SLOT(slot_selectShrink()));
+        connect(selectShrinkAct, SIGNAL(triggered()), viewer, SLOT(slot_selectShrink()));
         actionsMap["select shrink"] = selectShrinkAct;
 
         QAction *selectClearAct = new QAction(tr("Clear Selection"), this);
         selectClearAct->setShortcut(QKeySequence(Qt::Key_Backspace));
         selectClearAct->setStatusTip(tr("Clear Selection"));
-        connect(selectClearAct, SIGNAL(triggered()), this, SLOT(slot_selectClear()));
+        connect(selectClearAct, SIGNAL(triggered()), viewer, SLOT(slot_selectClear()));
         actionsMap["select clear"] = selectClearAct;
 
         
@@ -164,7 +164,7 @@ void MainWindow::createActions()
         actionsMap["show faces"] = showFacesAct;
 
         QAction *showNormalsAct = new QAction(tr("Show &Normals"), this);
-        showNormalsAct->setShortcut(Qt::Key_V);
+        showNormalsAct->setShortcut(Qt::Key_N);
         showNormalsAct->setCheckable(true);
         showNormalsAct->setChecked(true);
         showNormalsAct->setStatusTip(tr("Show Vertex Normals"));
@@ -406,39 +406,9 @@ void MainWindow::slot_saveFile()
     MeshManager::getInstance()->saveMeshes();
 }
 
-void MainWindow::slot_selectAll()
-{
-
-}
-
-void MainWindow::slot_selectInverse()
-{
-
-}
-
 void MainWindow::slot_selectMultiple()
 {
-
-}
-
-void MainWindow::slot_selectCC()
-{
-
-}
-
-void MainWindow::slot_selectGrow()
-{
-
-}
-
-void MainWindow::slot_selectShrink()
-{
-
-}
-
-void MainWindow::slot_selectClear()
-{
-
+    viewer->setSelectionMode(MeshViewer::multiple);
 }
 
 void MainWindow::slot_toggleEdges()

@@ -15,6 +15,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
     QGLWidget(qglformat_3d, parent)
 {
     interactionState = Camera;
+    selectionMode = single;
     viewerState.updateModelView();
     heMesh = nullptr;
     colormap = ColorMap::getDefaultColorMap();
@@ -67,6 +68,66 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
     }
 
     return isInvertible;
+}
+void MeshViewer::slot_selectAll()
+{
+    switch (interactionState) {
+    case SelectFace:
+        for (auto f : heMesh->faces())
+            f->setPicked(true);
+        break;
+    case SelectEdge:
+        for (auto e : heMesh->halfedges())
+            e->setPicked(true);
+        break;
+    case SelectVertex:
+        for (auto v : heMesh->verts())
+            v->setPicked(true);
+        break;
+    }
+}
+
+void MeshViewer::slot_selectInverse()
+{
+    switch (interactionState) {
+    case SelectFace:
+        for (auto f : heMesh->faces())
+            heMesh->selectFace(f->index);
+        break;
+    case SelectEdge:
+        for (auto e : heMesh->halfedges())
+            heMesh->selectEdge(e->index);
+        break;
+    case SelectVertex:
+        for (auto v : heMesh->verts())
+            heMesh->selectVertex(v->index);
+        break;
+    }
+}
+
+void MeshViewer::slot_selectCC()
+{
+//use DFS to traverse all elements connected to selection
+}
+
+void MeshViewer::slot_selectGrow()
+{
+//BFS to get all neighbours
+}
+
+void MeshViewer::slot_selectShrink()
+{
+//BFS to get all neighbours that are selected
+}
+
+void MeshViewer::slot_selectClear()
+{
+    for (auto f : heMesh->faces())
+        f->setPicked(false);
+    for (auto f : heMesh->verts())
+        f->setPicked(false);
+    for (auto f : heMesh->halfedges())
+        f->setPicked(false);
 }
 
 int MeshViewer::getSelectedElementIndex(const QPoint &p)
@@ -176,7 +237,7 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 {
     mouseState.isPressed = true;
 
-    /// set interaction mode as camera if shift key is hold
+    /// set interaction mode as camera if alt key is hold
     if (e->modifiers() & Qt::AltModifier) {
         interactionStateStack.push(interactionState);
         interactionState = Camera;
@@ -236,6 +297,8 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
         updateGL();
         break;
     }
+
+        //selection box
     case SelectFace:
     case SelectEdge:
     case SelectVertex: {
@@ -267,6 +330,8 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
     case Camera:
         mouseState.prev_pos = QVector2D(e->pos());
         break;
+
+        //selection box
     case SelectFace:
     case SelectEdge:
     case SelectVertex: {
@@ -284,6 +349,24 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
         int selectedElementIdx = getSelectedElementIndex(e->pos());//mouse positon;
         cout << "selected element " << selectedElementIdx << endl;
         if (selectedElementIdx >= 0) {
+            selectedElementsIdx.push(selectedElementIdx);
+
+            switch (selectionMode) {
+            case single:
+                if (selectedElementsIdx.size() > 1) {
+                 if (interactionState == SelectEdge) {
+                        heMesh->selectEdge(selectedElementsIdx.front());//deselect
+                        selectedElementsIdx.pop();
+                 } else if (interactionState == SelectFace) {
+                         heMesh->selectFace(selectedElementsIdx.front());//deselect
+                         selectedElementsIdx.pop();
+                 } else {
+                         heMesh->selectVertex(selectedElementsIdx.front());//deselect
+                         selectedElementsIdx.pop();
+                 }
+            }
+
+            case multiple:
             if (interactionState == SelectEdge) {
                 heMesh->selectEdge(selectedElementIdx);
             }
@@ -296,6 +379,9 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
                     findReebPoints();
                 if  (isCutLocusModeset)
                     findCutLocusPoints();
+            }
+            break;
+
             }
         }
         else
