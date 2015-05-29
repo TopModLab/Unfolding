@@ -55,7 +55,9 @@ public:
         return cutted_mesh.data();
     }
 
-    HDS_Mesh* getUnfoldedMesh() {
+	HDS_Mesh* getUnfoldedMesh() {
+		unfolded_mesh->printMesh("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+		cout << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
         return unfolded_mesh.data();
     }
 
@@ -106,6 +108,7 @@ public:
     void unfoldMesh();
     void smoothMesh();
     void extendMesh();
+	void exportXMLFile(const char* filename);//export as svg files
 
 private:
     typedef HDS_Mesh mesh_t;

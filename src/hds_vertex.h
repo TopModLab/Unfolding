@@ -42,10 +42,10 @@ public:
 	double colorVal;
 
 	enum ReebsPointType{
-	Minimum,
-	Maximum,
-	Saddle,
-	Regular
+		Minimum,
+		Maximum,
+		Saddle,
+		Regular
 	} rtype;
 	int sdegree;  // the degree of saddle point
 	double morseFunctionVal;
