@@ -295,33 +295,33 @@ void MeshManager::unfoldMesh() {
 	HDS_Mesh* ref_mesh;
 
 	if (extended_mesh.isNull())
-	ref_mesh = cutted_mesh.data();    
+		ref_mesh = cutted_mesh.data();
 	else
-	ref_mesh = extended_mesh.data();
+		ref_mesh = extended_mesh.data();
 
 	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
 	/// cut the mesh using the selected edges
 	set<int> selectedFaces;
 	for (auto f : ref_mesh->faces()) {
-	if( f->isPicked ) {
-		/// use picked edges as cut edges
-		f->setPicked(false);
+		if( f->isPicked ) {
+			/// use picked edges as cut edges
+			f->setPicked(false);
 
-		if( selectedFaces.find(f->index) == selectedFaces.end() ) {
-		selectedFaces.insert(f->index);
+			if( selectedFaces.find(f->index) == selectedFaces.end() ) {
+				selectedFaces.insert(f->index);
+			}
 		}
-	}
 	}
 
 	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh, selectedFaces)) {
-	/// unfolded successfully
-	unfolded_mesh->printInfo("unfolded mesh:");
-	//unfolded_mesh->printMesh("unfolded mesh:");
+		/// unfolded successfully
+		unfolded_mesh->printInfo("unfolded mesh:");
+		//unfolded_mesh->printMesh("unfolded mesh:");
 	}
 	else {
-	/// failed to unfold
-	cout << "Failed to unfold." << endl;
+		/// failed to unfold
+		cout << "Failed to unfold." << endl;
 	}
 
 }
@@ -361,13 +361,14 @@ void MeshManager::exportXMLFile(const char* filename)
 		printf("Can't write to files!\n");
 		return;
 	}
-	int size_x(120), size_y(120);
+	int size_x(360), size_y(360);
 	//printf("Type in SVG file size: ");
 	//err = scanf_s("%d%d", &size_x, &size_y);
 	
 	unordered_set<HDS_Mesh::face_t*> faces = unfolded_mesh->faces();
 	unordered_set<HDS_Mesh::face_t*> cutfaces;
 	for (auto face : faces) {
+		
 		if (face->isCutFace) {
 			cutfaces.insert(face);
 		}
@@ -379,18 +380,35 @@ void MeshManager::exportXMLFile(const char* filename)
 		size_x, size_y);
 	for (auto face : cutfaces)
 	{
-		double he_offset(5), he_scale(10);
+		double he_offset(10), he_scale(20);
 		HDS_HalfEdge *he = face->he;
 		HDS_HalfEdge *curHE = he;
 		fprintf(SVG_File, "\t<polygon points=\"");
+		face->computeNormal();//get the normal of unfolded mesh to calculate the projection(maybe can copy value when unfolding)
+		cout <<"Face normal:" << face->n << endl;
+		//should it be only one face cutted?
+		QVector3D nx, ny, c;
+		c = face->center();
+		nx = he->v->pos - c;
+		nx.normalize();
+		ny = QVector3D::crossProduct(nx, face->n);
+		cout << "Face normal:" << face->n << endl;
+		cout << "X dir:" << nx << endl;
+		cout << "Y dir:" << ny << endl;
+		cout << "Center:" << c << endl;
+		
+
 		do 
 		{
-			cout << curHE->v->pos[0] << ", " << curHE->v->pos[1] << ", " << curHE->v->pos[2] << endl;
-			fprintf(SVG_File, "%f,%f ", (curHE->v->pos[0] + he_offset) * he_scale, (curHE->v->pos[2] + he_offset) * he_scale);
+			//cout << curHE->v->pos[0] << ", " << curHE->v->pos[1] << ", " << curHE->v->pos[2] << endl;
+			fprintf(SVG_File, "%f,%f ",
+				(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
+				(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
 			curHE = curHE->next;
 		} while (curHE != he);
-		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"2\" fill=\"none\" />\n",
-			(he->v->pos[0] + he_offset) * he_scale, (he->v->pos[2] + he_offset) * he_scale);
+		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.5\" fill=\"none\" />\n",
+			(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
+			(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
 	}
 	fprintf(SVG_File, 
 		"</g>\n"\
