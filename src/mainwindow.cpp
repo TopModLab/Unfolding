@@ -196,12 +196,14 @@ void MainWindow::createActions()
         actionsMap["extend"] = extendAct;
 
         QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
-        cutAct->setStatusTip(tr("Cut mesh"));
+		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
+        cutAct->setStatusTip(tr("Cut mesh (ALT+C)"));
         connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
         actionsMap["mesh cut"] = cutAct;
 
         QAction *unfoldAct = new QAction(QIcon(":/icons/unfold.png"), tr("Unfold"), this);
-        unfoldAct->setStatusTip(tr("Unfold mesh"));
+		unfoldAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_U));
+        unfoldAct->setStatusTip(tr("Unfold mesh (ALT+U)"));
         unfoldAct->setCheckable(true);
         unfoldAct->setChecked(false);
         connect(unfoldAct, SIGNAL(triggered()), this, SLOT(slot_unfoldMesh()));

@@ -12,8 +12,6 @@ HDS_Mesh::HDS_Mesh()
 	showFace = true;
 	showVert = true;
 	showEdge = true;
-
-
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)

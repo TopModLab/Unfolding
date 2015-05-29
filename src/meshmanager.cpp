@@ -361,39 +361,43 @@ void MeshManager::exportXMLFile(const char* filename)
 		printf("Can't write to files!\n");
 		return;
 	}
-	int size_x, size_y;
-	printf("Type in SVG file size: ");
-	err = scanf_s("%d%d", &size_x, &size_y);
-	/*printf("Datas: ");
-	err = scanf_s("%lf%lf%lf", &a, &b, &c);*/
-	//cout << a << b << c << endl;
-	/*double points[] = {
-		50, 150,
-		50, 200,
-		200, 200,
-		200, 150
-	};*/
-	unordered_set<HDS_Mesh::he_t*> he_total = unfolded_mesh->halfedges();
-	unordered_set<HDS_Mesh::he_t*> he_cut, he_in;
-	for (auto he : he_total) {
-		he->isCutEdge ? he_cut.insert(he) : he_in.insert(he);
+	int size_x(120), size_y(120);
+	//printf("Type in SVG file size: ");
+	//err = scanf_s("%d%d", &size_x, &size_y);
+	
+	unordered_set<HDS_Mesh::face_t*> faces = unfolded_mesh->faces();
+	unordered_set<HDS_Mesh::face_t*> cutfaces;
+	for (auto face : faces) {
+		if (face->isCutFace) {
+			cutfaces.insert(face);
+		}
 	}
 	fprintf(SVG_File,
 		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
-		"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n",
+		"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" \
+		"<g opacity=\"0.8\">\n",
 		size_x, size_y);
-	fprintf(SVG_File,
-		"<g opacity=\"0.8\">\n\t"\
-		"<polyline points=\"");
-	for (auto he : he_cut)
+	for (auto face : cutfaces)
 	{
-		fprintf(SVG_File, "%lf,%lf ", he->v[0].pos[0], he->v[0].pos[2]);
+		double he_offset(5), he_scale(10);
+		HDS_HalfEdge *he = face->he;
+		HDS_HalfEdge *curHE = he;
+		fprintf(SVG_File, "\t<polygon points=\"");
+		do 
+		{
+			cout << curHE->v->pos[0] << ", " << curHE->v->pos[1] << ", " << curHE->v->pos[2] << endl;
+			fprintf(SVG_File, "%f,%f ", (curHE->v->pos[0] + he_offset) * he_scale, (curHE->v->pos[2] + he_offset) * he_scale);
+			curHE = curHE->next;
+		} while (curHE != he);
+		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"2\" fill=\"none\" />\n",
+			(he->v->pos[0] + he_offset) * he_scale, (he->v->pos[2] + he_offset) * he_scale);
 	}
-	fprintf(SVG_File, "\" stroke=\"red\" stroke-width=\"4\" fill=\"none\" />\n"\
+	fprintf(SVG_File, 
 		"</g>\n"\
 		"</svg>"
 		);
 	fclose(SVG_File);
+	cout << "SVG file saved successfully!" << endl;
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx)
