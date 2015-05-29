@@ -151,10 +151,13 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
     Utils::print(fixedFaces);
   }
 
+
   for( auto fid : fixedFaces ) {
     /// start from a face, expand all faces
     queue<HDS_Face*> Q;
+    //unfolded_mesh->printInfo();
     Q.push(unfolded_mesh->faceMap[fid]);
+
     vector<int> expSeq;     // sequence of expansion
     map<int, int> parentMap;
     set<int> visited;
@@ -164,6 +167,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
       Q.pop();
       visited.insert(cur->index);
       frontier.erase(cur->index);
+      cout<<"here"<<endl;
       expSeq.push_back(cur->index);
       /// get all neighbor faces
       vector<HDS_Face*> neighborFaces = unfolded_mesh->incidentFaces(cur);
@@ -171,6 +175,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
       vector<HDS_Face*> nonCutNeighborFaces = Utils::filter(neighborFaces, [](HDS_Face* f) {
           return !(f->isCutFace);
       });
+
 
       for( auto f : nonCutNeighborFaces ) {
         if( visited.find(f->index) == visited.end() && frontier.find(f->index) == frontier.end() ) {
@@ -184,6 +189,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
     /// print out the sequence of performing unfolding
     Utils::print(expSeq);
 
+    if (!expSeq.empty()){
     /// compute the spanning vectors for the first face
     QVector3D uvec, vvec;
     HDS_Face *face0 = unfolded_mesh->faceMap.at(expSeq.front());
@@ -195,6 +201,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
     /// update the vertex positions of the unfolded mesh base on the geometry of the reference mesh
     for(int i=1;i<expSeq.size();++i) {
       unfoldFace(parentMap.at(expSeq[i]), expSeq[i], unfolded_mesh, ref_mesh, uvec, vvec);
+    }
     }
   }
 

@@ -72,6 +72,8 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 void MeshViewer::slot_selectAll()
 {
     switch (interactionState) {
+    case Camera:
+        break;
     case SelectFace:
         for (auto f : heMesh->faces())
             f->setPicked(true);
@@ -90,6 +92,8 @@ void MeshViewer::slot_selectAll()
 void MeshViewer::slot_selectInverse()
 {
     switch (interactionState) {
+    case Camera:
+        break;
     case SelectFace:
         for (auto f : heMesh->faces())
             heMesh->selectFace(f->index);
@@ -107,12 +111,55 @@ void MeshViewer::slot_selectInverse()
 
 void MeshViewer::slot_selectCC()
 {
-//use DFS to traverse all elements connected to selection
+    switch (interactionState) {
+    case Camera:
+        break;
+    case SelectFace:
+
+        break;
+    case SelectEdge:
+
+        break;
+    case SelectVertex:
+
+        break;
+    }
 }
 
 void MeshViewer::slot_selectGrow()
 {
-//BFS to get all neighbours
+//get all neighbours
+    switch (interactionState) {
+    case Camera:
+        break;
+    case SelectFace:
+        for (auto f : heMesh->faces()) {
+            if (f->isPicked){
+            for (auto face : heMesh->incidentFaces(f)) {
+                face->setPicked(true);
+            }
+            }
+        }
+        break;
+    case SelectEdge:
+        for (auto e : heMesh->halfedges()) {
+            if (e->isPicked){
+            for (auto edge : heMesh->incidentEdges(e->v)) {
+                edge->setPicked(true);
+            }
+            }
+        }
+        break;
+    case SelectVertex:
+        for (auto v : heMesh->verts()) {
+            if (v->isPicked){
+            for (auto edge : heMesh->incidentEdges(v)) {
+                edge->v->setPicked(true);
+            }
+            }
+        }
+        break;
+    }
 }
 
 void MeshViewer::slot_selectShrink()

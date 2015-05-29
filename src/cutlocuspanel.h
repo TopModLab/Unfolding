@@ -19,7 +19,10 @@ signals:
     void sig_methodChanged(int);
     void sig_displayCut(bool);
     void sig_displayMinMax(bool);
+    void closedSignal();
 
+private:
+    void closeEvent(QCloseEvent *e);
 private:
     Ui::CutLocusPanel *ui;
 };

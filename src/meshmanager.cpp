@@ -275,9 +275,10 @@ void MeshManager::cutMeshWithSelectedEdges()
 
     bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
     if( cutSucceeded ) {
-      /// cutting performed successfullyas
+      /// cutting performed successfully
       cutted_mesh->printInfo("cutted mesh:");
       //cutted_mesh->printMesh("cutted mesh:");
+      cout<<"cut succeed!"<<endl;
     }
     else {
       /// can not cut it
@@ -285,27 +286,42 @@ void MeshManager::cutMeshWithSelectedEdges()
 
     isUnfoldable = true;// MeshUnfolder::unfoldable(cutted_mesh.data());
     /// replace the ref mesh with the cutted mesh
-    ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+    /// commented out due to bug when cutting all edges
+    //ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+    //cout<<"ref_mesh reset"<<endl;
+
     /// discard the selected edges now
     selectedEdges.clear();
   }
 }
 
 void MeshManager::unfoldMesh() {
-  HDS_Mesh* ref_mesh;
+  //HDS_Mesh* ref_mesh;
+    QScopedPointer<HDS_Mesh> ref_mesh;
+    ref_mesh.reset(new HDS_Mesh(*hds_mesh));
 
-  if (extended_mesh.isNull())
-    ref_mesh = cutted_mesh.data();    
-  else
-    ref_mesh = extended_mesh.data();
+    cout << "validating reference mesh" << endl;
+    ref_mesh->validate();
 
-  unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
-  /// cut the mesh using the selected edges
+  if (extended_mesh.isNull()){
+      cout<<"ref mesh set to cutted mesh"<<endl;
+      ref_mesh.reset(cutted_mesh.data());
+     //ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+    //ref_mesh = cutted_mesh.data();
+  } else {
+      ref_mesh.reset(new HDS_Mesh(*extended_mesh));
+      //ref_mesh = extended_mesh.data();
+  }
+
+    cout<<"ref mesh set"<<endl;
+  unfolded_mesh.reset(ref_mesh.data());
+
+  /// unfold the mesh using the selected faces
   set<int> selectedFaces;
   for (auto f : ref_mesh->faces()) {
     if( f->isPicked ) {
-      /// use picked edges as cut edges
+      /// use picked faces as unfold faces
       f->setPicked(false);
 
       if( selectedFaces.find(f->index) == selectedFaces.end() ) {
@@ -314,7 +330,7 @@ void MeshManager::unfoldMesh() {
     }
   }
 
-  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh, selectedFaces)) {
+  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
     /// unfolded successfully
     unfolded_mesh->printInfo("unfolded mesh:");
     //unfolded_mesh->printMesh("unfolded mesh:");
@@ -336,6 +352,11 @@ void MeshManager::smoothMesh() {
   //MeshSmoother::smoothMesh(smoothed_mesh.data());
   //MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
   MeshSmoother::smoothMesh_Laplacian(smoothed_mesh.data());
+}
+
+void MeshManager::resetMesh() {
+    cutted_mesh.reset();
+    unfolded_mesh.reset();
 }
 
 bool MeshManager::saveMeshes() {

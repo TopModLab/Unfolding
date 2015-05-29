@@ -106,6 +106,7 @@ public:
     void unfoldMesh();
     void smoothMesh();
     void extendMesh();
+    void resetMesh();
 
 private:
     typedef HDS_Mesh mesh_t;

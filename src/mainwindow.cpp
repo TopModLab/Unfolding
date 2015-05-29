@@ -63,9 +63,12 @@ bool MainWindow::connectComponents()
     connect(cppanel, SIGNAL(sig_smoothingTimesChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingTimes(int)));
     connect(cppanel, SIGNAL(sig_smoothingTypeChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingType(int)));
 
+    connect(cppanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disablecpp()));
+
     connect(clpanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCutLocusMethod(int)));
     //connect(clpanel, SIGNAL(sig_displayCut(bool)), this, );  //perform cut based on selected vertices
     connect(clpanel, SIGNAL(sig_displayMinMax(bool)), viewer, SLOT(slot_toggleCriticalPoints()));
+    connect(clpanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disableclp()));
 
     return true;
 }
@@ -243,8 +246,7 @@ void MainWindow::createActions()
         actionsMap["mesh unfold"] = unfoldAct;
 
         QAction *foldAct = new QAction(QIcon(":/icons/fold.png"), tr("Fold"), this);
-        foldAct->setStatusTip(tr("Fold"
-                                 " mesh"));
+        foldAct->setStatusTip(tr("Fold mesh"));
         foldAct->setCheckable(true);
         foldAct->setChecked(true);
         connect(foldAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
@@ -473,6 +475,13 @@ void MainWindow::slot_unfoldMesh() {
     viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
 }
 
+void MainWindow::slot_reset()
+{
+    viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+    MeshManager::getInstance()->resetMesh();
+
+}
+
 void MainWindow::slot_triggerColormap() {
     ceditor->show();
     ceditor->activateWindow();
@@ -525,10 +534,7 @@ void MainWindow::slot_extendMesh()
     viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
 }
 
-void MainWindow::slot_reset()
-{
-    viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
-}
+
 
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {

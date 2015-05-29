@@ -223,6 +223,9 @@ private:
 public:
     int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
     int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
+public slots:
+    void slot_disablecpp(){isCriticalPointModeSet = false; updateGL();}
+    void slot_disableclp(){isCutLocusModeset = false; updateGL();}
 
 private:
 	bool showReebPoints;

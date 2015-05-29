@@ -17,3 +17,10 @@ CutLocusPanel::~CutLocusPanel()
 {
     delete ui;
 }
+
+
+void CutLocusPanel::closeEvent(QCloseEvent *e)
+{
+    close();
+    emit closedSignal();
+}

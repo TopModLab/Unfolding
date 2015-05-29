@@ -16,6 +16,10 @@ signals:
     void sig_methodChanged(int);
     void sig_smoothingTimesChanged(int);
     void sig_smoothingTypeChanged(int);
+    void closedSignal();
+
+private:
+    void closeEvent(QCloseEvent *e);
 
 private:
     Ui::CriticalPointsPanel ui;
