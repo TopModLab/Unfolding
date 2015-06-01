@@ -4,8 +4,8 @@
 #include "common.h"
 
 enum CaseSensitivity{
-    CaseSensitive,
-    CaseInsensitive
+	CaseSensitive,
+	CaseInsensitive
 };
 
 typedef list<string> stringlist;
@@ -22,15 +22,15 @@ bool endsWith(const string& s, const string& sub);
 
 template <typename T>
 string toString(const T& t) {
-    stringstream ss;
-    ss << t;
-    return ss.str();
+	stringstream ss;
+	ss << t;
+	return ss.str();
 }
 
 static string toString(const bool& v) {
-    stringstream ss;
-    ss << (v?"true":"false");
-    return ss.str();
+	stringstream ss;
+	ss << (v?"true":"false");
+	return ss.str();
 }
 
 string padWith(const string& str, char c, int L);

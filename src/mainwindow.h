@@ -36,8 +36,9 @@ protected:
 private slots:
 	void slot_newFile();
 	void slot_closeFile();
-<<<<<<< HEAD
 	void slot_saveFile();
+
+    void slot_exportFile();
 
 	void slot_selectMultiple();
 
@@ -45,19 +46,6 @@ private slots:
 	void slot_toggleFaces();
 	void slot_toggleVertices();
 	void slot_toggleNormals();
-
-=======
-	void slot_exportFile();
-	void slot_saveFile();
-
-	void slot_selectAll();
-	void slot_selectInverse();
-	void slot_selectMultiple();
-	void slot_selectCC();
-	void slot_selectGrow();
-	void slot_selectShrink();
-	void slot_selectClear();
->>>>>>> origin/ConnectorComponent
 
 	void slot_reset();
 
@@ -85,10 +73,7 @@ private slots:
 
 	void slot_triggerCutLocusPanel();
 	void slot_updateCutLocusMethod(int);
-<<<<<<< HEAD
-=======
-	void slot_toggleMinMaxPoints(bool);
->>>>>>> origin/ConnectorComponent
+
 
 
 private:

@@ -13,93 +13,93 @@
 class HDS_Mesh
 {
 public:
-    typedef QVector3D point_t;
-    typedef HDS_Face face_t;
-    typedef HDS_Vertex vert_t;
-    typedef HDS_HalfEdge he_t;
+	typedef QVector3D point_t;
+	typedef HDS_Face face_t;
+	typedef HDS_Vertex vert_t;
+	typedef HDS_HalfEdge he_t;
 
 
-    enum ElementType {
+	enum ElementType {
 		Face = 0,
 		Edge,
 		Vertex
-    };
+	};
 
-    HDS_Mesh();
-    HDS_Mesh(const HDS_Mesh& other);
-    ~HDS_Mesh();
+	HDS_Mesh();
+	HDS_Mesh(const HDS_Mesh& other);
+	~HDS_Mesh();
 
-    HDS_Mesh operator=(const HDS_Mesh& rhs);
+	HDS_Mesh operator=(const HDS_Mesh& rhs);
 
-    void printInfo(const string &msg = "");
-    void printMesh(const string &msg = "");
-    void releaseMesh();
+	void printInfo(const string &msg = "");
+	void printMesh(const string &msg = "");
+	void releaseMesh();
 
-    void setMesh(const vector<face_t*> &faces,
-                 const vector<vert_t*> &verts,
-                 const vector<he_t*> &hes);
+	void setMesh(const vector<face_t*> &faces,
+					const vector<vert_t*> &verts,
+					const vector<he_t*> &hes);
 
-    unordered_set<vert_t*> getReebPoints(const vector<double> &val = vector<double>(), const QVector3D &normdir = QVector3D(0, 0, 1));
+	unordered_set<vert_t*> getReebPoints(const vector<double> &val = vector<double>(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
-    void colorVertices(const vector<double> &val);
+	void colorVertices(const vector<double> &val);
 
-    void draw(ColorMap cmap);
-    void drawFaceIndices();
-    void drawVertexIndices();
-    void drawEdgeIndices();
-    void flipShowEdges();
-    void flipShowFaces();
-    void flipShowVertices();
-    void flipShowNormals();
+	void draw(ColorMap cmap);
+	void drawFaceIndices();
+	void drawVertexIndices();
+	void drawEdgeIndices();
+	void flipShowEdges();
+	void flipShowFaces();
+	void flipShowVertices();
+	void flipShowNormals();
 
-    const unordered_set<he_t*>& halfedges() const { return heSet; }
-    unordered_set<he_t*>& halfedges() { return heSet; }
-    const unordered_set<face_t*>& faces() const { return faceSet; }
-    unordered_set<face_t*>& faces() { return faceSet; }
-    const unordered_set<vert_t*>& verts() const { return vertSet; }
-    unordered_set<vert_t*>& verts() { return vertSet; }
+	const unordered_set<he_t*>& halfedges() const { return heSet; }
+	unordered_set<he_t*>& halfedges() { return heSet; }
+	const unordered_set<face_t*>& faces() const { return faceSet; }
+	unordered_set<face_t*>& faces() { return faceSet; }
+	const unordered_set<vert_t*>& verts() const { return vertSet; }
+	unordered_set<vert_t*>& verts() { return vertSet; }
 
 
-    vector<face_t *> incidentFaces(vert_t *v);
-    vector<he_t *> incidentEdges(vert_t *v);
-    vector<face_t *> incidentFaces(face_t *f);
+	vector<face_t *> incidentFaces(vert_t *v);
+	vector<he_t *> incidentEdges(vert_t *v);
+	vector<face_t *> incidentFaces(face_t *f);
 
-    template <typename T>
-    void flipSelectionState(int idx, unordered_map<int, T> &m);
-    void selectFace(int idx);
-    void selectEdge(int idx);
-    void selectVertex(int idx);
+	template <typename T>
+	void flipSelectionState(int idx, unordered_map<int, T> &m);
+	void selectFace(int idx);
+	void selectEdge(int idx);
+	void selectVertex(int idx);
 
-    void validate();
+	void validate();
 
-    void save(const string &filename);
+	void save(const string &filename);
 private:
-    bool validateVertex(vert_t *v);
-    bool validateFace(face_t *f);
-    bool validateEdge(he_t *e);
+	bool validateVertex(vert_t *v);
+	bool validateFace(face_t *f);
+	bool validateEdge(he_t *e);
 
 protected:
-    friend class MeshCutter;
-    friend class MeshUnfolder;
-    friend class MeshSmoother;
-    friend class MeshExtender;
-    friend class MeshIterator;
-    friend class MeshViewer;
+	friend class MeshCutter;
+	friend class MeshUnfolder;
+	friend class MeshSmoother;
+	friend class MeshExtender;
+	friend class MeshIterator;
+	friend class MeshViewer;
 
-    friend class ReebGraph;
+	friend class ReebGraph;
 private:
-    unordered_set<he_t*> heSet;
-    unordered_set<face_t*> faceSet;
-    unordered_set<vert_t*> vertSet;
+	unordered_set<he_t*> heSet;
+	unordered_set<face_t*> faceSet;
+	unordered_set<vert_t*> vertSet;
 
-    vector<face_t*> sortedFaces;
+	vector<face_t*> sortedFaces;
 
-    unordered_map<int, he_t*> heMap;
-    unordered_map<int, face_t*> faceMap;
-    unordered_map<int, vert_t*> vertMap;
+	unordered_map<int, he_t*> heMap;
+	unordered_map<int, face_t*> faceMap;
+	unordered_map<int, vert_t*> vertMap;
 
 private:
-    bool showFace, showEdge, showVert, showNormals;
+	bool showFace, showEdge, showVert, showNormals;
 };
 
 inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {

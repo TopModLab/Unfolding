@@ -7,14 +7,14 @@
 class DiscreteGeoComputer
 {
 public:
-    DiscreteGeoComputer();
-    DiscreteGeoComputer(HDS_Mesh* hds_mesh);
-    ~DiscreteGeoComputer();
+	DiscreteGeoComputer();
+	DiscreteGeoComputer(HDS_Mesh* hds_mesh);
+	~DiscreteGeoComputer();
 
-    vector<double> discreteDistanceTo(HDS_Vertex* init) const;
+	vector<double> discreteDistanceTo(HDS_Vertex* init) const;
 private:
 
-    QScopedPointer<HDS_Mesh> hds_mesh;
+	QScopedPointer<HDS_Mesh> hds_mesh;
 };
 
 #endif // DISCRETEGEOCOMPUTER_H

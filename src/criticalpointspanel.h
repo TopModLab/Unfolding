@@ -6,23 +6,23 @@
 
 class CriticalPointsPanel : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    CriticalPointsPanel(QWidget *parent = 0);
-    ~CriticalPointsPanel();
+	CriticalPointsPanel(QWidget *parent = 0);
+	~CriticalPointsPanel();
 
 signals:
-    void sig_methodChanged(int);
-    void sig_smoothingTimesChanged(int);
-    void sig_smoothingTypeChanged(int);
-    void closedSignal();
+	void sig_methodChanged(int);
+	void sig_smoothingTimesChanged(int);
+	void sig_smoothingTypeChanged(int);
+	void closedSignal();
 
 private:
-    void closeEvent(QCloseEvent *e);
+	void closeEvent(QCloseEvent *e);
 
 private:
-    Ui::CriticalPointsPanel ui;
+	Ui::CriticalPointsPanel ui;
 };
 
 #endif // CRITIALPOINTSPANEL_H

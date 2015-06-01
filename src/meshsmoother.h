@@ -11,12 +11,12 @@ class HDS_Vertex;
 class MeshSmoother
 {
 public:
-    MeshSmoother();
+	MeshSmoother();
 
-    static void smoothMesh_perVertex(HDS_Mesh *mesh);
-    static void smoothMesh_wholeMesh(HDS_Mesh *mesh);
-    static void smoothMesh(HDS_Mesh *mesh);
-    static void smoothMesh_Laplacian(HDS_Mesh *mesh);
+	static void smoothMesh_perVertex(HDS_Mesh *mesh);
+	static void smoothMesh_wholeMesh(HDS_Mesh *mesh);
+	static void smoothMesh(HDS_Mesh *mesh);
+	static void smoothMesh_Laplacian(HDS_Mesh *mesh);
 private:
 };
 

@@ -9,22 +9,22 @@ class CutLocusPanel;
 
 class CutLocusPanel : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit CutLocusPanel(QWidget *parent = 0);
-    ~CutLocusPanel();
+	explicit CutLocusPanel(QWidget *parent = 0);
+	~CutLocusPanel();
 
 signals:
-    void sig_methodChanged(int);
-    void sig_displayCut(bool);
-    void sig_displayMinMax(bool);
-    void closedSignal();
+	void sig_methodChanged(int);
+	void sig_displayCut(bool);
+	void sig_displayMinMax(bool);
+	void closedSignal();
 
 private:
-    void closeEvent(QCloseEvent *e);
+	void closeEvent(QCloseEvent *e);
 private:
-    Ui::CutLocusPanel *ui;
+	Ui::CutLocusPanel *ui;
 };
 
 #endif // CUTLOCUSPANEL_H

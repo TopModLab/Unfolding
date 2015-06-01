@@ -111,7 +111,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 }
 
 HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
-									const vector<MeshLoader::vert_t> &inVerts) {
+										 const vector<MeshLoader::vert_t> &inVerts) {
 	mesh_t *thismesh = new mesh_t;
 
 	cout << "building the half edge mesh ..." << endl;
@@ -129,18 +129,18 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	faces.resize(facesCount);
 
 	for(size_t i=0;i<inFaces.size();i++)
-	heCount += inFaces[i].v.size();
+		heCount += inFaces[i].v.size();
 
 	hes.resize(heCount);
 
 	for(size_t i=0;i<vertsCount;i++)
 	{
-	verts[i] = new vert_t(inVerts[i]);
+		verts[i] = new vert_t(inVerts[i]);
 	}
 
 	for(size_t i=0;i<facesCount;i++)
 	{
-	faces[i] = new face_t;              //no value;
+		faces[i] = new face_t;              //no value;
 	}
 
 	map<pair<int, int>, he_t*> heMap;
@@ -148,55 +148,55 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
 	for(size_t i=0, heIdx = 0;i<facesCount;i++)
 	{
-	auto& Fi = inFaces[i];
-	face_t* curFace = faces[i];
+		auto& Fi = inFaces[i];
+		face_t* curFace = faces[i];
 
-	for(size_t j=0;j<Fi.v.size();j++)
-	{
-		he_t* curHe = new he_t;;
-		vert_t* curVert = verts[Fi.v[j]];
-		curHe->v = curVert;
-		curHe->f = curFace;
-
-		if( curVert->he == nullptr )
-		curVert->he = curHe;
-
-		hes[heIdx + j] = curHe;
-	}
-
-	// link the half edge of the face
-	for(int j=0;j<Fi.v.size();j++)
-	{
-		int jp = j-1;
-		if( jp < 0 ) jp += Fi.v.size();
-		int jn = j+1;
-		if( jn >= Fi.v.size() ) jn -= Fi.v.size();
-
-		hes[heIdx+j]->prev = hes[heIdx+jp];
-		hes[heIdx+j]->next = hes[heIdx+jn];
-
-		int vj = Fi.v[j];
-	//     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
-		int vjn = Fi.v[jn];
-	//      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
-		pair<int, int> vPair = make_pair(vj, vjn);
-		cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
-		cout<<"vPair.sencond = "<<vPair.second<<endl;
-		if( heMap.find(vPair) == heMap.end() )//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
+		for(size_t j=0;j<Fi.v.size();j++)
 		{
+			he_t* curHe = new he_t;;
+			vert_t* curVert = verts[Fi.v[j]];
+			curHe->v = curVert;
+			curHe->f = curFace;
 
-		heMap[vPair] = hes[heIdx+j];  //address transport; hes[heIdx + j] = curHe; *****critical******
-	//      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
-	//      ss+=1;  //later added;
+			if( curVert->he == nullptr )
+				curVert->he = curHe;
+
+			hes[heIdx + j] = curHe;
 		}
-		else
-			return thismesh;
-	}
-//    cout<<"ss = "<<ss<<endl;    //later added;
-	curFace->he = hes[heIdx];
-	curFace->computeNormal();
 
-	heIdx += Fi.v.size();
+		// link the half edge of the face
+		for(int j=0;j<Fi.v.size();j++)
+		{
+			int jp = j-1;
+			if( jp < 0 ) jp += Fi.v.size();
+			int jn = j+1;
+			if( jn >= Fi.v.size() ) jn -= Fi.v.size();
+
+			hes[heIdx+j]->prev = hes[heIdx+jp];
+			hes[heIdx+j]->next = hes[heIdx+jn];
+
+			int vj = Fi.v[j];
+			//     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
+			int vjn = Fi.v[jn];
+			//      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
+			pair<int, int> vPair = make_pair(vj, vjn);
+			cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
+			cout<<"vPair.sencond = "<<vPair.second<<endl;
+			if( heMap.find(vPair) == heMap.end() )//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
+			{
+
+				heMap[vPair] = hes[heIdx+j];  //address transport; hes[heIdx + j] = curHe; *****critical******
+				//      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
+				//      ss+=1;  //later added;
+			}
+			else
+				return thismesh;
+		}
+		//    cout<<"ss = "<<ss<<endl;    //later added;
+		curFace->he = hes[heIdx];
+		curFace->computeNormal();
+
+		heIdx += Fi.v.size();
 	}
 
 	set<pair<int, int> > pairedHESet;
@@ -204,36 +204,36 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	// for each half edge, find its flip
 	for(auto heit = heMap.begin();heit!=heMap.end();heit++)
 	{
-	int from, to;
+		int from, to;
 
-	pair<int, int> hePair = (*heit).first;
+		pair<int, int> hePair = (*heit).first;
 
-	if( pairedHESet.find(hePair) == pairedHESet.end() )
-	{
-
-		from = hePair.first;
-		to = hePair.second;
-		pair<int, int> invPair = make_pair(to, from);
-
-		auto invItem = heMap.find(invPair);
-
-		if( invItem != heMap.end() )
+		if( pairedHESet.find(hePair) == pairedHESet.end() )
 		{
-		he_t* he = (*heit).second;
-		he_t* hef = (*invItem).second;
 
-		he->flip = hef;
-		hef->flip = he;
+			from = hePair.first;
+			to = hePair.second;
+			pair<int, int> invPair = make_pair(to, from);
+
+			auto invItem = heMap.find(invPair);
+
+			if( invItem != heMap.end() )
+			{
+				he_t* he = (*heit).second;
+				he_t* hef = (*invItem).second;
+
+				he->flip = hef;
+				hef->flip = he;
+			}
+
+			pairedHESet.insert( hePair );
+			pairedHESet.insert( invPair );
 		}
-
-		pairedHESet.insert( hePair );
-		pairedHESet.insert( invPair );
-	}
 	}
 
 	for( auto &v : verts ) {
-	v->computeCurvature();
-	v->computeNormal();
+		v->computeCurvature();
+		v->computeNormal();
 	}
 
 	thismesh->setMesh(faces, verts, hes);
@@ -255,58 +255,49 @@ void MeshManager::cutMeshWithSelectedEdges()
 	/// cut the mesh using the selected edges
 	set<int> selectedEdges;
 	for(auto he : ref_mesh->halfedges()) {
-	if( he->isPicked ) {
-		/// use picked edges as cut edges
-		he->setPicked(false);
-		he->setCutEdge(true);
+		if( he->isPicked ) {
+			/// use picked edges as cut edges
+			he->setPicked(false);
+			he->setCutEdge(true);
 
-		if( selectedEdges.find(he->index) == selectedEdges.end() &&
-			selectedEdges.find(he->flip->index) == selectedEdges.end() ) {
-		selectedEdges.insert(he->index);
+			if( selectedEdges.find(he->index) == selectedEdges.end() &&
+					selectedEdges.find(he->flip->index) == selectedEdges.end() ) {
+				selectedEdges.insert(he->index);
+			}
 		}
-	}
 	}
 	cout << "Number of selected edges = " << selectedEdges.size() << endl;
 
 	bool isUnfoldable = false;
 	while( !isUnfoldable ) {
-	/// make a copy of the mesh with selected edges
-	cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
+		/// make a copy of the mesh with selected edges
+		cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
 
-	bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
-	if( cutSucceeded ) {
-<<<<<<< HEAD
-		/// cutting performed successfully
-		cutted_mesh->printInfo("cutted mesh:");
-		//cutted_mesh->printMesh("cutted mesh:");
-		cout<<"cut succeed!"<<endl;
-=======
-		/// cutting performed successfullyas
-		cutted_mesh->printInfo("cutted mesh:");
-		//cutted_mesh->printMesh("cutted mesh:");
->>>>>>> origin/ConnectorComponent
-	}
-	else {
-		/// can not cut it
-	}
+		bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
+		if( cutSucceeded ) {
 
-	isUnfoldable = true;// MeshUnfolder::unfoldable(cutted_mesh.data());
-	/// replace the ref mesh with the cutted mesh
-<<<<<<< HEAD
-	/// commented out due to bug when cutting all edges
-	//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-	//cout<<"ref_mesh reset"<<endl;
+			/// cutting performed successfully
+			cutted_mesh->printInfo("cutted mesh:");
+			//cutted_mesh->printMesh("cutted mesh:");
+			cout<<"cut succeed!"<<endl;
 
-=======
-	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
->>>>>>> origin/ConnectorComponent
-	/// discard the selected edges now
-	selectedEdges.clear();
+		}
+		else {
+			/// can not cut it
+		}
+
+		isUnfoldable = true;// MeshUnfolder::unfoldable(cutted_mesh.data());
+		/// replace the ref mesh with the cutted mesh
+		/// commented out due to bug when cutting all edges
+		//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+		//cout<<"ref_mesh reset"<<endl;
+
+		/// discard the selected edges now
+		selectedEdges.clear();
 	}
 }
 
 void MeshManager::unfoldMesh() {
-<<<<<<< HEAD
 	//HDS_Mesh* ref_mesh;
 	QScopedPointer<HDS_Mesh> ref_mesh;
 	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
@@ -319,7 +310,7 @@ void MeshManager::unfoldMesh() {
 		cout<<"ref mesh set to cutted mesh"<<endl;
 		ref_mesh.reset(cutted_mesh.data());
 		//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-	//ref_mesh = cutted_mesh.data();
+		//ref_mesh = cutted_mesh.data();
 	} else {
 		ref_mesh.reset(new HDS_Mesh(*extended_mesh));
 		//ref_mesh = extended_mesh.data();
@@ -331,39 +322,8 @@ void MeshManager::unfoldMesh() {
 	/// unfold the mesh using the selected faces
 	set<int> selectedFaces;
 	for (auto f : ref_mesh->faces()) {
-	if( f->isPicked ) {
-		/// use picked faces as unfold faces
-		f->setPicked(false);
-
-		if( selectedFaces.find(f->index) == selectedFaces.end() ) {
-		selectedFaces.insert(f->index);
-		}
-	}
-	}
-
-	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
-	/// unfolded successfully
-	unfolded_mesh->printInfo("unfolded mesh:");
-	//unfolded_mesh->printMesh("unfolded mesh:");
-	}
-	else {
-	/// failed to unfold
-	cout << "Failed to unfold." << endl;
-=======
-	HDS_Mesh* ref_mesh;
-
-	if (extended_mesh.isNull())
-		ref_mesh = cutted_mesh.data();
-	else
-		ref_mesh = extended_mesh.data();
-
-	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
-
-	/// cut the mesh using the selected edges
-	set<int> selectedFaces;
-	for (auto f : ref_mesh->faces()) {
 		if( f->isPicked ) {
-			/// use picked edges as cut edges
+			/// use picked faces as unfold faces
 			f->setPicked(false);
 
 			if( selectedFaces.find(f->index) == selectedFaces.end() ) {
@@ -372,7 +332,7 @@ void MeshManager::unfoldMesh() {
 		}
 	}
 
-	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh, selectedFaces)) {
+	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
 		/// unfolded successfully
 		unfolded_mesh->printInfo("unfolded mesh:");
 		//unfolded_mesh->printMesh("unfolded mesh:");
@@ -380,7 +340,7 @@ void MeshManager::unfoldMesh() {
 	else {
 		/// failed to unfold
 		cout << "Failed to unfold." << endl;
->>>>>>> origin/ConnectorComponent
+
 	}
 
 }
@@ -389,20 +349,17 @@ void MeshManager::smoothMesh() {
 	if( smoothed_mesh.isNull() )
 	{
 		cout<<"smoothmesh@@@"<<endl;
-	smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
+		smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
 	}
-  
+
 	//MeshSmoother::smoothMesh(smoothed_mesh.data());
 	//MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
 	MeshSmoother::smoothMesh_Laplacian(smoothed_mesh.data());
-<<<<<<< HEAD
 }
 
 void MeshManager::resetMesh() {
 	cutted_mesh.reset();
 	unfolded_mesh.reset();
-=======
->>>>>>> origin/ConnectorComponent
 }
 
 bool MeshManager::saveMeshes() {
@@ -413,12 +370,11 @@ bool MeshManager::saveMeshes() {
 void MeshManager::extendMesh()
 {
 	if ( cutted_mesh.isNull() )
-	extended_mesh.reset(new HDS_Mesh(*hds_mesh));
+		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
 	else
-	extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
+		extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
 	MeshExtender::extendMesh(extended_mesh.data(), 0.75);
-<<<<<<< HEAD
-=======
+
 }
 
 void MeshManager::exportXMLFile(const char* filename)
@@ -443,10 +399,10 @@ void MeshManager::exportXMLFile(const char* filename)
 		}
 	}
 	fprintf(SVG_File,
-		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
-		"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" \
-		"<g opacity=\"0.8\">\n",
-		size_x, size_y);
+			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
+			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" \
+			"<g opacity=\"0.8\">\n",
+			size_x, size_y);
 	for (auto face : cutfaces)
 	{
 		double he_offset(10), he_scale(20);
@@ -467,82 +423,81 @@ void MeshManager::exportXMLFile(const char* filename)
 		cout << "Center:" << c << endl;
 		
 
-		do 
+		do
 		{
 			//cout << curHE->v->pos[0] << ", " << curHE->v->pos[1] << ", " << curHE->v->pos[2] << endl;
 			fprintf(SVG_File, "%f,%f ",
-				(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
-				(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
+					(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
+					(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
 			curHE = curHE->next;
 		} while (curHE != he);
 		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.5\" fill=\"none\" />\n",
-			(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
-			(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
+				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
+				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
 	}
-	fprintf(SVG_File, 
-		"</g>\n"\
-		"</svg>"
-		);
+	fprintf(SVG_File,
+			"</g>\n"\
+			"</svg>"
+			);
 	fclose(SVG_File);
 	cout << "SVG file saved successfully!" << endl;
->>>>>>> origin/ConnectorComponent
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx)
 {
 	auto laplacianSmoother = [&](const vector<double> &val, HDS_Mesh *mesh) {
-	const double lambda = 0.25;
-	const double sigma = 1.0;
-	unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
-	vector<double> newval(mesh->verts().size());
-	for (auto vi : mesh->verts()) {
-		auto neighbors = vi->neighbors();
+		const double lambda = 0.25;
+		const double sigma = 1.0;
+		unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
+		vector<double> newval(mesh->verts().size());
+		for (auto vi : mesh->verts()) {
+			auto neighbors = vi->neighbors();
 
-		double denom = 0.0;
-		double numer = 0.0;
+			double denom = 0.0;
+			double numer = 0.0;
 
-		for (auto vj : neighbors) {
-		//double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
-		double wij = 1.0 / neighbors.size();
-		denom += wij;
-		numer += wij * val[vj->index];
+			for (auto vj : neighbors) {
+				//double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
+				double wij = 1.0 / neighbors.size();
+				denom += wij;
+				numer += wij * val[vj->index];
+			}
+
+			L.insert(make_pair(vi, numer / denom - val[vi->index]));
+		}
+		for (auto p : L) {
+			newval[p.first->index] = val[p.first->index] + lambda * p.second;
 		}
 
-		L.insert(make_pair(vi, numer / denom - val[vi->index]));
-	}
-	for (auto p : L) {
-		newval[p.first->index] = val[p.first->index] + lambda * p.second;
-	}
-
-	return newval;
+		return newval;
 	};
 #if 1
 	auto dists = gcomp->distanceTo(vidx);
 	int niters = 100;
 	for (int i = 0; i < niters; ++i)
-	dists = laplacianSmoother(dists, hds_mesh.data());
+		dists = laplacianSmoother(dists, hds_mesh.data());
 #else
 	auto Q = MeshIterator::BFS(hds_mesh.data(), vidx);
 	vector<double> dists(hds_mesh->verts().size());
 	while (!Q.empty()){
-	auto cur = Q.front();
-	Q.pop();
-	dists[cur.first->index] = cur.second;
+		auto cur = Q.front();
+		Q.pop();
+		dists[cur.first->index] = cur.second;
 	}
 #endif
 
 	// save it to a file
 	ofstream fout("geodist.txt");
 	for (auto x : dists) {
-	fout << x << endl;
+		fout << x << endl;
 	}
 	fout.close();
 
 	double maxDist = *(std::max_element(dists.begin(), dists.end()));
 	std::for_each(dists.begin(), dists.end(), [=](double &x){
-	x /= maxDist;
-	x -= 0.5;
-	//cout << x << endl;
+		x /= maxDist;
+		x -= 0.5;
+		//cout << x << endl;
 	});
 	hds_mesh->colorVertices(dists);
 }
@@ -552,9 +507,9 @@ void MeshManager::colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ra
 	auto dists = getInterpolatedGeodesics(vidx, lev0, lev1, ratio);
 	double maxDist = *(std::max_element(dists.begin(), dists.end()));
 	std::for_each(dists.begin(), dists.end(), [=](double &x){
-	x /= maxDist;
-	x -= 0.5;
-	//cout << x << endl;
+		x /= maxDist;
+		x -= 0.5;
+		//cout << x << endl;
 	});
 	hds_mesh->colorVertices(dists);
 }
@@ -569,80 +524,80 @@ void MeshManager::updateReebGraph(const vector<double> &fvals)
 	vtkSmartPointer<vtkDoubleArray> scalarField = vtkSmartPointer<vtkDoubleArray>::New();
 	scalarField->Resize(nverts);
 	if (fvals.empty() || fvals.size() != nverts) {
-	for (int i = 0; i < nverts; ++i) {
-		auto pt = vtkMesh->GetPoint(i);
-		scalarField->SetValue(i, pt[2]);
-	}
+		for (int i = 0; i < nverts; ++i) {
+			auto pt = vtkMesh->GetPoint(i);
+			scalarField->SetValue(i, pt[2]);
+		}
 	}
 	else {
-	for (int i = 0; i < nverts; ++i) {
-		scalarField->SetValue(i, fvals[i]);
-	}
+		for (int i = 0; i < nverts; ++i) {
+			scalarField->SetValue(i, fvals[i]);
+		}
 	}
 
 	cout << "[VTK] Building reeb graph ..." << endl;
 	int ret = surfaceReebGraph->Build(vtkMesh, scalarField);
 	switch (ret) {
 	case vtkReebGraph::ERR_INCORRECT_FIELD:
-	cout << "[VTK] ERR_INCORRECT_FIELD" << endl;
-	break;
+		cout << "[VTK] ERR_INCORRECT_FIELD" << endl;
+		break;
 	case vtkReebGraph::ERR_NOT_A_SIMPLICIAL_MESH:
-	cout << "[VTK] ERR NOT A SIMPLICIAL MESH" << endl;
-	break;
+		cout << "[VTK] ERR NOT A SIMPLICIAL MESH" << endl;
+		break;
 	default:
-	cout << "[VTK] Succeeded." << endl;
-	break;
+		cout << "[VTK] Succeeded." << endl;
+		break;
 	}
 	surfaceReebGraph->Print(std::cout);
-  
+
 	rbGraph.clear();
 
 	// print the information of this graph
 	vtkSmartPointer<vtkVertexListIterator> it = vtkVertexListIterator::New();
 	surfaceReebGraph->GetVertices(it);
 	while (it->HasNext()) {
-	auto vidx = it->Next();
-	auto vdata = surfaceReebGraph->GetVertexData();
-	auto refidx = vdata->GetArray("Vertex Ids")->GetComponent(vidx, 0);
-	cout << refidx << endl;
-	rbGraph.V.push_back(SimpleNode(vidx, refidx));
-	auto ptdata = vtkMesh->GetPoint(refidx);
-	cout << ptdata[0] << ", " << ptdata[1] << ", " << ptdata[2] << endl;
+		auto vidx = it->Next();
+		auto vdata = surfaceReebGraph->GetVertexData();
+		auto refidx = vdata->GetArray("Vertex Ids")->GetComponent(vidx, 0);
+		cout << refidx << endl;
+		rbGraph.V.push_back(SimpleNode(vidx, refidx));
+		auto ptdata = vtkMesh->GetPoint(refidx);
+		cout << ptdata[0] << ", " << ptdata[1] << ", " << ptdata[2] << endl;
 	}
 
 	vtkSmartPointer<vtkEdgeListIterator> eit = vtkEdgeListIterator::New();
 	surfaceReebGraph->GetEdges(eit);
 	while (eit->HasNext()) {
-	auto edge = eit->NextGraphEdge();
-	rbGraph.E.push_back(SimpleEdge(edge->GetSource(), edge->GetTarget()));
-	cout << edge->GetSource() << " -> " << edge->GetTarget() << endl;
+		auto edge = eit->NextGraphEdge();
+		rbGraph.E.push_back(SimpleEdge(edge->GetSource(), edge->GetTarget()));
+		cout << edge->GetSource() << " -> " << edge->GetTarget() << endl;
 	}
 
 	vtkDataArray *vertexInfo = vtkDataArray::SafeDownCast(surfaceReebGraph->GetVertexData()->GetAbstractArray("Vertex Ids"));
 	vtkVariantArray *edgeInfo = vtkVariantArray::SafeDownCast(surfaceReebGraph->GetEdgeData()->GetAbstractArray("Vertex Ids"));
 	surfaceReebGraph->GetEdges(eit);
 	while (eit->HasNext()) {
-	vtkEdgeType e = eit->Next();
-	vtkAbstractArray *deg2NodeList = edgeInfo->GetPointer(e.Id)->ToArray();
-	cout << "     Arc #" << e.Id << ": "
-		//<< *(vertexInfo->GetTuple(e.Source)) 
-		<< vertexInfo->GetComponent(e.Source, 0)
-		<< " -> "
-		//<< *(vertexInfo->GetTuple(e.Target)) 
-		<< vertexInfo->GetComponent(e.Target, 0)
-		<< " (" << deg2NodeList->GetNumberOfTuples() << " degree-2 nodes)" << endl;
+		vtkEdgeType e = eit->Next();
+		vtkAbstractArray *deg2NodeList = edgeInfo->GetPointer(e.Id)->ToArray();
+		cout << "     Arc #" << e.Id << ": "
+				//<< *(vertexInfo->GetTuple(e.Source))
+			 << vertexInfo->GetComponent(e.Source, 0)
+			 << " -> "
+				//<< *(vertexInfo->GetTuple(e.Target))
+			 << vertexInfo->GetComponent(e.Target, 0)
+			 << " (" << deg2NodeList->GetNumberOfTuples() << " degree-2 nodes)" << endl;
 
-	int ntuples = deg2NodeList->GetNumberOfTuples();
-	if (ntuples > 0) {
-		rbGraph.Es.push_back(SimpleEdge(vertexInfo->GetComponent(e.Source, 0), deg2NodeList->GetVariantValue(0).ToInt()));
-		for (int j = 0; j < ntuples - 1; ++j) {
-		rbGraph.Es.push_back(SimpleEdge(deg2NodeList->GetVariantValue(j).ToInt(), deg2NodeList->GetVariantValue(j + 1).ToInt()));
+		int ntuples = deg2NodeList->GetNumberOfTuples();
+		if (ntuples > 0) {
+			rbGraph.Es.push_back(SimpleEdge(vertexInfo->GetComponent(e.Source, 0), deg2NodeList->GetVariantValue(0).ToInt()));
+			for (int j = 0; j < ntuples - 1; ++j) {
+				rbGraph.Es.push_back(SimpleEdge(deg2NodeList->GetVariantValue(j).ToInt(), deg2NodeList->GetVariantValue(j + 1).ToInt()));
+			}
+			rbGraph.Es.push_back(SimpleEdge(deg2NodeList->GetVariantValue(ntuples - 1).ToInt(), vertexInfo->GetComponent(e.Target, 0)));
 		}
-		rbGraph.Es.push_back(SimpleEdge(deg2NodeList->GetVariantValue(ntuples - 1).ToInt(), vertexInfo->GetComponent(e.Target, 0)));
-	}
-	else {
-		rbGraph.Es.push_back(SimpleEdge(vertexInfo->GetComponent(e.Source, 0), vertexInfo->GetComponent(e.Target, 0)));
-	}
+		else {
+			rbGraph.Es.push_back(SimpleEdge(vertexInfo->GetComponent(e.Source, 0), vertexInfo->GetComponent(e.Target, 0)));
+		}
 	}
 }
 #endif
@@ -663,10 +618,10 @@ vector<double> MeshManager::getInterpolatedZValue(int lev0, int lev1, double alp
 	auto dist0 = vector<double>(hds_mesh->verts().size());
 	auto dist1 = vector<double>(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {
-	dist0[v->index] = v->pos.z();
+		dist0[v->index] = v->pos.z();
 	}
 	for (auto v : m1->verts()) {
-	dist1[v->index] = v->pos.z();
+		dist1[v->index] = v->pos.z();
 	}
 	return Utils::interpolate(dist0, dist1, alpha);
 }
@@ -679,10 +634,10 @@ vector<double> MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, 
 	auto dist0 = vector<double>(hds_mesh->verts().size());
 	auto dist1 = vector<double>(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {
-	dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+		dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
 	}
 	for (auto v : m1->verts()) {
-	dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+		dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
 	}
 	return Utils::interpolate(dist0, dist1, alpha);
 }
@@ -695,10 +650,10 @@ vector<double> MeshManager::getInterpolatedCurvature(int lev0, int lev1, double 
 	auto dist0 = vector<double>(hds_mesh->verts().size());
 	auto dist1 = vector<double>(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {
-	dist0[v->index] = v->curvature;
+		dist0[v->index] = v->curvature;
 	}
 	for (auto v : m1->verts()) {
-	dist1[v->index] = v->curvature;
+		dist1[v->index] = v->curvature;
 	}
 	return Utils::interpolate(dist0, dist1, alpha);
 }

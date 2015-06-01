@@ -48,14 +48,14 @@ const double ToleranceOfConvexAngle = 5e-3;
 #ifndef WIN32
 // XXX, MinGW fix
 inline double GetTickCount_linux() {
-    struct timespec ts;
-    if(clock_gettime(CLOCK_MONOTONIC,&ts) != 0) {
-        cerr << "Failed to get time." << endl;
-        return -1.0;
-    }
-    else {
-        return ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
-    }
+	struct timespec ts;
+	if(clock_gettime(CLOCK_MONOTONIC,&ts) != 0) {
+		cerr << "Failed to get time." << endl;
+		return -1.0;
+	}
+	else {
+		return ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
+	}
 }
 inline double GetCurrentTime() { return GetTickCount_linux(); }
 #else
