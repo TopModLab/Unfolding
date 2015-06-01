@@ -2,8 +2,10 @@
 #define MESHLOADER_H
 
 #include "common.h"
-#include <QtGui/QVector2D>
-#include <QtGui/QVector3D>
+// #include <QtGui/QVector2D>
+// #include <QtGui/QVector3D>
+#include <QVector2D>
+#include <QVector3D>
 
 class MeshLoader
 {

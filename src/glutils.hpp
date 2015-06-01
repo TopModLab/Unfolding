@@ -1,12 +1,13 @@
 #ifndef GLUTILS_HPP
 #define GLUTILS_HPP
 
+/*
 #include <QtOpenGL/QGLFunctions>
 #include <QtGui/QVector3D>
-/*
+*/
 #include <QGLFunctions>
 #include <QVector3D>
-*/
+
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #else

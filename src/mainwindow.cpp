@@ -81,13 +81,19 @@ void MainWindow::createActions()
         newAct->setShortcuts(QKeySequence::New);
         newAct->setStatusTip(tr("Create a new file"));
         connect(newAct, SIGNAL(triggered()), this, SLOT(slot_newFile()));
-        actionsMap["new"] = newAct;
+		actionsMap["new"] = newAct;
 
-        QAction *closeAct = new QAction(QIcon(":/icons/close.png"), tr("Close"), this);//later added
-        closeAct->setShortcuts(QKeySequence::Quit);
-        closeAct->setStatusTip(tr("close a file"));
-        connect(closeAct, SIGNAL(triggered()), this, SLOT(slot_closeFile()));
-        actionsMap["close"] = closeAct;
+		QAction *exportAct = new QAction(QIcon(":/icons/export.png"), tr("Export"), this);//new added
+		exportAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
+		exportAct->setStatusTip(tr("Export data as"));
+		connect(exportAct, SIGNAL(triggered()), this, SLOT(slot_exportFile()));//need to change
+		actionsMap["export"] = exportAct;
+
+		QAction *closeAct = new QAction(QIcon(":/icons/close.png"), tr("Close"), this);//later added
+		closeAct->setShortcuts(QKeySequence::Quit);
+		closeAct->setStatusTip(tr("close a file"));
+		connect(closeAct, SIGNAL(triggered()), this, SLOT(slot_closeFile()));
+		actionsMap["close"] = closeAct;
 
         //Edit Menu
         QAction *resetAct = new QAction(tr("Reset"), this);
@@ -234,12 +240,14 @@ void MainWindow::createActions()
         actionsMap["extend"] = extendAct;
 
         QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
-        cutAct->setStatusTip(tr("Cut mesh"));
+		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
+        cutAct->setStatusTip(tr("Cut mesh (ALT+C)"));
         connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
         actionsMap["mesh cut"] = cutAct;
 
         QAction *unfoldAct = new QAction(QIcon(":/icons/unfold.png"), tr("Unfold"), this);
-        unfoldAct->setStatusTip(tr("Unfold mesh"));
+		unfoldAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_U));
+        unfoldAct->setStatusTip(tr("Unfold mesh (ALT+U)"));
         unfoldAct->setCheckable(true);
         unfoldAct->setChecked(false);
         connect(unfoldAct, SIGNAL(triggered()), this, SLOT(slot_unfoldMesh()));
@@ -281,9 +289,9 @@ void MainWindow::createMenus()
 
 
         fileMenu->addAction(actionsMap["new"]);
+		fileMenu->addAction(actionsMap["export"]);
         fileMenu->addAction(actionsMap["close"]);//later added;
         //fileMenu->addAction(actionsMap["print"]);//later added
-
 
         QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
         editMenu->addAction(actionsMap["reset"]);
@@ -387,12 +395,20 @@ void MainWindow::slot_newFile()
 {
     cout << "loading a new obj file." << endl;
 
-    QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "D:/Unfolding2-master/Unfolding2-master/meshes"  ); //later added
+    QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "../meshes", tr("OBJ files(*.obj)")); //later added
     MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
     viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 #if USE_REEB_GRAPH
     viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
+}
+
+void MainWindow::slot_exportFile()
+{
+	cout << "Export as..." << endl;
+	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "../untitled.svg", tr("XML files (*.svg *.xml)"));
+	MeshManager::getInstance()->exportXMLFile(filename.toUtf8().constData());
+	//Needed to be implemented
 }
 
 void MainWindow::slot_closeFile()          //later add this function

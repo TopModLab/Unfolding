@@ -56,8 +56,15 @@ public:
 	}
 
 	HDS_Mesh* getUnfoldedMesh() {
+<<<<<<< HEAD
 		return unfolded_mesh.data();
 	}
+=======
+		unfolded_mesh->printMesh("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+		cout << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
+        return unfolded_mesh.data();
+    }
+>>>>>>> origin/ConnectorComponent
 
 	HDS_Mesh* getExtendedMesh() {
 		return extended_mesh.data();
@@ -100,6 +107,7 @@ private:
 	friend class MeshViewer;
 
 public:
+<<<<<<< HEAD
 	bool loadOBJFile(const string& filename);
 	HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
 	void cutMeshWithSelectedEdges();
@@ -107,6 +115,15 @@ public:
 	void smoothMesh();
 	void extendMesh();
 	void resetMesh();
+=======
+    bool loadOBJFile(const string& filename);
+    HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
+    void cutMeshWithSelectedEdges();
+    void unfoldMesh();
+    void smoothMesh();
+    void extendMesh();
+	void exportXMLFile(const char* filename);//export as svg files
+>>>>>>> origin/ConnectorComponent
 
 private:
 	typedef HDS_Mesh mesh_t;

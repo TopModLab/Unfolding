@@ -20,9 +20,9 @@ public:
 
 
     enum ElementType {
-      Face = 0,
-      Edge,
-      Vertex
+		Face = 0,
+		Edge,
+		Vertex
     };
 
     HDS_Mesh();
@@ -103,32 +103,32 @@ private:
 };
 
 inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
-  os << v.index
-     << ": (" << v.pos.x() << ", " << v.pos.y() << ", " << v.pos.z() << ")"
-     << "\t"
-     << v.he;
-  return os;
+	os << v.index
+		<< ": (" << v.pos.x() << ", " << v.pos.y() << ", " << v.pos.z() << ")"
+		<< "\t"
+		<< v.he;
+	return os;
 }
 
 inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
-  os << e.index << "::"
-     << " prev: " << e.prev->index
-     << " next: " << e.next->index
-     << " flip: " << e.flip->index
-     << " v: " << e.v->index
-     << " f:" << e.f->index;
-  return os;
+	os << e.index << "::"
+		<< " prev: " << e.prev->index
+		<< " next: " << e.next->index
+		<< " flip: " << e.flip->index
+		<< " v: " << e.v->index
+		<< " f:" << e.f->index;
+	return os;
 }
 
 inline ostream& operator<<(ostream &os, const HDS_Face& f) {
-  os << "face #" << f.index << " " << f.n << endl;
-  HDS_HalfEdge *he = f.he;
-  HDS_HalfEdge *curHE = he;
-  do {
-    os << "(" << curHE->index << ", " << curHE->v->index << ") ";
-    curHE = curHE->next;
-  } while( curHE != he );
-  return os;
+	os << "face #" << f.index << " " << f.n << " cut: " << f.isCutFace << endl;
+	HDS_HalfEdge *he = f.he;
+	HDS_HalfEdge *curHE = he;
+	do {
+		os << "(" << curHE->index << ", " << curHE->v->index << ") ";
+		curHE = curHE->next;
+	} while( curHE != he );
+	return os;
 }
 
 #endif // HDS_MESH_H

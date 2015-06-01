@@ -3,15 +3,20 @@
 
 #include "common.h"
 
+/*
 #include <QtOpenGL/QGLWidget>
 #include <QtOpenGL/QGLFunctions>
 #include <QtOpenGL/QGLFormat>
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QVector3D>
 #include <QtGui/QVector2D>
+<<<<<<< HEAD
 #include <QtOpenGL/QGLFramebufferObject>
 
 /*
+=======
+#include <QtOpenGL/QGLFramebufferObject>*/
+>>>>>>> origin/ConnectorComponent
 #include <QGLWidget>
 #include <QGLFunctions>
 #include <QGLFormat>
@@ -19,7 +24,7 @@
 #include <QVector3D>
 #include <QVector2D>
 #include <QGLFramebufferObject>
-*/
+
 
 #include "hds_mesh.h"
 #include "colormap.h"

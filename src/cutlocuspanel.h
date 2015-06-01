@@ -1,7 +1,7 @@
 #ifndef CUTLOCUSPANEL_H
 #define CUTLOCUSPANEL_H
 
-#include <QtWidgets/QWidget>
+#include <QWidget>
 
 namespace Ui {
 class CutLocusPanel;

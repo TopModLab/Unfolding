@@ -275,10 +275,16 @@ void MeshManager::cutMeshWithSelectedEdges()
 
 	bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
 	if( cutSucceeded ) {
+<<<<<<< HEAD
 		/// cutting performed successfully
 		cutted_mesh->printInfo("cutted mesh:");
 		//cutted_mesh->printMesh("cutted mesh:");
 		cout<<"cut succeed!"<<endl;
+=======
+		/// cutting performed successfullyas
+		cutted_mesh->printInfo("cutted mesh:");
+		//cutted_mesh->printMesh("cutted mesh:");
+>>>>>>> origin/ConnectorComponent
 	}
 	else {
 		/// can not cut it
@@ -286,16 +292,21 @@ void MeshManager::cutMeshWithSelectedEdges()
 
 	isUnfoldable = true;// MeshUnfolder::unfoldable(cutted_mesh.data());
 	/// replace the ref mesh with the cutted mesh
+<<<<<<< HEAD
 	/// commented out due to bug when cutting all edges
 	//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
 	//cout<<"ref_mesh reset"<<endl;
 
+=======
+	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+>>>>>>> origin/ConnectorComponent
 	/// discard the selected edges now
 	selectedEdges.clear();
 	}
 }
 
 void MeshManager::unfoldMesh() {
+<<<<<<< HEAD
 	//HDS_Mesh* ref_mesh;
 	QScopedPointer<HDS_Mesh> ref_mesh;
 	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
@@ -338,6 +349,38 @@ void MeshManager::unfoldMesh() {
 	else {
 	/// failed to unfold
 	cout << "Failed to unfold." << endl;
+=======
+	HDS_Mesh* ref_mesh;
+
+	if (extended_mesh.isNull())
+		ref_mesh = cutted_mesh.data();
+	else
+		ref_mesh = extended_mesh.data();
+
+	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
+
+	/// cut the mesh using the selected edges
+	set<int> selectedFaces;
+	for (auto f : ref_mesh->faces()) {
+		if( f->isPicked ) {
+			/// use picked edges as cut edges
+			f->setPicked(false);
+
+			if( selectedFaces.find(f->index) == selectedFaces.end() ) {
+				selectedFaces.insert(f->index);
+			}
+		}
+	}
+
+	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh, selectedFaces)) {
+		/// unfolded successfully
+		unfolded_mesh->printInfo("unfolded mesh:");
+		//unfolded_mesh->printMesh("unfolded mesh:");
+	}
+	else {
+		/// failed to unfold
+		cout << "Failed to unfold." << endl;
+>>>>>>> origin/ConnectorComponent
 	}
 
 }
@@ -352,11 +395,14 @@ void MeshManager::smoothMesh() {
 	//MeshSmoother::smoothMesh(smoothed_mesh.data());
 	//MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
 	MeshSmoother::smoothMesh_Laplacian(smoothed_mesh.data());
+<<<<<<< HEAD
 }
 
 void MeshManager::resetMesh() {
 	cutted_mesh.reset();
 	unfolded_mesh.reset();
+=======
+>>>>>>> origin/ConnectorComponent
 }
 
 bool MeshManager::saveMeshes() {
@@ -371,6 +417,75 @@ void MeshManager::extendMesh()
 	else
 	extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
 	MeshExtender::extendMesh(extended_mesh.data(), 0.75);
+<<<<<<< HEAD
+=======
+}
+
+void MeshManager::exportXMLFile(const char* filename)
+{
+	FILE *SVG_File;
+	errno_t err = fopen_s(&SVG_File, filename, "w");
+	if (err)
+	{
+		printf("Can't write to files!\n");
+		return;
+	}
+	int size_x(360), size_y(360);
+	//printf("Type in SVG file size: ");
+	//err = scanf_s("%d%d", &size_x, &size_y);
+	
+	unordered_set<HDS_Mesh::face_t*> faces = unfolded_mesh->faces();
+	unordered_set<HDS_Mesh::face_t*> cutfaces;
+	for (auto face : faces) {
+		
+		if (face->isCutFace) {
+			cutfaces.insert(face);
+		}
+	}
+	fprintf(SVG_File,
+		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
+		"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" \
+		"<g opacity=\"0.8\">\n",
+		size_x, size_y);
+	for (auto face : cutfaces)
+	{
+		double he_offset(10), he_scale(20);
+		HDS_HalfEdge *he = face->he;
+		HDS_HalfEdge *curHE = he;
+		fprintf(SVG_File, "\t<polygon points=\"");
+		face->computeNormal();//get the normal of unfolded mesh to calculate the projection(maybe can copy value when unfolding)
+		cout <<"Face normal:" << face->n << endl;
+		//should it be only one face cutted?
+		QVector3D nx, ny, c;
+		c = face->center();
+		nx = he->v->pos - c;
+		nx.normalize();
+		ny = QVector3D::crossProduct(nx, face->n);
+		cout << "Face normal:" << face->n << endl;
+		cout << "X dir:" << nx << endl;
+		cout << "Y dir:" << ny << endl;
+		cout << "Center:" << c << endl;
+		
+
+		do 
+		{
+			//cout << curHE->v->pos[0] << ", " << curHE->v->pos[1] << ", " << curHE->v->pos[2] << endl;
+			fprintf(SVG_File, "%f,%f ",
+				(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
+				(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
+			curHE = curHE->next;
+		} while (curHE != he);
+		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.5\" fill=\"none\" />\n",
+			(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
+			(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
+	}
+	fprintf(SVG_File, 
+		"</g>\n"\
+		"</svg>"
+		);
+	fclose(SVG_File);
+	cout << "SVG file saved successfully!" << endl;
+>>>>>>> origin/ConnectorComponent
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx)

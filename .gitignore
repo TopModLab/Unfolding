@@ -45,8 +45,6 @@ visual_studio/tmp/
 visual_studio/GeneratedFiles/
 visual_studio/*.sdf
 visual_studio/*.suo
-visual_studio/*.vcxproj.*
-visual_studio/*.vcxproj.*
 
 #Backup files
 *.bak
