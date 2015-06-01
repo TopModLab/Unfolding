@@ -1,6 +1,7 @@
 #include "morsesmalecomplex.h"
 #include "utils.hpp"
 
+//cut locus cutting method, follow gradient of saddle to min/maximum
 MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalPoints)
 {
 	int ii=0;

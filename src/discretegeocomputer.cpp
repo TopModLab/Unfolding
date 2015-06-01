@@ -18,9 +18,10 @@ DiscreteGeoComputer::~DiscreteGeoComputer()
 vector<double> DiscreteGeoComputer::discreteDistanceTo(HDS_Vertex* init) const
 {
 	auto dists = vector<double>();
+	cout<<hds_mesh->verts().size()<<endl;
 	dists = vector<double>(hds_mesh->verts().size());
 	//use BFS to traverse graph from init vertex
-
+	cout<<"dists initialized"<<endl;
 
 	queue<HDS_Vertex*> frontier;
 	//runtime log parameter

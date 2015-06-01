@@ -66,7 +66,7 @@ bool MainWindow::connectComponents()
 	connect(cppanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disablecpp()));
 
 	connect(clpanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCutLocusMethod(int)));
-	//connect(clpanel, SIGNAL(sig_displayCut(bool)), this, );  //perform cut based on selected vertices
+	connect(clpanel, SIGNAL(sig_displayCut(bool)), viewer, SLOT(slot_toggleCutLocusCut()));  //perform cut based on selected vertices
 	connect(clpanel, SIGNAL(sig_displayMinMax(bool)), viewer, SLOT(slot_toggleCriticalPoints()));
 	connect(clpanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disableclp()));
 
@@ -180,10 +180,18 @@ void MainWindow::createActions()
 		connect(showNormalsAct, SIGNAL(triggered()), this, SLOT(slot_toggleNormals()));
 		actionsMap["show normals"] = showNormalsAct;
 
+		QAction *showIndexAct = new QAction(tr("Show Vertex &Index"), this);
+		showIndexAct->setShortcut(Qt::Key_I);
+		showIndexAct->setCheckable(true);
+		showIndexAct->setChecked(true);
+		showIndexAct->setStatusTip(tr("Show Vertex Index"));
+		connect(showIndexAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleText()));
+		actionsMap["show index"] = showIndexAct;
+
 		QAction *showLightingAct = new QAction(tr("Show &Lighting"), this);
 		showLightingAct->setShortcut(Qt::Key_L);
 		showLightingAct->setCheckable(true);
-		showLightingAct->setChecked(true);
+		showLightingAct->setChecked(false);
 		showLightingAct->setStatusTip(tr("Show Lighting"));
 		connect(showLightingAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLighting()));
 		actionsMap["show lighting"] = showLightingAct;
@@ -191,7 +199,7 @@ void MainWindow::createActions()
 		QAction *showCPAct = new QAction(tr("Show &Critical Points"), this);
 		showCPAct->setShortcut(Qt::Key_C);
 		showCPAct->setCheckable(true);
-		showCPAct->setChecked(true);
+		showCPAct->setChecked(false);
 		showCPAct->setStatusTip(tr("Show Critical Points"));
 		connect(showCPAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleCriticalPoints()));
 		actionsMap["show CP"] = showCPAct;
@@ -311,6 +319,7 @@ void MainWindow::createMenus()
 		displayMenu->addAction(actionsMap["show edges"]);
 		displayMenu->addAction(actionsMap["show faces"]);
 		displayMenu->addAction(actionsMap["show normals"]);
+		displayMenu->addAction(actionsMap["show index"]);
 		displayMenu->addSeparator();
 		displayMenu->addAction(actionsMap["show lighting"]);
 
@@ -506,13 +515,14 @@ void MainWindow::slot_triggerColormap() {
 
 void MainWindow::slot_triggerCriticalPoints() {
 	viewer->showCriticalPoints();
+
 	viewer->setCriticalPointsMethod(viewer->getCmode());
 	viewer->update();
 	cppanel->show();
 }
 
 void MainWindow::slot_triggerCutLocusPanel() {
-	viewer->showCriticalPoints();
+	viewer->showCutLocusPoints();
 	viewer->setCutLocusMethod(viewer->getLmode());
 	viewer->update();
 	clpanel->show();

@@ -53,6 +53,7 @@ public:
 
 	void setCutLocusMethod(int midx);
 
+	void showCutLocusPoints();
 
 signals:
 	void updateMeshColorByGeoDistance(int vidx);
@@ -73,9 +74,12 @@ protected:
 	void resizeGL(int w, int h);
 	void paintGL();
 
+
 public slots:
 	void slot_toggleLighting();
 	void slot_toggleCriticalPoints();
+	void slot_toggleText();
+	void slot_toggleCutLocusCut();
 
 private:
 	struct ViewerState {
@@ -208,6 +212,11 @@ private:
 	void enableLights();
 	void disableLights();
 
+	bool showText;
+	bool showVIndex; // show vertex index
+	bool showCPDistance; //show critical points dists
+	bool showCLDistance; //show cut locus dists
+
 private:
 	QScopedPointer<QGLFramebufferObject> fbo;
 	void initializeFBO();
@@ -217,11 +226,12 @@ public:
 	int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
 	int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
 public slots:
-	void slot_disablecpp(){isCriticalPointModeSet = false; updateGL();}
-	void slot_disableclp(){isCutLocusModeset = false; updateGL();}
+	void slot_disablecpp(){isCriticalPointModeSet = false; showVIndex = true; showCPDistance = false; updateGL();}
+	void slot_disableclp(){isCutLocusModeset = false; showVIndex = true; showCLDistance = false; updateGL();}
 
 private:
 	bool showReebPoints;
+	vector<double> CPdistances;
 	bool isCriticalPointModeSet = false;
 	enum CriticalPointMode {
 		Geodesics = 0,
@@ -240,6 +250,9 @@ private:
 	void drawReebGraph();
 
 private:
+	bool showCut;
+	vector<double> CLdistances;
+
 	bool isCutLocusModeset = false;
 	enum CutLocusMode {
 		GraphDist = 0,

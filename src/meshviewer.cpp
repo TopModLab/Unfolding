@@ -21,6 +21,10 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	colormap = ColorMap::getDefaultColorMap();
 	enableLighting = false;
 	showReebPoints = false;
+	showCut = false;
+	showVIndex = true;
+	showCLDistance = false;
+	showCPDistance = false;
 	lastSelectedIndex = 0;
 	cmode =Random;//PointNormal;//Geodesics;
 	cp_smoothing_times = 0;
@@ -689,6 +693,9 @@ void MeshViewer::paintGL()
 			drawReebPoints();
 			//drawReebGraph();
 		}
+		if (showCut) {
+			drawReebGraph();
+		}
 		//    glColor4b(1.0,0,0,0);
 		//   glEnable(GL_DEPTH_TEST);
 		QFont fnt;
@@ -697,8 +704,17 @@ void MeshViewer::paintGL()
 		{
 			HDS_Vertex * v = (*vit);
 			QString *name;
-
-			this->renderText(v->x(),v->y(),v->z(),name->number(v->index),fnt);
+			if (showText) {
+			if (showVIndex) {
+				this->renderText(v->x(),v->y(),v->z(),name->number(v->index),fnt);
+			}
+			else if (showCLDistance) {
+				this->renderText(v->x(),v->y(),v->z(),name->number(CLdistances[v->index]),fnt);
+			}
+			else if (showCPDistance) {
+				this->renderText(v->x(),v->y(),v->z(),name->number(CPdistances[v->index]),fnt);
+			}
+			}
 		}
 	}
 }
@@ -852,19 +868,19 @@ void MeshViewer::disableLights()
 void MeshViewer::drawReebPoints()
 {
 	//cout << "nReebPoints = " << reebPoints.size() << endl;
-	glPointSize(8.0);
+	glPointSize(15.0);
 	glBegin(GL_POINTS);
 	for (auto p : reebPoints) {
 		switch (p->rtype) {
-		case HDS_Vertex::Maximum:
+		case HDS_Vertex::Maximum://orange
 			glColor4f(1,0.5, 0, 1);
 			mm+=1;
 			break;
-		case HDS_Vertex::Minimum:
+		case HDS_Vertex::Minimum: //purple
 			glColor4f(1, 0, 0.5, 1);
 			nm+=1;
 			break;
-		case HDS_Vertex::Saddle:
+		case HDS_Vertex::Saddle: //blue
 			glColor4f(0, 0, 1, 1);
 			nn+=1;
 			break;
@@ -1171,6 +1187,7 @@ void MeshViewer::findReebPoints()
 
 	// generate morse-smale complex
 	msc = MorseSmaleComplex(reebPoints);
+	CPdistances = dists;
 }
 
 void MeshViewer::findCutLocusPoints()
@@ -1191,14 +1208,16 @@ void MeshViewer::findCutLocusPoints()
 	}
 	case GraphDist:
 		cout<<"Graph Distance method on vertex "<<lastSelectedIndex<<"..."<<endl;
-
-		dists = MeshManager::getInstance()->dis_gcomp->discreteDistanceTo(heMesh->vertMap[lastSelectedIndex]);
-		cout << "Graph distance calculated."<<endl;
-
+		if(heMesh->verts().size()>10){
+			dists = MeshManager::getInstance()->dis_gcomp->discreteDistanceTo(heMesh->vertMap[lastSelectedIndex]);
+			cout << "Graph distance calculated."<<endl;
+		}
+		else
+			cout<<"Can't do cut locus on this obj, too few vertices."<<endl;
 		break;
 	}
 
-	//same as findReedPoints
+	//same as findReebPoints
 
 #if USE_REEB_GRAPH
 	MeshManager::getInstance()->updateReebGraph(dists);
@@ -1215,7 +1234,7 @@ void MeshViewer::findCutLocusPoints()
 
 	// generate morse-smale complex
 	msc = MorseSmaleComplex(reebPoints);
-
+	CLdistances = dists;
 }
 
 void MeshViewer::slot_toggleLighting()
@@ -1223,14 +1242,30 @@ void MeshViewer::slot_toggleLighting()
 	enableLighting = !enableLighting;
 }
 
+void MeshViewer::slot_toggleText()
+{
+	showText = !showText;
+}
+
 void MeshViewer::slot_toggleCriticalPoints() {
 	showReebPoints = !showReebPoints;
 
-}
 
+}
+void MeshViewer::slot_toggleCutLocusCut() {
+	showCut = !showCut;
+}
 
 void MeshViewer::showCriticalPoints() {
 	showReebPoints = true;
+	showCPDistance = true;
+	showVIndex = false;
+}
+
+void MeshViewer::showCutLocusPoints() {
+	showReebPoints = true;
+	showCLDistance = true;
+	showVIndex = false;
 
 }
 
@@ -1299,13 +1334,27 @@ void MeshViewer::drawReebGraph()
 		GLUtils::drawLine(heMesh->vertMap[v0]->pos, heMesh->vertMap[v1]->pos, Qt::red);
 	}
 #else
+	bool hasSaddle = false;
+	for (auto cp : reebPoints) {
+		if (cp->rtype == HDS_Vertex::Saddle)
+			hasSaddle = true;
+	}
+
+	if (hasSaddle){
+	cout<<"drawing path..."<<endl;
 	auto paths = msc.getPaths();
 	for (auto p : paths) {
+	//auto p = paths.front();
 		for (auto i = 0; i < p.edges.size(); ++i) {
 			auto v0 = p.edges[i].s;
 			auto v1 = p.edges[i].t;
+			cout<<" path edge: "<<v0->pos<<" "<<v1->pos<<endl;
 			GLUtils::drawLine(v0->pos, v1->pos, Qt::green);
 		}
+	}
+	cout<<"path drawn..."<<endl;
+}else {
+		cout<<"Has no saddle, no cut locus defined."<<endl;
 	}
 #endif
 #endif

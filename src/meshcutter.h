@@ -16,14 +16,14 @@ public:
 
 private:
 	struct Edge {
-	Edge(){}
-	Edge(int i, int j, int u, int v, double w):i(i), j(j), u(u), v(v), weight(w){}
-	int i, j;
-	int u, v;
-	double weight;
-	bool operator>(const Edge& e) const {
-		return weight > e.weight;
-	}
+		Edge(){}
+		Edge(int i, int j, int u, int v, double w):i(i), j(j), u(u), v(v), weight(w){}
+		int i, j;
+		int u, v;
+		double weight;
+		bool operator>(const Edge& e) const {
+			return weight > e.weight;
+		}
 	};
 	typedef vector<vector<pair<double, int>>> PathInfo;
 
