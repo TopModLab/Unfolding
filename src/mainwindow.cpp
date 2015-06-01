@@ -470,6 +470,7 @@ void MainWindow::slot_performMeshCut() {
     viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
 }
 
+
 void MainWindow::slot_unfoldMesh() {
     MeshManager::getInstance()->unfoldMesh();
     viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
