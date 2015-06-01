@@ -81,8 +81,8 @@ protected:
 	void paintGL();
 
 public slots:
-    void slot_toggleLighting();
-    void slot_toggleCriticalPoints();
+	void slot_toggleLighting();
+	void slot_toggleCriticalPoints();
 
 private:
 	struct ViewerState {
@@ -166,14 +166,14 @@ public:
 	SelectFace,
 	SelectEdge
 	};
-    void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdx.empty()) selectedElementsIdx.pop();}
+	void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdx.empty()) selectedElementsIdx.pop();}
 
-    enum SelectionMode {
-        single = 0,
-        multiple,
+	enum SelectionMode {
+		single = 0,
+		multiple,
 
-    };
-    void setSelectionMode(SelectionMode mode) {selectionMode = mode; }
+	};
+	void setSelectionMode(SelectionMode mode) {selectionMode = mode; }
 
 	struct SelectionBox
 	{
@@ -189,19 +189,19 @@ public:
 	bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
 	int getSelectedElementIndex(const QPoint& p);
 public slots:
-    void slot_selectAll();
-    void slot_selectInverse();
-    void slot_selectCC();
-    void slot_selectGrow();
-    void slot_selectShrink();
-    void slot_selectClear();
+	void slot_selectAll();
+	void slot_selectInverse();
+	void slot_selectCC();
+	void slot_selectGrow();
+	void slot_selectShrink();
+	void slot_selectClear();
 
 private:
 	InteractionState interactionState;
-    SelectionMode selectionMode;
+	SelectionMode selectionMode;
 	stack<InteractionState> interactionStateStack;
 
-    queue<int> selectedElementsIdx;
+	queue<int> selectedElementsIdx;
 private:
 	HDS_Mesh *heMesh;   /// not own
 	float scale;
@@ -221,23 +221,23 @@ private:
 	void drawMeshToFBO();
 
 public:
-    int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
-    int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
+	int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
+	int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
 public slots:
-    void slot_disablecpp(){isCriticalPointModeSet = false; updateGL();}
-    void slot_disableclp(){isCutLocusModeset = false; updateGL();}
+	void slot_disablecpp(){isCriticalPointModeSet = false; updateGL();}
+	void slot_disableclp(){isCutLocusModeset = false; updateGL();}
 
 private:
 	bool showReebPoints;
 	bool isCriticalPointModeSet = false;
 	enum CriticalPointMode {
-	Geodesics = 0,
-	Z=1,              //this line and below later added "= number";
-	PointNormal=2,
-	Curvature=3,
-	Random=5,
-	Quadratic=4,
-	NCModes
+		Geodesics = 0,
+		Z=1,              //this line and below later added "= number";
+		PointNormal=2,
+		Curvature=3,
+		Random=5,
+		Quadratic=4,
+		NCModes
 	} cmode;
 
 	int cp_smoothing_times;
