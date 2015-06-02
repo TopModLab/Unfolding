@@ -1341,18 +1341,18 @@ void MeshViewer::drawReebGraph()
 	}
 
 	if (hasSaddle){
-	cout<<"drawing path..."<<endl;
+	//cout<<"drawing path..."<<endl;
 	auto paths = msc.getPaths();
 	for (auto p : paths) {
 	//auto p = paths.front();
 		for (auto i = 0; i < p.edges.size(); ++i) {
 			auto v0 = p.edges[i].s;
 			auto v1 = p.edges[i].t;
-			cout<<" path edge: "<<v0->pos<<" "<<v1->pos<<endl;
+			//cout<<" path edge: "<<v0->pos<<" "<<v1->pos<<endl;
 			GLUtils::drawLine(v0->pos, v1->pos, Qt::green);
 		}
 	}
-	cout<<"path drawn..."<<endl;
+	//cout<<"path drawn..."<<endl;
 }else {
 		cout<<"Has no saddle, no cut locus defined."<<endl;
 	}
