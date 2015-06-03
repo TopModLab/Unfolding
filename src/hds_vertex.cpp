@@ -46,9 +46,6 @@ vector<HDS_Vertex*> HDS_Vertex::neighbors() const {
 	do {
 		neighbors.push_back(curHE->flip->v);
 		curHE = curHE->flip->next;
-
-	//      cout<<"neighbors() matters; ";   //later added;
-
 	} while( curHE != he );
 	return neighbors;
 }

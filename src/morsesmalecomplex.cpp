@@ -74,11 +74,14 @@ MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalP
 						v1 = *nv;
 					}
 				}
-				paths.push_back(path);
+				if (climbingHill)
+					maxpaths.push_back(path);
+				else
+					minpaths.push_back(path);
 			}
 
 
-			/*liu wei's modification somehow has some bugs, can't produce correct path
+			/*liu wei's modification somehow has some bugs, can't produce correct path, hence commented out
 				// trace the steepest vertex until reaches a maximum or minimum
 				Path path;
 

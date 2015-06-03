@@ -79,7 +79,10 @@ public slots:
 	void slot_toggleLighting();
 	void slot_toggleCriticalPoints();
 	void slot_toggleText();
+
+	void slot_toggleCutLocusPoints(int);
 	void slot_toggleCutLocusCut();
+	void slot_toggleCutLocusCutMode();
 
 private:
 	struct ViewerState {
@@ -182,6 +185,7 @@ public:
 	vector<unsigned char> selectionBuffer;
 	int lastSelectedIndex;
 
+
 	void computeGlobalSelectionBox();
 	bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
 	int getSelectedElementIndex(const QPoint& p);
@@ -229,6 +233,9 @@ public slots:
 	void slot_disablecpp(){isCriticalPointModeSet = false; showVIndex = true; showCPDistance = false; updateGL();}
 	void slot_disableclp(){isCutLocusModeset = false; showVIndex = true; showCLDistance = false; updateGL();}
 
+	void slot_resetVertices();
+	void slot_resetEdges();
+	void slot_resetFaces();
 private:
 	bool showReebPoints;
 	vector<double> CPdistances;
@@ -247,10 +254,12 @@ private:
 	int cp_smoothing_type;
 	void findReebPoints();
 	void drawReebPoints();
-	void drawReebGraph();
+	void selectCutLocusEdges();
 
 private:
 	bool showCut;
+	bool showOneCut;
+	bool showMultCut;
 	vector<double> CLdistances;
 
 	bool isCutLocusModeset = false;

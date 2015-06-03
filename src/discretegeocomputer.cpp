@@ -15,7 +15,24 @@ DiscreteGeoComputer::~DiscreteGeoComputer()
 
 }
 
-vector<double> DiscreteGeoComputer::discreteDistanceTo(HDS_Vertex* init) const
+vector<double> DiscreteGeoComputer::discreteDistanceTo(unordered_set<HDS_Vertex*> initSet) const
+{
+	auto dists = vector<double>();
+	dists = vector<double>(hds_mesh->verts().size());
+	for (int i = 0; i < dists.size();i++) {
+		dists[i] = numeric_limits<double>::infinity();
+	}
+	for (auto i: initSet) {
+		vector<double> curDists = computeDistanceTo(i);
+		for (int index = 0; index < curDists.size();index++) {
+			cout<<index<<" : "<<dists[index]<<" >>>> "<<curDists[index]<<endl;
+			dists[index] = min(curDists[index], dists[index]);
+		}
+	}
+	return dists;
+}
+
+vector<double> DiscreteGeoComputer::computeDistanceTo(HDS_Vertex* init) const
 {
 	auto dists = vector<double>();
 	cout<<hds_mesh->verts().size()<<endl;
@@ -68,7 +85,7 @@ vector<double> DiscreteGeoComputer::discreteDistanceTo(HDS_Vertex* init) const
 
 	//if fail BFS dists assignment, assign 0 to all vertices
 	for (auto &x : dists) {
-		x = 0;
+		dists[x] = 0;
 	}
 	return dists;
 

@@ -41,6 +41,10 @@ public:
 
 	unordered_set<vert_t*> getReebPoints(const vector<double> &val = vector<double>(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
+	unordered_set<vert_t*> getSelectedVertices();
+	unordered_set<he_t*> getSelectedHalfEdges();
+	unordered_set<face_t*> getSelectedFaces();
+
 	void colorVertices(const vector<double> &val);
 
 	void draw(ColorMap cmap);

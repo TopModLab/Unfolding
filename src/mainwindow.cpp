@@ -66,9 +66,13 @@ bool MainWindow::connectComponents()
 	connect(cppanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disablecpp()));
 
 	connect(clpanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCutLocusMethod(int)));
-	connect(clpanel, SIGNAL(sig_displayCut(bool)), viewer, SLOT(slot_toggleCutLocusCut()));  //perform cut based on selected vertices
-	connect(clpanel, SIGNAL(sig_displayMinMax(bool)), viewer, SLOT(slot_toggleCriticalPoints()));
-	connect(clpanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disableclp()));
+
+	connect(clpanel, SIGNAL(sig_toggleCut()), viewer, SLOT(slot_toggleCutLocusCut()));
+	connect(clpanel, SIGNAL(sig_toggleCutMode(int)), viewer, SLOT(slot_toggleCutLocusCutMode()));
+
+	connect(clpanel, SIGNAL(sig_displayMinMax(int)), viewer, SLOT(slot_toggleCutLocusPoints(int)));
+
+	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
 
 	return true;
 }
@@ -444,6 +448,8 @@ void MainWindow::slot_toggleEdges()
 	{
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowEdges();
 	}
+	viewer->update();
+
 }
 
 void MainWindow::slot_toggleVertices()
@@ -452,6 +458,8 @@ void MainWindow::slot_toggleVertices()
 	{
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowVertices();
 	}
+	viewer->update();
+
 }
 void MainWindow::slot_toggleFaces()
 {
@@ -459,6 +467,8 @@ void MainWindow::slot_toggleFaces()
 	{
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowFaces();
 	}
+	viewer->update();
+
 }
 
 void MainWindow::slot_toggleNormals()
@@ -468,6 +478,8 @@ void MainWindow::slot_toggleNormals()
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowNormals();
 
 	}
+	viewer->update();
+
 }
 
 void MainWindow::slot_toggleCameraOperation()
@@ -514,14 +526,17 @@ void MainWindow::slot_triggerColormap() {
 }
 
 void MainWindow::slot_triggerCriticalPoints() {
+	actionsMap["show CP"]->setChecked(true);
 	viewer->showCriticalPoints();
-
 	viewer->setCriticalPointsMethod(viewer->getCmode());
 	viewer->update();
 	cppanel->show();
 }
+//need to enable action after close the panel
 
 void MainWindow::slot_triggerCutLocusPanel() {
+	actionsMap["show CP"]->setChecked(true);
+	actionsMap["show CP"]->setEnabled(false);
 	viewer->showCutLocusPoints();
 	viewer->setCutLocusMethod(viewer->getLmode());
 	viewer->update();

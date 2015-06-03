@@ -8,8 +8,12 @@ CutLocusPanel::CutLocusPanel(QWidget *parent) :
 	ui->setupUi(this);
 
 	connect(ui->methodComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(sig_methodChanged(int)));
-	connect(ui->MinmaxRadioButton, SIGNAL(toggled(bool)), this, SIGNAL(sig_displayMinMax(bool)));
-	connect(ui->CutRadioButton, SIGNAL(toggled(bool)), this, SIGNAL(sig_displayCut(bool)));
+	connect(ui->MinmaxCheckBox, SIGNAL(stateChanged(int)), this, SIGNAL(sig_displayMinMax(int)));
+	connect(ui->CutCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slot_toggleCut(int)));
+	//connect(ui->OneCutRadioButton, SIGNAL(toggled(bool)), this, SIGNAL(sig_displayOneCut(bool)));
+	//connect(ui->MultCutRadioButton, SIGNAL(toggled(bool)), this, SIGNAL(sig_displayMultCut(bool)));
+	ui->buttonGroup->connect(ui->buttonGroup, SIGNAL(buttonClicked(int)), this, SIGNAL(sig_toggleCutMode(int)));
+
 
 }
 
@@ -22,5 +26,19 @@ CutLocusPanel::~CutLocusPanel()
 void CutLocusPanel::closeEvent(QCloseEvent *e)
 {
 	close();
-	emit closedSignal();
+
+	emit sig_closedSignal();
+}
+
+void CutLocusPanel::slot_toggleCut(int state)
+{
+	if (state == Qt::Unchecked) {
+		ui->OneCutRadioButton->setEnabled(false);
+		ui->MultCutRadioButton->setEnabled(false);
+
+	}else {
+		ui->OneCutRadioButton->setEnabled(true);
+		ui->MultCutRadioButton->setEnabled(true);
+	}
+	emit sig_toggleCut();
 }

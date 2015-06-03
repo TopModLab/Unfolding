@@ -20,8 +20,11 @@ public:
 	MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalPoints);
 	~MorseSmaleComplex();
 
-	const vector<Path>& getPaths() const { return paths; }
+	const vector<Path>& getMinPaths() const { return minpaths; }
+	const vector<Path>& getMaxPaths() const { return maxpaths; }
+
 private:
-	vector<Path> paths;
+	vector<Path> minpaths;
+	vector<Path> maxpaths;
 };
 

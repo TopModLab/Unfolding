@@ -21,7 +21,11 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	colormap = ColorMap::getDefaultColorMap();
 	enableLighting = false;
 	showReebPoints = false;
+
 	showCut = false;
+	showMultCut = false;
+
+	showText = true;
 	showVIndex = true;
 	showCLDistance = false;
 	showCPDistance = false;
@@ -132,34 +136,34 @@ void MeshViewer::slot_selectCC()
 
 void MeshViewer::slot_selectGrow()
 {
-//get all neighbours
+	//get all neighbours
 	switch (interactionState) {
 	case Camera:
 		break;
 	case SelectFace:
 		for (auto f : heMesh->faces()) {
 			if (f->isPicked){
-			for (auto face : heMesh->incidentFaces(f)) {
-				face->setPicked(true);
-			}
+				for (auto face : heMesh->incidentFaces(f)) {
+					face->setPicked(true);
+				}
 			}
 		}
 		break;
 	case SelectEdge:
 		for (auto e : heMesh->halfedges()) {
 			if (e->isPicked){
-			for (auto edge : heMesh->incidentEdges(e->v)) {
-				edge->setPicked(true);
-			}
+				for (auto edge : heMesh->incidentEdges(e->v)) {
+					edge->setPicked(true);
+				}
 			}
 		}
 		break;
 	case SelectVertex:
 		for (auto v : heMesh->verts()) {
 			if (v->isPicked){
-			for (auto edge : heMesh->incidentEdges(v)) {
-				edge->v->setPicked(true);
-			}
+				for (auto edge : heMesh->incidentEdges(v)) {
+					edge->v->setPicked(true);
+				}
 			}
 		}
 		break;
@@ -168,7 +172,7 @@ void MeshViewer::slot_selectGrow()
 
 void MeshViewer::slot_selectShrink()
 {
-//BFS to get all neighbours that are selected
+	//BFS to get all neighbours that are selected
 }
 
 void MeshViewer::slot_selectClear()
@@ -178,6 +182,27 @@ void MeshViewer::slot_selectClear()
 	for (auto f : heMesh->verts())
 		f->setPicked(false);
 	for (auto f : heMesh->halfedges())
+		f->setPicked(false);
+}
+
+void MeshViewer::slot_resetEdges()
+{
+	//reset all edges
+	for (auto he: heMesh->halfedges())
+		he->setPicked(false);
+}
+
+void MeshViewer::slot_resetVertices()
+{
+	//reset all vertices
+	for (auto v: heMesh->verts())
+		v->setPicked(false);
+}
+
+void MeshViewer::slot_resetFaces()
+{
+	//reset all faces
+	for (auto f: heMesh->faces())
 		f->setPicked(false);
 }
 
@@ -409,29 +434,29 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 						heMesh->selectEdge(selectedElementsIdx.front());//deselect
 						selectedElementsIdx.pop();
 					} else if (interactionState == SelectFace) {
-							heMesh->selectFace(selectedElementsIdx.front());//deselect
-							selectedElementsIdx.pop();
+						heMesh->selectFace(selectedElementsIdx.front());//deselect
+						selectedElementsIdx.pop();
 					} else {
-							heMesh->selectVertex(selectedElementsIdx.front());//deselect
-							selectedElementsIdx.pop();
+						heMesh->selectVertex(selectedElementsIdx.front());//deselect
+						selectedElementsIdx.pop();
 					}
-			}
+				}
 
 			case multiple:
-			if (interactionState == SelectEdge) {
-				heMesh->selectEdge(selectedElementIdx);
-			}
-			else if (interactionState == SelectFace) {
-				heMesh->selectFace(selectedElementIdx);
-			}
-			else {
-				heMesh->selectVertex(selectedElementIdx);
-				if (isCriticalPointModeSet)
-					findReebPoints();
-				if  (isCutLocusModeset)
-					findCutLocusPoints();
-			}
-			break;
+				if (interactionState == SelectEdge) {
+					heMesh->selectEdge(selectedElementIdx);
+				}
+				else if (interactionState == SelectFace) {
+					heMesh->selectFace(selectedElementIdx);
+				}
+				else {
+					heMesh->selectVertex(selectedElementIdx);
+					if (isCriticalPointModeSet)
+						findReebPoints();
+					if  (isCutLocusModeset)
+						findCutLocusPoints();
+				}
+				break;
 
 			}
 		}
@@ -469,37 +494,37 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
 
 		break;
 	}
-//    case Qt::Key_E:
-//    {
-//        if (heMesh) {
-//            heMesh->flipShowEdges();
-//        }
-//        break;
-//    }
-//    case Qt::Key_V:
-//    {
-//        if (heMesh) {
-//            heMesh->flipShowVertices();
-//        }
-//        break;
-//    }
-//    case Qt::Key_F:
-//    {
-//        if (heMesh) {
-//            heMesh->flipShowFaces();
-//        }
-//        break;
-//    }
-//    case Qt::Key_L:
-//    {
-//        enableLighting = !enableLighting;
-//        break;
-//    }
-//    case Qt::Key_R:
-//    {
-//        toggleCriticalPoints();
-//        break;
-//    }
+		//    case Qt::Key_E:
+		//    {
+		//        if (heMesh) {
+		//            heMesh->flipShowEdges();
+		//        }
+		//        break;
+		//    }
+		//    case Qt::Key_V:
+		//    {
+		//        if (heMesh) {
+		//            heMesh->flipShowVertices();
+		//        }
+		//        break;
+		//    }
+		//    case Qt::Key_F:
+		//    {
+		//        if (heMesh) {
+		//            heMesh->flipShowFaces();
+		//        }
+		//        break;
+		//    }
+		//    case Qt::Key_L:
+		//    {
+		//        enableLighting = !enableLighting;
+		//        break;
+		//    }
+		//    case Qt::Key_R:
+		//    {
+		//        toggleCriticalPoints();
+		//        break;
+		//    }
 	case Qt::Key_M:
 	{
 		//loop through all critical point modes
@@ -666,9 +691,9 @@ void MeshViewer::paintGL()
 	if (heMesh == nullptr) {
 		glLineWidth(2.0);
 		GLUtils::drawQuad(QVector3D(-1, -1, 0),
-							QVector3D(1, -1, 0),
-							QVector3D(1, 1, 0),
-							QVector3D(-1, 1, 0));
+						  QVector3D(1, -1, 0),
+						  QVector3D(1, 1, 0),
+						  QVector3D(-1, 1, 0));
 	}
 	else {
 		if (enableLighting)
@@ -683,7 +708,6 @@ void MeshViewer::paintGL()
 		default:
 			if (mouseState.isPressed)
 			{
-
 				drawSelectionBox();
 			}
 			drawMeshToFBO();
@@ -691,10 +715,6 @@ void MeshViewer::paintGL()
 
 		if (showReebPoints) {
 			drawReebPoints();
-			//drawReebGraph();
-		}
-		if (showCut) {
-			drawReebGraph();
 		}
 		//    glColor4b(1.0,0,0,0);
 		//   glEnable(GL_DEPTH_TEST);
@@ -705,15 +725,15 @@ void MeshViewer::paintGL()
 			HDS_Vertex * v = (*vit);
 			QString *name;
 			if (showText) {
-			if (showVIndex) {
-				this->renderText(v->x(),v->y(),v->z(),name->number(v->index),fnt);
-			}
-			else if (showCLDistance) {
-				this->renderText(v->x(),v->y(),v->z(),name->number(CLdistances[v->index]),fnt);
-			}
-			else if (showCPDistance) {
-				this->renderText(v->x(),v->y(),v->z(),name->number(CPdistances[v->index]),fnt);
-			}
+				if (showVIndex) {
+					this->renderText(v->x(),v->y(),v->z(),name->number(v->index),fnt);
+				}
+				else if (showCLDistance) {
+					this->renderText(v->x(),v->y(),v->z(),name->number(CLdistances[v->index]),fnt);
+				}
+				else if (showCPDistance) {
+					this->renderText(v->x(),v->y(),v->z(),name->number(CPdistances[v->index]),fnt);
+				}
 			}
 		}
 	}
@@ -1194,46 +1214,36 @@ void MeshViewer::findCutLocusPoints()
 {
 	auto dists = vector<double>();
 
-	switch (lmode) {
-	case GeodesicsDist: {
-		// use geodesic distance
-		if(heMesh->verts().size()>10){
+	if(heMesh->verts().size()>10){
+		switch (lmode) {
+		case GeodesicsDist: {
+			// use geodesic distance
 			dists = MeshManager::getInstance()->gcomp->distanceTo(lastSelectedIndex);
 
 			cout<<"Geodesics method on "<<lastSelectedIndex<<"..."<<endl;
-		}
-		else
-			break;
-		break;
-	}
-	case GraphDist:
-		cout<<"Graph Distance method on vertex "<<lastSelectedIndex<<"..."<<endl;
-		if(heMesh->verts().size()>10){
-			dists = MeshManager::getInstance()->dis_gcomp->discreteDistanceTo(heMesh->vertMap[lastSelectedIndex]);
-			cout << "Graph distance calculated."<<endl;
-		}
-		else
-			cout<<"Can't do cut locus on this obj, too few vertices."<<endl;
-		break;
-	}
 
-	//same as findReebPoints
+			break;
+		}
+		case GraphDist:
+			cout<<"Graph Distance method on vertex "<<lastSelectedIndex<<"..."<<endl;
+			dists = MeshManager::getInstance()->dis_gcomp->discreteDistanceTo(heMesh->getSelectedVertices());
+			cout << "Graph distance calculated."<<endl;
+
+			break;
+		}
+
+		//same as findReebPoints
 
 #if USE_REEB_GRAPH
-	MeshManager::getInstance()->updateReebGraph(dists);
+		MeshManager::getInstance()->updateReebGraph(dists);
 #endif
-	reebPoints = heMesh->getReebPoints(dists);
-
-	int sum_cp = 0;
-	for (auto cp : reebPoints) {
-		if (cp->rtype == HDS_Vertex::Maximum) sum_cp += 1;
-		else if (cp->rtype == HDS_Vertex::Minimum) sum_cp += 1;
-		else sum_cp -= cp->sdegree;
+		//get min max saddle points
+		reebPoints = heMesh->getReebPoints(dists);
+		// generate morse-smale complex
+		msc = MorseSmaleComplex(reebPoints);
 	}
-	cout << "reeb points sum = " << sum_cp << endl;
-
-	// generate morse-smale complex
-	msc = MorseSmaleComplex(reebPoints);
+	else
+		cout<<"Can't do cut locus on this obj, too few vertices."<<endl;
 	CLdistances = dists;
 }
 
@@ -1247,14 +1257,39 @@ void MeshViewer::slot_toggleText()
 	showText = !showText;
 }
 
-void MeshViewer::slot_toggleCriticalPoints() {
-	showReebPoints = !showReebPoints;
 
+void MeshViewer::slot_toggleCriticalPoints() {
+
+	showReebPoints = !showReebPoints;
+	update();
 
 }
+
+void MeshViewer::slot_toggleCutLocusPoints(int state) {
+	if(state == Qt::Unchecked) {
+		showReebPoints = false;
+	}else {
+		showReebPoints = true;
+	}
+	update();
+}
+
 void MeshViewer::slot_toggleCutLocusCut() {
 	showCut = !showCut;
+	if (showCut)
+		selectCutLocusEdges();
+	else
+		slot_resetEdges();
+	update();
 }
+
+void MeshViewer::slot_toggleCutLocusCutMode() {
+	slot_resetEdges();
+	showMultCut = !showMultCut;
+	selectCutLocusEdges();
+	update();
+}
+
 
 void MeshViewer::showCriticalPoints() {
 	showReebPoints = true;
@@ -1263,7 +1298,6 @@ void MeshViewer::showCriticalPoints() {
 }
 
 void MeshViewer::showCutLocusPoints() {
-	showReebPoints = true;
 	showCLDistance = true;
 	showVIndex = false;
 
@@ -1313,9 +1347,9 @@ void MeshViewer::bindReebGraph(SimpleGraph *g)
 	rbgraph = g;
 }
 
-void MeshViewer::drawReebGraph()
+void MeshViewer::selectCutLocusEdges()
 {
-	// draw edges
+
 #if 0
 	for (auto i = 0; i < rbgraph->E.size(); ++i) {
 		int s = rbgraph->E[i].s;
@@ -1341,19 +1375,32 @@ void MeshViewer::drawReebGraph()
 	}
 
 	if (hasSaddle){
-	//cout<<"drawing path..."<<endl;
-	auto paths = msc.getPaths();
-	for (auto p : paths) {
-	//auto p = paths.front();
-		for (auto i = 0; i < p.edges.size(); ++i) {
-			auto v0 = p.edges[i].s;
-			auto v1 = p.edges[i].t;
-			//cout<<" path edge: "<<v0->pos<<" "<<v1->pos<<endl;
-			GLUtils::drawLine(v0->pos, v1->pos, Qt::green);
+		//cout<<"drawing path..."<<endl;
+		auto maxpaths = msc.getMaxPaths();
+		auto minpaths = msc.getMinPaths();
+		auto paths = maxpaths;
+		if (showMultCut)
+			paths.insert( paths.end(), minpaths.begin(), minpaths.end() );
+		for (auto p : paths) {
+			//auto p = paths.front();
+			for (auto i = 0; i < p.edges.size(); ++i) {
+				auto v0 = p.edges[i].s;
+				auto v1 = p.edges[i].t;
+				//cout<<" path edge: "<<v0->pos<<" "<<v1->pos<<endl;
+				//GLUtils::drawLine(v0->pos, v1->pos, Qt::green);
+				HDS_HalfEdge *curHE = v0->he;
+				do {
+					if (curHE->flip->v == v1) {
+						curHE->setPicked(true);
+						break;
+					}
+					curHE = curHE->flip->next;
+
+				} while( curHE != v0->he );
+
+			}
 		}
-	}
-	//cout<<"path drawn..."<<endl;
-}else {
+	}else {
 		cout<<"Has no saddle, no cut locus defined."<<endl;
 	}
 #endif
