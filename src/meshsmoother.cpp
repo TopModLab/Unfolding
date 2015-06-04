@@ -10,82 +10,82 @@ MeshSmoother::MeshSmoother()
 
 void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 	auto vertex_comp = [](const HDS_Vertex *a, const HDS_Vertex *b) {
-	return fabs(a->curvature) > fabs(b->curvature);
+		return fabs(a->curvature) > fabs(b->curvature);
 	};
 
 	/// put all non-zero curvature vertices into a heap
 	const double CTHRES = 1e-6;
 	vector<HDS_Vertex*> H;
 	for (auto v : mesh->vertSet) {
-	if ( fabs(v->curvature) > CTHRES )
-		H.push_back(v);
+		if ( fabs(v->curvature) > CTHRES )
+			H.push_back(v);
 	}
 	std::make_heap(H.begin(), H.end(), vertex_comp);
-  
+
 	/// modify the curvature of the vertices one by one, making them 0
 	double CTHRES2;
 	cout << "threshold:" << endl;
 	cin >> CTHRES2;
 	while (!H.empty()) {
-	auto v = H.front();
-	std::pop_heap(H.begin(), H.end(), vertex_comp);
-	H.pop_back();
-	if (fabs(v->curvature) > CTHRES2) {
-		H.clear();
-		break;
-	}
+		auto v = H.front();
+		std::pop_heap(H.begin(), H.end(), vertex_comp);
+		H.pop_back();
+		if (fabs(v->curvature) > CTHRES2) {
+			H.clear();
+			break;
+		}
 
-	/// make the curvature at this vertex 0
-	auto neighbors = v->neighbors();
+		/// make the curvature at this vertex 0
+		auto neighbors = v->neighbors();
 
-	/// update its neighbors
-	map<HDS_Vertex*, double> entries;
-	double sum_inv_dist = 0.0;
-	for (auto neighbor : neighbors) {
+		/// update its neighbors
+		map<HDS_Vertex*, double> entries;
+		double sum_inv_dist = 0.0;
+		for (auto neighbor : neighbors) {
 #if 1
-		if (fabs(neighbor->curvature) < CTHRES) {
-		entries.insert(make_pair(neighbor, 0.0));
-		}
-		else {
-		double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
-		entries.insert(make_pair(neighbor, inv_dist));
-		sum_inv_dist += inv_dist;
-		}
+			if (fabs(neighbor->curvature) < CTHRES) {
+				entries.insert(make_pair(neighbor, 0.0));
+			}
+			else {
+				double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
+				entries.insert(make_pair(neighbor, inv_dist));
+				sum_inv_dist += inv_dist;
+			}
 #else
-		double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
-		entries.insert(make_pair(neighbor, inv_dist));
-		sum_inv_dist += inv_dist;
+			double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
+			entries.insert(make_pair(neighbor, inv_dist));
+			sum_inv_dist += inv_dist;
 #endif
-	}
-
-	if (sum_inv_dist > 0) {
-		for (auto entry : entries) {
-		double w = entry.second / sum_inv_dist;
-		entry.first->curvature += w * v->curvature;
 		}
 
-		v->curvature = 0;
+		if (sum_inv_dist > 0) {
+			for (auto entry : entries) {
+				double w = entry.second / sum_inv_dist;
+				entry.first->curvature += w * v->curvature;
+			}
 
-		/// add back the neighbors if they are not in queue
-		for (auto entry : entries) {
-		if (find(H.begin(), H.end(), entry.first) == H.end()) {
-			H.push_back(entry.first);
+			v->curvature = 0;
+
+			/// add back the neighbors if they are not in queue
+			for (auto entry : entries) {
+				if (find(H.begin(), H.end(), entry.first) == H.end()) {
+					H.push_back(entry.first);
+				}
+			}
 		}
-		}
-	}
 
-	/// remove zero curvature vertices
-	auto newEnd = std::remove_if(H.begin(), H.end(), [=](const HDS_Vertex *a) {
-		return fabs(a->curvature) <= CTHRES;
-	});
+		/// remove zero curvature vertices
+		auto newEnd = std::remove_if(H.begin(), H.end(), [=](const HDS_Vertex *a) {
+			return fabs(a->curvature) <= CTHRES;
+		});
 
-	H.erase(newEnd, H.end());
-	std::make_heap(H.begin(), H.end(), vertex_comp);
-	cout << H.size() << ": " << H.front()->curvature << endl;
+		H.erase(newEnd, H.end());
+		std::make_heap(H.begin(), H.end(), vertex_comp);
+		cout << H.size() << ": " << H.front()->curvature << endl;
 	}
 
 	double sum_curvature = std::accumulate(mesh->vertSet.begin(), mesh->vertSet.end(), 0.0, [](double val, HDS_Vertex* v) {
-	return val + v->curvature;
+		return val + v->curvature;
 	});
 
 	cout << "sum = " << sum_curvature << endl;
@@ -104,44 +104,44 @@ void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 	unordered_map<int, int> vidxMap;
 	int ridx = 0;
 	for(auto v : mesh->vertSet) {
-	vidxMap[v->index] = ridx;
-	/// set the entry in vector x
-	x(ridx) = v->curvature;
-	++ridx;
+		vidxMap[v->index] = ridx;
+		/// set the entry in vector x
+		x(ridx) = v->curvature;
+		++ridx;
 	}
 
 	/// assemble the matrix A
 	const double CTHRES = 1e-10;
 	for(auto v : mesh->vertSet) {
-	int ridx = vidxMap[v->index];
+		int ridx = vidxMap[v->index];
 
-	if( fabs(v->curvature) < CTHRES ) {
-		A(ridx, ridx) = 1.0;
-	}
-	else {
-		/// set the entry in vector x
-		/// get all its neighbors
-		auto neighbors = v->neighbors();
-		vector<pair<int, double>> entries;
-		double sum_inv_dist = 0.0;
-		for(auto neighbor : neighbors) {
-		if( fabs(neighbor->curvature) < CTHRES ) {
-			entries.push_back(make_pair(vidxMap[neighbor->index], 0.0));
+		if( fabs(v->curvature) < CTHRES ) {
+			A(ridx, ridx) = 1.0;
 		}
 		else {
-			double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
-			entries.push_back(make_pair(vidxMap[neighbor->index], inv_dist));
-			sum_inv_dist += inv_dist;
-		}
-		}
+			/// set the entry in vector x
+			/// get all its neighbors
+			auto neighbors = v->neighbors();
+			vector<pair<int, double>> entries;
+			double sum_inv_dist = 0.0;
+			for(auto neighbor : neighbors) {
+				if( fabs(neighbor->curvature) < CTHRES ) {
+					entries.push_back(make_pair(vidxMap[neighbor->index], 0.0));
+				}
+				else {
+					double inv_dist = 1.0 / v->pos.distanceToPoint(neighbor->pos);
+					entries.push_back(make_pair(vidxMap[neighbor->index], inv_dist));
+					sum_inv_dist += inv_dist;
+				}
+			}
 
-		for(auto entry : entries) {
-		double w = entry.second / (sum_inv_dist + 1.0);
-		A(entry.first, ridx) = w;
-		}
+			for(auto entry : entries) {
+				double w = entry.second / (sum_inv_dist + 1.0);
+				A(entry.first, ridx) = w;
+			}
 
-		A(ridx, ridx) = 1.0 / (sum_inv_dist + 1.0);
-	}
+			A(ridx, ridx) = 1.0 / (sum_inv_dist + 1.0);
+		}
 	}
 
 	//cout << A << endl;
@@ -150,11 +150,11 @@ void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 	vec x_hat = A * x;
 	double sum_curvature = 0.0;
 	for(auto v : mesh->vertSet) {
-	int ridx = vidxMap[v->index];
+		int ridx = vidxMap[v->index];
 
-	/// set the entry in vector x
-	v->curvature = x_hat(ridx);
-	sum_curvature += x_hat(ridx);
+		/// set the entry in vector x
+		v->curvature = x_hat(ridx);
+		sum_curvature += x_hat(ridx);
 	}
 
 	cout << "sum = " << sum_curvature << endl;
@@ -240,24 +240,24 @@ void MeshSmoother::smoothMesh_Laplacian(HDS_Mesh *mesh)
 
 	mesh->colorVertices(vec);  // later added
 
-//  cout<<"mesh->vertSet"<<mesh->vertSet.size()<<endl;// later added
+	//  cout<<"mesh->vertSet"<<mesh->vertSet.size()<<endl;// later added
 	for (auto vi : mesh->vertSet) {
-	auto neighbors = vi->neighbors();
+		auto neighbors = vi->neighbors();
 
-	double denom = 0.0;
-	QVector3D numer(0, 0, 0);
+		double denom = 0.0;
+		QVector3D numer(0, 0, 0);
 
-	for (auto vj : neighbors) {
-		double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
-		denom += wij;
-		numer += wij * vj->pos;
-	}
-	cout<<"vi.pos"<<nn<<vi->pos<<endl;// later added
-	nn+=1;                           // later added
-	L.insert(make_pair(vi, numer/denom-vi->pos));
+		for (auto vj : neighbors) {
+			double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
+			denom += wij;
+			numer += wij * vj->pos;
+		}
+		cout<<"vi.pos"<<nn<<vi->pos<<endl;// later added
+		nn+=1;                           // later added
+		L.insert(make_pair(vi, numer/denom-vi->pos));
 	}
 
 	for (auto vi : mesh->vertSet) {
-	vi->pos += lambda * L.at(vi);
+		vi->pos += lambda * L.at(vi);
 	}
 }

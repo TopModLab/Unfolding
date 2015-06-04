@@ -1,6 +1,7 @@
 #include "morsesmalecomplex.h"
 #include "utils.hpp"
 
+//cut locus cutting method, follow gradient of saddle to min/maximum
 MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalPoints)
 {
 	int ii=0;
@@ -10,7 +11,7 @@ MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalP
 			auto neighbors = cp->neighbors();
 			vector<double> diffs;
 			for (auto n : neighbors) {
-			diffs.push_back(n->morseFunctionVal - cp->morseFunctionVal);
+				diffs.push_back(n->morseFunctionVal - cp->morseFunctionVal);
 			}
 
 			vector<vector<HDS_Vertex*>> groups(1, vector<HDS_Vertex*>());
@@ -36,24 +37,56 @@ MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalP
 			}
 			// above find saddle points and their group;
 			// for each group, find the steepest direction
-		//  cout << "number of groups = " << groups.size() << endl;
+			//  cout << "number of groups = " << groups.size() << endl;
 			for (auto g : groups) {
 				HDS_Vertex *steepestV = g.front();
 				double vdiff = fabs(steepestV->morseFunctionVal - cp->morseFunctionVal);
 				for (int i = 1; i < g.size(); ++i) {
 					double gidiff = fabs(g[i]->morseFunctionVal - cp->morseFunctionVal);
 					if (gidiff > vdiff) {
-					steepestV = g[i];
-					vdiff = gidiff;
+						steepestV = g[i];
+						vdiff = gidiff;
 					}
 				}
 
+				// trace the steepest vertex until reaches a maximum or minimum
+				Path path;
+				HDS_Vertex *v0 = cp, *v1 = steepestV;
+				bool climbingHill = v1->morseFunctionVal > v0->morseFunctionVal;
+				while (v0->rtype != HDS_Vertex::Maximum && v0->rtype != HDS_Vertex::Minimum) {
+					path.edges.push_back(Edge(v0, v1));
+					v0 = v1;
+					// find the steepest neighbor of v1
+					auto v1_neighbors = Utils::filter(v1->neighbors(), [&](HDS_Vertex* v){return v != v1; });
 
+					if (climbingHill) {
+						// find the highest neighbor of v1
+						auto nv = std::max_element(v1_neighbors.begin(), v1_neighbors.end(), [&](HDS_Vertex *vstar, HDS_Vertex *v){
+								return vstar->morseFunctionVal < v->morseFunctionVal;
+					});
+						v1 = *nv;
+					}
+					else {
+						// find the lowest neighbor of v1
+						auto nv = std::min_element(v1_neighbors.begin(), v1_neighbors.end(), [&](HDS_Vertex *vstar, HDS_Vertex *v){
+								return vstar->morseFunctionVal < v->morseFunctionVal;
+					});
+						v1 = *nv;
+					}
+				}
+				if (climbingHill)
+					maxpaths.push_back(path);
+				else
+					minpaths.push_back(path);
+			}
+
+
+			/*liu wei's modification somehow has some bugs, can't produce correct path, hence commented out
 				// trace the steepest vertex until reaches a maximum or minimum
 				Path path;
 
 				HDS_Vertex *v0 = cp, *v1 = steepestV;
-				bool climbingHill = v1->morseFunctionVal >= v0->morseFunctionVal;//add an extral = sign, later added;
+				bool climbingHill = v1->morseFunctionVal >= v0->morseFunctionVal;//add an extra = sign, later added;
 				while (v0->rtype != HDS_Vertex::Maximum && v0->rtype != HDS_Vertex::Minimum&&ii<1000) {   //sometimes it can't find max or min points, so recycle always runs;
 					path.edges.push_back(Edge(v0, v1));
 					v0 = v1;
@@ -80,6 +113,7 @@ MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalP
 				}
 				paths.push_back(path);
 			}
+			*/
 		}
 	}
 }

@@ -53,7 +53,8 @@ public:
 
 	void setCutLocusMethod(int midx);
 
-
+	void showCutLocusPoints();
+	void showCutLocusCut();
 signals:
 	void updateMeshColorByGeoDistance(int vidx);
 	void updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double alpha);
@@ -73,9 +74,15 @@ protected:
 	void resizeGL(int w, int h);
 	void paintGL();
 
+
 public slots:
 	void slot_toggleLighting();
 	void slot_toggleCriticalPoints();
+	void slot_toggleText();
+
+	void slot_toggleCutLocusPoints(int);
+	void slot_toggleCutLocusCut();
+	void slot_toggleCutLocusCutMode();
 
 private:
 	struct ViewerState {
@@ -178,6 +185,7 @@ public:
 	vector<unsigned char> selectionBuffer;
 	int lastSelectedIndex;
 
+
 	void computeGlobalSelectionBox();
 	bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
 	int getSelectedElementIndex(const QPoint& p);
@@ -208,6 +216,11 @@ private:
 	void enableLights();
 	void disableLights();
 
+	bool showText;
+	bool showVIndex; // show vertex index
+	bool showCPDistance; //show critical points dists
+	bool showCLDistance; //show cut locus dists
+
 private:
 	QScopedPointer<QGLFramebufferObject> fbo;
 	void initializeFBO();
@@ -217,11 +230,15 @@ public:
 	int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
 	int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
 public slots:
-	void slot_disablecpp(){isCriticalPointModeSet = false; updateGL();}
-	void slot_disableclp(){isCutLocusModeset = false; updateGL();}
+	void slot_disablecpp();
+	void slot_disableclp();
 
+	void slot_resetVertices();
+	void slot_resetEdges();
+	void slot_resetFaces();
 private:
 	bool showReebPoints;
+	vector<double> CPdistances;
 	bool isCriticalPointModeSet = false;
 	enum CriticalPointMode {
 		Geodesics = 0,
@@ -237,9 +254,14 @@ private:
 	int cp_smoothing_type;
 	void findReebPoints();
 	void drawReebPoints();
-	void drawReebGraph();
+	void selectCutLocusEdges();
 
 private:
+	bool showCut;
+	bool showOneCut;
+	bool showMultCut;
+	vector<double> CLdistances;
+
 	bool isCutLocusModeset = false;
 	enum CutLocusMode {
 		GraphDist = 0,

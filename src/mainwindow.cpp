@@ -66,9 +66,13 @@ bool MainWindow::connectComponents()
 	connect(cppanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disablecpp()));
 
 	connect(clpanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCutLocusMethod(int)));
-	//connect(clpanel, SIGNAL(sig_displayCut(bool)), this, );  //perform cut based on selected vertices
-	connect(clpanel, SIGNAL(sig_displayMinMax(bool)), viewer, SLOT(slot_toggleCriticalPoints()));
-	connect(clpanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disableclp()));
+
+	connect(clpanel, SIGNAL(sig_toggleCut()), viewer, SLOT(slot_toggleCutLocusCut()));
+	connect(clpanel, SIGNAL(sig_toggleCutMode(int)), viewer, SLOT(slot_toggleCutLocusCutMode()));
+
+	connect(clpanel, SIGNAL(sig_displayMinMax(int)), viewer, SLOT(slot_toggleCutLocusPoints(int)));
+
+	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
 
 	return true;
 }
@@ -180,10 +184,18 @@ void MainWindow::createActions()
 		connect(showNormalsAct, SIGNAL(triggered()), this, SLOT(slot_toggleNormals()));
 		actionsMap["show normals"] = showNormalsAct;
 
+		QAction *showIndexAct = new QAction(tr("Show Vertex &Index"), this);
+		showIndexAct->setShortcut(Qt::Key_I);
+		showIndexAct->setCheckable(true);
+		showIndexAct->setChecked(true);
+		showIndexAct->setStatusTip(tr("Show Vertex Index"));
+		connect(showIndexAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleText()));
+		actionsMap["show index"] = showIndexAct;
+
 		QAction *showLightingAct = new QAction(tr("Show &Lighting"), this);
 		showLightingAct->setShortcut(Qt::Key_L);
 		showLightingAct->setCheckable(true);
-		showLightingAct->setChecked(true);
+		showLightingAct->setChecked(false);
 		showLightingAct->setStatusTip(tr("Show Lighting"));
 		connect(showLightingAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLighting()));
 		actionsMap["show lighting"] = showLightingAct;
@@ -191,7 +203,7 @@ void MainWindow::createActions()
 		QAction *showCPAct = new QAction(tr("Show &Critical Points"), this);
 		showCPAct->setShortcut(Qt::Key_C);
 		showCPAct->setCheckable(true);
-		showCPAct->setChecked(true);
+		showCPAct->setChecked(false);
 		showCPAct->setStatusTip(tr("Show Critical Points"));
 		connect(showCPAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleCriticalPoints()));
 		actionsMap["show CP"] = showCPAct;
@@ -311,6 +323,7 @@ void MainWindow::createMenus()
 		displayMenu->addAction(actionsMap["show edges"]);
 		displayMenu->addAction(actionsMap["show faces"]);
 		displayMenu->addAction(actionsMap["show normals"]);
+		displayMenu->addAction(actionsMap["show index"]);
 		displayMenu->addSeparator();
 		displayMenu->addAction(actionsMap["show lighting"]);
 
@@ -435,6 +448,8 @@ void MainWindow::slot_toggleEdges()
 	{
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowEdges();
 	}
+	viewer->update();
+
 }
 
 void MainWindow::slot_toggleVertices()
@@ -443,6 +458,8 @@ void MainWindow::slot_toggleVertices()
 	{
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowVertices();
 	}
+	viewer->update();
+
 }
 void MainWindow::slot_toggleFaces()
 {
@@ -450,6 +467,8 @@ void MainWindow::slot_toggleFaces()
 	{
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowFaces();
 	}
+	viewer->update();
+
 }
 
 void MainWindow::slot_toggleNormals()
@@ -459,6 +478,8 @@ void MainWindow::slot_toggleNormals()
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowNormals();
 
 	}
+	viewer->update();
+
 }
 
 void MainWindow::slot_toggleCameraOperation()
@@ -505,15 +526,18 @@ void MainWindow::slot_triggerColormap() {
 }
 
 void MainWindow::slot_triggerCriticalPoints() {
-	viewer->showCriticalPoints();
+	actionsMap["show CP"]->setChecked(true);
 	viewer->setCriticalPointsMethod(viewer->getCmode());
+	viewer->showCriticalPoints();
 	viewer->update();
 	cppanel->show();
 }
 
 void MainWindow::slot_triggerCutLocusPanel() {
-	viewer->showCriticalPoints();
+	actionsMap["show CP"]->setChecked(false);
 	viewer->setCutLocusMethod(viewer->getLmode());
+	viewer->showCutLocusPoints();
+	viewer->showCutLocusCut();
 	viewer->update();
 	clpanel->show();
 }
@@ -549,9 +573,6 @@ void MainWindow::slot_extendMesh()
 	MeshManager::getInstance()->extendMesh();
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
 }
-
-
-
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 	viewer->setCriticalPointsMethod(midx);

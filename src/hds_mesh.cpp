@@ -245,25 +245,20 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
 
 
 
-// below newly added;
-
+//usage unknown
 #define MAX_CHAR        128
 
 void drawString(const char* str, int numb) {
 	static int isFirstCall = 1;
 	static GLuint lists;
 
-	if( isFirstCall ) { // 如果是第一次调用，执行初始化
-		// 为每一个ASCII字符产生一个显示列表
+	if( isFirstCall ) {
 		isFirstCall = 0;
 
-		// 申请MAX_CHAR个连续的显示列表编号
 		lists = glGenLists(MAX_CHAR);
 
-		// 把每个字符的绘制命令都装到对应的显示列表中
 		wglUseFontBitmaps(wglGetCurrentDC(), 0, MAX_CHAR, lists);
 	}
-	// 调用每个字符对应的显示列表，绘制每个字符
 
 	//for(int i=0; i<numb; i++){
 
@@ -284,10 +279,9 @@ void display(int num) {
 	num=0;
 
 }
+//usage unknown
 
 
-
-//   above newly adde;
 
 
 void HDS_Mesh::draw(ColorMap cmap)
@@ -574,6 +568,41 @@ void HDS_Mesh::selectVertex(int idx)
 {
 	flipSelectionState(idx, vertMap);
 }
+
+unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getSelectedVertices()
+{
+	unordered_set<vert_t*> pickedVerts;
+	for(auto v: vertSet) {
+		if (v->isPicked) {
+			cout<<"picked++"<<endl;
+			pickedVerts.insert(v);
+		}
+	}
+	return pickedVerts;
+}
+
+unordered_set<HDS_Mesh::he_t*> HDS_Mesh::getSelectedHalfEdges()
+{
+	unordered_set<he_t*> pickedHEs;
+	for(auto he: heSet) {
+		if (he->isPicked) {
+			pickedHEs.insert(he);
+		}
+	}
+	return pickedHEs;
+}
+
+unordered_set<HDS_Mesh::face_t*> HDS_Mesh::getSelectedFaces()
+{
+	unordered_set<face_t*> pickedFaces;
+	for(auto f: faceSet) {
+		if (f->isPicked) {
+			pickedFaces.insert(f);
+		}
+	}
+	return pickedFaces;
+}
+
 
 unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &funcval, const QVector3D &normdir)
 {

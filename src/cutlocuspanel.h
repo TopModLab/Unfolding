@@ -17,10 +17,13 @@ public:
 
 signals:
 	void sig_methodChanged(int);
-	void sig_displayCut(bool);
-	void sig_displayMinMax(bool);
-	void closedSignal();
+	void sig_displayMinMax(int);
+	void sig_toggleCutMode(int);
+	void sig_closedSignal();
+	void sig_toggleCut();
 
+public slots:
+	void slot_toggleCut(int);
 private:
 	void closeEvent(QCloseEvent *e);
 private:
