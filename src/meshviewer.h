@@ -54,7 +54,7 @@ public:
 	void setCutLocusMethod(int midx);
 
 	void showCutLocusPoints();
-
+	void showCutLocusCut();
 signals:
 	void updateMeshColorByGeoDistance(int vidx);
 	void updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double alpha);
@@ -230,8 +230,8 @@ public:
 	int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
 	int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
 public slots:
-	void slot_disablecpp(){isCriticalPointModeSet = false; showVIndex = true; showCPDistance = false; updateGL();}
-	void slot_disableclp(){isCutLocusModeset = false; showVIndex = true; showCLDistance = false; updateGL();}
+	void slot_disablecpp();
+	void slot_disableclp();
 
 	void slot_resetVertices();
 	void slot_resetEdges();

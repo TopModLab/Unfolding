@@ -25,7 +25,6 @@ vector<double> DiscreteGeoComputer::discreteDistanceTo(unordered_set<HDS_Vertex*
 	for (auto i: initSet) {
 		vector<double> curDists = computeDistanceTo(i);
 		for (int index = 0; index < curDists.size();index++) {
-			cout<<index<<" : "<<dists[index]<<" >>>> "<<curDists[index]<<endl;
 			dists[index] = min(curDists[index], dists[index]);
 		}
 	}

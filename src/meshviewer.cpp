@@ -206,6 +206,23 @@ void MeshViewer::slot_resetFaces()
 		f->setPicked(false);
 }
 
+
+void MeshViewer::slot_disablecpp()
+{
+	isCriticalPointModeSet = false;
+	showVIndex = true;
+	showCPDistance = false;
+	updateGL();
+}
+
+void MeshViewer::slot_disableclp()
+{
+	isCutLocusModeset = false;
+	showVIndex = true;
+	showCLDistance = false;
+	updateGL();
+}
+
 int MeshViewer::getSelectedElementIndex(const QPoint &p)
 {
 	int winX = p.x(), winY = height() - p.y();
@@ -1298,9 +1315,17 @@ void MeshViewer::showCriticalPoints() {
 }
 
 void MeshViewer::showCutLocusPoints() {
+	showReebPoints = false;
 	showCLDistance = true;
 	showVIndex = false;
 
+}
+
+void MeshViewer::showCutLocusCut() {
+	showCut = true;
+	selectCutLocusEdges();
+
+	update();
 }
 
 void MeshViewer::hideCriticalPoints() {
