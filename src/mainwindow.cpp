@@ -574,9 +574,6 @@ void MainWindow::slot_extendMesh()
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
 }
 
-
-
-
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 	viewer->setCriticalPointsMethod(midx);
 	viewer->update();
