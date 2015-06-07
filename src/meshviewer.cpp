@@ -95,6 +95,7 @@ void MeshViewer::slot_selectAll()
 			v->setPicked(true);
 		break;
 	}
+	updateGL();
 }
 
 void MeshViewer::slot_selectInverse()
@@ -115,6 +116,8 @@ void MeshViewer::slot_selectInverse()
 			heMesh->selectVertex(v->index);
 		break;
 	}
+	updateGL();
+
 }
 
 void MeshViewer::slot_selectCC()
@@ -132,6 +135,8 @@ void MeshViewer::slot_selectCC()
 
 		break;
 	}
+	updateGL();
+
 }
 
 void MeshViewer::slot_selectGrow()
@@ -141,48 +146,69 @@ void MeshViewer::slot_selectGrow()
 	case Camera:
 		break;
 	case SelectFace:
-		for (auto f : heMesh->faces()) {
-			if (f->isPicked){
-				for (auto face : heMesh->incidentFaces(f)) {
-					face->setPicked(true);
-				}
+		for (auto f : heMesh->getSelectedFaces()) {
+			for (auto face : heMesh->incidentFaces(f)) {
+				face->setPicked(true);
 			}
 		}
 		break;
 	case SelectEdge:
-		for (auto e : heMesh->halfedges()) {
-			if (e->isPicked){
-				for (auto edge : heMesh->incidentEdges(e->v)) {
-					edge->setPicked(true);
-				}
+		for (auto e : heMesh->getSelectedHalfEdges()) {
+			for (auto edge : heMesh->incidentEdges(e->v)) {
+				edge->setPicked(true);
+
 			}
 		}
 		break;
 	case SelectVertex:
-		for (auto v : heMesh->verts()) {
-			if (v->isPicked){
-				for (auto edge : heMesh->incidentEdges(v)) {
-					edge->v->setPicked(true);
-				}
+		for (auto vert : heMesh->getSelectedVertices()) {
+			for (auto v : vert->neighbors()) {
+				v->setPicked(true);
 			}
 		}
 		break;
 	}
+	updateGL();
+
 }
 
 void MeshViewer::slot_selectShrink()
 {
 	//BFS to get all neighbours that are selected
+	switch (interactionState) {
+	case Camera:
+		break;
+	case SelectFace:
+		for (auto f : heMesh->getSelectedFaces()) {
+
+		}
+		break;
+	case SelectEdge:
+		for (auto e : heMesh->getSelectedHalfEdges()) {
+			for (auto edge : heMesh->incidentEdges(e->v)) {
+				edge->setPicked(true);
+
+			}
+		}
+		break;
+	case SelectVertex:
+		for (auto vert : heMesh->getSelectedVertices()) {
+			for (auto v : vert->neighbors()) {
+				v->setPicked(true);
+			}
+		}
+		break;
+	}
+	updateGL();
 }
 
 void MeshViewer::slot_selectClear()
 {
-	for (auto f : heMesh->faces())
-		f->setPicked(false);
-	for (auto f : heMesh->verts())
-		f->setPicked(false);
-	for (auto f : heMesh->halfedges())
-		f->setPicked(false);
+	slot_resetEdges();
+	slot_resetFaces();
+	slot_resetVertices();
+	updateGL();
+
 }
 
 void MeshViewer::slot_resetEdges()
@@ -204,6 +230,23 @@ void MeshViewer::slot_resetFaces()
 	//reset all faces
 	for (auto f: heMesh->faces())
 		f->setPicked(false);
+}
+
+
+void MeshViewer::slot_disablecpp()
+{
+	isCriticalPointModeSet = false;
+	showVIndex = true;
+	showCPDistance = false;
+	updateGL();
+}
+
+void MeshViewer::slot_disableclp()
+{
+	isCutLocusModeset = false;
+	showVIndex = true;
+	showCLDistance = false;
+	updateGL();
 }
 
 int MeshViewer::getSelectedElementIndex(const QPoint &p)
@@ -583,10 +626,6 @@ void MeshViewer::wheelEvent(QWheelEvent *e)
 	default:
 		break;
 	}
-
-
-
-
 	updateGL();
 	/*
 	int numDegrees = e->delta();
@@ -1247,106 +1286,6 @@ void MeshViewer::findCutLocusPoints()
 	CLdistances = dists;
 }
 
-void MeshViewer::slot_toggleLighting()
-{
-	enableLighting = !enableLighting;
-}
-
-void MeshViewer::slot_toggleText()
-{
-	showText = !showText;
-}
-
-
-void MeshViewer::slot_toggleCriticalPoints() {
-
-	showReebPoints = !showReebPoints;
-	update();
-
-}
-
-void MeshViewer::slot_toggleCutLocusPoints(int state) {
-	if(state == Qt::Unchecked) {
-		showReebPoints = false;
-	}else {
-		showReebPoints = true;
-	}
-	update();
-}
-
-void MeshViewer::slot_toggleCutLocusCut() {
-	showCut = !showCut;
-	if (showCut)
-		selectCutLocusEdges();
-	else
-		slot_resetEdges();
-	update();
-}
-
-void MeshViewer::slot_toggleCutLocusCutMode() {
-	slot_resetEdges();
-	showMultCut = !showMultCut;
-	selectCutLocusEdges();
-	update();
-}
-
-
-void MeshViewer::showCriticalPoints() {
-	showReebPoints = true;
-	showCPDistance = true;
-	showVIndex = false;
-}
-
-void MeshViewer::showCutLocusPoints() {
-	showCLDistance = true;
-	showVIndex = false;
-
-}
-
-void MeshViewer::hideCriticalPoints() {
-	showReebPoints = false;
-
-}
-
-void MeshViewer::setCriticalPointsMethod(int midx)
-{
-	cmode = (CriticalPointMode)midx;
-	isCriticalPointModeSet = true;
-	cout<<"setCriticalPointsMethod midx = "<<midx<<endl;
-	cout<<"setCriticalPointsMethod cmode = "<<cmode<<endl;
-	findReebPoints();
-}
-
-void MeshViewer::setCriticalPointsSmoothingTimes(int times)
-{
-	cp_smoothing_times = times;
-	findReebPoints();
-}
-
-void MeshViewer::setCriticalPointsSmoothingType(int t)
-{
-	cp_smoothing_type = t;
-	cout<<"setCriticalPointssmoothingtype cp_smoothing_type"<<cp_smoothing_type<<endl;
-	findReebPoints();
-}
-
-void MeshViewer::setCutLocusMethod(int midx)
-{
-	lmode = (CutLocusMode)midx;
-	isCutLocusModeset = true;
-	cout<<"setCutLocusMethod midx = "<<midx<<endl;
-	cout<<"setCutLocusMethod lmode = "<<lmode<<endl;
-	findCutLocusPoints();
-
-}
-
-
-
-void MeshViewer::bindReebGraph(SimpleGraph *g)
-{
-	rbgraph = g;
-}
-
 void MeshViewer::selectCutLocusEdges()
 {
 
@@ -1406,3 +1345,114 @@ void MeshViewer::selectCutLocusEdges()
 #endif
 #endif
 }
+
+void MeshViewer::slot_toggleLighting()
+{
+	enableLighting = !enableLighting;
+}
+
+void MeshViewer::slot_toggleText()
+{
+	showText = !showText;
+}
+
+
+void MeshViewer::slot_toggleCriticalPoints() {
+
+	showReebPoints = !showReebPoints;
+	updateGL();
+
+}
+
+void MeshViewer::slot_toggleCutLocusPoints(int state) {
+	if(state == Qt::Unchecked) {
+		showReebPoints = false;
+	}else {
+		showReebPoints = true;
+	}
+	updateGL();
+}
+
+void MeshViewer::slot_toggleCutLocusCut() {
+	showCut = !showCut;
+	if (showCut)
+		selectCutLocusEdges();
+	else
+		slot_resetEdges();
+	updateGL();
+}
+
+void MeshViewer::slot_toggleCutLocusCutMode() {
+	slot_resetEdges();
+	showMultCut = !showMultCut;
+	selectCutLocusEdges();
+	updateGL();
+}
+
+
+void MeshViewer::showCriticalPoints() {
+	showReebPoints = true;
+	showCPDistance = true;
+	showVIndex = false;
+
+}
+
+void MeshViewer::showCutLocusPoints() {
+	showReebPoints = false;
+	showCLDistance = true;
+	showVIndex = false;
+
+}
+
+void MeshViewer::showCutLocusCut() {
+	showCut = true;
+	selectCutLocusEdges();
+
+	//updateGL();
+}
+
+void MeshViewer::hideCriticalPoints() {
+	showReebPoints = false;
+
+}
+
+void MeshViewer::setCriticalPointsMethod(int midx)
+{
+	cmode = (CriticalPointMode)midx;
+	isCriticalPointModeSet = true;
+	cout<<"setCriticalPointsMethod midx = "<<midx<<endl;
+	cout<<"setCriticalPointsMethod cmode = "<<cmode<<endl;
+	findReebPoints();
+}
+
+void MeshViewer::setCriticalPointsSmoothingTimes(int times)
+{
+	cp_smoothing_times = times;
+	findReebPoints();
+}
+
+void MeshViewer::setCriticalPointsSmoothingType(int t)
+{
+	cp_smoothing_type = t;
+	cout<<"setCriticalPointssmoothingtype cp_smoothing_type"<<cp_smoothing_type<<endl;
+	findReebPoints();
+}
+
+void MeshViewer::setCutLocusMethod(int midx)
+{
+	lmode = (CutLocusMode)midx;
+	isCutLocusModeset = true;
+	cout<<"setCutLocusMethod midx = "<<midx<<endl;
+	cout<<"setCutLocusMethod lmode = "<<lmode<<endl;
+	findCutLocusPoints();
+
+}
+
+
+
+void MeshViewer::bindReebGraph(SimpleGraph *g)
+{
+	rbgraph = g;
+}
+
+

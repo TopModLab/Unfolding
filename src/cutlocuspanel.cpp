@@ -26,7 +26,7 @@ CutLocusPanel::~CutLocusPanel()
 void CutLocusPanel::closeEvent(QCloseEvent *e)
 {
 	close();
-
+	ui->MinmaxCheckBox->setChecked(false);
 	emit sig_closedSignal();
 }
 

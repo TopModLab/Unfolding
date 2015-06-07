@@ -527,18 +527,17 @@ void MainWindow::slot_triggerColormap() {
 
 void MainWindow::slot_triggerCriticalPoints() {
 	actionsMap["show CP"]->setChecked(true);
-	viewer->showCriticalPoints();
 	viewer->setCriticalPointsMethod(viewer->getCmode());
+	viewer->showCriticalPoints();
 	viewer->update();
 	cppanel->show();
 }
-//need to enable action after close the panel
 
 void MainWindow::slot_triggerCutLocusPanel() {
-	actionsMap["show CP"]->setChecked(true);
-	actionsMap["show CP"]->setEnabled(false);
-	viewer->showCutLocusPoints();
+	actionsMap["show CP"]->setChecked(false);
 	viewer->setCutLocusMethod(viewer->getLmode());
+	viewer->showCutLocusPoints();
+	viewer->showCutLocusCut();
 	viewer->update();
 	clpanel->show();
 }
@@ -574,9 +573,6 @@ void MainWindow::slot_extendMesh()
 	MeshManager::getInstance()->extendMesh();
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
 }
-
-
-
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 	viewer->setCriticalPointsMethod(midx);
