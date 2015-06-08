@@ -12,7 +12,7 @@ HDS_Mesh::HDS_Mesh()
 	showFace = true;
 	showVert = true;
 	showEdge = true;
-	showNormals = true;
+	showNormals = false;
 
 }
 
@@ -167,7 +167,10 @@ void HDS_Mesh::printMesh(const string &msg)
 	}
 
 	for(auto f : faceSet) {
-		cout << *f << endl;
+		//if (f->isCutFace)
+		{
+			cout << *f << endl;
+		}
 	}
 
 	for(auto he : heSet) {
@@ -306,17 +309,17 @@ void HDS_Mesh::draw(ColorMap cmap)
 			he_t* curHe = he;
 
 			if( f->isPicked ) {
-				glColor4f(0.95, 0.75, 0.75, 0.5);
+				glColor4f(1, 0, 0.5, 1);
 			}
 			else if (f->isConnector) {
-				glColor4f(0.75, 0.75, 0.95, 0.5);
+				glColor4f(0.75, 0.75, 0.95, 1);
 			}
 			else {
-				glColor4f(0.75, 0.75, 0.95, 0.5);
+				glColor4f(0.75, 0.75, 0.75, 1);
 			}
 
 			if (f->isFlap) {
-				glColor4f(0.75, 0.95, 0.75, 0.5);
+				glColor4f(0.75, 0.95, 0.75, 1);
 			}
 
 			int vcount = 0;
@@ -328,8 +331,8 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 				/// interpolation
 				if (!f->isConnector) {
-					QColor clr = cmap.getColor_discrete(v->colorVal);
-					GLUtils::setColor(clr, 0.5);
+					//QColor clr = cmap.getColor_discrete(v->colorVal);
+					//GLUtils::setColor(clr, 0.3); //commented out face color variation
 				}
 				GLUtils::useNormal(v->normal);
 				GLUtils::useVertex(v->pos);
@@ -353,8 +356,9 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 			QColor c = Qt::black;
 			if( e->isPicked )
-				c = Qt::red;
+				c.setRgbF(1.0,0.0,0.5,1.0);
 			else if( e->isCutEdge ) {
+				cout << "kkkkkkkkkkkkkkk:\n\t" << e->f->index << endl;
 				c = Qt::green;
 			}
 
@@ -376,9 +380,9 @@ void HDS_Mesh::draw(ColorMap cmap)
 #if 0
 			glutSolidSphere(0.125, 16, 16);
 #else
-			glPointSize(14.0);
+			glPointSize(15.0);
 			if( v->isPicked ){
-				glColor4f(1, 1, 0, 1);
+				glColor4f(1, 0, 0.5, 1);
 				//       display(v->index);
 
 			}
@@ -393,7 +397,8 @@ void HDS_Mesh::draw(ColorMap cmap)
 				//        else {
 				//          glColor4f(c, (c-0.5, 0.0, 1.0);
 				//        }
-				glColor4f(c, 1-c, 1-c, 1.0);
+				//glColor4f(c, 1-c, 1-c, 1.0); //commented out show colors depanding on curvature
+				glColor4f(0.55,0.55,0.55,0.1);
 			}
 
 			if( showVert )

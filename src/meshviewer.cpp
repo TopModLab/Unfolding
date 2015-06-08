@@ -679,6 +679,7 @@ void MeshViewer::initializeGL()
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
+	//glEnable (GL_DEPTH_TEST);
 
 	glShadeModel(GL_SMOOTH);
 
@@ -755,8 +756,8 @@ void MeshViewer::paintGL()
 		if (showReebPoints) {
 			drawReebPoints();
 		}
-		//    glColor4b(1.0,0,0,0);
-		//   glEnable(GL_DEPTH_TEST);
+			glColor4b(1.0,1.0,1.0,0.5);
+		   //glEnable(GL_DEPTH_TEST);
 		QFont fnt;
 		fnt.setPointSize(10);
 		for(auto vit=heMesh->vertSet.begin();vit!=heMesh->vertSet.end();vit++)
@@ -931,11 +932,11 @@ void MeshViewer::drawReebPoints()
 	glBegin(GL_POINTS);
 	for (auto p : reebPoints) {
 		switch (p->rtype) {
-		case HDS_Vertex::Maximum://orange
-			glColor4f(1,0.5, 0, 1);
+		case HDS_Vertex::Maximum://green
+			glColor4f(0,1.0, 0, 1);
 			mm+=1;
 			break;
-		case HDS_Vertex::Minimum: //purple
+		case HDS_Vertex::Minimum: //pink
 			glColor4f(1, 0, 0.5, 1);
 			nm+=1;
 			break;

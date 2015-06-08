@@ -66,7 +66,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 			const int stepsize = 10;
 			string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
 			smoothed_mesh_filenames.push_back(smesh_filename);
-			cout<<" smesh_filename is "<< smesh_filename<<endl;
+			//cout<<" smesh_filename is "<< smesh_filename<<endl;
 
 			if (Utils::exists(smesh_filename)) {
 				// load the mesh directly
@@ -80,7 +80,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 					MeshSmoother::smoothMesh_Laplacian(tmp_mesh.data());
 					//      cout<<"smoothMesh_Laplacian"<<endl;
 				}
-				tmp_mesh->save(smesh_filename);
+				//tmp_mesh->save(smesh_filename); //commented out exporting smoothes objs
 			}
 			hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
 		}
@@ -94,7 +94,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 				// compute or load SVG for smoothed meshes
 				//    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
 
-				cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
+				//cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
 			}
 			cout << "SVGs computed." << endl;
 		}
@@ -180,8 +180,8 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 			int vjn = Fi.v[jn];
 			//      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
 			pair<int, int> vPair = make_pair(vj, vjn);
-			cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
-			cout<<"vPair.sencond = "<<vPair.second<<endl;
+			//cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
+			//cout<<"vPair.sencond = "<<vPair.second<<endl;
 			if( heMap.find(vPair) == heMap.end() )//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
 			{
 
