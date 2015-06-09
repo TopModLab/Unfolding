@@ -323,8 +323,10 @@ void MeshManager::unfoldMesh() {
 	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh)); //bug when selecting all edges!!!!
 	/// unfold the mesh using the selected faces
 	set<int> selectedFaces;
-	for (auto f : ref_mesh->faces()) {
-		if( f->isPicked ) {
+	for (auto f : ref_mesh->faces())
+	{
+		if( f->isPicked )
+		{
 			/// use picked faces as unfold faces
 			f->setPicked(false);
 
