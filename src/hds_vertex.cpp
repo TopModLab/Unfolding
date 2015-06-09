@@ -56,17 +56,18 @@ void HDS_Vertex::computeCurvature()
 	auto prevHE = he;
 	auto curHE = he->flip->next;
 	do {
-	if( !prevHE->f->isCutFace ) {
-		QVector3D v1 = prevHE->flip->v->pos - prevHE->v->pos;
-		QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
-		double nv1pnv2 = v1.length() * v2.length();
-		double inv_nv1pnv2 = 1.0 / nv1pnv2;
-		double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
-		double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
-		curvature += angle;
-	}
-	prevHE = curHE;
-	curHE = prevHE->flip->next;
+		if( !prevHE->f->isCutFace )
+		{
+			QVector3D v1 = prevHE->flip->v->pos - prevHE->v->pos;
+			QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+			double nv1pnv2 = v1.length() * v2.length();
+			double inv_nv1pnv2 = 1.0 / nv1pnv2;
+			double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+			double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
+			curvature += angle;
+		}
+		prevHE = curHE;
+		curHE = prevHE->flip->next;
 	}while( prevHE != he );
 	curvature = PI2 - curvature;
 

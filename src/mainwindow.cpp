@@ -1,5 +1,7 @@
 #define NOMINMAX
+#define MAX_PATH 100
 #include "meshmanager.h"
+#include <windows.h>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -9,22 +11,30 @@
 #include <QString>
 #include <QFileDialog>
 
-
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	setWindowTitle(tr("Object Unfolding"));
+	setWindowTitle(tr("Geometry Unfolding"));
 
 	createComponents();
 	layoutComponents();
 	connectComponents();
+	initialization();
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
+}
+
+void MainWindow::initialization()
+{
+	QString curPath = QDir::currentPath();
+	QString filename = curPath+"/../meshes/cube_grid.obj";
+	MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 }
 
 bool MainWindow::createComponents()
@@ -81,9 +91,9 @@ void MainWindow::createActions()
 {
 	try {
 		//file menu
-		QAction *newAct = new QAction(QIcon(":/icons/open.png"), tr("New"), this);
+		QAction *newAct = new QAction(QIcon(":/icons/open.png"), tr("Import"), this);
 		newAct->setShortcuts(QKeySequence::New);
-		newAct->setStatusTip(tr("Create a new file"));
+		newAct->setStatusTip(tr("Import a new obj file"));
 		connect(newAct, SIGNAL(triggered()), this, SLOT(slot_newFile()));
 		actionsMap["new"] = newAct;
 
@@ -179,7 +189,7 @@ void MainWindow::createActions()
 		QAction *showNormalsAct = new QAction(tr("Show &Normals"), this);
 		showNormalsAct->setShortcut(Qt::Key_N);
 		showNormalsAct->setCheckable(true);
-		showNormalsAct->setChecked(true);
+		showNormalsAct->setChecked(false);
 		showNormalsAct->setStatusTip(tr("Show Vertex Normals"));
 		connect(showNormalsAct, SIGNAL(triggered()), this, SLOT(slot_toggleNormals()));
 		actionsMap["show normals"] = showNormalsAct;
@@ -406,9 +416,9 @@ void MainWindow::createStatusBar()
 
 void MainWindow::slot_newFile()
 {
-	cout << "loading a new obj file." << endl;
 
 	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "../meshes", tr("OBJ files(*.obj)")); //later added
+	cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
 	MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 #if USE_REEB_GRAPH

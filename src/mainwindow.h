@@ -26,6 +26,7 @@ protected:
 	bool layoutComponents();
 	bool connectComponents();
 
+	void initialization();
 protected:
 	void createActions();
 	void createMenus();

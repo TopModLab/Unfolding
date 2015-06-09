@@ -234,7 +234,7 @@ void MeshSmoother::smoothMesh_Laplacian(HDS_Mesh *mesh)
 	const double lambda = 0.25;
 	const double sigma = 1.0;
 	int nn=1;                          // later added
-	unordered_map<HDS_Vertex*, QVector3D> L(mesh->vertSet.size());//not understand
+	unordered_map<HDS_Vertex*, QVector3D> L(mesh->vertSet.size());
 
 	vector <double> vec(mesh->vertSet.size(),1.0);  // later added
 
@@ -252,7 +252,7 @@ void MeshSmoother::smoothMesh_Laplacian(HDS_Mesh *mesh)
 			denom += wij;
 			numer += wij * vj->pos;
 		}
-		cout<<"vi.pos"<<nn<<vi->pos<<endl;// later added
+		//cout<<"vi.pos"<<nn<<vi->pos<<endl;// later added
 		nn+=1;                           // later added
 		L.insert(make_pair(vi, numer/denom-vi->pos));
 	}
