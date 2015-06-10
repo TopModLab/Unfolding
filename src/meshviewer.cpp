@@ -14,7 +14,7 @@ using namespace std;
 MeshViewer::MeshViewer(QWidget *parent) :
 	QGLWidget(qglformat_3d, parent)
 {
-	interactionState = Camera;
+	interactionState = SelectVertex;
 	selectionMode = single;
 	viewerState.updateModelView();
 	heMesh = nullptr;
@@ -25,7 +25,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	showCut = false;
 	showMultCut = false;
 
-	showText = true;
+	showText = false;
 	showVIndex = true;
 	showCLDistance = false;
 	showCPDistance = false;
@@ -39,7 +39,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	mm=0;
 
 
-	//setStatusTip(tr("C: mesh color  E: edges  V : vertices  F : faces  L : lighting  R : critical points  M : change critical point mode "));
+	setStatusTip(tr("Hold Alt to rotate camera"));
 
 }
 
@@ -756,10 +756,10 @@ void MeshViewer::paintGL()
 		if (showReebPoints) {
 			drawReebPoints();
 		}
-			glColor4b(1.0,1.0,1.0,0.5);
+			glColor4f(0.0,0.0,0.0,0.5);
 		   //glEnable(GL_DEPTH_TEST);
 		QFont fnt;
-		fnt.setPointSize(10);
+		fnt.setPointSize(8);
 		for(auto vit=heMesh->vertSet.begin();vit!=heMesh->vertSet.end();vit++)
 		{
 			HDS_Vertex * v = (*vit);

@@ -116,6 +116,7 @@ inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
 
 inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
 	os << e.index << "::"
+
 		<< " prev: " << e.prev->index
 		<< " next: " << e.next->index
 		<< " flip: " << e.flip->index

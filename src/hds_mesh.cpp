@@ -398,7 +398,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 				//          glColor4f(c, (c-0.5, 0.0, 1.0);
 				//        }
 				//glColor4f(c, 1-c, 1-c, 1.0); //commented out show colors depanding on curvature
-				glColor4f(0.55,0.55,0.55,0.1);
+				glColor4f(0.55,0.55,0.55,0.0);
 			}
 
 			if( showVert )
@@ -407,7 +407,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 				glVertex3f(0, 0, 0);
 				glEnd();
 			}
-			if(showNormals)
+			if( showNormals )
 			{
 				glBegin(GL_LINES);
 

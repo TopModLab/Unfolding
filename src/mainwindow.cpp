@@ -198,7 +198,7 @@ void MainWindow::createActions()
 		QAction *showIndexAct = new QAction(tr("Show Vertex &Index"), this);
 		showIndexAct->setShortcut(Qt::Key_I);
 		showIndexAct->setCheckable(true);
-		showIndexAct->setChecked(true);
+		showIndexAct->setChecked(false);
 		showIndexAct->setStatusTip(tr("Show Vertex Index"));
 		connect(showIndexAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleText()));
 		actionsMap["show index"] = showIndexAct;
@@ -230,7 +230,6 @@ void MainWindow::createActions()
 		QAction *camAct = new QAction(QIcon(":/icons/select.png"), tr("Camera Operation"), this);
 		camAct->setStatusTip(tr("Camera operation"));
 		camAct->setCheckable(true);
-		camAct->setChecked(true);
 		connect(camAct, SIGNAL(triggered()), this, SLOT(slot_toggleCameraOperation()));
 		actionsMap["camera"] = camAct;
 
@@ -249,6 +248,7 @@ void MainWindow::createActions()
 		QAction *vsAct = new QAction(QIcon(":/icons/vertex.png"), tr("Vertex Select"), this);
 		vsAct->setStatusTip(tr("Select vertices"));
 		vsAct->setCheckable(true);
+		vsAct->setChecked(true);
 		connect(vsAct, SIGNAL(triggered()), this, SLOT(slot_toggleVertexSelection()));
 		actionsMap["vertex select"] = vsAct;
 
