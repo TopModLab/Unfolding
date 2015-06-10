@@ -323,8 +323,10 @@ void MeshManager::unfoldMesh() {
 	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh)); //bug when selecting all edges!!!!
 	/// unfold the mesh using the selected faces
 	set<int> selectedFaces;
-	for (auto f : ref_mesh->faces()) {
-		if( f->isPicked ) {
+	for (auto f : ref_mesh->faces())
+	{
+		if( f->isPicked )
+		{
 			/// use picked faces as unfold faces
 			f->setPicked(false);
 
@@ -432,18 +434,21 @@ void MeshManager::exportXMLFile(const char* filename)
 	//err = scanf_s("%d%d", &size_x, &size_y);
 	
 	unordered_set<HDS_Mesh::face_t*> faces = unfolded_mesh->faces();
-	unordered_set<HDS_Mesh::face_t*> cutfaces;
-	for (auto face : faces) {
+	unordered_set<HDS_Mesh::face_t*> cutfaces, infaces;
+	for (auto face : faces)
+	{
 		
-		if (face->isCutFace) {
-			cutfaces.insert(face);
-		}
+		face->isCutFace ? cutfaces.insert(face) : infaces.insert(face);
 	}
+	//SVG file head
 	fprintf(SVG_File,
 			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
 			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" \
 			"<g opacity=\"0.8\">\n",
-			size_x, size_y);
+			size_x, size_y);// define the size of export graph
+	//for cut layer
+	QVector3D nx, ny, c;
+
 	for (auto face : cutfaces)
 	{
 		double he_offset(10), he_scale(20);
@@ -453,7 +458,6 @@ void MeshManager::exportXMLFile(const char* filename)
 		face->computeNormal();//get the normal of unfolded mesh to calculate the projection(maybe can copy value when unfolding)
 		cout <<"Face normal:" << face->n << endl;
 		//should it be only one face cutted?
-		QVector3D nx, ny, c;
 		c = face->center();
 		nx = he->v->pos - c;
 		nx.normalize();
@@ -463,18 +467,50 @@ void MeshManager::exportXMLFile(const char* filename)
 		cout << "Y dir:" << ny << endl;
 		cout << "Center:" << c << endl;
 		
-
-		do
-		{
-			//cout << curHE->v->pos[0] << ", " << curHE->v->pos[1] << ", " << curHE->v->pos[2] << endl;
+		do {
 			fprintf(SVG_File, "%f,%f ",
-					(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
-					(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
+				(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
+				(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
 			curHE = curHE->next;
 		} while (curHE != he);
 		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.5\" fill=\"none\" />\n",
 				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
 				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
+	}
+	fprintf(SVG_File,
+		"</g>" \
+		"<g opacity=\"0.2\">");//set a new group for inner lines
+	for (auto face : infaces)
+	{
+		double he_offset(10), he_scale(20);
+		HDS_HalfEdge *he = face->he;
+		HDS_HalfEdge *curHE = he;
+		fprintf(SVG_File, "\t<polygon points=\"");
+		//face->computeNormal();//get the normal of unfolded mesh to calculate the projection(maybe can copy value when unfolding)
+		//cout << "Face normal:" << face->n << endl;
+		//should it be only one face cutted?
+		/*QVector3D nx, ny, c;
+		c = face->center();
+		nx = he->v->pos - c;
+		nx.normalize();
+		ny = QVector3D::crossProduct(nx, face->n);
+		cout << "Face normal:" << face->n << endl;
+		cout << "X dir:" << nx << endl;
+		cout << "Y dir:" << ny << endl;
+		cout << "Center:" << c << endl;*/
+
+		do {
+			if (!curHE->isCutEdge)
+			{
+				fprintf(SVG_File, "%f,%f ",
+					(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
+					(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
+			}
+			curHE = curHE->next;
+		} while (curHE != he);
+		fprintf(SVG_File, "%f,%f\" stroke=\"black\" stroke-width=\"0.5\" fill=\"none\" />\n",
+			(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
+			(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
 	}
 	fprintf(SVG_File,
 			"</g>\n"\

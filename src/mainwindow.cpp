@@ -32,8 +32,7 @@ MainWindow::~MainWindow()
 void MainWindow::initialization()
 {
 	QString curPath = QDir::currentPath();
-
-	QString filename = curPath+"/meshes/cube_grid.obj";
+	QString filename = curPath+"/../meshes/cube_grid.obj";
 	MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 }

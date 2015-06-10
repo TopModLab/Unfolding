@@ -764,14 +764,28 @@ void MeshViewer::paintGL()
 		{
 			HDS_Vertex * v = (*vit);
 			QString *name;
-			if (showText) {
-				if (showVIndex) {
+			if (showText)
+			{
+				if (showVIndex)
+				{
 					this->renderText(v->x(),v->y(),v->z(),name->number(v->index),fnt);
 				}
-				else if (showCLDistance) {
+				else if (showCLDistance)
+				{
+					if (v->index >= CLdistances.size())
+					{
+						cout << "v index:" << v->index << " while CLdistances len: " << CLdistances.size() << endl;
+						continue;
+					}
 					this->renderText(v->x(),v->y(),v->z(),name->number(CLdistances[v->index]),fnt);
 				}
-				else if (showCPDistance) {
+				else if (showCPDistance)
+				{
+					if (v->index >= CLdistances.size())
+					{
+						cout << "v index:" << v->index << " while CLdistances len: " << CPdistances.size() << endl;
+						continue;
+					}
 					this->renderText(v->x(),v->y(),v->z(),name->number(CPdistances[v->index]),fnt);
 				}
 			}
