@@ -45,6 +45,9 @@ bool MeshManager::loadOBJFile(const string& filename) {
 	if( loader.load(filename) ) {
 		cout << "file " << filename << " loaded." << endl;
 
+		progress = new QProgressDialog("Building the half edge mesh...", "", 0, 100);
+		progress->setWindowModality(Qt::WindowModal);
+
 		/// build a half edge mesh here
 		//hds_mesh->printMesh("original");
 		hds_mesh.reset(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
@@ -55,6 +58,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 		/// save the half edge mesh out to a temporary file
 		hds_mesh->save("temp.obj");
+		progress->setValue(60);
 
 		/// preprocess the mesh with smoothing
 		const int nsmooth = 10;
@@ -83,6 +87,8 @@ bool MeshManager::loadOBJFile(const string& filename) {
 				//tmp_mesh->save(smesh_filename); //commented out exporting smoothes objs
 			}
 			hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
+			progress->setValue(i/nsmooth*20);
+
 		}
 		cout << "smoothed meshes computed finished." << endl;
 
@@ -97,12 +103,14 @@ bool MeshManager::loadOBJFile(const string& filename) {
 				//cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
 			}
 			cout << "SVGs computed." << endl;
+
+			//set the graph for discrete geodesics computer
+			dis_gcomp.reset(new DiscreteGeoComputer(getHalfEdgeMesh()));
+			cout<<"dis gcomp set."<<endl;
 		}
 		else
 			return true;
-
-		//set the graph for discrete geodesics computer
-		dis_gcomp.reset(new DiscreteGeoComputer(getHalfEdgeMesh()));
+		progress->setValue(100);
 
 
 		return true;
@@ -112,7 +120,9 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
 										 const vector<MeshLoader::vert_t> &inVerts) {
+
 	mesh_t *thismesh = new mesh_t;
+
 
 	cout << "building the half edge mesh ..." << endl;
 	int ss=0;
@@ -148,6 +158,9 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
 	for(size_t i=0, heIdx = 0;i<facesCount;i++)
 	{
+		int progressValue = i/facesCount * 50.0;
+		progress->setValue(progressValue);
+
 		auto& Fi = inFaces[i];
 		face_t* curFace = faces[i];
 

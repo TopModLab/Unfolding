@@ -7,7 +7,8 @@ DiscreteGeoComputer::DiscreteGeoComputer()
 
 DiscreteGeoComputer::DiscreteGeoComputer(HDS_Mesh* hds_mesh)
 {
-	this->hds_mesh.reset(hds_mesh);
+	this->hds_mesh = hds_mesh;
+
 }
 
 DiscreteGeoComputer::~DiscreteGeoComputer()

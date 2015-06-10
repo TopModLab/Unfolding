@@ -32,7 +32,7 @@ MainWindow::~MainWindow()
 void MainWindow::initialization()
 {
 	QString curPath = QDir::currentPath();
-	QString filename = curPath+"/../meshes/cube_grid.obj";
+	QString filename = curPath+"/meshes/cube_grid.obj";
 	MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 }
@@ -407,7 +407,10 @@ void MainWindow::createToolBar()
 void MainWindow::createStatusBar()
 {
 	try {
-
+//		progressBar = new QProgressBar(ui->statusBar);
+//		progressBar->setAlignment(Qt::AlignRight);
+//		progressBar->setMaximumSize(180, 15);
+//		ui->statusBar->addPermanentWidget(progressBar);
 	}
 	catch(...) {
 		throw UnfoldingAppException("Failed to create status bar!");

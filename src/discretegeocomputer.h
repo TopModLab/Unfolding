@@ -18,7 +18,7 @@ public:
 
 private:
 
-	QScopedPointer<HDS_Mesh> hds_mesh;
+	HDS_Mesh* hds_mesh;
 };
 
 #endif // DISCRETEGEOCOMPUTER_H

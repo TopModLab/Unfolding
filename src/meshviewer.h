@@ -91,6 +91,7 @@ private:
 		angularChange = 0;
 	}
 
+
 	void updateViewport(int w, int h) {
 		viewport.x = 0;
 		viewport.y = 0;

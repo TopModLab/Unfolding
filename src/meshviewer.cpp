@@ -29,7 +29,9 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	showVIndex = true;
 	showCLDistance = false;
 	showCPDistance = false;
+
 	lastSelectedIndex = 0;
+
 	cmode =Random;//PointNormal;//Geodesics;
 	cp_smoothing_times = 0;
 	cp_smoothing_type = 0;
@@ -223,6 +225,7 @@ void MeshViewer::slot_resetVertices()
 	//reset all vertices
 	for (auto v: heMesh->verts())
 		v->setPicked(false);
+
 }
 
 void MeshViewer::slot_resetFaces()
@@ -230,6 +233,7 @@ void MeshViewer::slot_resetFaces()
 	//reset all faces
 	for (auto f: heMesh->faces())
 		f->setPicked(false);
+
 }
 
 
@@ -756,6 +760,10 @@ void MeshViewer::paintGL()
 		if (showReebPoints) {
 			drawReebPoints();
 		}
+
+		if (showCut) {
+			selectCutLocusEdges();
+		}
 			glColor4f(0.0,0.0,0.0,0.5);
 		   //glEnable(GL_DEPTH_TEST);
 		QFont fnt;
@@ -1280,6 +1288,11 @@ void MeshViewer::findCutLocusPoints()
 		}
 		case GraphDist:
 			cout<<"Graph Distance method on vertex "<<lastSelectedIndex<<"..."<<endl;
+
+			if (heMesh->getSelectedVertices().empty()) {
+				heMesh->selectVertex(0);
+				selectedElementsIdx.push(0);
+			}
 			dists = MeshManager::getInstance()->dis_gcomp->discreteDistanceTo(heMesh->getSelectedVertices());
 			cout << "Graph distance calculated."<<endl;
 
@@ -1304,6 +1317,7 @@ void MeshViewer::findCutLocusPoints()
 void MeshViewer::selectCutLocusEdges()
 {
 
+	slot_resetEdges();
 #if 0
 	for (auto i = 0; i < rbgraph->E.size(); ++i) {
 		int s = rbgraph->E[i].s;
@@ -1390,15 +1404,14 @@ void MeshViewer::slot_toggleCutLocusPoints(int state) {
 
 void MeshViewer::slot_toggleCutLocusCut() {
 	showCut = !showCut;
+	slot_resetEdges();
 	if (showCut)
 		selectCutLocusEdges();
-	else
-		slot_resetEdges();
+
 	updateGL();
 }
 
 void MeshViewer::slot_toggleCutLocusCutMode() {
-	slot_resetEdges();
 	showMultCut = !showMultCut;
 	selectCutLocusEdges();
 	updateGL();
@@ -1423,7 +1436,7 @@ void MeshViewer::showCutLocusCut() {
 	showCut = true;
 	selectCutLocusEdges();
 
-	//updateGL();
+	updateGL();
 }
 
 void MeshViewer::hideCriticalPoints() {

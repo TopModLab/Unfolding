@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 
-
 #include "meshviewer.h"
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
@@ -87,6 +86,8 @@ private:
 	ColormapEditor *ceditor;
 	CriticalPointsPanel *cppanel;
 	CutLocusPanel *clpanel;
+	//QProgressBar *progressBar;
+
 };
 
 #endif // MAINWINDOW_H
