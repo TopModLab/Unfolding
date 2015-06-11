@@ -4,6 +4,8 @@
 #include "common.h"
 #include "unionfind.h"
 
+#include <QProgressDialog>
+
 class HDS_Mesh;
 class HDS_Face;
 class HDS_HalfEdge;
@@ -34,6 +36,8 @@ private:
 
 	static set<int> findCutEdges(HDS_Mesh *mesh);
 	static vector<Edge> minimumSpanningTree(PQ &edges, int);
+
+
 };
 
 #endif // MESHCUTTER_H

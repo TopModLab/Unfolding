@@ -5,6 +5,7 @@
 
 //#include <QtGui/QVector3D>
 #include <QVector3D>
+#include <QProgressDialog>
 
 class HDS_Mesh;
 
@@ -21,6 +22,8 @@ public:
 private:
 	static void unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
 					const QVector3D &uvec, const QVector3D &vvec);
+
+
 };
 
 #endif // MESHUNFOLDER_H

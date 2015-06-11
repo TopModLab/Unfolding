@@ -102,7 +102,6 @@ private:
 
 	friend class MeshViewer;
 
-	QProgressDialog* progress;
 
 public:
 	bool loadOBJFile(const string& filename);

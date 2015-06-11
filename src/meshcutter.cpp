@@ -9,10 +9,18 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
 
+	QProgressDialog* cuttingProgress = new QProgressDialog("Cutting...", "", 0, 100);
+	cuttingProgress->setWindowModality(Qt::WindowModal);
+	cuttingProgress->setValue(0);
+	cuttingProgress->setAutoClose(true);
+	cuttingProgress->setCancelButton(0);
+	cuttingProgress->setMinimumDuration(0);
+
 	if( edges.empty() ) {
-		//no edge is selected, find cuttable edges
+		//if no edge is selected, find cuttable edges
 		edges = findCutEdges(mesh);
 	}
+	cuttingProgress->setValue(20);
 
 
 	/// vertices connected to cut edges
@@ -87,10 +95,12 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		he->twin = hef;
 		hef->twin = he;
 	}
+	cuttingProgress->setValue(30);
 
 	mesh->printInfo();
 	mesh->validate();
 
+	int progressIndex = 0;
 	/// check each cut vertices, merge faces if necessary
 	for(auto cv : cutVerts) {
 		if( cv.second > 1 ) {
@@ -241,6 +251,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			mesh->printInfo("merged");
 			mesh->validate();
 		}
+		progressIndex++;
+		cuttingProgress->setValue(30+((double)progressIndex/(double)cutVerts.size()*65));
 	}
 
 	/// update the curvature of each vertex
@@ -248,7 +260,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		v->computeCurvature();
 		cout << v->index << ": " << (*v) << endl;
 	}
-
+	cuttingProgress->setValue(100);
 	return true;
 }
 
@@ -332,8 +344,6 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 			}
 			else hasCutFace = true;
 			he = curHE;
-
-			cout<<"he != v->he";                        //not be shown, so paragraph not matter.
 
 			curHE = he->flip->next;
 		}while( he != v->he ) ;

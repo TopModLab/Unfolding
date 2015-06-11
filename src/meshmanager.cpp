@@ -45,8 +45,13 @@ bool MeshManager::loadOBJFile(const string& filename) {
 	if( loader.load(filename) ) {
 		cout << "file " << filename << " loaded." << endl;
 
-		progress = new QProgressDialog("Building the half edge mesh...", "", 0, 100);
-		progress->setWindowModality(Qt::WindowModal);
+		QProgressDialog* loadingProgress;
+		loadingProgress = new QProgressDialog("Loading the object...", "", 0, 100);
+		loadingProgress->setWindowModality(Qt::WindowModal);
+		loadingProgress->setValue(0);
+		loadingProgress->setAutoClose(true);
+		loadingProgress->setCancelButton(0);
+		loadingProgress->setMinimumDuration(1000);
 
 		/// build a half edge mesh here
 		//hds_mesh->printMesh("original");
@@ -58,7 +63,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 		/// save the half edge mesh out to a temporary file
 		hds_mesh->save("temp.obj");
-		progress->setValue(60);
+		loadingProgress->setValue(30);
 
 		/// preprocess the mesh with smoothing
 		const int nsmooth = 10;
@@ -67,6 +72,8 @@ bool MeshManager::loadOBJFile(const string& filename) {
 		tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
 		hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
 		for (int i = 0; i < nsmooth; ++i) {
+			loadingProgress->setValue(30+(double)i/(double)nsmooth*50);
+
 			const int stepsize = 10;
 			string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
 			smoothed_mesh_filenames.push_back(smesh_filename);
@@ -87,10 +94,11 @@ bool MeshManager::loadOBJFile(const string& filename) {
 				//tmp_mesh->save(smesh_filename); //commented out exporting smoothes objs
 			}
 			hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
-			progress->setValue(i/nsmooth*20);
+
 
 		}
 		cout << "smoothed meshes computed finished." << endl;
+		loadingProgress->setValue(80);
 
 		/// initialize the sparse graph
 		if(hds_mesh->verts().size()>10){                         //later added;
@@ -101,6 +109,8 @@ bool MeshManager::loadOBJFile(const string& filename) {
 				//    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
 
 				//cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
+				loadingProgress->setValue(80+(double)i/(double)smoothed_mesh_filenames.size()*20);
+
 			}
 			cout << "SVGs computed." << endl;
 
@@ -108,9 +118,12 @@ bool MeshManager::loadOBJFile(const string& filename) {
 			dis_gcomp.reset(new DiscreteGeoComputer(getHalfEdgeMesh()));
 			cout<<"dis gcomp set."<<endl;
 		}
-		else
+		else {
+			loadingProgress->setValue(100);
+
 			return true;
-		progress->setValue(100);
+		}
+		loadingProgress->setValue(100);
 
 
 		return true;
@@ -158,8 +171,6 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
 	for(size_t i=0, heIdx = 0;i<facesCount;i++)
 	{
-		int progressValue = i/facesCount * 50.0;
-		progress->setValue(progressValue);
 
 		auto& Fi = inFaces[i];
 		face_t* curFace = faces[i];
@@ -259,6 +270,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
 void MeshManager::cutMeshWithSelectedEdges()
 {
+
 	QScopedPointer<HDS_Mesh> ref_mesh;
 	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
 
@@ -283,6 +295,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 
 	bool isUnfoldable = false;
 	while( !isUnfoldable ) {
+
 		/// make a copy of the mesh with selected edges
 		cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
 
@@ -308,6 +321,8 @@ void MeshManager::cutMeshWithSelectedEdges()
 		/// discard the selected edges now
 		selectedEdges.clear();
 	}
+
+
 }
 
 
@@ -318,6 +333,7 @@ void MeshManager::unfoldMesh() {
 
 //	cout << "validating reference mesh" << endl;
 //	ref_mesh->validate();
+
 
 
 	if (extended_mesh.isNull()){
@@ -359,6 +375,7 @@ void MeshManager::unfoldMesh() {
 		cout << "Failed to unfold." << endl;
 
 	}
+
 
 }
 
