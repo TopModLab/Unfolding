@@ -130,11 +130,17 @@ void MainWindow::createActions()
 		actionsMap["select inverse"] = selectInverseAct;
 
 		QAction *selectMultipleAct = new QAction(tr("Select Multiple"), this);
-		selectMultipleAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+		selectMultipleAct->setShortcut(QKeySequence(Qt::SHIFT));
 		selectMultipleAct->setStatusTip(tr("Select Multiple"));
 		connect(selectMultipleAct, SIGNAL(triggered()), this, SLOT(slot_selectMultiple()));
 		actionsMap["select multiple"] = selectMultipleAct;
         
+		QAction *selectCPAct = new QAction(tr("Select Critical Points"), this);
+		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+		selectCPAct->setStatusTip(tr("Select All Critical Points"));
+		connect(selectCPAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCP()));
+		actionsMap["select cp"] = selectCPAct;
+
 		QAction *selectCCAct = new QAction(tr("Select Connected Component"), this);
 		selectCCAct->setShortcut(QKeySequence(Qt::Key_Asterisk));
 		selectCCAct->setStatusTip(tr("Select Connected Component"));
@@ -322,6 +328,8 @@ void MainWindow::createMenus()
 		selectionMenu->addAction(actionsMap["select all"]);
 		selectionMenu->addAction(actionsMap["select inverse"]);
 		selectionMenu->addAction(actionsMap["select multiple"]);
+		selectionMenu->addSeparator();
+		selectionMenu->addAction(actionsMap["select cp"]);
 		selectionMenu->addAction(actionsMap["select cc"]);
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select grow"]);
@@ -329,6 +337,8 @@ void MainWindow::createMenus()
 		selectionMenu->addAction(actionsMap["select clear"]);
 
 		QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
+		//QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));
+		//displayVertexMenu->addAction(actionsMap["show "]);
 		displayMenu->addAction(actionsMap["show vertices"]);
 		displayMenu->addAction(actionsMap["show edges"]);
 		displayMenu->addAction(actionsMap["show faces"]);
@@ -407,10 +417,7 @@ void MainWindow::createToolBar()
 void MainWindow::createStatusBar()
 {
 	try {
-//		progressBar = new QProgressBar(ui->statusBar);
-//		progressBar->setAlignment(Qt::AlignRight);
-//		progressBar->setMaximumSize(180, 15);
-//		ui->statusBar->addPermanentWidget(progressBar);
+
 	}
 	catch(...) {
 		throw UnfoldingAppException("Failed to create status bar!");

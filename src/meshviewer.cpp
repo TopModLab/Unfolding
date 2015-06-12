@@ -122,6 +122,15 @@ void MeshViewer::slot_selectInverse()
 
 }
 
+void MeshViewer::slot_selectCP()
+{
+	for (auto p : reebPoints) {
+		p->setPicked(true);
+	}
+	reebPoints.clear();
+	updateGL();
+}
+
 void MeshViewer::slot_selectCC()
 {
 	switch (interactionState) {
@@ -250,6 +259,7 @@ void MeshViewer::slot_disableclp()
 	isCutLocusModeset = false;
 	showVIndex = true;
 	showCLDistance = false;
+	showCut = false;
 	updateGL();
 }
 
@@ -897,6 +907,7 @@ void MeshViewer::drawSelectionBox() {
 	glVertex3dv(sbox.corner_global + 6);
 	glVertex3dv(sbox.corner_global + 9);
 	glEnd();
+
 
 #else
 	glPushMatrix();

@@ -347,7 +347,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 		glColor4f(0.25, 0.25, 0.25, 1);
 		GLfloat line_mat_diffuse[4] = {0.25, 0.25, 0.25, 1};
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
-		//glLineWidth(2.0);
+		glLineWidth(2.0);
 		// render the boundaires
 		for(auto eit=heSet.begin();eit!=heSet.end();eit++)
 		{
