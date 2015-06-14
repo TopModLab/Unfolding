@@ -127,7 +127,7 @@ bool HDS_Mesh::validateVertex(vert_t *v) {
 }
 
 void HDS_Mesh::validate() {
-	/// verify that the mesh has good topology
+	/// verify that the mesh has good topology, ie has loop
 	for( auto v : vertSet ) {
 		if( !validateVertex(v) ) {
 			cout << "vertex #" << v->index << " is invalid." << endl;
@@ -358,7 +358,6 @@ void HDS_Mesh::draw(ColorMap cmap)
 			if( e->isPicked )
 				c.setRgbF(1.0,0.0,0.5,1.0);
 			else if( e->isCutEdge ) {
-				cout << "kkkkkkkkkkkkkkk:\n\t" << e->f->index << endl;
 				c = Qt::green;
 			}
 

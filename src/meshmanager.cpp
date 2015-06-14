@@ -295,6 +295,14 @@ void MeshManager::cutMeshWithSelectedEdges()
 		/// discard the selected edges now
 		selectedEdges.clear();
 	}
+	for (auto f : cutted_mesh->faces())
+	{
+		if (f->isCutFace)
+		{
+			cout << "Face " << f->index << " is cutface" << endl;
+		}
+	}
+	cout << ".........................." << endl;
 }
 
 
@@ -336,8 +344,7 @@ void MeshManager::unfoldMesh() {
 			}
 		}
 	}
-/*
-	for (auto f : ref_mesh->faces())
+	/*for (auto f : ref_mesh->faces())
 	{
 		if (f->isCutFace)
 		{
@@ -454,7 +461,7 @@ void MeshManager::exportXMLFile(const char* filename)
 			"<g opacity=\"0.8\">\n",
 			size_x, size_y);// define the size of export graph
 	//for cut layer
-	QVector3D nx, ny;// , c;
+	QVector3D nx, ny;
 
 	for (auto face : cutfaces)
 	{
@@ -465,14 +472,12 @@ void MeshManager::exportXMLFile(const char* filename)
 		face->computeNormal();//get the normal of unfolded mesh to calculate the projection(maybe can copy value when unfolding)
 		//cout <<"Face normal:" << face->n << endl;
 		//should it be only one face cutted?
-		//c = face->center();
 		nx = he->v->pos - he->next->v->pos;
 		nx.normalize();
 		ny = QVector3D::crossProduct(nx, face->n);
 		/*cout << "Face normal:" << face->n << endl;
 		cout << "X dir:" << nx << endl;
-		cout << "Y dir:" << ny << endl;
-		cout << "Center:" << c << endl;*/
+		cout << "Y dir:" << ny << endl;*/
 		
 		do {
 			fprintf(SVG_File, "%f,%f ",

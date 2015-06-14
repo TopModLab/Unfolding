@@ -9,35 +9,57 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
 
+	cout << "edge data" << edges.size() << endl;
 	if( edges.empty() ) {
 		//no edge is selected, find cuttable edges
 		edges = findCutEdges(mesh);
 	}
-
-
-	/// vertices connected to cut edges
+	for (auto heIdx : edges)
+	{
+		auto he = mesh->heMap[heIdx];
+		if (he->isCutEdge)
+		{
+			cout << "cut edge";
+			if (he->flip->isCutEdge)
+			{
+				cout << " at flip edge" << endl;
+			}
+		}
+	}
+	/*for (auto f : mesh->faces())
+	{
+		if (f->isCutFace)
+		{
+			cout << "Face " << f->index << " is cutface" << endl;
+		}
+	}*/
+	/// cut vertices with number of connected cut edges
 	map<vert_t*, int> cutVerts;
+	unordered_set<int> cutEdgesFlips;//new flip edges of cut edges
 
 	/// split each cut edge into 2 edges
-	for(auto heIdx : edges) {
+	for(auto heIdx : edges)
+	{
 		auto he = mesh->heMap[heIdx];
 		auto hef = he->flip;
 		auto vs = he->v;
 		auto ve = hef->v;
 
-		/// record the cut vertices
-		auto cit = cutVerts.find(vs);
-		if( cit == cutVerts.end() ) {
+		/// record the number of cut edges the cut vertices is connected to
+		if (cutVerts.find(vs) == cutVerts.end())
+		{
 			cutVerts.insert(make_pair(vs, 1));
 		}
-		else {
+		else
+		{
 			++cutVerts[vs];
 		}
-		cit = cutVerts.find(ve);
-		if( cit == cutVerts.end() ) {
+		if (cutVerts.find(ve) == cutVerts.end())
+		{
 			cutVerts.insert(make_pair(ve, 1));
 		}
-		else {
+		else
+		{
 			++cutVerts[ve];
 		}
 
@@ -51,6 +73,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		/// the flip of he
 		he_new_flip->flip = he;
 		he_new_flip->f = nf;
+		//he_new_flip->f = he->f;
 		he_new_flip->v = ve;
 		he_new_flip->next = hef_new_flip;
 		he_new_flip->prev = hef_new_flip;
@@ -60,11 +83,13 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 		he_new_flip->index = HDS_HalfEdge::assignIndex();
 		mesh->heSet.insert(he_new_flip);
+		cutEdgesFlips.insert(he_new_flip->index);//record new half-edge
 		mesh->heMap.insert(make_pair(he_new_flip->index, he_new_flip));
 
 		/// the flip of hef
 		hef_new_flip->flip = hef;
 		hef_new_flip->f = nf;
+		//hef_new_flip->f = hef->f;
 		hef_new_flip->v = vs;
 		hef_new_flip->next = he_new_flip;
 		hef_new_flip->prev = he_new_flip;
@@ -74,6 +99,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 		hef_new_flip->index = HDS_HalfEdge::assignIndex();
 		mesh->heSet.insert(hef_new_flip);
+		cutEdgesFlips.insert(hef_new_flip->index);//record new half-edge
 		mesh->heMap.insert(make_pair(hef_new_flip->index, hef_new_flip));
 
 		/// fix the new face
@@ -88,12 +114,39 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		hef->twin = he;
 	}
 
-	mesh->printInfo();
+	/// create face for new created half-edge
+	/*while (!cutEdgesFlips.empty())
+	{
+		face_t *nf = new face_t;
+
+		nf->index = HDS_Face::assignIndex();
+		nf->isCutFace = true;
+		mesh->faceSet.insert(nf);
+		mesh->faceMap.insert(make_pair(nf->index, nf));
+
+		auto he = mesh->heMap[*cutEdgesFlips.begin()];
+		nf->he = he;
+		auto curHE = he;
+		do
+		{
+			curHE->next = curHE->flip->prev->flip;
+			curHE->prev = curHE->flip->next->flip;
+
+			curHE->f = nf;
+			cutEdgesFlips.erase(curHE->index);
+			curHE = curHE->next;
+		} while (curHE != he);
+	}*/
+	
+	/// kkkkkkkkkkkkkkkkkkkkkk comment
+	//mesh->printInfo();
 	mesh->validate();
 
 	/// check each cut vertices, merge faces if necessary
-	for(auto cv : cutVerts) {
-		if( cv.second > 1 ) {
+	for(auto cv : cutVerts)
+	{
+		if( cv.second > 1 )
+		{
 			/// merge all incident faces
 			cout << "merging cut faces incident to vertex #" << cv.first->index << endl;
 
@@ -101,7 +154,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			vector<face_t*> incidentFaces = mesh->incidentFaces(cv.first);
 			vector<face_t*> cutFaces = Utils::filter(incidentFaces, [](face_t* f) {
 					return f->isCutFace;
-		});
+			});
 
 #if 1
 			/// test if we are merging the same face
@@ -117,7 +170,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			vector<he_t*> incidentHEs = mesh->incidentEdges(cv.first);
 			vector<he_t*> cutEdges = Utils::filter(incidentHEs, [](he_t* e) {
 					return e->f->isCutFace;
-		});
+			});
 
 			/// merge them
 			/// since they are discovered in a given order (CW or CCW), just glue them together
@@ -242,7 +295,6 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			mesh->validate();
 		}
 	}
-
 	/// update the curvature of each vertex
 	for( auto &v : mesh->vertSet ) {
 		v->computeCurvature();
