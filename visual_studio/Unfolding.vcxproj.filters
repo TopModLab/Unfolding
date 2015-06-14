@@ -58,9 +58,6 @@
     <Filter Include="Header Files\UI">
       <UniqueIdentifier>{39d9dd59-d5e7-4161-bee3-6274cfa501c3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\mesh">
-      <UniqueIdentifier>{57419b2c-ce31-4e11-8917-9a3e7fa9942b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\extras">
       <UniqueIdentifier>{9face1b9-97c4-4e31-8e29-6b23fb92cd2d}</UniqueIdentifier>
     </Filter>
@@ -70,33 +67,33 @@
     <Filter Include="Header Files\HDS">
       <UniqueIdentifier>{8b0f3f5f-892e-4642-b0ab-0059dca2a737}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\mesh">
-      <UniqueIdentifier>{1fdcb9a7-d899-475b-9109-d463b4f81172}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\UI">
       <UniqueIdentifier>{50ebdabb-294f-468d-99e8-80110599c7db}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\HDS">
       <UniqueIdentifier>{63896fe2-4e6d-4980-b345-24745dc3239f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{5e15f4b4-126d-481c-bdcd-06012f7a7408}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{406507e8-32fd-4f6c-9ddd-1572f858f836}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\geometry">
+      <UniqueIdentifier>{1fdcb9a7-d899-475b-9109-d463b4f81172}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\geometry">
+      <UniqueIdentifier>{57419b2c-ce31-4e11-8917-9a3e7fa9942b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\GeodesicComputer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp">
@@ -111,28 +108,13 @@
     <ClCompile Include="..\extras\colormap_editor\colormapeditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\criticalpointspanel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\cutlocuspanel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\discretegeocomputer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\morsesmalecomplex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\stringutils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\unionfind.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_icons.cpp">
@@ -169,22 +151,22 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\src\meshcutter.cpp">
-      <Filter>Source Files\mesh</Filter>
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\MeshExtender.cpp">
-      <Filter>Source Files\mesh</Filter>
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\meshloader.cpp">
-      <Filter>Source Files\mesh</Filter>
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\meshmanager.cpp">
-      <Filter>Source Files\mesh</Filter>
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\meshsmoother.cpp">
-      <Filter>Source Files\mesh</Filter>
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\meshunfolder.cpp">
-      <Filter>Source Files\mesh</Filter>
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files\UI</Filter>
@@ -207,20 +189,38 @@
     <ClCompile Include="..\src\hds_vertex.cpp">
       <Filter>Source Files\HDS</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\stringutils.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\unionfind.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeodesicComputer.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\criticalpointspanel.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cutlocuspanel.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\discretegeocomputer.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\GeodesicComputer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\colormap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <ClInclude Include="..\src\common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <CustomBuild Include="..\src\criticalpointspanel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -230,22 +230,7 @@
     <ClInclude Include="..\src\discretegeocomputer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\glutils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\mathutils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\morsesmalecomplex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\stringutils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\unionfind.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\utils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_colormapeditor.h">
@@ -261,22 +246,22 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshcutter.h">
-      <Filter>Header Files\mesh</Filter>
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\MeshExtender.h">
-      <Filter>Header Files\mesh</Filter>
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshloader.h">
-      <Filter>Header Files\mesh</Filter>
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshmanager.h">
-      <Filter>Header Files\mesh</Filter>
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshsmoother.h">
-      <Filter>Header Files\mesh</Filter>
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshunfolder.h">
-      <Filter>Header Files\mesh</Filter>
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h">
       <Filter>Header Files\extras\LocalGeodesics</Filter>
@@ -322,6 +307,27 @@
     </ClInclude>
     <ClInclude Include="..\src\hds_vertex.h">
       <Filter>Header Files\HDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stringutils.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\utils.hpp">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\glutils.hpp">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mathutils.hpp">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\common.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\unionfind.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeodesicComputer.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
