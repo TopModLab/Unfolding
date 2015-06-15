@@ -497,7 +497,6 @@ void MainWindow::slot_toggleNormals()
 	if (MeshManager::getInstance()->getHalfEdgeMesh())
 	{
 		MeshManager::getInstance()->getHalfEdgeMesh()->flipShowNormals();
-
 	}
 	viewer->update();
 
