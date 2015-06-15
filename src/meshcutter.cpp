@@ -49,13 +49,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			++cutVerts[ve];
 		}
 
-		/// create a new face
+		/// create a new face (invisible face between cut)
 		face_t *nf = new face_t;
 
 		/// duplicate half edges
 		he_t *he_new_flip = new he_t;
 		he_t *hef_new_flip = new he_t;
 
+		/// set two new edges to be cut edges and assign pointers(next, prev) to match two cut edges
 		/// the flip of he
 		he_new_flip->flip = he;
 		he_new_flip->f = nf;

@@ -22,9 +22,9 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_
 
 	// print the corners of the previous face
 	auto corners_prev = face_prev->corners();
-	qDebug() << "corners of face_prev";
+	//qDebug() << "corners of face_prev";
 	for(auto p : corners_prev) {
-		qDebug() << p->index << " @ " << p->pos;
+		//qDebug() << p->index << " @ " << p->pos;
 	}
 
 	/// find the shared half edge
@@ -59,8 +59,8 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_
 
 	/// compute the spanning vectors for the face in the reference mesh
 	QVector3D cface_ref = face_cur_ref->center();
-	qDebug() << "cface ref:  " << cface_ref;
-	qDebug() << "cface prev: " << cface_prev;
+	//qDebug() << "cface ref:  " << cface_ref;
+	//qDebug() << "cface prev: " << cface_prev;
 	QVector3D xvec_ref = vs_ref->pos - ve_ref->pos;
 	xvec_ref.normalize();
 	QVector3D yvec_ref = (cface_ref - vs_ref->pos) - QVector3D::dotProduct(cface_ref - vs_ref->pos, xvec_ref) * xvec_ref;
@@ -83,8 +83,8 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_
 			qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec_ref);
 
 			v->pos = vs->pos + xcoord * xvec + ycoord * yvec;
-			qDebug() << "x = " << xcoord << ", " << "y = " << ycoord << "\t"
-					 << v->index << " @ " << v->pos;
+//			qDebug() << "x = " << xcoord << ", " << "y = " << ycoord << "\t"
+//					 << v->index << " @ " << v->pos;
 		}
 		curHE = curHE->next;
 	} while( curHE != he );
@@ -145,6 +145,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		for(auto f : ref_mesh->faceSet) {
 			if( f->isCutFace ) continue;
 			if( visitedFaces.find(f->index) == visitedFaces.end() ) {
+
 				visitedFaces.insert(f->index);
 				fixedFaces.insert(f->index);
 				set<HDS_Face*> connectedFaces = Utils::filter_set(f->connectedFaces(), [](HDS_Face* f){

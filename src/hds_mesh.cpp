@@ -299,8 +299,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
 		{
 			face_t* f = (*fit);
-			if( f->isCutFace ) continue;
-
+			if( f->isCutFace ) continue; //invisible face
 			// render the faces
 			he_t* he = f->he;
 			he_t* hen = he->next;
@@ -332,7 +331,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 				/// interpolation
 				if (!f->isConnector) {
 					//QColor clr = cmap.getColor_discrete(v->colorVal);
-					//GLUtils::setColor(clr, 0.3); //commented out face color variation
+					//GLUtils::setColor(QColor(0.75,0.75,0.75), 0.3); //commented out face color variation
 				}
 				GLUtils::useNormal(v->normal);
 				GLUtils::useVertex(v->pos);

@@ -260,6 +260,7 @@ void MeshViewer::slot_disableclp()
 	showVIndex = true;
 	showCLDistance = false;
 	showCut = false;
+
 	updateGL();
 }
 
@@ -1437,7 +1438,7 @@ void MeshViewer::showCriticalPoints() {
 }
 
 void MeshViewer::showCutLocusPoints() {
-	showReebPoints = false;
+	showReebPoints = true;
 	showCLDistance = true;
 	showVIndex = false;
 

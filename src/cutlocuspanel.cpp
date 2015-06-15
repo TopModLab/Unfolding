@@ -26,7 +26,6 @@ CutLocusPanel::~CutLocusPanel()
 void CutLocusPanel::closeEvent(QCloseEvent *e)
 {
 	close();
-	ui->MinmaxCheckBox->setChecked(false);
 	emit sig_closedSignal();
 }
 
@@ -41,4 +40,9 @@ void CutLocusPanel::slot_toggleCut(int state)
 		ui->MultCutRadioButton->setEnabled(true);
 	}
 	emit sig_toggleCut();
+}
+
+bool CutLocusPanel::isMinMaxChecked()
+{
+	return ui->MinmaxCheckBox->isChecked();
 }

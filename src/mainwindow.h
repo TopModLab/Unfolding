@@ -73,6 +73,7 @@ private slots:
 
 	void slot_triggerCutLocusPanel();
 	void slot_updateCutLocusMethod(int);
+	void slot_disableclp();
 
 
 

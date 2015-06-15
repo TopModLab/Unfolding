@@ -83,6 +83,7 @@ bool MainWindow::connectComponents()
 	connect(clpanel, SIGNAL(sig_displayMinMax(int)), viewer, SLOT(slot_toggleCutLocusPoints(int)));
 
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
+	connect(clpanel, SIGNAL(sig_closedSignal()), this, SLOT(slot_disableclp()));
 
 	return true;
 }
@@ -554,12 +555,19 @@ void MainWindow::slot_triggerCriticalPoints() {
 }
 
 void MainWindow::slot_triggerCutLocusPanel() {
-	actionsMap["show CP"]->setChecked(false);
+	actionsMap["show CP"]->setChecked(clpanel->isMinMaxChecked());
 	viewer->setCutLocusMethod(viewer->getLmode());
-	viewer->showCutLocusPoints();
+	if (clpanel->isMinMaxChecked()) {
+		viewer->showCutLocusPoints();
+	}
 	viewer->showCutLocusCut();
 	viewer->update();
 	clpanel->show();
+}
+
+void MainWindow::slot_disableclp() {
+	actionsMap["show CP"]->setChecked(clpanel->isMinMaxChecked());
+
 }
 
 void MainWindow::slot_updateViewerColormap()
@@ -587,6 +595,8 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 	cppanel->close();
 	clpanel->close();
 }
+
+
 
 void MainWindow::slot_extendMesh()
 {

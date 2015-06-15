@@ -15,6 +15,7 @@ public:
 	explicit CutLocusPanel(QWidget *parent = 0);
 	~CutLocusPanel();
 
+	bool isMinMaxChecked();
 signals:
 	void sig_methodChanged(int);
 	void sig_displayMinMax(int);
