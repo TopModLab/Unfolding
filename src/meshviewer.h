@@ -163,6 +163,8 @@ public:
 
 	enum InteractionState {
 	Camera = 0,
+	Camera_Translation,
+	Camera_Zoom,
 	SelectVertex,
 	SelectFace,
 	SelectEdge
@@ -193,8 +195,11 @@ public:
 public slots:
 	void slot_selectAll();
 	void slot_selectInverse();
+
+	void slot_selectCutEdgePair();
 	void slot_selectCP();
 	void slot_selectCC();
+
 	void slot_selectGrow();
 	void slot_selectShrink();
 	void slot_selectClear();

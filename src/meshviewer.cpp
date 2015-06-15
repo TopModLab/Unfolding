@@ -41,7 +41,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	mm=0;
 
 
-	setStatusTip(tr("Hold Alt to rotate camera"));
+	setStatusTip(tr("Hold Alt to rotate camera, Shift to move camera, Ctrl to zoom"));
 
 }
 
@@ -82,8 +82,7 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 void MeshViewer::slot_selectAll()
 {
 	switch (interactionState) {
-	case Camera:
-		break;
+
 	case SelectFace:
 		for (auto f : heMesh->faces())
 			f->setPicked(true);
@@ -96,6 +95,8 @@ void MeshViewer::slot_selectAll()
 		for (auto v : heMesh->verts())
 			v->setPicked(true);
 		break;
+	default:
+		break;
 	}
 	updateGL();
 }
@@ -103,8 +104,6 @@ void MeshViewer::slot_selectAll()
 void MeshViewer::slot_selectInverse()
 {
 	switch (interactionState) {
-	case Camera:
-		break;
 	case SelectFace:
 		for (auto f : heMesh->faces())
 			heMesh->selectFace(f->index);
@@ -117,9 +116,28 @@ void MeshViewer::slot_selectInverse()
 		for (auto v : heMesh->verts())
 			heMesh->selectVertex(v->index);
 		break;
+	default:
+		break;
 	}
 	updateGL();
 
+}
+
+void MeshViewer::slot_selectCutEdgePair()
+{
+	switch (interactionState) {
+	case SelectEdge:
+		if (!heMesh->getSelectedHalfEdges().empty()) {
+			for (auto he :heMesh->getSelectedHalfEdges()) {
+				if (he->twin != nullptr)
+					he->twin->setPicked(true);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	updateGL();
 }
 
 void MeshViewer::slot_selectCP()
@@ -134,8 +152,7 @@ void MeshViewer::slot_selectCP()
 void MeshViewer::slot_selectCC()
 {
 	switch (interactionState) {
-	case Camera:
-		break;
+
 	case SelectFace:
 
 		break;
@@ -144,6 +161,8 @@ void MeshViewer::slot_selectCC()
 		break;
 	case SelectVertex:
 
+		break;
+	default:
 		break;
 	}
 	updateGL();
@@ -154,8 +173,7 @@ void MeshViewer::slot_selectGrow()
 {
 	//get all neighbours
 	switch (interactionState) {
-	case Camera:
-		break;
+
 	case SelectFace:
 		for (auto f : heMesh->getSelectedFaces()) {
 			for (auto face : heMesh->incidentFaces(f)) {
@@ -178,6 +196,8 @@ void MeshViewer::slot_selectGrow()
 			}
 		}
 		break;
+	default:
+		break;
 	}
 	updateGL();
 
@@ -187,8 +207,6 @@ void MeshViewer::slot_selectShrink()
 {
 	//BFS to get all neighbours that are selected
 	switch (interactionState) {
-	case Camera:
-		break;
 	case SelectFace:
 		for (auto f : heMesh->getSelectedFaces()) {
 
@@ -208,6 +226,8 @@ void MeshViewer::slot_selectShrink()
 				v->setPicked(true);
 			}
 		}
+		break;
+	default:
 		break;
 	}
 	updateGL();
@@ -371,14 +391,26 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 {
 	mouseState.isPressed = true;
 
-	/// set interaction mode as camera if alt key is hold
+	/// set interaction mode as camera rotation if alt key is hold
 	if (e->modifiers() & Qt::AltModifier) {
 		interactionStateStack.push(interactionState);
 		interactionState = Camera;
+
+		/// set interaction mode as camera translation if shift key is hold
+	} else if (e->modifiers() & Qt::ShiftModifier) {
+		interactionStateStack.push(interactionState);
+		interactionState = Camera_Translation;
+
+		/// set interaction mode as camera zoom if ctrl key is hold
+	} else if (e->modifiers() & Qt::ControlModifier) {
+		interactionStateStack.push(interactionState);
+		interactionState = Camera_Zoom;
 	}
 
 	switch (interactionState) {
 	case Camera:
+	case Camera_Translation:
+	case Camera_Zoom:
 		mouseState.prev_pos = QVector2D(e->pos());
 		break;
 	case SelectFace:
@@ -432,6 +464,24 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 		break;
 	}
 
+	case Camera_Translation:
+		if (e->buttons() & Qt::LeftButton) {
+			QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
+			viewerState.translation += QVector3D(diff.x() / 100.0, -diff.y() / 100.0, 0.0);
+			viewerState.updateModelView();
+			mouseState.prev_pos = QVector2D(e->pos());
+		}
+		updateGL();
+		break;
+	case Camera_Zoom:
+		if (e->buttons() & Qt::LeftButton) {
+			QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
+			viewerState.translation += QVector3D(0.0, 0.0, diff.x() / 100.0 - diff.y() / 100.0);
+			viewerState.updateModelView();
+			mouseState.prev_pos = QVector2D(e->pos());
+		}
+		updateGL();
+		break;
 		//selection box
 	case SelectFace:
 	case SelectEdge:
@@ -462,6 +512,9 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 {
 	switch (interactionState) {
 	case Camera:
+	case Camera_Translation:
+	case Camera_Zoom:
+
 		mouseState.prev_pos = QVector2D(e->pos());
 		break;
 
@@ -489,13 +542,13 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 			case single:
 				if (selectedElementsIdx.size() > 1) {
 					if (interactionState == SelectEdge) {
-						heMesh->selectEdge(selectedElementsIdx.front());//deselect
+						heMesh->heMap[selectedElementsIdx.front()]->setPicked(false);//deselect
 						selectedElementsIdx.pop();
 					} else if (interactionState == SelectFace) {
-						heMesh->selectFace(selectedElementsIdx.front());//deselect
+						heMesh->faceMap[selectedElementsIdx.front()]->setPicked(false);//deselect
 						selectedElementsIdx.pop();
 					} else {
-						heMesh->selectVertex(selectedElementsIdx.front());//deselect
+						heMesh->vertMap[selectedElementsIdx.front()]->setPicked(false);//deselect
 						selectedElementsIdx.pop();
 					}
 				}
@@ -775,8 +828,8 @@ void MeshViewer::paintGL()
 		if (showCut) {
 			selectCutLocusEdges();
 		}
-			glColor4f(0.0,0.0,0.0,0.5);
-		   //glEnable(GL_DEPTH_TEST);
+		glColor4f(0.0,0.0,0.0,0.5);
+		//glEnable(GL_DEPTH_TEST);
 		QFont fnt;
 		fnt.setPointSize(8);
 		for(auto vit=heMesh->vertSet.begin();vit!=heMesh->vertSet.end();vit++)

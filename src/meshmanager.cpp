@@ -321,10 +321,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 		/// discard the selected edges now
 		selectedEdges.clear();
 	}
-<<<<<<< HEAD
 
-
-=======
 	for (auto f : cutted_mesh->faces())
 	{
 		if (f->isCutFace)
@@ -333,7 +330,6 @@ void MeshManager::cutMeshWithSelectedEdges()
 		}
 	}
 	cout << ".........................." << endl;
->>>>>>> origin/ExportComponent
 }
 
 

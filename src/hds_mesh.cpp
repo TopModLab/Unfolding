@@ -357,10 +357,6 @@ void HDS_Mesh::draw(ColorMap cmap)
 			if( e->isPicked )
 				c.setRgbF(1.0,0.0,0.5,1.0);
 			else if( e->isCutEdge ) {
-<<<<<<< HEAD
-				//cout << "kkkkkkkkkkkkkkk:\n\t" << e->f->index << endl;
-=======
->>>>>>> origin/ExportComponent
 				c = Qt::green;
 			}
 

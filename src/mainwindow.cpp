@@ -131,14 +131,20 @@ void MainWindow::createActions()
 		actionsMap["select inverse"] = selectInverseAct;
 
 		QAction *selectMultipleAct = new QAction(tr("Select Multiple"), this);
-		selectMultipleAct->setShortcut(QKeySequence(Qt::SHIFT));
+		selectMultipleAct->setShortcut(Qt::SHIFT);
 		selectMultipleAct->setStatusTip(tr("Select Multiple"));
 		connect(selectMultipleAct, SIGNAL(triggered()), this, SLOT(slot_selectMultiple()));
 		actionsMap["select multiple"] = selectMultipleAct;
         
+		QAction *selectCutEdgePairAct = new QAction(tr("Select Cut Edge Pair"), this);
+		selectCutEdgePairAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected cut edge"));
+		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCutEdgePair()));
+		actionsMap["select cut edge pair"] = selectCutEdgePairAct;
+
 		QAction *selectCPAct = new QAction(tr("Select Critical Points"), this);
-		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
-		selectCPAct->setStatusTip(tr("Select All Critical Points"));
+		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+		selectCPAct->setStatusTip(tr("Select All Critical Points (turn into minimum points)"));
 		connect(selectCPAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCP()));
 		actionsMap["select cp"] = selectCPAct;
 
@@ -329,6 +335,7 @@ void MainWindow::createMenus()
 		selectionMenu->addAction(actionsMap["select all"]);
 		selectionMenu->addAction(actionsMap["select inverse"]);
 		selectionMenu->addAction(actionsMap["select multiple"]);
+		selectionMenu->addAction(actionsMap["select cut edge pair"]);
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select cp"]);
 		selectionMenu->addAction(actionsMap["select cc"]);
