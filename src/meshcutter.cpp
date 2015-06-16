@@ -361,6 +361,7 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 		bool hasCutFace = false;
 		do {
 			if( !curHE->f->isCutFace ) {
+				//calculate vertex angle defect
 				QVector3D v1 = he->flip->v->pos - he->v->pos;
 				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
 				double nv1pnv2 = v1.length() * v2.length();
@@ -414,7 +415,7 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 	}
 
 	/// generate a tree connecting all bad vertices using shortest path
-	/// this basically bacomes a minimum spanning tree.
+	/// this basically becomes a minimum spanning tree.
 	///
 	for(auto &path : mstEdges) {
 		/// if this edge is connected to a non-planar vertex, cut this edge,

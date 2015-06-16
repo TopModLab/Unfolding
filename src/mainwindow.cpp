@@ -131,22 +131,29 @@ void MainWindow::createActions()
 		actionsMap["select inverse"] = selectInverseAct;
 
 		QAction *selectMultipleAct = new QAction(tr("Select Multiple"), this);
-		selectMultipleAct->setShortcut(Qt::SHIFT);
+		selectMultipleAct->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_M));
 		selectMultipleAct->setStatusTip(tr("Select Multiple"));
 		connect(selectMultipleAct, SIGNAL(triggered()), this, SLOT(slot_selectMultiple()));
 		actionsMap["select multiple"] = selectMultipleAct;
         
 		QAction *selectCutEdgePairAct = new QAction(tr("Select Cut Edge Pair"), this);
-		selectCutEdgePairAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+		selectCutEdgePairAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
 		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected cut edge"));
 		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCutEdgePair()));
 		actionsMap["select cut edge pair"] = selectCutEdgePairAct;
 
 		QAction *selectCPAct = new QAction(tr("Select Critical Points"), this);
-		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
 		selectCPAct->setStatusTip(tr("Select All Critical Points (turn into minimum points)"));
 		connect(selectCPAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCP()));
 		actionsMap["select cp"] = selectCPAct;
+
+		QAction *selectMSTEdgesAct = new QAction(tr("Select MST Edges"), this);
+		selectMSTEdgesAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+		selectMSTEdgesAct->setStatusTip(tr("Select Minimal Spanning Tree based cuttable edges"));
+		connect(selectMSTEdgesAct, SIGNAL(triggered()), viewer, SLOT(slot_selectMSTEdges()));
+		actionsMap["select mst"] = selectMSTEdgesAct;
+
 
 		QAction *selectCCAct = new QAction(tr("Select Connected Component"), this);
 		selectCCAct->setShortcut(QKeySequence(Qt::Key_Asterisk));
@@ -167,7 +174,7 @@ void MainWindow::createActions()
 		actionsMap["select shrink"] = selectShrinkAct;
 
 		QAction *selectClearAct = new QAction(tr("Clear Selection"), this);
-		selectClearAct->setShortcut(QKeySequence(Qt::Key_Backspace));
+		selectClearAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Backspace));
 		selectClearAct->setStatusTip(tr("Clear Selection"));
 		connect(selectClearAct, SIGNAL(triggered()), viewer, SLOT(slot_selectClear()));
 		actionsMap["select clear"] = selectClearAct;
@@ -335,14 +342,17 @@ void MainWindow::createMenus()
 		selectionMenu->addAction(actionsMap["select all"]);
 		selectionMenu->addAction(actionsMap["select inverse"]);
 		selectionMenu->addAction(actionsMap["select multiple"]);
-		selectionMenu->addAction(actionsMap["select cut edge pair"]);
-		selectionMenu->addSeparator();
-		selectionMenu->addAction(actionsMap["select cp"]);
 		selectionMenu->addAction(actionsMap["select cc"]);
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select grow"]);
 		selectionMenu->addAction(actionsMap["select shrink"]);
 		selectionMenu->addAction(actionsMap["select clear"]);
+		selectionMenu->addSeparator();
+		selectionMenu->addAction(actionsMap["select cut edge pair"]);
+		selectionMenu->addSeparator();
+		selectionMenu->addAction(actionsMap["select mst"]);
+		selectionMenu->addAction(actionsMap["select cp"]);
+
 
 		QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
 		//QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));

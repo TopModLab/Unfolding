@@ -169,7 +169,7 @@ public:
 	SelectFace,
 	SelectEdge
 	};
-	void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdx.empty()) selectedElementsIdx.pop();}
+	void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdxQueue.empty()) selectedElementsIdxQueue.pop();}
 
 	enum SelectionMode {
 		single = 0,
@@ -199,6 +199,7 @@ public slots:
 	void slot_selectCutEdgePair();
 	void slot_selectCP();
 	void slot_selectCC();
+	void slot_selectMSTEdges();
 
 	void slot_selectGrow();
 	void slot_selectShrink();
@@ -209,7 +210,7 @@ private:
 	SelectionMode selectionMode;
 	stack<InteractionState> interactionStateStack;
 
-	queue<int> selectedElementsIdx;
+	queue<int> selectedElementsIdxQueue;
 private:
 	HDS_Mesh *heMesh;   /// not own
 	float scale;

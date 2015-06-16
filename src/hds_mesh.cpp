@@ -584,6 +584,20 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getSelectedVertices()
 	return pickedVerts;
 }
 
+unordered_set<HDS_Mesh::he_t*> HDS_Mesh::getSelectedEdges()
+{
+	unordered_set<he_t*> pickedHEs;
+	unordered_set<he_t*> heSetTmp = heSet;
+	for(auto he: heSetTmp) {
+		if (he->isPicked) {
+			pickedHEs.insert(he);
+			heSetTmp.erase(he);
+			heSetTmp.erase(he->flip);
+		}
+	}
+	return pickedHEs;
+}
+
 unordered_set<HDS_Mesh::he_t*> HDS_Mesh::getSelectedHalfEdges()
 {
 	unordered_set<he_t*> pickedHEs;

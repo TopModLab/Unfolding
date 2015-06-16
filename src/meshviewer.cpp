@@ -104,18 +104,29 @@ void MeshViewer::slot_selectAll()
 void MeshViewer::slot_selectInverse()
 {
 	switch (interactionState) {
-	case SelectFace:
+	case SelectFace: {
 		for (auto f : heMesh->faces())
 			heMesh->selectFace(f->index);
 		break;
-	case SelectEdge:
-		for (auto e : heMesh->halfedges())
-			heMesh->selectEdge(e->index);
+	}
+	case SelectEdge: {
+
+		unordered_set<HDS_HalfEdge*> selected = heMesh->getSelectedHalfEdges();
+
+
+		for (auto e : heMesh->halfedges()) {
+			if (selected.find(e) != selected.end())
+				e->setPicked(false);
+			else
+				e->setPicked(true);
+		}
 		break;
-	case SelectVertex:
+	}
+	case SelectVertex: {
 		for (auto v : heMesh->verts())
 			heMesh->selectVertex(v->index);
 		break;
+	}
 	default:
 		break;
 	}
@@ -166,6 +177,11 @@ void MeshViewer::slot_selectCC()
 		break;
 	}
 	updateGL();
+
+}
+
+void MeshViewer::slot_selectMSTEdges()
+{
 
 }
 
@@ -536,21 +552,22 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 		int selectedElementIdx = getSelectedElementIndex(e->pos());//mouse positon;
 		cout << "selected element " << selectedElementIdx << endl;
 		if (selectedElementIdx >= 0) {
-			selectedElementsIdx.push(selectedElementIdx);
+			selectedElementsIdxQueue.push(selectedElementIdx);
 
 			switch (selectionMode) {
 			case single:
-				if (selectedElementsIdx.size() > 1) {
+				if (selectedElementsIdxQueue.size() > 1) {
+					if (selectedElementsIdxQueue.front() != selectedElementsIdxQueue.back()) {
 					if (interactionState == SelectEdge) {
-						heMesh->heMap[selectedElementsIdx.front()]->setPicked(false);//deselect
-						selectedElementsIdx.pop();
+						heMesh->heMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
 					} else if (interactionState == SelectFace) {
-						heMesh->faceMap[selectedElementsIdx.front()]->setPicked(false);//deselect
-						selectedElementsIdx.pop();
-					} else {
-						heMesh->vertMap[selectedElementsIdx.front()]->setPicked(false);//deselect
-						selectedElementsIdx.pop();
+						heMesh->faceMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
+					} else if (interactionState == SelectVertex){
+						heMesh->vertMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
 					}
+					}
+					selectedElementsIdxQueue.pop();
+
 				}
 
 			case multiple:
@@ -560,7 +577,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 				else if (interactionState == SelectFace) {
 					heMesh->selectFace(selectedElementIdx);
 				}
-				else {
+				else if (interactionState == SelectVertex){
 					heMesh->selectVertex(selectedElementIdx);
 					if (isCriticalPointModeSet)
 						findReebPoints();
@@ -1356,7 +1373,7 @@ void MeshViewer::findCutLocusPoints()
 
 			if (heMesh->getSelectedVertices().empty()) {
 				heMesh->selectVertex(0);
-				selectedElementsIdx.push(0);
+				selectedElementsIdxQueue.push(0);
 			}
 			dists = MeshManager::getInstance()->dis_gcomp->discreteDistanceTo(heMesh->getSelectedVertices());
 			cout << "Graph distance calculated."<<endl;
