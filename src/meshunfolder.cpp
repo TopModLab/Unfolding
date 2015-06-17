@@ -82,7 +82,7 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_
 			QVector3D dvec_ref = v_ref->pos - vs_ref->pos;
 			qreal xcoord = QVector3D::dotProduct(dvec_ref, xvec_ref);
 			qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec_ref);
-			//kkkkkkkkkkkkkkkkkk comment
+			
 			v->pos = vs->pos + xcoord * xvec + ycoord * yvec;
 
 		}
@@ -130,11 +130,12 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 	unfoldingProgress->setAutoClose(true);
 	unfoldingProgress->setCancelButton(0);
 	unfoldingProgress->setMinimumDuration(0);
-
-	//  if( !unfoldable(ref_mesh) ) {
-	//    cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
-	//    return false;
-	//  }
+	
+	/*if( !unfoldable(ref_mesh) )
+	{
+		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
+		return false;
+	}*/
 
 	if( fixedFaces.empty() )
 	{
@@ -166,8 +167,8 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 	unfoldingProgress->setValue(10);
 
 	int progressIndex = 0;
-	for( auto fid : fixedFaces ) {
-
+	for( auto fid : fixedFaces )
+	{
 		/// start from a face, expand all faces
 		queue<HDS_Face*> Q;
 		//unfolded_mesh->printInfo();
@@ -228,10 +229,8 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 
 		}
 		unfoldingProgress->setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
-
 	}
 	unfoldingProgress->setValue(100);
-
 
 	return true;
 }
