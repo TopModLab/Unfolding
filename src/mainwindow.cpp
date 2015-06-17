@@ -344,15 +344,14 @@ void MainWindow::createMenus()
 		selectionMenu->addAction(actionsMap["select multiple"]);
 		selectionMenu->addAction(actionsMap["select cc"]);
 		selectionMenu->addSeparator();
-		selectionMenu->addAction(actionsMap["select grow"]);
-		selectionMenu->addAction(actionsMap["select shrink"]);
-		selectionMenu->addAction(actionsMap["select clear"]);
-		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select cut edge pair"]);
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select mst"]);
 		selectionMenu->addAction(actionsMap["select cp"]);
-
+		selectionMenu->addSeparator();
+		selectionMenu->addAction(actionsMap["select grow"]);
+		selectionMenu->addAction(actionsMap["select shrink"]);
+		selectionMenu->addAction(actionsMap["select clear"]);
 
 		QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
 		//QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));

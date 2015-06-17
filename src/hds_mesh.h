@@ -69,6 +69,8 @@ public:
 	vector<he_t *> incidentEdges(vert_t *v);
 	vector<face_t *> incidentFaces(face_t *f);
 
+	he_t* incidentEdge(face_t *f1, face_t *f2);
+
 	template <typename T>
 	void flipSelectionState(int idx, unordered_map<int, T> &m);
 	void selectFace(int idx);

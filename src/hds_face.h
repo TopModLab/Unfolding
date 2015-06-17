@@ -38,6 +38,7 @@ public:
 	bool isCutFace;
 	bool isConnector;
 	bool isFlap;
+
 };
 
 #endif // HDS_FACE_H

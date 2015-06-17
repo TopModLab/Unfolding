@@ -20,6 +20,7 @@
 #include <functional>
 #include <numeric>
 #include <memory>
+#include <limits>
 
 using namespace std;
 

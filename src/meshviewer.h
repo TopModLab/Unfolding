@@ -282,6 +282,23 @@ private:
 	SimpleGraph * rbgraph;
 	MorseSmaleComplex msc;
 
+private:
+	struct Face{
+		Face(){}
+		Face(HDS_Face* f, double w):f(f), weight(w){}
+		HDS_Face* f;
+		HDS_Face* parent = nullptr;
+		double weight = std::numeric_limits<double>::infinity();
+
+		void setParent(HDS_Face* e) {parent = e;}
+		bool operator>(const Face& e) const {
+			return weight > e.weight;
+		}
+
+	};
+
+	typedef std::priority_queue<Face, std::vector<Face>, std::greater<Face>> PQ_MST_Face;
+
 
 };
 

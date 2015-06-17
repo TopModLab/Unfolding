@@ -519,6 +519,19 @@ vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(HDS_Mesh::face_t *f)
 	return faces;
 }
 
+HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::face_t *f1, HDS_Mesh::face_t *f2)
+{
+	if(f1 == f2) return nullptr;
+	he_t *he = f1->he;
+	he_t *curHe = he;
+	do {
+		if(curHe->flip->f == f2)
+			return curHe;
+		curHe = curHe->next;
+	} while( curHe != he );
+	return nullptr;
+}
+
 void HDS_Mesh::drawVertexIndices()
 {
 	glColor4f(0, 0, 1, 1);

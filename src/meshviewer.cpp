@@ -134,6 +134,26 @@ void MeshViewer::slot_selectInverse()
 
 }
 
+void MeshViewer::slot_selectCC()
+{
+	switch (interactionState) {
+
+	case SelectFace:
+
+		break;
+	case SelectEdge:
+
+		break;
+	case SelectVertex:
+
+		break;
+	default:
+		break;
+	}
+	updateGL();
+
+}
+
 void MeshViewer::slot_selectCutEdgePair()
 {
 	switch (interactionState) {
@@ -160,29 +180,44 @@ void MeshViewer::slot_selectCP()
 	updateGL();
 }
 
-void MeshViewer::slot_selectCC()
-{
-	switch (interactionState) {
 
-	case SelectFace:
-
-		break;
-	case SelectEdge:
-
-		break;
-	case SelectVertex:
-
-		break;
-	default:
-		break;
-	}
-	updateGL();
-
-}
 
 void MeshViewer::slot_selectMSTEdges()
 {
+	slot_selectClear();
 
+	//find MST(with no weight), face as "graph node", edge between faces as "graph edge"
+	unordered_set<HDS_Face*> MSTnodes;
+	PQ_MST_Face faces;
+
+	HDS_Face* tmp = *(heMesh->faces().begin());
+	Face init(tmp,0);
+	faces.push(init);
+	MSTnodes.emplace(tmp);
+
+	int depth = 0;
+	unordered_set<HDS_HalfEdge*> MSTedges;
+	while (!faces.empty()) {
+		Face currentFace = faces.top();
+		faces.pop();
+		if (currentFace.parent != nullptr)
+			MSTedges.emplace(heMesh->incidentEdge(currentFace.parent,currentFace.f));
+
+		for(auto adjacentFace: heMesh->incidentFaces(currentFace.f)) {
+			if (MSTnodes.find(adjacentFace) == MSTnodes.end()) {
+				MSTnodes.emplace(adjacentFace);
+				Face adj(adjacentFace,++depth);
+				adj.setParent(currentFace.f);
+				faces.push(adj);
+			}
+		}
+	}
+
+	cout<<"mst edges #:::"<<MSTedges.size()<<endl;
+	for (auto he: heMesh->halfedges()) {
+		if (MSTedges.find(he) == MSTedges.end() && MSTedges.find(he->flip) == MSTedges.end())
+			he->setPicked(true);
+	}
 }
 
 void MeshViewer::slot_selectGrow()
