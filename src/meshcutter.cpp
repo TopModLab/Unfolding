@@ -184,7 +184,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 #endif
 
 			vector<vert_t*> cv_new(cutSize);
-			for (int i = 0; i < cutSize; ++i) {
+			for (int i = 0; i < cutSize; ++i)
+			{
 				cv_new[i] = new vert_t(*cv.first);
 				cv_new[i]->he = cutEdges[i];
 
@@ -197,13 +198,15 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			int groupIdx = 0, nextGroup = 1;
 			he_t *he = cutEdges[groupIdx];
 			he_t *curHE = he;
-			do {
+			do
+			{
 				cout << "gid = " << groupIdx << endl;
 				/// put curHE into current group
 				heGroup[groupIdx].push_back(curHE);
 
 				curHE = curHE->flip->next;
-				if( curHE == cutEdges[nextGroup] ) {
+				if( curHE == cutEdges[nextGroup] )
+				{
 					/// switch to the next group
 					++groupIdx;
 					nextGroup = (groupIdx + 1) % cutSize;
@@ -211,15 +214,18 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 			} while( curHE != he );
 
-			for (int i = 0; i<cutSize; ++i) {
+			for (int i = 0; i < cutSize; ++i)
+			{
 				cout << "Group #" << i << " has " << heGroup[i].size() << " half edges." << endl;
 				for(auto x : heGroup[i])
 					cout << x->index << endl;
 			}
 
 			/// k-way split the vertex, assign new vertex to the k groups, k = cutSize
-			for (int i = 0; i<cutSize; ++i) {
-				for(auto x : heGroup[i]) {
+			for (int i = 0; i<cutSize; ++i)
+			{
+				for(auto x : heGroup[i])
+				{
 					x->v = cv_new[i];
 					/*cout << x->flip->v->pos.x() << ", "
 							<< x->flip->v->pos.y() << ", "
@@ -252,7 +258,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	while (!cutFacesTotal.empty())
 	{
 		auto f = mesh->faceMap[*cutFacesTotal.begin()];
-		if (mesh->faceSet.find(f) != mesh->faceSet.end()) {
+		if (mesh->faceSet.find(f) != mesh->faceSet.end())
+		{
 			cout << "removing face " << f->index << endl;
 
 			cutFacesTotal.erase(f->index);
@@ -283,7 +290,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	}
 
 	/// update the curvature of each vertex
-	for( auto &v : mesh->vertSet ) {
+	for( auto &v : mesh->vertSet )
+	{
 		v->computeCurvature();
 		cout << v->index << ": " << (*v) << endl;
 	}

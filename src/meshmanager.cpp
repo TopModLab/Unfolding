@@ -128,7 +128,10 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 		return true;
 	}
-	else return false;
+	else
+	{
+		return false;
+	}
 }
 
 HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
@@ -214,7 +217,9 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 				//      ss+=1;  //later added;
 			}
 			else
+			{
 				return thismesh;
+			}
 		}
 		//    cout<<"ss = "<<ss<<endl;    //later added;
 		curFace->he = hes[heIdx];
@@ -264,7 +269,6 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	cout << "finished building halfedge structure." << endl;
 	cout << "halfedge count = " << thismesh->halfedges().size() << endl;
 
-
 	return thismesh;
 }
 
@@ -279,14 +283,16 @@ void MeshManager::cutMeshWithSelectedEdges()
 
 	/// cut the mesh using the selected edges
 	set<int> selectedEdges;
-	for(auto he : ref_mesh->halfedges()) {
+	for(auto he : ref_mesh->halfedges())
+	{
 		if( he->isPicked ) {
 			/// use picked edges as cut edges
 			he->setPicked(false);
 			he->setCutEdge(true);
 
 			if( selectedEdges.find(he->index) == selectedEdges.end() &&
-					selectedEdges.find(he->flip->index) == selectedEdges.end() ) {
+				selectedEdges.find(he->flip->index) == selectedEdges.end() )
+			{
 				selectedEdges.insert(he->index);
 			}
 		}
@@ -294,21 +300,21 @@ void MeshManager::cutMeshWithSelectedEdges()
 	//cout << "Number of selected edges = " << selectedEdges.size() << endl;
 
 	bool isUnfoldable = false;
-	while( !isUnfoldable ) {
-
+	while( !isUnfoldable )
+	{
 		/// make a copy of the mesh with selected edges
 		cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
 
 		bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
-		if( cutSucceeded ) {
-
+		if( cutSucceeded )
+		{
 			/// cutting performed successfully
 			//cutted_mesh->printInfo("cutted mesh:");
 			//cutted_mesh->printMesh("cutted mesh:");
 			cout<<"cut succeed!"<<endl;
-
 		}
-		else {
+		else
+		{
 			/// can not cut it
 		}
 
@@ -333,7 +339,8 @@ void MeshManager::cutMeshWithSelectedEdges()
 }
 
 
-void MeshManager::unfoldMesh() {
+void MeshManager::unfoldMesh()
+{
 	//HDS_Mesh* ref_mesh;
 	QScopedPointer<HDS_Mesh> ref_mesh;
 //	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
@@ -341,14 +348,15 @@ void MeshManager::unfoldMesh() {
 //	cout << "validating reference mesh" << endl;
 //	ref_mesh->validate();
 
-
-
-	if (extended_mesh.isNull()){
+	if (extended_mesh.isNull())
+	{
 		cout<<"ref mesh set to cutted mesh"<<endl;
 		ref_mesh.reset(cutted_mesh.data());
 		//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
 		//ref_mesh = cutted_mesh.data();
-	} else {
+	}
+	else
+	{
 		ref_mesh.reset(extended_mesh.data());
 		//ref_mesh = extended_mesh.data();
 	}
@@ -367,33 +375,24 @@ void MeshManager::unfoldMesh() {
 			/// use picked faces as unfold faces
 			f->setPicked(false);
 
-			if( selectedFaces.find(f->index) == selectedFaces.end() ) {
+			if( selectedFaces.find(f->index) == selectedFaces.end() )
+			{
 				selectedFaces.insert(f->index);
 			}
 		}
 	}
-	/*for (auto f : ref_mesh->faces())
+	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces))
 	{
-		if (f->isCutFace)
-		{
-			cout << "Face " << f->index << " is cutface" << endl;
-		}
-	}*/
-	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
 		/// unfolded successfully
 		unfolded_mesh->printInfo("unfolded mesh:");
 		//unfolded_mesh->printMesh("unfolded mesh:");
 	}
-	else {
+	else
+	{
 		/// failed to unfold
 		cout << "Failed to unfold." << endl;
-
 	}
-
-
 }
-
-
 
 /*
 void MeshManager::unfoldMesh() {
@@ -478,73 +477,81 @@ void MeshManager::exportXMLFile(const char* filename)
 	//err = scanf_s("%d%d", &size_x, &size_y);
 	
 	unordered_set<HDS_Mesh::face_t*> faces = unfolded_mesh->faces();
-	unordered_set<HDS_Mesh::face_t*> cutfaces, infaces;
+	unordered_set<HDS_Mesh::face_t*> cutfaces;// , infaces;
 	for (auto face : faces)
 	{
-		face->isCutFace ? cutfaces.insert(face) : infaces.insert(face);
+		if (face->isCutFace)
+		{
+			cutfaces.insert(face);
+		}
 	}
 	//SVG file head
 	fprintf(SVG_File,
 			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
-			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" \
-			"<g opacity=\"0.8\">\n",
+			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n",
 			size_x, size_y);// define the size of export graph
 	//for cut layer
 	QVector3D nx, ny;
-
+	double he_offset(10), he_scale(20);
+		
 	for (auto face : cutfaces)
 	{
-		double he_offset(10), he_scale(20);
 		HDS_HalfEdge *he = face->he;
 		HDS_HalfEdge *curHE = he;
-		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", face->index);
+		
 		face->computeNormal();//get the normal of unfolded mesh to calculate the projection(maybe can copy value when unfolding)
-		//cout <<"Face normal:" << face->n << endl;
-		//should it be only one face cutted?
+		
 		nx = he->v->pos - he->next->v->pos;
 		nx.normalize();
 		ny = QVector3D::crossProduct(nx, face->n);
 		/*cout << "Face normal:" << face->n << endl;
 		cout << "X dir:" << nx << endl;
 		cout << "Y dir:" << ny << endl;*/
-		
+		fprintf(SVG_File,
+			"<g opacity=\"0.8\">\n" \
+			"\t<polygon id=\"%d\" points=\"",
+			face->index);
 		do {
 			fprintf(SVG_File, "%f,%f ",
 				(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
 				(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
 			curHE = curHE->next;
 		} while (curHE != he);
-		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.5\" fill=\"none\" />\n",
+		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.8\" fill=\"none\" />\n",
 				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
 				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
-	}
-	fprintf(SVG_File,
-		"</g>\n" \
-		"<g opacity=\"0.2\">\n");//set a new group for inner lines
-	for (auto face : infaces)
-	{
-		double he_offset(10), he_scale(20);
-		HDS_HalfEdge *he = face->he;
-		HDS_HalfEdge *curHE = he;
-		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", face->index);
+		/// draw connected faces
+		set<HDS_Face*> neighbourFaces = face->connectedFaces();
+		for (auto face : neighbourFaces)
+		{
+			//double he_offset(10), he_scale(20);
+			HDS_HalfEdge *he = face->he;
+			HDS_HalfEdge *curHE = he;
+			fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", face->index);
 
-		do {
-			//if (!curHE->isCutEdge)
-			{
-				fprintf(SVG_File, "%f,%f ",
-					(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
-					(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
-			}
-			curHE = curHE->next;
-		} while (curHE != he);
-		fprintf(SVG_File, "%f,%f\" stroke=\"black\" stroke-width=\"0.5\" fill=\"none\" />\n",
-			(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
-			(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
+			do {
+				/*if (curHE->isCutEdge)
+				{
+					curHE = curHE->next;
+					continue;
+				}*/
+				{
+					fprintf(SVG_File, "%f,%f ",
+						(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
+						(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
+				}
+				curHE = curHE->next;
+			} while (curHE != he);
+			fprintf(SVG_File, "%f,%f\" stroke=\"gray\" stroke-width=\"0.5\" fill=\"none\" />\n",
+				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
+				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
+		}
+		//////////////////////////////////////////////////////////////////////////
+		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
 	}
 	fprintf(SVG_File,
-			"</g>\n"\
-			"</svg>"
-			);
+			/*//"</g>\n"\*/
+			"</svg>");
 	fclose(SVG_File);
 	cout << "SVG file saved successfully!" << endl;
 }

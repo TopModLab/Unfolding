@@ -96,7 +96,8 @@ bool HDS_Mesh::validateEdge(he_t *e) {
 	return true;
 }
 
-bool HDS_Mesh::validateFace(face_t *f) {
+bool HDS_Mesh::validateFace(face_t *f)
+{
 	if( faceMap.find(f->index) == faceMap.end() ) return false;
 
 	int maxEdges = 100;
@@ -106,7 +107,10 @@ bool HDS_Mesh::validateFace(face_t *f) {
 	do {
 		curHe = curHe->next;
 		++edgeCount;
-		if( edgeCount > maxEdges ) return false;
+		if (edgeCount > maxEdges)
+		{
+			return false;
+		}
 	} while( curHe != he );
 	return true;
 }

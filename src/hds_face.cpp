@@ -36,7 +36,8 @@ set<HDS_Face *> HDS_Face::connectedFaces()
 	set<HDS_Face*> faces;
 	queue<HDS_Face*> Q;
 	Q.push(this);
-	while( !Q.empty() ) {
+	while( !Q.empty() )
+	{
 		auto cur = Q.front();
 		Q.pop();
 		faces.insert(cur);

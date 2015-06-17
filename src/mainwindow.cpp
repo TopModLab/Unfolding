@@ -457,7 +457,7 @@ void MainWindow::slot_newFile()
 void MainWindow::slot_exportFile()
 {
 	cout << "Export as..." << endl;
-	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "../untitled.svg", tr("XML files (*.svg *.xml)"));
+	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "untitled.svg", tr("XML files (*.svg *.xml)"));
 	MeshManager::getInstance()->exportXMLFile(filename.toUtf8().constData());
 	//Needed to be implemented
 }
