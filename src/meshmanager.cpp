@@ -58,6 +58,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 		hds_mesh.reset(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
 
 		cutted_mesh.reset();
+		extended_mesh.reset();
 		unfolded_mesh.reset();
 		smoothed_mesh.reset();
 
@@ -339,62 +340,62 @@ void MeshManager::cutMeshWithSelectedEdges()
 }
 
 
-void MeshManager::unfoldMesh()
-{
-	//HDS_Mesh* ref_mesh;
-	QScopedPointer<HDS_Mesh> ref_mesh;
-//	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+//void MeshManager::unfoldMesh()
+//{
+//	//HDS_Mesh* ref_mesh;
+//	QScopedPointer<HDS_Mesh> ref_mesh;
+////	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
 
-//	cout << "validating reference mesh" << endl;
-//	ref_mesh->validate();
+////	cout << "validating reference mesh" << endl;
+////	ref_mesh->validate();
 
-	if (extended_mesh.isNull())
-	{
-		cout<<"ref mesh set to cutted mesh"<<endl;
-		ref_mesh.reset(cutted_mesh.data());
-		//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-		//ref_mesh = cutted_mesh.data();
-	}
-	else
-	{
-		ref_mesh.reset(extended_mesh.data());
-		//ref_mesh = extended_mesh.data();
-	}
+//	if (extended_mesh.isNull())
+//	{
+//		cout<<"ref mesh set to cutted mesh"<<endl;
+//		ref_mesh.reset(cutted_mesh.data());
+//		//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+//		//ref_mesh = cutted_mesh.data();
+//	}
+//	else
+//	{
+//		ref_mesh.reset(extended_mesh.data());
+//		//ref_mesh = extended_mesh.data();
+//	}
 
-	cout<<"ref mesh set"<<endl;
+//	cout<<"ref mesh set"<<endl;
 
-	//unfolded_mesh.reset(ref_mesh.data());
-	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh)); //bug when selecting all edges!!!!
+//	//unfolded_mesh.reset(ref_mesh.data());
+//	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh)); //bug when selecting all edges!!!!
 
-	/// unfold the mesh using the selected faces
-	set<int> selectedFaces;
-	for (auto f : ref_mesh->faces())
-	{
-		if( f->isPicked )
-		{
-			/// use picked faces as unfold faces
-			f->setPicked(false);
+//	/// unfold the mesh using the selected faces
+//	set<int> selectedFaces;
+//	for (auto f : ref_mesh->faces())
+//	{
+//		if( f->isPicked )
+//		{
+//			/// use picked faces as unfold faces
+//			f->setPicked(false);
 
-			if( selectedFaces.find(f->index) == selectedFaces.end() )
-			{
-				selectedFaces.insert(f->index);
-			}
-		}
-	}
-	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces))
-	{
-		/// unfolded successfully
-		unfolded_mesh->printInfo("unfolded mesh:");
-		//unfolded_mesh->printMesh("unfolded mesh:");
-	}
-	else
-	{
-		/// failed to unfold
-		cout << "Failed to unfold." << endl;
-	}
-}
+//			if( selectedFaces.find(f->index) == selectedFaces.end() )
+//			{
+//				selectedFaces.insert(f->index);
+//			}
+//		}
+//	}
+//	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces))
+//	{
+//		/// unfolded successfully
+//		unfolded_mesh->printInfo("unfolded mesh:");
+//		//unfolded_mesh->printMesh("unfolded mesh:");
+//	}
+//	else
+//	{
+//		/// failed to unfold
+//		cout << "Failed to unfold." << endl;
+//	}
+//}
 
-/*
+
 void MeshManager::unfoldMesh() {
   HDS_Mesh* ref_mesh;
 
@@ -429,7 +430,7 @@ void MeshManager::unfoldMesh() {
   }
 
 }
-*/
+
 
 void MeshManager::smoothMesh() {
 	if( smoothed_mesh.isNull() )
@@ -444,6 +445,7 @@ void MeshManager::smoothMesh() {
 }
 
 void MeshManager::resetMesh() {
+	extended_mesh.reset();
 	cutted_mesh.reset();
 	unfolded_mesh.reset();
 }
@@ -457,8 +459,10 @@ void MeshManager::extendMesh()
 {
 	if ( cutted_mesh.isNull() )
 		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
-	else
+	else if (!cutted_mesh.isNull() && unfolded_mesh.isNull())
 		extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
+	else
+		extended_mesh.reset(new HDS_Mesh(*unfolded_mesh));
 	MeshExtender::extendMesh(extended_mesh.data(), 0.75);
 
 }

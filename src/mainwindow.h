@@ -47,6 +47,7 @@ private slots:
 	void slot_toggleVertices();
 	void slot_toggleNormals();
 
+	void slot_undo();
 	void slot_reset();
 
 	void slot_toggleCameraOperation();
@@ -80,6 +81,18 @@ private slots:
 private:
 	void closeEvent(QCloseEvent *e);
 
+	enum CurrentMesh {
+		Original,
+		Extended,
+		Cutted,
+		Unfolded
+	};
+
+	CurrentMesh curMesh;
+	stack<CurrentMesh> meshStack;
+
+	void updateCurrentMesh(){curMesh = meshStack.top();}
+
 private:
 	Ui::MainWindow *ui;
 	QMap<QString, QAction*> actionsMap;
@@ -87,7 +100,6 @@ private:
 	ColormapEditor *ceditor;
 	CriticalPointsPanel *cppanel;
 	CutLocusPanel *clpanel;
-	//QProgressBar *progressBar;
 
 };
 

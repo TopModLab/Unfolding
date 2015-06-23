@@ -95,13 +95,14 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = false;
 		nf->isConnector = true;
-		nf->isFlap = hef->f->isCutFace || he->f->isCutFace;
+		//nf->isFlap = hef->f->isCutFace || he->f->isCutFace;
 		mesh->faceSet.insert(nf);
 		mesh->faceMap.insert(make_pair(nf->index, nf));
 
 		/// record this event with twin map
 		twinmap.insert(make_pair(he, hef));
 	}
+	//end of splitting edge
 
 	mesh->printInfo();
 	mesh->validate();
@@ -122,15 +123,15 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			/// get all incident faces
 			vector<face_t*> incidentFaces = mesh->incidentFaces(cv.first);
 			vector<face_t*> connectorFaces = Utils::filter(incidentFaces, [](face_t* f) {
-				return f->isConnector;
-			});
+					return f->isConnector;
+		});
 
 			/// get all outgoing halfedges
 			vector<he_t*> incidentHEs = mesh->incidentEdges(cv.first);
 			/// outgoing cut edges
 			vector<he_t*> cutEdges = Utils::filter(incidentHEs, [](he_t* e) {
-			return e->f->isConnector;
-			});
+					return e->f->isConnector;
+		});
 
 			/// the degree of the cut vertex
 			int k = connectorFaces.size();
@@ -138,8 +139,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 #if 0
 			/// check the relationship between the cut edges and connector faces
 			for (int i = 0; i < k; ++i) {
-			/// the face of cut edge i is connector face i
-			cout << cutEdges[i]->f << " and " << connectorFaces[i] << endl;
+				/// the face of cut edge i is connector face i
+				cout << cutEdges[i]->f << " and " << connectorFaces[i] << endl;
 			}
 			::system("pause");
 #endif
@@ -154,9 +155,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 #if 0
 			/// verify incident edges
 			for (int i = 0; i < incidentHEs.size(); ++i) {
-					int j = (i + 1) % incidentHEs.size();
-					if (incidentHEs[i]->flip->next != incidentHEs[j]) cout << "failed @" << i << endl;
-				}
+				int j = (i + 1) % incidentHEs.size();
+				if (incidentHEs[i]->flip->next != incidentHEs[j]) cout << "failed @" << i << endl;
+			}
 #endif
 
 			vector<vert_t*> cv_new(k);
@@ -198,8 +199,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 				for (auto x : heGroup[i]) {
 					x->v = cv_new[i];
 					cout << x->flip->v->pos.x() << ", "
-					<< x->flip->v->pos.y() << ", "
-					<< x->flip->v->pos.z() << endl;
+						 << x->flip->v->pos.y() << ", "
+						 << x->flip->v->pos.z() << endl;
 				}
 
 				/// for this group, connect its tail with head
@@ -266,7 +267,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 #if 0
 			/// verify the topology
 			for (int i = 0; i < k; ++i) {
-			cout << heGroup[i].front()->f << ", " << heGroup[i].back()->flip->f << " <-> " << connectorFaces[i] << endl;
+				cout << heGroup[i].front()->f << ", " << heGroup[i].back()->flip->f << " <-> " << connectorFaces[i] << endl;
 			}
 			::system("pause");
 #endif
@@ -292,9 +293,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			cout << endl;
 
 			for (int i = 0; i < k; ++i) {
-			auto corners = connectorFaces[i]->corners();
-			for (auto &x : corners) cout << x->index << ", ";
-			cout << endl;
+				auto corners = connectorFaces[i]->corners();
+				for (auto &x : corners) cout << x->index << ", ";
+				cout << endl;
 			}
 			system("pause");
 #endif
@@ -311,7 +312,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			cout << "new cut face index = " << nf->index << endl;
 			nf->isCutFace = true;
 			nf->isConnector = false;
-			nf->isFlap = false;
+			//nf->isFlap = false;
 			nf->he = newedges.front()->flip;
 			mesh->faceSet.insert(nf);
 			mesh->faceMap.insert(make_pair(nf->index, nf));
@@ -320,12 +321,12 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			auto nfcorners = holeface->corners();
 			for (auto corner : nfcorners) {
 				auto cutfaces = Utils::filter(mesh->incidentFaces(corner), [](face_t* f){
-					return f->isCutFace;
-				});        
+						return f->isCutFace;
+			});
 				if (cutfaces.size() >= 2) {
 					cout << "Woohoo!" << cutfaces.size() << endl;
 					++woohoos;
-          
+
 					// fix it here, the faces are already in correct order
 					for (int i = 0; i < cutfaces.size(); ++i) {
 
@@ -350,13 +351,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 	/// update each face with the scaling factor
 	for (auto fidx : oldFaces) {
 		auto face = mesh->faceMap[fidx];
-		QVector3D center = face->center();
-		/// update the vertex position
-		auto vertices = face->corners();
-		for (auto v : vertices) {
-			QVector3D vec_cv = v->pos - center;
-			v->pos = center + scale * vec_cv;
-		}
+		face->scaleDown(scale);
 	}
 	/*
 	cout << "number of flaps = " << twinmap.size() << endl;

@@ -16,5 +16,7 @@
         <file>icons/fold.png</file>
         <file>icons/close.png</file>
         <file>icons/export.png</file>
+        <file>icons/redo.png</file>
+        <file>icons/undo.png</file>
     </qresource>
 </RCC>

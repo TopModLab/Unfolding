@@ -49,7 +49,8 @@ SOURCES += src/main.cpp\
     src/GeodesicComputer.cpp \
     src/MeshExtender.cpp \
     src/discretegeocomputer.cpp \
-    src/cutlocuspanel.cpp
+    src/cutlocuspanel.cpp \
+    src/hds_connector.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -86,7 +87,8 @@ HEADERS  += src/mainwindow.h \
     src/GeodesicComputer.h \
     src/MeshExtender.h \
     src/discretegeocomputer.h \
-    src/cutlocuspanel.h
+    src/cutlocuspanel.h \
+    src/hds_connector.h
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
     forms/criticalpointspanel.ui \

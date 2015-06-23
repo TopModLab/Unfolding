@@ -31,10 +31,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::initialization()
 {
+
 	QString curPath = QDir::currentPath();
 	QString filename = curPath+"/meshes/cube_grid.obj";
-	MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+	if (MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()))) {
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+		meshStack.push((CurrentMesh)Original);
+		updateCurrentMesh();
+	}
 }
 
 bool MainWindow::createComponents()
@@ -104,17 +108,17 @@ void MainWindow::createActions()
 		connect(exportAct, SIGNAL(triggered()), this, SLOT(slot_exportFile()));//need to change
 		actionsMap["export"] = exportAct;
 
-		QAction *closeAct = new QAction(QIcon(":/icons/close.png"), tr("Close"), this);//later added
+		QAction *closeAct = new QAction(QIcon(":/icons/close.png"), tr("Close"), this);
 		closeAct->setShortcuts(QKeySequence::Quit);
 		closeAct->setStatusTip(tr("close a file"));
 		connect(closeAct, SIGNAL(triggered()), this, SLOT(slot_closeFile()));
 		actionsMap["close"] = closeAct;
 
 		//Edit Menu
-		QAction *resetAct = new QAction(tr("Reset"), this);
-		resetAct->setStatusTip(tr("Reset"));
-		connect(resetAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
-		actionsMap["reset"] = resetAct;
+		//		QAction *resetAct = new QAction(tr("Reset"), this);
+		//		resetAct->setStatusTip(tr("Reset"));
+		//		connect(resetAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
+		//		actionsMap["reset"] = resetAct;
 
 		//selection menu
 
@@ -135,7 +139,7 @@ void MainWindow::createActions()
 		selectMultipleAct->setStatusTip(tr("Select Multiple"));
 		connect(selectMultipleAct, SIGNAL(triggered()), this, SLOT(slot_selectMultiple()));
 		actionsMap["select multiple"] = selectMultipleAct;
-        
+
 		QAction *selectCutEdgePairAct = new QAction(tr("Select Cut Edge Pair"), this);
 		selectCutEdgePairAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
 		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected cut edge"));
@@ -160,7 +164,7 @@ void MainWindow::createActions()
 		selectCCAct->setStatusTip(tr("Select Connected Component"));
 		connect(selectCCAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCC()));
 		actionsMap["select cc"] = selectCCAct;
-        
+
 		QAction *selectGrowAct = new QAction(tr("Grow Selection"), this);
 		selectGrowAct->setShortcut(QKeySequence(Qt::Key_Equal));
 		selectGrowAct->setStatusTip(tr("Grow Selection"));
@@ -179,7 +183,7 @@ void MainWindow::createActions()
 		connect(selectClearAct, SIGNAL(triggered()), viewer, SLOT(slot_selectClear()));
 		actionsMap["select clear"] = selectClearAct;
 
-        
+
 		//display menu
 		//"E: edges  V : vertices  F : faces  N: Normals L : lighting  C : critical points"
 		QAction *showEdgesAct = new QAction(tr("Show Edges"), this);
@@ -246,6 +250,13 @@ void MainWindow::createActions()
 		connect(saveAct, SIGNAL(triggered()), this, SLOT(slot_saveFile()));
 		actionsMap["save"] = saveAct;
 
+		QAction *undoAct = new QAction(QIcon(":/icons/undo.png"), tr("Undo last operation"), this);
+		undoAct->setStatusTip(tr("Undo last mesh operation"));
+		undoAct->setCheckable(false);
+		connect(undoAct, SIGNAL(triggered()), this, SLOT(slot_undo()));
+		actionsMap["mesh undo"] = undoAct;
+
+
 		QAction *camAct = new QAction(QIcon(":/icons/select.png"), tr("Camera Operation"), this);
 		camAct->setStatusTip(tr("Camera operation"));
 		camAct->setCheckable(true);
@@ -295,12 +306,7 @@ void MainWindow::createActions()
 		connect(unfoldAct, SIGNAL(triggered()), this, SLOT(slot_unfoldMesh()));
 		actionsMap["mesh unfold"] = unfoldAct;
 
-		QAction *foldAct = new QAction(QIcon(":/icons/fold.png"), tr("Fold"), this);
-		foldAct->setStatusTip(tr("Fold mesh"));
-		foldAct->setCheckable(true);
-		foldAct->setChecked(true);
-		connect(foldAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
-		actionsMap["mesh fold"] = foldAct;
+
 
 		QAction *colormapAct = new QAction(QIcon(":/icons/colormap.png"), tr("Colormap"), this);
 		colormapAct->setStatusTip(tr("Color map"));
@@ -332,17 +338,17 @@ void MainWindow::createMenus()
 
 		fileMenu->addAction(actionsMap["new"]);
 		fileMenu->addAction(actionsMap["export"]);
-		fileMenu->addAction(actionsMap["close"]);//later added;
-		//fileMenu->addAction(actionsMap["print"]);//later added
+		fileMenu->addAction(actionsMap["close"]);
 
 		QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
-		editMenu->addAction(actionsMap["reset"]);
+		editMenu->addAction(actionsMap["mesh undo"]);
 
 		QMenu *selectionMenu = ui->menuBar->addMenu(tr("&Selection"));
 		selectionMenu->addAction(actionsMap["select all"]);
 		selectionMenu->addAction(actionsMap["select inverse"]);
 		selectionMenu->addAction(actionsMap["select multiple"]);
 		selectionMenu->addAction(actionsMap["select cc"]);
+
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select cut edge pair"]);
 		selectionMenu->addSeparator();
@@ -402,8 +408,11 @@ void MainWindow::createToolBar()
 
 		QActionGroup *unfoldGroup = new QActionGroup(ui->mainToolBar);
 		unfoldGroup->addAction(actionsMap["mesh unfold"]);
-		unfoldGroup->addAction(actionsMap["mesh fold"]);
+		//unfoldGroup->addAction(actionsMap["mesh fold"]);
 		unfoldGroup->setExclusive(true);
+
+		ui->mainToolBar->addAction(actionsMap["mesh undo"]);
+		ui->mainToolBar->addSeparator();
 
 		ui->mainToolBar->addAction(actionsMap["camera"]);
 
@@ -419,7 +428,6 @@ void MainWindow::createToolBar()
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["mesh cut"]);
 		ui->mainToolBar->addAction(actionsMap["mesh unfold"]);
-		ui->mainToolBar->addAction(actionsMap["mesh fold"]);
 
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["colormap"]);
@@ -445,12 +453,18 @@ void MainWindow::slot_newFile()
 {
 
 	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "../meshes", tr("OBJ files(*.obj)")); //later added
-	cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
-	MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+	if (filename != NULL) {
+		cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
+		MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+
 #if USE_REEB_GRAPH
-	viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
+		viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
+		while(!meshStack.empty()) meshStack.pop();
+		meshStack.push((CurrentMesh)Original);
+		updateCurrentMesh();
+	}
 }
 
 void MainWindow::slot_exportFile()
@@ -539,21 +553,62 @@ void MainWindow::slot_toggleVertexSelection()
 }
 
 void MainWindow::slot_performMeshCut() {
-	MeshManager::getInstance()->cutMeshWithSelectedEdges();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+
+	if (curMesh == Original) {
+		MeshManager::getInstance()->cutMeshWithSelectedEdges();
+	}else if (curMesh == Extended) {
+		//cut original mesh
+		//dislay extended mesh
+		//set cutted_mesh as cutted_extended_mesh
+	}
+
+	if (curMesh == Original || curMesh == Extended) {
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+		meshStack.push(Cutted);
+		updateCurrentMesh();
+	}
+
 }
 
 
 void MainWindow::slot_unfoldMesh() {
-	MeshManager::getInstance()->unfoldMesh();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+	if (curMesh == Cutted) {
+		MeshManager::getInstance()->unfoldMesh();
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+		meshStack.push(Unfolded);
+		updateCurrentMesh();
+	}
+}
+
+void MainWindow::slot_undo()
+{
+	if(curMesh != Original) {
+		meshStack.pop();
+		updateCurrentMesh();
+
+		switch(curMesh){
+		case Original:
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+			break;
+		case Extended:
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+			break;
+		case Cutted:
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+			break;
+		case Unfolded:
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+			break;
+		}
+	}
+
+
 }
 
 void MainWindow::slot_reset()
 {
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 	MeshManager::getInstance()->resetMesh();
-
 }
 
 void MainWindow::slot_triggerColormap() {

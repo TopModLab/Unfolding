@@ -321,9 +321,9 @@ void HDS_Mesh::draw(ColorMap cmap)
 				glColor4f(0.75, 0.75, 0.75, 1);
 			}
 
-			if (f->isFlap) {
-				glColor4f(0.75, 0.95, 0.75, 1);
-			}
+//			if (f->isFlap) {
+//				glColor4f(0.75, 0.95, 0.75, 1);
+//			}
 
 			int vcount = 0;
 			glBegin(GL_POLYGON);

@@ -29,16 +29,23 @@ public:
 	QVector3D center() const;
 	vector<HDS_Vertex*> corners() const;
 	QVector3D computeNormal();
+	void checkPlanar();
+
+	void scaleDown(double factor);
+	double getScalingFactor(){return scalingFactor;}
+
 
 	QVector3D n;
 	HDS_HalfEdge *he;
 
 	int index;
 	bool isPicked;
-	bool isCutFace;
+	bool isCutFace; //invisible face between cut edges
 	bool isConnector;
-	bool isFlap;
 
+	bool isPlanar;
+	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
+	double scalingFactor;
 };
 
 #endif // HDS_FACE_H
