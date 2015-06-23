@@ -462,7 +462,7 @@ void MainWindow::slot_newFile()
 		viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
 		while(!meshStack.empty()) meshStack.pop();
-		meshStack.push((CurrentMesh)Original);
+		meshStack.push(Original);
 		updateCurrentMesh();
 	}
 }
@@ -486,6 +486,45 @@ void MainWindow::slot_saveFile()
 	QString filename = QFileDialog::getSaveFileName(this, "Input a file name");
 	cout << "saving file " << filename.toStdString() << endl;
 	MeshManager::getInstance()->saveMeshes();
+}
+
+void MainWindow::slot_performMeshCut() {
+
+	MeshManager::getInstance()->cutMeshWithSelectedEdges();
+	if (curMesh == Extended) {
+		//set cutted_mesh as cutted_extended_mesh
+		MeshManager::getInstance()->mapToExtendedMesh();
+	}
+
+	if (curMesh == Original || curMesh == Extended) {
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+		meshStack.push(Cutted);
+		updateCurrentMesh();
+	}
+
+}
+
+
+void MainWindow::slot_unfoldMesh() {
+	if (curMesh == Cutted) {
+		MeshManager::getInstance()->unfoldMesh();
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+		meshStack.push(Unfolded);
+		updateCurrentMesh();
+	}
+}
+
+void MainWindow::slot_extendMesh()
+{
+		MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+		meshStack.push(Extended);
+		updateCurrentMesh();
+}
+
+void MainWindow::slot_smoothMesh() {
+	MeshManager::getInstance()->smoothMesh();
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getSmoothedMesh());
 }
 
 void MainWindow::slot_selectMultiple()
@@ -552,33 +591,7 @@ void MainWindow::slot_toggleVertexSelection()
 	viewer->setInteractionMode(MeshViewer::SelectVertex);
 }
 
-void MainWindow::slot_performMeshCut() {
 
-	if (curMesh == Original) {
-		MeshManager::getInstance()->cutMeshWithSelectedEdges();
-	}else if (curMesh == Extended) {
-		//cut original mesh
-		//dislay extended mesh
-		//set cutted_mesh as cutted_extended_mesh
-	}
-
-	if (curMesh == Original || curMesh == Extended) {
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
-		meshStack.push(Cutted);
-		updateCurrentMesh();
-	}
-
-}
-
-
-void MainWindow::slot_unfoldMesh() {
-	if (curMesh == Cutted) {
-		MeshManager::getInstance()->unfoldMesh();
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
-		meshStack.push(Unfolded);
-		updateCurrentMesh();
-	}
-}
 
 void MainWindow::slot_undo()
 {
@@ -655,10 +668,6 @@ void MainWindow::slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1,
 	viewer->update();
 }
 
-void MainWindow::slot_smoothMesh() {
-	MeshManager::getInstance()->smoothMesh();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getSmoothedMesh());
-}
 
 void MainWindow::closeEvent(QCloseEvent *e) {
 	ceditor->close();
@@ -666,13 +675,6 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 	clpanel->close();
 }
 
-
-
-void MainWindow::slot_extendMesh()
-{
-	MeshManager::getInstance()->extendMesh();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
-}
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 	viewer->setCriticalPointsMethod(midx);

@@ -107,9 +107,10 @@ public:
 	bool loadOBJFile(const string& filename);
 	HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
 	void cutMeshWithSelectedEdges();
+	void mapToExtendedMesh();
 	void unfoldMesh();
 	void smoothMesh();
-	void extendMesh();
+	void extendMesh(int meshType, double scale);
 	void resetMesh();
     void exportXMLFile(const char* filename);//export as svg files
 

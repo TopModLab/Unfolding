@@ -68,7 +68,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 		he_new_flip->v = ve;
 		he_new_flip->next = hef_new_flip;
 		he_new_flip->prev = hef_new_flip;
-		he_new_flip->isCutEdge = true;
+		//he_new_flip->isCutEdge = true;
 
 		he->flip = he_new_flip;
 
@@ -82,7 +82,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 		hef_new_flip->v = vs;
 		hef_new_flip->next = he_new_flip;
 		hef_new_flip->prev = he_new_flip;
-		hef_new_flip->isCutEdge = true;
+		//hef_new_flip->isCutEdge = true;
 
 		hef->flip = hef_new_flip;
 
@@ -95,12 +95,22 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = false;
 		nf->isConnector = true;
+
+
 		//nf->isFlap = hef->f->isCutFace || he->f->isCutFace;
 		mesh->faceSet.insert(nf);
 		mesh->faceMap.insert(make_pair(nf->index, nf));
 
 		/// record this event with twin map
 		twinmap.insert(make_pair(he, hef));
+
+//		if(he->isCutEdge) {
+//			HDS_HalfEdge* edge = nf->he->next;
+//			do {
+//			edge->setCutEdge(true);
+//			edge = edge->next;
+//			}while(edge != nf->he);
+//		}
 	}
 	//end of splitting edge
 
@@ -301,10 +311,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 #endif
 
 			/// for all cut edges, make them normal edges
-			for (auto ce : cutEdges) {
-				ce->isCutEdge = false;
-				ce->flip->isCutEdge = false;
-			}
+//			for (auto ce : cutEdges) {
+//				ce->isCutEdge = false;
+//				ce->flip->isCutEdge = false;
+//			}
 
 			/// add a new cut face
 			face_t *nf = holeface;

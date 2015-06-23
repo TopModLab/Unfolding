@@ -82,10 +82,10 @@ private:
 	void closeEvent(QCloseEvent *e);
 
 	enum CurrentMesh {
-		Original,
-		Extended,
-		Cutted,
-		Unfolded
+		Original = 0,
+		Extended = 1,
+		Cutted = 2,
+		Unfolded = 3
 	};
 
 	CurrentMesh curMesh;

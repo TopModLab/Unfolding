@@ -339,6 +339,13 @@ void MeshManager::cutMeshWithSelectedEdges()
 	cout << ".........................." << endl;
 }
 
+void MeshManager::mapToExtendedMesh()
+{
+	QScopedPointer<HDS_Mesh> ref_mesh;
+	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+
+
+}
 
 //void MeshManager::unfoldMesh()
 //{
@@ -455,15 +462,25 @@ bool MeshManager::saveMeshes() {
 	return true;
 }
 
-void MeshManager::extendMesh()
+void MeshManager::extendMesh(int meshType, double scale)
 {
-	if ( cutted_mesh.isNull() )
+	switch(meshType){
+	case 0://original
 		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
-	else if (!cutted_mesh.isNull() && unfolded_mesh.isNull())
+		break;
+	case 1://extended
+		extended_mesh.reset(new HDS_Mesh(*extended_mesh));
+		break;
+	case 2://cutted
 		extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
-	else
+		break;
+	case 3://unfolded
 		extended_mesh.reset(new HDS_Mesh(*unfolded_mesh));
-	MeshExtender::extendMesh(extended_mesh.data(), 0.75);
+		break;
+	}
+
+
+	MeshExtender::extendMesh(extended_mesh.data(), scale);
 
 }
 
