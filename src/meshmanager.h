@@ -55,12 +55,19 @@ public:
 	HDS_Mesh* getCuttedMesh() {
 		return cutted_mesh.data();
 	}
+	HDS_Mesh* getExtendedCuttedMesh() {
+		return extended_cutted_mesh.data();
+	}
 
 	HDS_Mesh* getUnfoldedMesh() {
 		/*unfolded_mesh->printMesh("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk");
 		cout << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;*/
         return unfolded_mesh.data();
     }
+
+	HDS_Mesh* getExtendedUnfoldedMesh() {
+		return extended_unfolded_mesh.data();
+	}
 
 	HDS_Mesh* getExtendedMesh() {
 		return extended_mesh.data();
@@ -106,8 +113,8 @@ private:
 public:
 	bool loadOBJFile(const string& filename);
 	HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
-	void cutMeshWithSelectedEdges();
-	void mapToExtendedMesh();
+	void cutMeshWithSelectedEdges(int meshType);
+	void mapToExtendedMesh(int meshType);
 	void unfoldMesh();
 	void smoothMesh();
 	void extendMesh(int meshType, double scale);
@@ -121,7 +128,7 @@ private:
 	typedef HDS_Face face_t;
 	typedef HDS_Vertex vert_t;
     
-	QScopedPointer<HDS_Mesh> hds_mesh, extended_mesh, smoothed_mesh, cutted_mesh, unfolded_mesh;
+	QScopedPointer<HDS_Mesh> hds_mesh, extended_mesh, smoothed_mesh, cutted_mesh, extended_cutted_mesh, unfolded_mesh, extended_unfolded_mesh;
 	QScopedPointer<GeodesicComputer> gcomp;
 	QScopedPointer<DiscreteGeoComputer> dis_gcomp;
 

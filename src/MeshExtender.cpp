@@ -104,15 +104,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 		/// record this event with twin map
 		twinmap.insert(make_pair(he, hef));
 
-//		if(he->isCutEdge) {
-//			HDS_HalfEdge* edge = nf->he->next;
-//			do {
-//			edge->setCutEdge(true);
-//			edge = edge->next;
-//			}while(edge != nf->he);
-//		}
+
 	}
 	//end of splitting edge
+
 
 	mesh->printInfo();
 	mesh->validate();
@@ -349,7 +344,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 		}
 	}
 
-	cout << "woohoos = " << woohoos << endl;
+//	cout << "woohoos = " << woohoos << endl;
 
 	/// update the curvature of each vertex
 	for (auto &v : mesh->vertSet) {

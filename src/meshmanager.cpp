@@ -273,11 +273,11 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	return thismesh;
 }
 
-void MeshManager::cutMeshWithSelectedEdges()
+void MeshManager::cutMeshWithSelectedEdges(int meshType)
 {
 
 	QScopedPointer<HDS_Mesh> ref_mesh;
-	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+		ref_mesh.reset(new HDS_Mesh(*hds_mesh));
 
 	cout << "validating reference mesh" << endl;
 	ref_mesh->validate();
@@ -339,11 +339,53 @@ void MeshManager::cutMeshWithSelectedEdges()
 	cout << ".........................." << endl;
 }
 
-void MeshManager::mapToExtendedMesh()
+void MeshManager::mapToExtendedMesh(int meshType)
 {
 	QScopedPointer<HDS_Mesh> ref_mesh;
-	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+	QScopedPointer<HDS_Mesh> des_mesh;
 
+	if (meshType == 2) {
+		ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+		des_mesh.reset(new HDS_Mesh(*extended_mesh));
+
+	} else if (meshType == 3) {
+		ref_mesh.reset(new HDS_Mesh(*unfolded_mesh));
+		des_mesh.reset(new HDS_Mesh(*extended_unfolded_mesh));
+
+	}
+
+
+	//mark out all cut edges
+
+	//get cut edges in cutted mesh
+	set<int> cutEdges;
+	for(auto he : ref_mesh->halfedges()) {
+		if (he->isCutEdge) {
+			if( cutEdges.find(he->index) == cutEdges.end() )
+			{
+				cutEdges.insert(he->index);
+			}
+		}
+	}
+
+	//find original cut edges in extended mesh and mark out its face
+	for(auto f : des_mesh->faces()) {
+		if (f->isConnector) {
+			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
+				HDS_HalfEdge* edge = f->he->next;
+				do {
+					edge->setCutEdge(true);
+					edge = edge->next;
+				}while(edge != f->he);
+			}
+		}
+	}
+
+	if (meshType == 2) {
+		extended_cutted_mesh.reset(new HDS_Mesh(*des_mesh));
+	} else if (meshType == 3) {
+		extended_unfolded_mesh.reset(new HDS_Mesh(*des_mesh));
+	}
 
 }
 
@@ -406,10 +448,8 @@ void MeshManager::mapToExtendedMesh()
 void MeshManager::unfoldMesh() {
   HDS_Mesh* ref_mesh;
 
-  if (extended_mesh.isNull())
-	ref_mesh = cutted_mesh.data();
-  else
-	ref_mesh = extended_mesh.data();
+  ref_mesh = cutted_mesh.data();
+
 
   unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
@@ -455,6 +495,8 @@ void MeshManager::resetMesh() {
 	extended_mesh.reset();
 	cutted_mesh.reset();
 	unfolded_mesh.reset();
+	extended_cutted_mesh.reset();
+	extended_unfolded_mesh.reset();
 }
 
 bool MeshManager::saveMeshes() {
@@ -467,20 +509,17 @@ void MeshManager::extendMesh(int meshType, double scale)
 	switch(meshType){
 	case 0://original
 		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
+		MeshExtender::extendMesh(extended_mesh.data(), scale);
+
 		break;
-	case 1://extended
-		extended_mesh.reset(new HDS_Mesh(*extended_mesh));
-		break;
-	case 2://cutted
-		extended_mesh.reset(new HDS_Mesh(*cutted_mesh));
-		break;
+
+
 	case 3://unfolded
-		extended_mesh.reset(new HDS_Mesh(*unfolded_mesh));
+		extended_unfolded_mesh.reset(new HDS_Mesh(*unfolded_mesh));
+		MeshExtender::extendMesh(extended_unfolded_mesh.data(), scale);
+
 		break;
 	}
-
-
-	MeshExtender::extendMesh(extended_mesh.data(), scale);
 
 }
 

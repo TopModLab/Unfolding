@@ -56,13 +56,13 @@ private slots:
 	void slot_toggleVertexSelection();
 
 	void slot_performMeshCut();
-	void slot_unfoldMesh();
+	void slot_unfoldMesh(bool);
 
 	void slot_triggerColormap();
 	void slot_updateViewerColormap();
 
 	void slot_smoothMesh();
-	void slot_extendMesh();
+	void slot_extendMesh(bool);
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
@@ -90,6 +90,7 @@ private:
 
 	CurrentMesh curMesh;
 	stack<CurrentMesh> meshStack;
+	bool isExtended;
 
 	void updateCurrentMesh(){curMesh = meshStack.top();}
 

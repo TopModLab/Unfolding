@@ -31,9 +31,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::initialization()
 {
+	isExtended = false;
 
 	QString curPath = QDir::currentPath();
-	QString filename = curPath+"/meshes/cube_grid.obj";
+	QString filename = curPath+"/meshes/cube.obj";
 	if (MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()))) {
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 		meshStack.push((CurrentMesh)Original);
@@ -115,10 +116,10 @@ void MainWindow::createActions()
 		actionsMap["close"] = closeAct;
 
 		//Edit Menu
-		//		QAction *resetAct = new QAction(tr("Reset"), this);
-		//		resetAct->setStatusTip(tr("Reset"));
-		//		connect(resetAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
-		//		actionsMap["reset"] = resetAct;
+		QAction *resetAct = new QAction(tr("Reset"), this);
+		resetAct->setStatusTip(tr("Reset"));
+		connect(resetAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
+		actionsMap["reset"] = resetAct;
 
 		//selection menu
 
@@ -289,7 +290,9 @@ void MainWindow::createActions()
 
 		QAction *extendAct = new QAction(QIcon(":/icons/extend.png"), tr("Extend Mesh"), this);
 		extendAct->setStatusTip(tr("Extend mesh"));
-		connect(extendAct, SIGNAL(triggered()), this, SLOT(slot_extendMesh()));
+		extendAct->setCheckable(true);
+		extendAct->setChecked(false);
+		connect(extendAct, SIGNAL(toggled(bool)), this, SLOT(slot_extendMesh(bool)));
 		actionsMap["extend"] = extendAct;
 
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
@@ -303,7 +306,7 @@ void MainWindow::createActions()
 		unfoldAct->setStatusTip(tr("Unfold mesh (ALT+U)"));
 		unfoldAct->setCheckable(true);
 		unfoldAct->setChecked(false);
-		connect(unfoldAct, SIGNAL(triggered()), this, SLOT(slot_unfoldMesh()));
+		connect(unfoldAct, SIGNAL(toggled(bool)), this, SLOT(slot_unfoldMesh(bool)));
 		actionsMap["mesh unfold"] = unfoldAct;
 
 
@@ -406,10 +409,9 @@ void MainWindow::createToolBar()
 		selectGroup->addAction(actionsMap["vertex select"]);
 		selectGroup->setExclusive(true);
 
-		QActionGroup *unfoldGroup = new QActionGroup(ui->mainToolBar);
-		unfoldGroup->addAction(actionsMap["mesh unfold"]);
+		//QActionGroup *unfoldGroup = new QActionGroup(ui->mainToolBar);
+		//unfoldGroup->addAction(actionsMap["mesh unfold"]);
 		//unfoldGroup->addAction(actionsMap["mesh fold"]);
-		unfoldGroup->setExclusive(true);
 
 		ui->mainToolBar->addAction(actionsMap["mesh undo"]);
 		ui->mainToolBar->addSeparator();
@@ -490,36 +492,84 @@ void MainWindow::slot_saveFile()
 
 void MainWindow::slot_performMeshCut() {
 
-	MeshManager::getInstance()->cutMeshWithSelectedEdges();
-	if (curMesh == Extended) {
-		//set cutted_mesh as cutted_extended_mesh
-		MeshManager::getInstance()->mapToExtendedMesh();
-	}
-
 	if (curMesh == Original || curMesh == Extended) {
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+
+		MeshManager::getInstance()->cutMeshWithSelectedEdges(curMesh);
 		meshStack.push(Cutted);
 		updateCurrentMesh();
+
+		if (!isExtended) {
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+
+		} else {
+			MeshManager::getInstance()->mapToExtendedMesh(Cutted);
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
+		}
+
 	}
 
 }
 
 
-void MainWindow::slot_unfoldMesh() {
+void MainWindow::slot_unfoldMesh(bool checked) {
+	if(checked){
 	if (curMesh == Cutted) {
 		MeshManager::getInstance()->unfoldMesh();
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
 		meshStack.push(Unfolded);
 		updateCurrentMesh();
+
+		if (!isExtended) {
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+
+		} else {
+			MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
+			MeshManager::getInstance()->mapToExtendedMesh(Unfolded);
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
+
+		}
+
+
+	}
+	}else {
+		slot_undo();
 	}
 }
 
-void MainWindow::slot_extendMesh()
+void MainWindow::slot_extendMesh(bool checked)
 {
+	if (checked) {
+	if(curMesh == Original || curMesh == Unfolded) {
 		MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+		if(curMesh == Original)
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+		else
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
+
 		meshStack.push(Extended);
 		updateCurrentMesh();
+		isExtended = true;
+	}
+	}else {
+
+		if(curMesh == Extended) {
+			meshStack.pop();
+			updateCurrentMesh();
+		}
+		isExtended = false;
+		switch(curMesh){
+		case Original:
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+			break;
+		case Extended:
+			break;
+		case Cutted:
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+			break;
+		case Unfolded:
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+			break;
+		}
+	}
 }
 
 void MainWindow::slot_smoothMesh() {
@@ -601,16 +651,28 @@ void MainWindow::slot_undo()
 
 		switch(curMesh){
 		case Original:
+			//actionsMap["extend"]->setChecked(false);
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 			break;
 		case Extended:
-			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+			if(isExtended)
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+			else {
+				slot_undo();
+			}
 			break;
 		case Cutted:
-			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+			//actionsMap["mesh unfold"]->setChecked(false);
+			if(!isExtended)
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+			else
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 			break;
 		case Unfolded:
-			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+			if(!isExtended)
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
+			else
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
 			break;
 		}
 	}
@@ -621,6 +683,9 @@ void MainWindow::slot_undo()
 void MainWindow::slot_reset()
 {
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+	actionsMap["mesh unfold"]->setChecked(false);
+	actionsMap["extend"]->setChecked(false);
+
 	MeshManager::getInstance()->resetMesh();
 }
 
