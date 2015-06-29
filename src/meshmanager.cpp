@@ -273,11 +273,15 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	return thismesh;
 }
 
-void MeshManager::cutMeshWithSelectedEdges(int meshType)
+void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 {
 
 	QScopedPointer<HDS_Mesh> ref_mesh;
+	if (!isExtended)
 		ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+	else
+		ref_mesh.reset(new HDS_Mesh(*extended_mesh));
+
 
 	cout << "validating reference mesh" << endl;
 	ref_mesh->validate();
@@ -303,10 +307,17 @@ void MeshManager::cutMeshWithSelectedEdges(int meshType)
 	bool isUnfoldable = false;
 	while( !isUnfoldable )
 	{
-		/// make a copy of the mesh with selected edges
-		cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
+		bool cutSucceeded;
+		if (!isExtended) {
+			/// make a copy of the mesh with selected edges
+			cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
 
-		bool cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
+			cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
+		}else {
+			/// make a copy of the mesh with selected edges
+			extended_cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
+			cutSucceeded = MeshCutter::cutMeshUsingEdges(extended_cutted_mesh.data(), selectedEdges);
+		}
 		if( cutSucceeded )
 		{
 			/// cutting performed successfully
@@ -339,20 +350,13 @@ void MeshManager::cutMeshWithSelectedEdges(int meshType)
 	cout << ".........................." << endl;
 }
 
-void MeshManager::mapToExtendedMesh(int meshType)
+void MeshManager::mapToExtendedMesh()
 {
 	QScopedPointer<HDS_Mesh> ref_mesh;
 	QScopedPointer<HDS_Mesh> des_mesh;
+	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+	des_mesh.reset(new HDS_Mesh(*extended_mesh));
 
-	if (meshType == 2) {
-		ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-		des_mesh.reset(new HDS_Mesh(*extended_mesh));
-
-	} else if (meshType == 3) {
-		ref_mesh.reset(new HDS_Mesh(*unfolded_mesh));
-		des_mesh.reset(new HDS_Mesh(*extended_unfolded_mesh));
-
-	}
 
 
 	//mark out all cut edges
@@ -370,23 +374,26 @@ void MeshManager::mapToExtendedMesh(int meshType)
 
 	//find original cut edges in extended mesh and mark out its face
 	for(auto f : des_mesh->faces()) {
+		if (f->isCutFace) {
+			HDS_HalfEdge* edge = f->he;
+			do {
+				edge->setPicked(true);
+				edge = edge->next;
+			}while(edge != f->he);
+		}
 		if (f->isConnector) {
 			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
-				f->he->setCutEdge(true);
-//				HDS_HalfEdge* edge = f->he;
+				f->he->setPicked(true);
+//				HDS_HalfEdge* edge = f->he->next;
 //				do {
-//					edge->setCutEdge(true);
+//					edge->setPicked(true);
 //					edge = edge->next;
 //				}while(edge != f->he);
 			}
 		}
 	}
 
-	if (meshType == 2) {
-		extended_cutted_mesh.reset(new HDS_Mesh(*des_mesh));
-	} else if (meshType == 3) {
-		extended_unfolded_mesh.reset(new HDS_Mesh(*des_mesh));
-	}
+	extended_mesh.reset(new HDS_Mesh(*des_mesh));
 
 }
 

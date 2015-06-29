@@ -495,7 +495,7 @@ void MainWindow::slot_performMeshCut() {
 
 	if (curMesh == Original || curMesh == Extended) {
 
-		MeshManager::getInstance()->cutMeshWithSelectedEdges(curMesh);
+		MeshManager::getInstance()->cutMeshWithSelectedEdges(false);
 		meshStack.push(Cutted);
 		updateCurrentMesh();
 
@@ -503,7 +503,10 @@ void MainWindow::slot_performMeshCut() {
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
 
 		} else {
-			MeshManager::getInstance()->mapToExtendedMesh(Cutted);
+			//map cut edge on hidden cutted_mesh to displayed extended_mesh
+			MeshManager::getInstance()->mapToExtendedMesh();
+			MeshManager::getInstance()->cutMeshWithSelectedEdges(true);
+
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 		}
 
@@ -514,23 +517,16 @@ void MainWindow::slot_performMeshCut() {
 
 void MainWindow::slot_unfoldMesh(bool checked) {
 	if(checked){
-	if (curMesh == Cutted) {
-		MeshManager::getInstance()->unfoldMesh(isExtended);
-		meshStack.push(Unfolded);
-		updateCurrentMesh();
+		if (curMesh == Cutted) {
+			MeshManager::getInstance()->unfoldMesh(isExtended);
+			meshStack.push(Unfolded);
+			updateCurrentMesh();
 
-		//if (!isExtended) {
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
 
-		//} else {
-			//MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
-			//MeshManager::getInstance()->mapToExtendedMesh(Unfolded);
-			//viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
-
-		//}
 
 
-	}
+		}
 	}else {
 		slot_undo();
 	}
@@ -539,17 +535,17 @@ void MainWindow::slot_unfoldMesh(bool checked) {
 void MainWindow::slot_extendMesh(bool checked)
 {
 	if (checked) {
-	if(curMesh == Original || curMesh == Unfolded) {
-		MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
-		if(curMesh == Original)
-			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
-		else
-			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
+		if(curMesh == Original || curMesh == Unfolded) {
+			MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
+			if(curMesh == Original)
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+			else
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
 
-		meshStack.push(Extended);
-		updateCurrentMesh();
-		isExtended = true;
-	}
+			meshStack.push(Extended);
+			updateCurrentMesh();
+			isExtended = true;
+		}
 	}else {
 
 		if(curMesh == Extended) {

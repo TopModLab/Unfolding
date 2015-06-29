@@ -113,8 +113,8 @@ private:
 public:
 	bool loadOBJFile(const string& filename);
 	HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
-	void cutMeshWithSelectedEdges(int meshType);
-	void mapToExtendedMesh(int meshType);
+	void cutMeshWithSelectedEdges(bool isExtended);
+	void mapToExtendedMesh();
 	void unfoldMesh(bool isExtended);
 	void smoothMesh();
 	void extendMesh(int meshType, double scale);
