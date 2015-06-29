@@ -372,11 +372,12 @@ void MeshManager::mapToExtendedMesh(int meshType)
 	for(auto f : des_mesh->faces()) {
 		if (f->isConnector) {
 			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
-				HDS_HalfEdge* edge = f->he->next;
-				do {
-					edge->setCutEdge(true);
-					edge = edge->next;
-				}while(edge != f->he);
+				f->he->setCutEdge(true);
+//				HDS_HalfEdge* edge = f->he;
+//				do {
+//					edge->setCutEdge(true);
+//					edge = edge->next;
+//				}while(edge != f->he);
 			}
 		}
 	}
@@ -445,10 +446,13 @@ void MeshManager::mapToExtendedMesh(int meshType)
 //}
 
 
-void MeshManager::unfoldMesh() {
+void MeshManager::unfoldMesh(bool isExtended) {
   HDS_Mesh* ref_mesh;
 
-  ref_mesh = cutted_mesh.data();
+  if(!isExtended)
+	  ref_mesh = cutted_mesh.data();
+  else
+	  ref_mesh = extended_cutted_mesh.data();
 
 
   unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));

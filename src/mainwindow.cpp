@@ -463,6 +463,7 @@ void MainWindow::slot_newFile()
 #if USE_REEB_GRAPH
 		viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
+		slot_reset();
 		while(!meshStack.empty()) meshStack.pop();
 		meshStack.push(Original);
 		updateCurrentMesh();
@@ -514,19 +515,19 @@ void MainWindow::slot_performMeshCut() {
 void MainWindow::slot_unfoldMesh(bool checked) {
 	if(checked){
 	if (curMesh == Cutted) {
-		MeshManager::getInstance()->unfoldMesh();
+		MeshManager::getInstance()->unfoldMesh(isExtended);
 		meshStack.push(Unfolded);
 		updateCurrentMesh();
 
-		if (!isExtended) {
+		//if (!isExtended) {
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
 
-		} else {
-			MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
-			MeshManager::getInstance()->mapToExtendedMesh(Unfolded);
-			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
+		//} else {
+			//MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
+			//MeshManager::getInstance()->mapToExtendedMesh(Unfolded);
+			//viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
 
-		}
+		//}
 
 
 	}

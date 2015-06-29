@@ -115,7 +115,7 @@ public:
 	HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
 	void cutMeshWithSelectedEdges(int meshType);
 	void mapToExtendedMesh(int meshType);
-	void unfoldMesh();
+	void unfoldMesh(bool isExtended);
 	void smoothMesh();
 	void extendMesh(int meshType, double scale);
 	void resetMesh();
