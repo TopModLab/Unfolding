@@ -50,7 +50,9 @@ SOURCES += src/main.cpp\
     src/MeshExtender.cpp \
     src/discretegeocomputer.cpp \
     src/cutlocuspanel.cpp \
-    src/hds_connector.cpp
+    src/hds_connector.cpp \
+    src/connectorpanel.cpp \
+    src/connectorpanelviewer.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -88,11 +90,14 @@ HEADERS  += src/mainwindow.h \
     src/MeshExtender.h \
     src/discretegeocomputer.h \
     src/cutlocuspanel.h \
-    src/hds_connector.h
+    src/hds_connector.h \
+    src/connectorpanel.h \
+    src/connectorpanelviewer.h
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
     forms/criticalpointspanel.ui \
-    forms/cutlocuspanel.ui
+    forms/cutlocuspanel.ui \
+    forms/connectorpanel.ui
 
 RESOURCES += \
     icons.qrc

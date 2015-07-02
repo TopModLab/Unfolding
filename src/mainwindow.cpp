@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QString>
 #include <QFileDialog>
+#include <QToolButton>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -49,6 +50,8 @@ bool MainWindow::createComponents()
 		ceditor = new ColormapEditor;
 		cppanel = new CriticalPointsPanel;
 		clpanel = new CutLocusPanel;
+		conpanel = new ConnectorPanel;
+
 		createActions();
 		createMenus();
 		createToolBar();
@@ -195,14 +198,37 @@ void MainWindow::createActions()
 		connect(showEdgesAct, SIGNAL(triggered()), this, SLOT(slot_toggleEdges()));
 		actionsMap["show edges"] = showEdgesAct;
 
-		QAction *showVerticesAct = new QAction(tr("Show &Vertices"), this);
+		//vertices
+		QAction *showVerticesAct = new QAction(tr("Show All"), this);
 		showVerticesAct->setShortcut(Qt::Key_V);
 		showVerticesAct->setCheckable(true);
 		showVerticesAct->setChecked(true);
-		showVerticesAct->setStatusTip(tr("Show Vertices"));
+		showVerticesAct->setStatusTip(tr("Show All Vertices"));
 		connect(showVerticesAct, SIGNAL(triggered()), this, SLOT(slot_toggleVertices()));
 		actionsMap["show vertices"] = showVerticesAct;
 
+		QAction *showVMinAct = new QAction(tr("Show Mins"), this);
+		showVMinAct->setCheckable(true);
+		showVMinAct->setChecked(true);
+		showVMinAct->setStatusTip(tr("Show Minimums"));
+		connect(showVMinAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleMins()));
+		actionsMap["show mins"] = showVMinAct;
+
+		QAction *showVMaxAct = new QAction(tr("Show Maxs"), this);
+		showVMaxAct->setCheckable(true);
+		showVMaxAct->setChecked(true);
+		showVMaxAct->setStatusTip(tr("Show Maximums"));
+		connect(showVMaxAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleMaxs()));
+		actionsMap["show maxs"] = showVMaxAct;
+
+		QAction *showVSaddlesAct = new QAction(tr("Show Saddles"), this);
+		showVSaddlesAct->setCheckable(true);
+		showVSaddlesAct->setChecked(true);
+		showVSaddlesAct->setStatusTip(tr("Show Saddles"));
+		connect(showVSaddlesAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleSaddles()));
+		actionsMap["show saddles"] = showVSaddlesAct;
+
+		//face
 		QAction *showFacesAct = new QAction(tr("Show &Faces"), this);
 		showFacesAct->setShortcut(Qt::Key_F);
 		showFacesAct->setCheckable(true);
@@ -295,11 +321,13 @@ void MainWindow::createActions()
 		connect(extendAct, SIGNAL(toggled(bool)), this, SLOT(slot_extendMesh(bool)));
 		actionsMap["extend"] = extendAct;
 
+		//cut with popup submenu
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
 		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
 		cutAct->setStatusTip(tr("Cut mesh (ALT+C)"));
 		connect(cutAct, SIGNAL(triggered()), this, SLOT(slot_performMeshCut()));
 		actionsMap["mesh cut"] = cutAct;
+
 
 		QAction *unfoldAct = new QAction(QIcon(":/icons/unfold.png"), tr("Unfold"), this);
 		unfoldAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_U));
@@ -363,9 +391,15 @@ void MainWindow::createMenus()
 		selectionMenu->addAction(actionsMap["select clear"]);
 
 		QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
-		//QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));
-		//displayVertexMenu->addAction(actionsMap["show "]);
+//		QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));
+//		displayVertexMenu->setDefaultAction(actionsMap["show vertices"]);
+//		displayVertexMenu->addAction(actionsMap["show vertices"]);
+//		displayVertexMenu->addAction(actionsMap["show mins"]);
+//		displayVertexMenu->addAction(actionsMap["show maxs"]);
+//		displayVertexMenu->addAction(actionsMap["show saddles"]);
+
 		displayMenu->addAction(actionsMap["show vertices"]);
+
 		displayMenu->addAction(actionsMap["show edges"]);
 		displayMenu->addAction(actionsMap["show faces"]);
 		displayMenu->addAction(actionsMap["show normals"]);
@@ -429,6 +463,11 @@ void MainWindow::createToolBar()
 
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["mesh cut"]);
+
+		//QToolButton *cutButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(actionsMap["mesh cut"]));
+		//cutButton->setPopupMode(QToolButton::InstantPopup);
+		//cutButton->addAction(new QAction("Expanded Cut", this));
+
 		ui->mainToolBar->addAction(actionsMap["mesh unfold"]);
 
 		ui->mainToolBar->addSeparator();
@@ -536,6 +575,8 @@ void MainWindow::slot_extendMesh(bool checked)
 {
 	if (checked) {
 		if(curMesh == Original || curMesh == Unfolded) {
+			conpanel->show();
+
 			MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
 			if(curMesh == Original)
 				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());

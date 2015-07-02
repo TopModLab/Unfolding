@@ -7,6 +7,7 @@
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
+#include "connectorpanel.h"
 
 namespace Ui {
 	class MainWindow;
@@ -101,6 +102,7 @@ private:
 	ColormapEditor *ceditor;
 	CriticalPointsPanel *cppanel;
 	CutLocusPanel *clpanel;
+	ConnectorPanel *conpanel;
 
 };
 
