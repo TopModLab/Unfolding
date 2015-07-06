@@ -21,6 +21,7 @@ public:
 	HDS_Connector(const HDS_Connector &other);
 	HDS_Connector operator=(const HDS_Connector &other);
 
+
 	vector<HDS_Face*> faces; //corresponding faces pointer
 	HDS_HalfEdge* he; //original corresponding he before adding connector
 

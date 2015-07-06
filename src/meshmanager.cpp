@@ -374,21 +374,18 @@ void MeshManager::mapToExtendedMesh()
 
 	//find original cut edges in extended mesh and mark out its face
 	for(auto f : des_mesh->faces()) {
-		if (f->isCutFace) {
+		if (f->isHole) {
 			HDS_HalfEdge* edge = f->he;
 			do {
 				edge->setPicked(true);
 				edge = edge->next;
 			}while(edge != f->he);
 		}
+
 		if (f->isConnector) {
 			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
 				f->he->setPicked(true);
-//				HDS_HalfEdge* edge = f->he->next;
-//				do {
-//					edge->setPicked(true);
-//					edge = edge->next;
-//				}while(edge != f->he);
+
 			}
 		}
 	}
@@ -458,19 +455,22 @@ void MeshManager::unfoldMesh(bool isExtended) {
 
   if(!isExtended)
 	  ref_mesh = cutted_mesh.data();
-  else
+  else {
 	  ref_mesh = extended_cutted_mesh.data();
+}
 
-
+  cout<<"unfolded mesh set"<<endl;
   unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
   /// cut the mesh using the selected edges
   set<int> selectedFaces;
   for (auto f : ref_mesh->faces()) {
+	  cout<<"check if f is picked"<<endl;
 	if( f->isPicked ) {
+		cout<<"f is picked"<<endl;
 	  /// use picked edges as cut edges
 	  f->setPicked(false);
-
+	  cout<<"set picked false"<<endl;
 	  if( selectedFaces.find(f->index) == selectedFaces.end() ) {
 		selectedFaces.insert(f->index);
 	  }

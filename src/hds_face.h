@@ -41,6 +41,7 @@ public:
 	int index;
 	bool isPicked;
 	bool isCutFace; //invisible face between cut edges
+	bool isHole;
 	bool isConnector;
 
 	bool isPlanar;

@@ -315,7 +315,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			face_t *nf = holeface;
 			nf->index = HDS_Face::assignIndex();
 			cout << "new cut face index = " << nf->index << endl;
-			nf->isCutFace = true;
+			nf->isHole = true;
 			nf->isConnector = false;
 			//nf->isFlap = false;
 			nf->he = newedges.front()->flip;
