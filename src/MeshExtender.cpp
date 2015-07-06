@@ -108,7 +108,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 	}
 	//end of splitting edge
 
-
 	mesh->printInfo();
 	mesh->validate();
 
@@ -121,25 +120,27 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 #endif
 
 	/// check each cut vertices, merge faces if necessary
-	for (auto cv : cutVerts) {
-		if (cv.second > 1) {
+	for (auto cv : cutVerts)
+	{
+		if (cv.second > 1)
+		{
 			cout << "splitting cut vertex #" << cv.first->index << endl;
 
 			/// get all incident faces
 			vector<face_t*> incidentFaces = mesh->incidentFaces(cv.first);
 			vector<face_t*> connectorFaces = Utils::filter(incidentFaces, [](face_t* f) {
 					return f->isConnector;
-		});
+			});
 
 			/// get all outgoing halfedges
 			vector<he_t*> incidentHEs = mesh->incidentEdges(cv.first);
 			/// outgoing cut edges
 			vector<he_t*> cutEdges = Utils::filter(incidentHEs, [](he_t* e) {
 					return e->f->isConnector;
-		});
+			});
 
 			/// the degree of the cut vertex
-			int k = connectorFaces.size();
+			int nConnectors = connectorFaces.size();//replace k with nConnectors
 
 #if 0
 			/// check the relationship between the cut edges and connector faces
@@ -149,14 +150,20 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			}
 			::system("pause");
 #endif
-			cout << "cut vertex degree = " << k << endl;
+			cout << "cut vertex degree = " << nConnectors << endl;
 			cout << "cut faces number = " << connectorFaces.size() << endl;
 			cout << "incident edges = " << incidentHEs.size() << endl;
 			for (auto x : incidentHEs)
-				cout << x->index << " @ " << x->f->index << "[" << x->v->index << ", " << x->flip->v->index << "]" << endl;
+			{
+				cout << x->index << " @ " << x->f->index
+					<< "[" << x->v->index << ", " << x->flip->v->index << "]" << endl;
+			}
 			cout << "cut edges = " << cutEdges.size() << endl;
 			for (auto x : cutEdges)
-				cout << x->index << " @ " << x->f->index << "[" << x->v->index << ", " << x->flip->v->index << "]" << endl;
+			{
+				cout << x->index << " @ " << x->f->index
+					<< "[" << x->v->index << ", " << x->flip->v->index << "]" << endl;
+			}
 #if 0
 			/// verify incident edges
 			for (int i = 0; i < incidentHEs.size(); ++i) {
@@ -165,17 +172,21 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			}
 #endif
 
-			vector<vert_t*> cv_new(k);
-			for (int i = 0; i < k; ++i){
+			vector<vert_t*> cv_new(nConnectors);
+			for (int i = 0; i < nConnectors; ++i)
+			{
 				cv_new[i] = new vert_t(*cv.first);
 				cv_new[i]->he = cutEdges[i];
 
+				//Update vertices
+				cutEdges[i]->v = cv_new[i];
+				cutEdges[i]->flip->next->v = cv_new[i];
 				/// assign a new id to the vertex
 				cv_new[i]->index = HDS_Vertex::assignIndex();
 			}
 
-			/// divide all incident half edges into k group
-			vector<vector<he_t*>> heGroup(k);
+			/// divide all incident half edges into nConnectors group
+			vector<vector<he_t*>> heGroup(nConnectors);
 			int groupIdx = 0, nextGroup = 1;
 			he_t *he = cutEdges[groupIdx];
 			he_t *curHE = he;
@@ -188,19 +199,19 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 				if (curHE == cutEdges[nextGroup]) {
 					/// switch to the next group
 					++groupIdx;
-					nextGroup = (groupIdx + 1) % k;
+					nextGroup = (groupIdx + 1) % nConnectors;
 				}
 
 			} while (curHE != he);
 
-			for (int i = 0; i < k; ++i) {
+			/*for (int i = 0; i < nConnectors; ++i) {
 				cout << "Group #" << i << " has " << heGroup[i].size() << " half edges." << endl;
 				for (auto x : heGroup[i])
 					cout << x->index << endl;
-			}
+			}*/
 
 			/// k-way split the vertex, assign new vertex to the k groups
-			for (int i = 0; i < k; ++i) {
+			/*for (int i = 0; i < nConnectors; ++i) {
 				for (auto x : heGroup[i]) {
 					x->v = cv_new[i];
 					cout << x->flip->v->pos.x() << ", "
@@ -211,7 +222,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 				/// for this group, connect its tail with head
 				heGroup[i].front()->prev = heGroup[i].back()->flip;
 				heGroup[i].back()->flip->next = heGroup[i].front();
-			}
+			}*/
 
 			/// remove the old vertex and add new vertices
 			cout << "removing vertex " << cv.first->index << endl;
@@ -233,13 +244,14 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 
 			/// add new edges to connect new vertices
 			vector<he_t*> newedges;
-			for (int i = 0; i < k; ++i) {
+			for (int i = 0; i < nConnectors; ++i)
+			{
 				he_t* newhe = new he_t;
 				newhe->v = cv_new[i];
 				newhe->index = HDS_HalfEdge::assignIndex();
 
 				he_t* newhe_flip = newhe->flip = new he_t;
-				newhe_flip->v = cv_new[(i + (k - 1)) % k];
+				newhe_flip->v = cv_new[(i + (nConnectors - 1)) % nConnectors];
 				newhe_flip->index = HDS_HalfEdge::assignIndex();
 
 				/// connect the he/flip pair
@@ -248,25 +260,27 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 
 				/// fix the flip's face
 				newhe_flip->f = holeface;
-				newhe->f = connectorFaces[(i + 1) % k];
+				newhe->f = connectorFaces[(nConnectors + 1) % nConnectors];
 
-				newedges.push_back(newhe);
+				newedges.push_back(newhe_flip);
 
 				mesh->heSet.insert(newhe);
 				mesh->heSet.insert(newhe_flip);
 				mesh->heMap.insert(make_pair(newhe->index, newhe));
 				mesh->heMap.insert(make_pair(newhe_flip->index, newhe_flip));
-			}
-			/// connect the new edges, these are not the final results
-			for (int i = 0; i < k; ++i) {
-				newedges[i]->prev = newedges[(i + (k - 1)) % k];
-				newedges[i]->next = newedges[(i + 1) % k];
+
+				/// connect new edges with original edges
+				auto prevEdge = cv_new[i]->he->flip->next->flip;
+				prevEdge->next->prev = newhe;
+				newhe->next = prevEdge->next;
+				prevEdge->next = newhe;
+				newhe->prev = prevEdge;
 			}
 			/// connect the new edges' flips
-			for (int i = 0; i < k; ++i) {
-				newedges[i]->flip->v = newedges[i]->next->v;
-				newedges[i]->flip->next = newedges[i]->prev->flip;
-				newedges[i]->flip->prev = newedges[i]->next->flip;
+			for (int i = 0; i < nConnectors; ++i)
+			{
+				newedges[i]->next = newedges[(i + (nConnectors - 1)) % nConnectors];
+				newedges[i]->prev = newedges[(i + 1) % nConnectors];
 			}
 
 #if 0
@@ -277,16 +291,17 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			::system("pause");
 #endif
 			/// update old faces
-			for (int i = 0; i < k; ++i) {
+			/*for (int i = 0; i < nConnectors; ++i)
+			{
 				heGroup[i].back()->flip->next = newedges[i];
 				newedges[i]->prev = heGroup[i].back()->flip;
 
-				heGroup[(i + 1) % k].front()->prev = newedges[i];
-				newedges[i]->next = heGroup[(i + 1) % k].front();
+				heGroup[(i + 1) % nConnectors].front()->prev = newedges[i];
+				newedges[i]->next = heGroup[(i + 1) % nConnectors].front();
 
 				connectorFaces[i]->isCutFace = false;
 				connectorFaces[i]->isConnector = true;
-			}
+			}*/
 
 #if 0
 			cout << "new verts: ";
@@ -318,16 +333,16 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 			nf->isCutFace = true;
 			nf->isConnector = false;
 			//nf->isFlap = false;
-			nf->he = newedges.front()->flip;
+			nf->he = newedges.front();// ->flip;
 			mesh->faceSet.insert(nf);
 			mesh->faceMap.insert(make_pair(nf->index, nf));
 
 			/// fix the hole if it is adjacent to a cut face
-			auto nfcorners = holeface->corners();
+			/*auto nfcorners = holeface->corners();
 			for (auto corner : nfcorners) {
 				auto cutfaces = Utils::filter(mesh->incidentFaces(corner), [](face_t* f){
 						return f->isCutFace;
-			});
+				});
 				if (cutfaces.size() >= 2) {
 					cout << "Woohoo!" << cutfaces.size() << endl;
 					++woohoos;
@@ -337,7 +352,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 
 					}
 				}
-			}
+			}*/
 
 			//mesh->printInfo("merged");
 			mesh->validate();
