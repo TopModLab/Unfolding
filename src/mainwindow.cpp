@@ -93,6 +93,20 @@ bool MainWindow::connectComponents()
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
 	connect(clpanel, SIGNAL(sig_closedSignal()), this, SLOT(slot_disableclp()));
 
+	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_extendMesh()));
+	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
+
+//	connect(conpanel, &ConnectorPanel::sig_setShape, [this](int index) {
+//		MeshManager::getInstance()->setConnector("shape", index);
+//	});
+
+//	connect(conpanel, SIGNAL(sig_setShape(int)), this, SLOT(slot_setConnectorShape(int)));
+//	connect(conpanel, SIGNAL(sig_setCurvature(int)), this, SLOT(slot_setConnectorCurv(int)));
+//	connect(conpanel, SIGNAL(sig_setSamples(int)), this, SLOT(slot_setConnectorSamples(int)));
+//	connect(conpanel, SIGNAL(sig_setSize(int)), this, SLOT(slot_setConnectorSize(int)));
+//	connect(conpanel, SIGNAL(sig_setConvergingPoint(int)), this, SLOT(slot_setConnectorCP(int)));
+//	connect(conpanel, SIGNAL(sig_setOpeningType(int)), this, SLOT(slot_setConnectorOpening(int)));
+
 	return true;
 }
 
@@ -318,7 +332,7 @@ void MainWindow::createActions()
 		extendAct->setStatusTip(tr("Extend mesh"));
 		extendAct->setCheckable(true);
 		extendAct->setChecked(false);
-		connect(extendAct, SIGNAL(toggled(bool)), this, SLOT(slot_extendMesh(bool)));
+		connect(extendAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
 		actionsMap["extend"] = extendAct;
 
 		//cut with popup submenu
@@ -571,21 +585,13 @@ void MainWindow::slot_unfoldMesh(bool checked) {
 	}
 }
 
-void MainWindow::slot_extendMesh(bool checked)
+void MainWindow::slot_triggerExtendMesh(bool checked)
 {
 	if (checked) {
 		if(curMesh == Original || curMesh == Unfolded) {
 			conpanel->show();
+			conpanel->activateWindow();
 
-			MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
-			if(curMesh == Original)
-				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
-			else
-				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
-
-			meshStack.push(Extended);
-			updateCurrentMesh();
-			isExtended = true;
 		}
 	}else {
 
@@ -608,6 +614,24 @@ void MainWindow::slot_extendMesh(bool checked)
 			break;
 		}
 	}
+}
+
+void MainWindow::slot_extendMesh()
+{
+	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
+	if(curMesh == Original)
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+	else
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
+
+	meshStack.push(Extended);
+	updateCurrentMesh();
+	isExtended = true;
+
+}
+void MainWindow::slot_cancelExtendMesh()
+{
+	actionsMap["extend"]->setChecked(false);
 }
 
 void MainWindow::slot_smoothMesh() {

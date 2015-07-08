@@ -4,7 +4,17 @@
 #include "utils.hpp"
 #include "mathutils.hpp"
 
-bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
+int MeshExtender::shape = 0;
+double MeshExtender::scale = 0.75;
+
+void MeshExtender::setConnector(std::map<QString, double> config)
+{
+	shape = (int)config["shape"];
+	scale = config["size"];
+}
+
+
+bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;

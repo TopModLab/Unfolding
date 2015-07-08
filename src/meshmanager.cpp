@@ -450,17 +450,17 @@ void MeshManager::mapToExtendedMesh()
 //}
 
 
-void MeshManager::unfoldMesh(bool isExtended) {
-  HDS_Mesh* ref_mesh;
+void MeshManager::unfoldMesh(bool isExtended)
+{
+  QScopedPointer<HDS_Mesh> ref_mesh;
 
-  if(!isExtended)
-	  ref_mesh = cutted_mesh.data();
-  else {
-	  ref_mesh = extended_cutted_mesh.data();
+  if(!isExtended) {
+	  ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+  } else {
+	  ref_mesh.reset(new HDS_Mesh(*extended_cutted_mesh));
 }
-
+  ref_mesh->validate();
   cout<<"unfolded mesh set"<<endl;
-  unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
   /// cut the mesh using the selected edges
   set<int> selectedFaces;
@@ -476,8 +476,10 @@ void MeshManager::unfoldMesh(bool isExtended) {
 	  }
 	}
   }
+  unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
-  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh, selectedFaces)) {
+
+  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
 	/// unfolded successfully
 	unfolded_mesh->printInfo("unfolded mesh:");
 	//unfolded_mesh->printMesh("unfolded mesh:");
@@ -515,19 +517,22 @@ bool MeshManager::saveMeshes() {
 	return true;
 }
 
-void MeshManager::extendMesh(int meshType, double scale)
+
+void MeshManager::extendMesh(int meshType, map<QString, double> config)
 {
+	MeshExtender::setConnector(config);
+
 	switch(meshType){
 	case 0://original
 		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
-		MeshExtender::extendMesh(extended_mesh.data(), scale);
+		MeshExtender::extendMesh(extended_mesh.data());
 
 		break;
 
 
 	case 3://unfolded
 		extended_unfolded_mesh.reset(new HDS_Mesh(*unfolded_mesh));
-		MeshExtender::extendMesh(extended_unfolded_mesh.data(), scale);
+		MeshExtender::extendMesh(extended_unfolded_mesh.data());
 
 		break;
 	}

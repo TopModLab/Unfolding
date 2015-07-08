@@ -16,7 +16,7 @@ public:
 	HDS_Connector();
 	~HDS_Connector();
 
-	HDS_Connector(vector<HDS_Face*> f, HDS_HalfEdge* he);
+	HDS_Connector(HDS_HalfEdge* he);
 
 	HDS_Connector(const HDS_Connector &other);
 	HDS_Connector operator=(const HDS_Connector &other);

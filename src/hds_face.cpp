@@ -97,7 +97,6 @@ void HDS_Face::scaleDown(double factor)
 
 	scalingFactor = factor;
 	if(isPlanar) {
-		cout<<"face "<<index<<" is Planar!!!"<<endl;
 		QVector3D c = center();
 		/// update the vertex position
 		auto vertices = corners();

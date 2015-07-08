@@ -10,7 +10,7 @@ ConnectorPanelViewer::ConnectorPanelViewer(QWidget *parent)
 	shapeIndex = 0;
 	curvature = 5;
 	nSamples = 3;
-	size = 10;
+	size = 80;
 	convergingPointPos = 0;
 	openingIndex = 0;
 }
