@@ -24,14 +24,15 @@ signals:
 
 public slots:
 	void slot_saved();
+	void slot_restrainSliders(int);
 
 private:
 	Ui::ConnectorPanel *ui;
-
 	ConnectorPanelViewer *viewer;
-
 	std::map<QString,double> connectorConfig;
 
+private:
+	void closeEvent(QCloseEvent *e);
 
 };
 

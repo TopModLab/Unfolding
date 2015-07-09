@@ -31,7 +31,9 @@ public:
 	QVector3D computeNormal();
 	void checkPlanar();
 
-	void scaleDown(double factor);
+	void setScaledCorners(double factor);
+	vector<QVector3D> getScaledCorners();
+	void scaleDown();
 	double getScalingFactor(){return scalingFactor;}
 
 
@@ -47,6 +49,7 @@ public:
 	bool isPlanar;
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	double scalingFactor;
+	vector<QVector3D> scaledCorners;
 };
 
 #endif // HDS_FACE_H

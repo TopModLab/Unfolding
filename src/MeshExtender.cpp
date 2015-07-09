@@ -4,21 +4,12 @@
 #include "utils.hpp"
 #include "mathutils.hpp"
 
-int MeshExtender::shape = 0;
-double MeshExtender::scale = 0.75;
-
-void MeshExtender::setConnector(std::map<QString, double> config)
-{
-	shape = (int)config["shape"];
-	scale = config["size"];
-}
-
-
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
+	typedef HDS_Connector con_t;
 
 	// convert all edges to a new face
 	set<int> oldFaces;
@@ -27,6 +18,12 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		else oldFaces.insert(f->index);
 	}
 	cout << "number of old faces = " << oldFaces.size() << endl;
+
+	/// update each face with the scaling factor
+	for (auto fidx : oldFaces) {
+		auto face = mesh->faceMap[fidx];
+		face->setScaledCorners(HDS_Connector::getScale());
+	}
 
 	// find all edges
 	set<int> edges;
@@ -64,7 +61,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		else {
 			++cutVerts[ve];
 		}
-
 		/// create a new face
 		face_t *nf = new face_t;
 
@@ -74,8 +70,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 		/// the flip of he
 		he_new_flip->flip = he;
-		he_new_flip->f = nf;
 		he_new_flip->v = ve;
+		he_new_flip->f = nf;
 		he_new_flip->next = hef_new_flip;
 		he_new_flip->prev = hef_new_flip;
 		//he_new_flip->isCutEdge = true;
@@ -88,8 +84,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 		/// the flip of hef
 		hef_new_flip->flip = hef;
-		hef_new_flip->f = nf;
 		hef_new_flip->v = vs;
+		hef_new_flip->f = nf;
 		hef_new_flip->next = he_new_flip;
 		hef_new_flip->prev = he_new_flip;
 		//hef_new_flip->isCutEdge = true;
@@ -111,6 +107,15 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		mesh->faceSet.insert(nf);
 		mesh->faceMap.insert(make_pair(nf->index, nf));
 
+//		/// create a new connector face
+//		con_t *nc = new con_t(he_new_flip, hef_new_flip);
+//		nc->index = con_t::assignIndex();
+//		nc->isFlap = false;
+
+//		for(auto nf: nc->faces) {
+//			mesh->faceSet.insert(nf);
+//			mesh->faceMap.insert(make_pair(nf->index, nf));
+//		}
 		/// record this event with twin map
 		twinmap.insert(make_pair(he, hef));
 
@@ -366,7 +371,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	/// update each face with the scaling factor
 	for (auto fidx : oldFaces) {
 		auto face = mesh->faceMap[fidx];
-		face->scaleDown(scale);
+		face->scaleDown();
 	}
 	/*
 	cout << "number of flaps = " << twinmap.size() << endl;

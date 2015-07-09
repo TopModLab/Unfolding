@@ -88,7 +88,7 @@
        <number>1</number>
       </property>
       <property name="maximum">
-       <number>10</number>
+       <number>5</number>
       </property>
       <property name="sliderPosition">
        <number>3</number>

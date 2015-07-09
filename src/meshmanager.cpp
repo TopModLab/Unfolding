@@ -520,7 +520,7 @@ bool MeshManager::saveMeshes() {
 
 void MeshManager::extendMesh(int meshType, map<QString, double> config)
 {
-	MeshExtender::setConnector(config);
+	HDS_Connector::setConnector(config);
 
 	switch(meshType){
 	case 0://original

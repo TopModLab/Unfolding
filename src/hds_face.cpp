@@ -91,7 +91,7 @@ QVector3D HDS_Face::computeNormal()
 	return n;
 }
 
-void HDS_Face::scaleDown(double factor)
+void HDS_Face::setScaledCorners(double factor)
 {
 	checkPlanar();
 
@@ -102,10 +102,24 @@ void HDS_Face::scaleDown(double factor)
 		auto vertices = corners();
 		for (auto v : vertices) {
 			QVector3D vec_cv = v->pos - c;
-			v->pos = c + scalingFactor * vec_cv;
+			scaledCorners.insert(scaledCorners.end(), c + scalingFactor * vec_cv);
 		}
 	}else {
 		//scale down non-planar face
+	}
+}
+
+vector<QVector3D> HDS_Face::getScaledCorners()
+{
+	return scaledCorners;
+}
+
+void HDS_Face::scaleDown()
+{
+	int n = 0;
+	for (auto v : corners()) {
+		v->pos = scaledCorners.at(n);
+		n++;
 	}
 }
 
