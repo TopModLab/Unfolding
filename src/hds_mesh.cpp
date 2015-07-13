@@ -78,6 +78,21 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		auto v_ref = other.vertMap.at(v->index);
 		v->he = heMap.at(v_ref->he->index);
 	}
+
+  /// create the sorted face set
+  sortedFaces.assign(faceSet.begin(), faceSet.end());
+  std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
+    auto ca = fa->corners();
+    auto cb = fb->corners();
+    float minZa = 1e9, minZb = 1e9;
+    for (auto va : ca) {
+      minZa = std::min(va->pos.z(), minZa);
+    }
+    for (auto vb : cb) {
+      minZb = std::min(vb->pos.z(), minZb);
+    }
+    return minZa < minZb;
+  });
 }
 
 HDS_Mesh::~HDS_Mesh() {
