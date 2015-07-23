@@ -18,6 +18,7 @@ HDS_Mesh::HDS_Mesh()
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 {
+
 	/// need a deep copy
 	showFace = other.showFace;
 	showEdge = other.showEdge;
@@ -79,25 +80,36 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		v->he = heMap.at(v_ref->he->index);
 	}
 
-  /// create the sorted face set
-  sortedFaces.assign(faceSet.begin(), faceSet.end());
-  std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
-    auto ca = fa->corners();
-    auto cb = fb->corners();
-    float minZa = 1e9, minZb = 1e9;
-    for (auto va : ca) {
-      minZa = std::min(va->pos.z(), minZa);
-    }
-    for (auto vb : cb) {
-      minZb = std::min(vb->pos.z(), minZb);
-    }
-    return minZa < minZb;
-  });
+
 }
 
 HDS_Mesh::~HDS_Mesh() {
 	releaseMesh();
 }
+
+void HDS_Mesh::updateSortedFaces()
+{
+	/// create the sorted face set
+	sortedFaces.assign(faceSet.begin(), faceSet.end());
+	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
+	  auto ca = fa->corners();
+	  auto cb = fb->corners();
+	  float minZa = 1e9, minZb = 1e9;
+	  for (auto va : ca) {
+		minZa = std::min(va->pos.z(), minZa);
+	  }
+	  for (auto vb : cb) {
+		minZb = std::min(vb->pos.z(), minZb);
+	  }
+	  return minZa < minZb;
+	});
+}
+
+void HDS_Mesh::clearSortedFaces()
+{
+	sortedFaces.clear();
+}
+
 
 bool HDS_Mesh::validateEdge(he_t *e) {
 	if( heMap.find(e->index) == heMap.end() ) return false;
@@ -174,6 +186,7 @@ void HDS_Mesh::printInfo(const string& msg)
 	cout << "#vertices = " << vertSet.size() << endl;
 	cout << "#faces = " << faceSet.size() << endl;
 	cout << "#half edges = " << heSet.size() << endl;
+	cout << "#sorted Faces = "<< sortedFaces.size() << endl;
 }
 
 void HDS_Mesh::printMesh(const string &msg)
@@ -249,20 +262,7 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
 		heMap[hefIdx] = he->flip;
 	}
 
-	/// sort the face set
-	sortedFaces.assign(faceSet.begin(), faceSet.end());
-	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
-		auto ca = fa->corners();
-		auto cb = fb->corners();
-		float minZa = 1e9, minZb = 1e9;
-		for (auto va : ca) {
-			minZa = std::min(va->pos.z(), minZa);
-		}
-		for (auto vb : cb) {
-			minZb = std::min(vb->pos.z(), minZb);
-		}
-		return minZa < minZb;
-	});
+	updateSortedFaces();
 }
 
 
@@ -312,13 +312,12 @@ void HDS_Mesh::draw(ColorMap cmap)
 	if( showFace )
 	{
 		/// traverse the mesh and render every single face
-		//  cout << "sorted faces = " << sortedFaces.size() << endl;
 		MeshViewer dd;
-
 		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
 		{
+
 			face_t* f = (*fit);
-			if( f->isCutFace ) continue; //invisible face
+			if( f->isCutFace || f->isHole ) continue; //invisible face
 			// render the faces
 			he_t* he = f->he;
 			he_t* hen = he->next;
@@ -332,6 +331,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 			else if (f->isConnector) {
 				glColor4f(0.75, 0.75, 0.95, 1);
 			}
+
 			else {
 				glColor4f(0.75, 0.75, 0.75, 1);
 			}
@@ -357,6 +357,8 @@ void HDS_Mesh::draw(ColorMap cmap)
 				curHe = curHe->next;
 			}while( curHe != he );
 			glEnd();
+
+
 		}
 	}
 

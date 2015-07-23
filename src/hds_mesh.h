@@ -30,6 +30,8 @@ public:
 	~HDS_Mesh();
 
 	HDS_Mesh operator=(const HDS_Mesh& rhs);
+	void updateSortedFaces();
+	void clearSortedFaces();
 
 	void printInfo(const string &msg = "");
 	void printMesh(const string &msg = "");

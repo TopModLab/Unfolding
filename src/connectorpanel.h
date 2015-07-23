@@ -31,8 +31,7 @@ private:
 	ConnectorPanelViewer *viewer;
 	std::map<QString,double> connectorConfig;
 
-private:
-	void closeEvent(QCloseEvent *e);
+
 
 };
 

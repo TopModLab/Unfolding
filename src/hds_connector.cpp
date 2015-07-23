@@ -29,7 +29,6 @@ HDS_Connector::HDS_Connector(HDS_HalfEdge* he, HDS_HalfEdge* hef)
 		HDS_Face * nf = new HDS_Face;
 		/// fix the new face
 		nf->index = HDS_Face::assignIndex();
-		nf->isCutFace = false;
 		nf->isConnector = true;
 
 		if (n == 0) {
@@ -58,6 +57,7 @@ HDS_Connector::HDS_Connector(HDS_HalfEdge* he, HDS_HalfEdge* hef)
 			newhe->f = faces.at(n-1);
 			newhe_flip->f = nf;
 			nf->he = newhe_flip;
+
 
 			//link adjacent edges
 			newhe->next = faces.at(n-1)->he;

@@ -171,6 +171,23 @@ void MeshViewer::slot_selectCutEdgePair()
 	updateGL();
 }
 
+void MeshViewer::slot_selectNextEdge()
+{
+	switch (interactionState) {
+	case SelectEdge:
+		if (!heMesh->getSelectedHalfEdges().empty()) {
+			for (auto he :heMesh->getSelectedHalfEdges()) {
+				if (he->next != nullptr)
+					he->next->setPicked(true);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	updateGL();
+}
+
 void MeshViewer::slot_selectCP()
 {
 	for (auto p : reebPoints) {

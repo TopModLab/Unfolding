@@ -197,6 +197,8 @@ public slots:
 	void slot_selectInverse();
 
 	void slot_selectCutEdgePair();
+	void slot_selectNextEdge();
+
 	void slot_selectCP();
 	void slot_selectCC();
 	void slot_selectMSTEdges();

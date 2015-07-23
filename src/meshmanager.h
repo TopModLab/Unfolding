@@ -70,6 +70,7 @@ public:
 		return extended_unfolded_mesh.data();
 	}
 
+
 	HDS_Mesh* getExtendedMesh() {
 		return extended_mesh.data();
 	}

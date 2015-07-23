@@ -79,8 +79,4 @@ std::map<QString, double> ConnectorPanel::getConfigValues()
 	return connectorConfig;
 }
 
-void ConnectorPanel::closeEvent(QCloseEvent *e)
-{
-	close();
-	emit sig_canceled();
-}
+

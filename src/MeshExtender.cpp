@@ -62,6 +62,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			++cutVerts[ve];
 		}
 
+		//face_t *nf = new face_t;
+
 		/// duplicate half edges
 		he_t *he_new_flip = new he_t;
 		he_t *hef_new_flip = new he_t;
@@ -69,6 +71,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		/// the flip of he
 		he_new_flip->flip = he;
 		he_new_flip->v = ve;
+		//he_new_flip->f = nf;
+		//he_new_flip->next = hef_new_flip;
+		//he_new_flip->prev = hef_new_flip;
 
 		//he_new_flip->isCutEdge = true;
 
@@ -81,6 +86,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		/// the flip of hef
 		hef_new_flip->flip = hef;
 		hef_new_flip->v = vs;
+		//hef_new_flip->f = nf;
+		//hef_new_flip->next = he_new_flip;
+		//hef_new_flip->prev = he_new_flip;
 
 		//hef_new_flip->isCutEdge = true;
 
@@ -90,6 +98,15 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		mesh->heSet.insert(hef_new_flip);
 		mesh->heMap.insert(make_pair(hef_new_flip->index, hef_new_flip));
 
+		///// fix the new face
+		//nf->he = he_new_flip;
+		//nf->index = HDS_Face::assignIndex();
+		//nf->isCutFace = false;
+		//nf->isConnector = true;
+
+		//nf->isFlap = hef->f->isCutFace || he->f->isCutFace;
+		//mesh->faceSet.insert(nf);
+		//mesh->faceMap.insert(make_pair(nf->index, nf));
 
 		/// create a new connector face
 		con_t *nc = new con_t(he_new_flip, hef_new_flip);
@@ -371,5 +388,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	*/
   
 
+	cout<<"extend succeed............."<<endl;
 	return true;
 }

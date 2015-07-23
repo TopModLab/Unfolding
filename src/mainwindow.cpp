@@ -96,16 +96,6 @@ bool MainWindow::connectComponents()
 	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_extendMesh()));
 	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
 
-//	connect(conpanel, &ConnectorPanel::sig_setShape, [this](int index) {
-//		MeshManager::getInstance()->setConnector("shape", index);
-//	});
-
-//	connect(conpanel, SIGNAL(sig_setShape(int)), this, SLOT(slot_setConnectorShape(int)));
-//	connect(conpanel, SIGNAL(sig_setCurvature(int)), this, SLOT(slot_setConnectorCurv(int)));
-//	connect(conpanel, SIGNAL(sig_setSamples(int)), this, SLOT(slot_setConnectorSamples(int)));
-//	connect(conpanel, SIGNAL(sig_setSize(int)), this, SLOT(slot_setConnectorSize(int)));
-//	connect(conpanel, SIGNAL(sig_setConvergingPoint(int)), this, SLOT(slot_setConnectorCP(int)));
-//	connect(conpanel, SIGNAL(sig_setOpeningType(int)), this, SLOT(slot_setConnectorOpening(int)));
 
 	return true;
 }
@@ -159,10 +149,14 @@ void MainWindow::createActions()
 		actionsMap["select multiple"] = selectMultipleAct;
 
 		QAction *selectCutEdgePairAct = new QAction(tr("Select Cut Edge Pair"), this);
-		selectCutEdgePairAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
 		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected cut edge"));
 		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCutEdgePair()));
 		actionsMap["select cut edge pair"] = selectCutEdgePairAct;
+
+		QAction *selectnextEdgeAct = new QAction(tr("Select Next Edge"), this);
+		selectnextEdgeAct->setStatusTip(tr("Select next half edge"));
+		connect(selectnextEdgeAct, SIGNAL(triggered()), viewer, SLOT(slot_selectNextEdge()));
+		actionsMap["select next edge"] = selectnextEdgeAct;
 
 		QAction *selectCPAct = new QAction(tr("Select Critical Points"), this);
 		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
@@ -396,6 +390,7 @@ void MainWindow::createMenus()
 
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select cut edge pair"]);
+		selectionMenu->addAction(actionsMap["select next edge"]);
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select mst"]);
 		selectionMenu->addAction(actionsMap["select cp"]);
@@ -570,7 +565,7 @@ void MainWindow::slot_performMeshCut() {
 
 void MainWindow::slot_unfoldMesh(bool checked) {
 	if(checked){
-		if (curMesh == Cutted) {
+		if (curMesh == Cutted || curMesh == Extended) {
 			MeshManager::getInstance()->unfoldMesh(isExtended);
 			meshStack.push(Unfolded);
 			updateCurrentMesh();
@@ -588,7 +583,7 @@ void MainWindow::slot_unfoldMesh(bool checked) {
 void MainWindow::slot_triggerExtendMesh(bool checked)
 {
 	if (checked) {
-		if(curMesh == Original || curMesh == Unfolded) {
+		if(curMesh == Original || curMesh == Cutted ||curMesh == Unfolded) {
 			conpanel->show();
 			conpanel->activateWindow();
 
@@ -621,9 +616,11 @@ void MainWindow::slot_extendMesh()
 	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
 	if(curMesh == Original)
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
-	else
+	else if (curMesh == Unfolded)
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
-
+	else {
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
+}
 	meshStack.push(Extended);
 	updateCurrentMesh();
 	isExtended = true;

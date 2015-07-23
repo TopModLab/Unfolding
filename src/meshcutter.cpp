@@ -31,6 +31,21 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	unordered_set<int> cutEdgesFlips;//new flip edges of cut edges
 	unordered_set<int> cutFacesTotal;//all temporatry cut faces
 
+	/// handle hole face
+	for (auto f: mesh->faces()) {
+		if (f->isHole) {
+			f->isCutFace = true;
+			cutFacesTotal.insert(f->index);
+			HDS_HalfEdge* edge = f->he;
+			do {
+				edge->setCutEdge(true);
+				cutEdgesFlips.insert(edge->index);
+				edge = edge->next;
+			}while(edge != f->he);
+
+			cutVerts.insert(make_pair(edge->v, 1));
+		}
+	}
 	/// split each cut edge into 2 edges
 	for(auto heIdx : edges)
 	{
@@ -74,6 +89,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		he_new_flip->prev = hef_new_flip;
 		he_new_flip->isCutEdge = true;
 
+
 		he->flip = he_new_flip;
 
 		he_new_flip->index = HDS_HalfEdge::assignIndex();
@@ -115,6 +131,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	mesh->validate();
 
 	int progressIndex = 0;
+
 	/// check each cut vertices, merge faces if necessary
 	for(auto cv : cutVerts)
 	{
@@ -129,6 +146,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			vector<face_t*> cutFaces = Utils::filter(incidentFaces, [](face_t* f) {
 					return f->isCutFace;
 		});
+
 
 #if 1
 			/// test if we are merging the same face
@@ -145,9 +163,12 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 #endif
 
 			vector<he_t*> incidentHEs = mesh->incidentEdges(cv.first);
+
+
 			vector<he_t*> cutEdges = Utils::filter(incidentHEs, [](he_t* e) {
 					return e->f->isCutFace;
 		});
+
 
 			/// merge them
 			/// since they are discovered in a given order (CW or CCW), just glue them together
@@ -248,74 +269,15 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 				mesh->vertSet.insert(v);
 				mesh->vertMap.insert(make_pair(v->index, v));
 			}
+
 			mesh->printInfo("merged");
 			mesh->validate();
 		}
+
 		progressIndex++;
 		cuttingProgress->setValue(30+((double)progressIndex/(double)cutVerts.size()*65));
 	}
 
-	///set hole faces
-	//merge all hole cut faces
-	for (auto f: mesh->faces()) {
-		if (f->isHole) {
-			cout<<"Hole: "<<f->index<<endl;
-			unordered_set<int> cutEdges;
-			//remove all old faces
-			for (auto incidentf : mesh->incidentFaces(f)) {
-				cout<<"hole face incident face: "<<incidentf->isCutFace<<endl;
-				//delete edges
-				HDS_HalfEdge* edge = mesh->incidentEdge(f,incidentf);
-				cout<<"edge twin index: "<<edge->twin->index<<endl;
-				cutEdges.insert(edge->twin->index);
-				//cutEdgesFlips.insert(edge->twin->index);
-
-				mesh->heSet.erase(edge);
-				mesh->heSet.erase(edge->flip);
-
-				mesh->heMap.erase(edge->index);
-				mesh->heMap.erase(edge->flip->index);
-
-				cutEdgesFlips.erase(edge->index);
-				cutEdgesFlips.erase(edge->flip->index);
-
-				delete edge;
-				delete edge->flip;
-
-				//delete faces
-				mesh->faceSet.erase(incidentf);
-				mesh->faceMap.erase(incidentf->index);
-
-				cutFacesTotal.erase(incidentf->index);
-				delete incidentf;
-			}
-			mesh->faceSet.erase(f);
-			mesh->faceMap.erase(f->index);
-
-			delete f;
-
-			//create new unified cut face
-			face_t *nf = new face_t;
-
-			nf->index = HDS_Face::assignIndex();
-			cout<<"new hole face: "<<nf->index<<endl;
-			nf->isCutFace = true;
-			mesh->faceSet.insert(nf);
-			mesh->faceMap.insert(make_pair(nf->index, nf));
-			cutFacesTotal.insert(nf->index);
-
-			auto he = mesh->heMap[*cutEdges.begin()];
-			nf->he = he;
-			auto curHE = he;
-			do
-			{
-				curHE->f = nf;
-				cutEdges.erase(curHE->index);
-				curHE = curHE->next;
-			} while (curHE != he);
-		}
-
-	}
 
 	/// delete old cut face, create new cut face depending on edge loop
 	while (!cutFacesTotal.empty())
@@ -359,8 +321,9 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		cout << v->index << ": " << (*v) << endl;
 	}
 
-
 	cuttingProgress->setValue(100);
+	mesh->updateSortedFaces();
+
 	return true;
 }
 
