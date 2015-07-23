@@ -275,6 +275,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh, float scale)
 				newhe->next = prevEdge->next;
 				prevEdge->next = newhe;
 				newhe->prev = prevEdge;
+
+				//newhe->isCutEdge(true);
 			}
 			/// connect the new edges' flips
 			for (int i = 0; i < nConnectors; ++i)

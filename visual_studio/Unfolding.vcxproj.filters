@@ -213,6 +213,24 @@
     <ClCompile Include="..\src\discretegeocomputer.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_connectorpanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_connectorpanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\connectorpanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_connectorpanelviewer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_connectorpanelviewer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\connectorpanelviewer.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -329,6 +347,9 @@
     <ClInclude Include="..\src\GeodesicComputer.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_connectorpanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
@@ -347,6 +368,15 @@
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\meshviewer.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\connectorpanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\connectorpanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\connectorpanelviewer.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
   </ItemGroup>
