@@ -12,7 +12,7 @@ HDS_HalfEdge::HDS_HalfEdge()
 	flip = nullptr;
 	prev = nullptr;
 	next = nullptr;
-	twin = nullptr;
+	cutTwin = nullptr;
 }
 
 HDS_HalfEdge::~HDS_HalfEdge()
@@ -30,7 +30,7 @@ HDS_HalfEdge::HDS_HalfEdge(const HDS_HalfEdge &other)
 	flip = nullptr;
 	prev = nullptr;
 	next = nullptr;
-	twin = nullptr;
+	cutTwin = nullptr;
 }
 
 HDS_HalfEdge HDS_HalfEdge::operator=(const HDS_HalfEdge &other)

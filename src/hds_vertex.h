@@ -41,6 +41,8 @@ public:
 	bool isPicked;
 	double colorVal;
 
+	HDS_Vertex* bridgeTwin; // created in mesh extender
+
 	enum ReebsPointType{
 		Minimum,
 		Maximum,

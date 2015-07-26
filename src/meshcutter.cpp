@@ -122,8 +122,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		cutFacesTotal.insert(nf->index);
 
 		/// record this cut event using twin
-		he->twin = hef;
-		hef->twin = he;
+		he_new_flip->cutTwin = hef_new_flip;
+		hef_new_flip->cutTwin = he_new_flip;
 	}
 	cuttingProgress->setValue(30);
 
@@ -302,6 +302,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		nf->isCutFace = true;
 		mesh->faceSet.insert(nf);
 		mesh->faceMap.insert(make_pair(nf->index, nf));
+		mesh->finalCutFaceIndex = nf->index;
 
 		auto he = mesh->heMap[*cutEdgesFlips.begin()];
 		nf->he = he;

@@ -24,12 +24,13 @@ public:
 
 	void setPicked(bool v) { isPicked = v; flip->isPicked = v; }
 	void setCutEdge(bool v) { isCutEdge = v; flip->isCutEdge = v; }
+	void setFlip(HDS_HalfEdge* thef) {flip = thef; thef->flip = this;}
 
 	HDS_Face *f;
 	HDS_Vertex *v;
 	HDS_HalfEdge *prev, *next, *flip;
 
-	HDS_HalfEdge *twin;  // pointer to its twin halfedge created in a cut event
+	HDS_HalfEdge *cutTwin;  // pointer to its twin halfedge created in a cut event
 
 	int index;
 	bool isPicked;

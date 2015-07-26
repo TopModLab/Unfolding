@@ -12,12 +12,14 @@ HDS_Vertex::HDS_Vertex() {
 	index = -1;
 	colorVal = 0;
 	he = nullptr;
+	bridgeTwin = nullptr;
 }
 
 HDS_Vertex::HDS_Vertex(const QVector3D &pos):pos(pos) {
 	isPicked = false;
 	index = -1;
 	he = nullptr;
+	bridgeTwin = nullptr;
 }
 
 HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
@@ -29,6 +31,7 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
 	curvature = v.curvature;
 	colorVal = v.colorVal;
 	he = nullptr;
+	bridgeTwin = nullptr;
 	rtype = v.rtype;
 	morseFunctionVal = v.morseFunctionVal;
 }
@@ -82,6 +85,8 @@ void HDS_Vertex::computeNormal()
 		if (!prevHE->f->isCutFace) {
 			QVector3D v1 = prevHE->flip->v->pos - prevHE->v->pos;
 			QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+
+
 			normal += QVector3D::crossProduct(v2, v1) * acos(QVector3D::dotProduct(v2.normalized(), v1.normalized()));
 		}
 		prevHE = curHE;

@@ -148,9 +148,9 @@ void MainWindow::createActions()
 		connect(selectMultipleAct, SIGNAL(triggered()), this, SLOT(slot_selectMultiple()));
 		actionsMap["select multiple"] = selectMultipleAct;
 
-		QAction *selectCutEdgePairAct = new QAction(tr("Select Cut Edge Pair"), this);
-		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected cut edge"));
-		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCutEdgePair()));
+		QAction *selectCutEdgePairAct = new QAction(tr("Select Twin Pair"), this);
+		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected elements"));
+		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectTwinPair()));
 		actionsMap["select cut edge pair"] = selectCutEdgePairAct;
 
 		QAction *selectnextEdgeAct = new QAction(tr("Select Next Edge"), this);

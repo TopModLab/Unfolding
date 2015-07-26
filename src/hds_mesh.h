@@ -41,6 +41,7 @@ public:
 					const vector<vert_t*> &verts,
 					const vector<he_t*> &hes);
 
+
 	unordered_set<vert_t*> getReebPoints(const vector<double> &val = vector<double>(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
 	unordered_set<vert_t*> getSelectedVertices();
@@ -72,6 +73,9 @@ public:
 	vector<face_t *> incidentFaces(face_t *f);
 
 	he_t* incidentEdge(face_t *f1, face_t *f2);
+	he_t* incidentEdge(vert_t *v1, vert_t *v2);
+
+	face_t * bridging(he_t* h1, he_t* h2); //create a bridge between two boundary half edges
 
 	template <typename T>
 	void flipSelectionState(int idx, unordered_map<int, T> &m);
@@ -106,6 +110,8 @@ private:
 	unordered_map<int, he_t*> heMap;
 	unordered_map<int, face_t*> faceMap;
 	unordered_map<int, vert_t*> vertMap;
+
+	int finalCutFaceIndex;
 
 private:
 	bool showFace, showEdge, showVert, showNormals;
