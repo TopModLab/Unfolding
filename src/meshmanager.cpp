@@ -381,10 +381,7 @@ void MeshManager::mapToExtendedMesh()
 			HDS_HalfEdge* edge = f->he;
 			do {
 				//edge->setPicked(true);
-<<<<<<< HEAD
-=======
 				edge->setCutEdge(true);
->>>>>>> origin/GroupComponet
 				edge = edge->next;
 			}while(edge != f->he);
 		}
@@ -595,7 +592,7 @@ void MeshManager::exportXMLFile(const char* filename)
 					printEdgePts.push_back(Pnsn);
 
 					cutedges.erase(curHE);
-					cutedges.erase(curHE->flip->twin->flip);
+					cutedges.erase(curHE->flip->cutTwin->flip);
 				}
 				else
 				{
@@ -636,7 +633,7 @@ void MeshManager::exportXMLFile(const char* filename)
 					printEdgePtsCarves.push_back(Psn);
 
 					cutedges.erase(curHE);
-					cutedges.erase(curHE->flip->twin->flip);
+					cutedges.erase(curHE->flip->cutTwin->flip);
 				}
 				else
 				{
