@@ -6,7 +6,7 @@
     <OutDir>$(SolutionDir)..\bin\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>tmp\$(Configuration)\$(PlatformTarget)\</IntDir>
     <ExecutablePath>$(QTDIR)\bin;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(QTDIR)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(QTDIR)\include;$(ProjectPath)\..\..\src;$(IncludePath)</IncludePath>
     <LibraryPath>$(QTDIR)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>

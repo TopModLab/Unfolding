@@ -381,6 +381,10 @@ void MeshManager::mapToExtendedMesh()
 			HDS_HalfEdge* edge = f->he;
 			do {
 				//edge->setPicked(true);
+<<<<<<< HEAD
+=======
+				edge->setCutEdge(true);
+>>>>>>> origin/GroupComponet
 				edge = edge->next;
 			}while(edge != f->he);
 		}
@@ -494,6 +498,14 @@ void MeshManager::extendMesh(int meshType, map<QString, double> config)
 
 void MeshManager::exportXMLFile(const char* filename)
 {
+	enum ConnectorType
+	{
+		SIMPLE_CONNECTOR,
+		INSERT_CONNECTOR,
+		GEAR_CONNECTOR,
+		SAW_CONNECTOR
+	};
+	ConnectorType cn_t = GEAR_CONNECTOR;
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
 	if (err)
@@ -521,7 +533,7 @@ void MeshManager::exportXMLFile(const char* filename)
 			size_x, size_y);// define the size of export graph
 	//for cut layer
 	QVector3D nx, ny;
-	double he_offset(10), he_scale(20);
+	double he_offset(10), he_scale(20), wid_conn(10), len_conn(10);
 		
 	for (auto face : cutfaces)
 	{
@@ -533,10 +545,210 @@ void MeshManager::exportXMLFile(const char* filename)
 		nx = he->v->pos - he->next->v->pos;
 		nx.normalize();
 		ny = QVector3D::crossProduct(nx, face->n);
+
+		//////////////////////////////////////////////////////////////////////////
+		unordered_set<HDS_HalfEdge*> cutedges;
+		unordered_set<HDS_HalfEdge*> cutTwinEdges;
+		vector<QVector2D*> printEdgePts;
+		vector<QVector2D*> printEdgePtsCarves;
+		do 
+		{
+			cutedges.insert(curHE);
+			curHE = curHE->next;
+		} while (curHE != he);
+
+		QVector2D *Pthis = new QVector2D((QVector3D::dotProduct(curHE->v->pos, nx) + he_offset)*he_scale,
+			(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset)*he_scale);
+		do 
+		{
+			QVector3D faceCenter = curHE->flip->f->center();
+			QVector2D Pc((QVector3D::dotProduct(faceCenter, nx) + he_offset)*he_scale,
+				(QVector3D::dotProduct(faceCenter, ny) + he_offset)*he_scale);
+			
+			QVector2D *Pnext = new QVector2D((QVector3D::dotProduct(curHE->next->v->pos, nx) + he_offset)*he_scale,
+				(QVector3D::dotProduct(curHE->next->v->pos, ny) + he_offset)*he_scale);
+
+			printEdgePts.push_back(Pthis);
+
+			
+			switch (cn_t)
+			{
+			case SIMPLE_CONNECTOR:
+			{
+				if (cutedges.find(curHE) != cutedges.end())
+				{
+					//calculate 
+					QVector2D T = (*Pnext - *Pthis).normalized();
+					QVector2D d = (Pc - *Pthis);
+					QVector2D a = QVector2D::dotProduct(d, T) * T;
+					QVector2D n = (a - d).normalized();
+
+					QVector2D Pn = *Pthis + a;
+					QVector2D Psc = Pn + n * wid_conn;
+
+					//draw connector
+
+					QVector2D *Pnst = new QVector2D(Psc - len_conn * T);
+					QVector2D *Pnsn = new QVector2D(Psc + len_conn * T);
+
+					printEdgePts.push_back(Pnst);
+					printEdgePts.push_back(Pnsn);
+
+					cutedges.erase(curHE);
+					cutedges.erase(curHE->flip->twin->flip);
+				}
+				else
+				{
+					//draw receiver
+				}
+				break;
+			}
+			case INSERT_CONNECTOR:
+			{
+				//calculate 
+				QVector2D T = (*Pnext - *Pthis).normalized();
+				QVector2D d = (Pc - *Pthis);
+				QVector2D a = QVector2D::dotProduct(d, T) * T;
+				QVector2D n = (a - d).normalized();
+
+				QVector2D Pn = *Pthis + a;
+				QVector2D Psc = Pn + n * wid_conn;
+
+				QVector2D *Pst = new QVector2D(Pn - len_conn * T);
+				QVector2D *Psn = new QVector2D(Pn + len_conn * T);
+				QVector2D *Pnst = new QVector2D(Psc - len_conn * T);
+				QVector2D *Pnsn = new QVector2D(Psc + len_conn * T);
+
+				QVector2D *Pcvt = new QVector2D(Pn - 0.5 * len_conn * T);
+				QVector2D *Pcvn = new QVector2D(Pn + 0.5 * len_conn * T);
+
+				printEdgePts.push_back(Pst);
+				printEdgePts.push_back(Pnst);
+				printEdgePts.push_back(Pnsn);
+				printEdgePts.push_back(Psn);
+
+				if (cutedges.find(curHE) != cutedges.end())
+				{
+					//draw connector
+					printEdgePtsCarves.push_back(Pst);
+					printEdgePtsCarves.push_back(Pcvt);
+					printEdgePtsCarves.push_back(Pcvn);
+					printEdgePtsCarves.push_back(Psn);
+
+					cutedges.erase(curHE);
+					cutedges.erase(curHE->flip->twin->flip);
+				}
+				else
+				{
+					//draw receiver
+					printEdgePtsCarves.push_back(Pcvt);
+					printEdgePtsCarves.push_back(Pcvn);
+				}
+				break;
+			}
+			case GEAR_CONNECTOR:
+			{
+				//calculate 
+				QVector2D T = (*Pnext - *Pthis).normalized();
+				QVector2D d = (Pc - *Pthis);
+				QVector2D a = QVector2D::dotProduct(d, T) * T;
+				QVector2D n = (a - d).normalized();
+
+				QVector2D Pn = *Pthis + a;
+				QVector2D Psc = Pn + n * wid_conn;
+
+				//division number
+				int ndiv = 8;
+				//connector segment length
+				double len_seg = Pthis->distanceToPoint(*Pnext) / ndiv * 0.5;
+
+				QVector2D *Pst = Pthis;
+				for (int i = 0; i < ndiv; i++)
+				{
+					if (i > 0)
+					{
+						printEdgePts.push_back(Pst);
+					}
+					QVector2D seg_T = T * len_seg;
+					QVector2D *Pnst = new QVector2D(*Pst + n * len_seg);
+					QVector2D *Pnsn = new QVector2D(*Pnst + seg_T);
+					QVector2D *Psn = new QVector2D(*Pst + seg_T);
+					
+					Pst = new QVector2D(*Psn + seg_T);
+
+					printEdgePts.push_back(Pnst);
+					printEdgePts.push_back(Pnsn);
+					printEdgePts.push_back(Psn);
+					
+				}
+				break;
+			}
+			case SAW_CONNECTOR:
+			{
+				//calculate 
+				QVector2D T = (*Pnext - *Pthis).normalized();
+				QVector2D d = (Pc - *Pthis);
+				QVector2D a = QVector2D::dotProduct(d, T) * T;
+				QVector2D n = (a - d).normalized();
+
+				QVector2D Pn = *Pthis + a;
+				QVector2D Psc = Pn + n * wid_conn * 0.6;
+
+				QVector2D *Pst = new QVector2D(Pn - len_conn * T * 0.5);
+				QVector2D *Psn = new QVector2D(Pn + len_conn * T * 0.5);
+				QVector2D *Pnst = new QVector2D(Psc - len_conn * T * 0.5);
+				QVector2D *Pnsn = new QVector2D(Psc + len_conn * T * 0.5);
+				QVector2D *Pnn = new QVector2D(Pn);
+
+				printEdgePts.push_back(Pst);
+				printEdgePts.push_back(Pnst);
+				printEdgePts.push_back(Pnsn);
+				printEdgePts.push_back(Psn);
+
+				printEdgePtsCarves.push_back(Pnn);
+				printEdgePtsCarves.push_back(Psn);
+
+				break;
+			}
+			default:
+				break;
+			}
+			
+			printEdgePts.push_back(Pnext);
+
+			Pthis = Pnext;
+			curHE = curHE->next;
+		} while (curHE != he);
+
+		fprintf(SVG_File,
+			"<g opacity=\"0.8\">\n" \
+			"\t<polygon id=\"%d\" points=\"",
+			face->index);
+		for (int i = 0; i < printEdgePts.size(); i++)
+		{
+			fprintf(SVG_File, "%f,%f ", printEdgePts[i]->x(), printEdgePts[i]->y());
+		}
+		fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
+			printEdgePts[0]->x(), printEdgePts[0]->y());
+		//print carve edges
+		if (printEdgePtsCarves.size())
+		{
+			
+			for (int i = 0; i < printEdgePtsCarves.size(); i += 2)
+			{
+				fprintf(SVG_File, "\t<polyline id=\"%d\" points=\"%f,%f %f,%f\" " \
+					"style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
+					i,
+					printEdgePtsCarves[i]->x(), printEdgePtsCarves[i]->y(),
+					printEdgePtsCarves[i + 1]->x(), printEdgePtsCarves[i + 1]->y());
+
+			}
+		}
+		//////////////////////////////////////////////////////////////////////////
 		/*cout << "Face normal:" << face->n << endl;
 		cout << "X dir:" << nx << endl;
 		cout << "Y dir:" << ny << endl;*/
-		fprintf(SVG_File,
+		/*fprintf(SVG_File,
 			"<g opacity=\"0.8\">\n" \
 			"\t<polygon id=\"%d\" points=\"",
 			face->index);
@@ -549,6 +761,7 @@ void MeshManager::exportXMLFile(const char* filename)
 		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.8\" fill=\"none\" />\n",
 				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
 				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
+		*/
 		/// draw connected faces
 		set<HDS_Face*> neighbourFaces = face->connectedFaces();
 		for (auto face : neighbourFaces)
@@ -559,11 +772,6 @@ void MeshManager::exportXMLFile(const char* filename)
 			fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", face->index);
 
 			do {
-				/*if (curHE->isCutEdge)
-				{
-					curHE = curHE->next;
-					continue;
-				}*/
 				{
 					fprintf(SVG_File, "%f,%f ",
 						(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
@@ -571,7 +779,7 @@ void MeshManager::exportXMLFile(const char* filename)
 				}
 				curHE = curHE->next;
 			} while (curHE != he);
-			fprintf(SVG_File, "%f,%f\" stroke=\"gray\" stroke-width=\"0.5\" fill=\"none\" />\n",
+			fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.8\" />\n",
 				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
 				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
 		}
