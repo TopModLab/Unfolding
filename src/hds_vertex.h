@@ -42,6 +42,7 @@ public:
 	double colorVal;
 
 	HDS_Vertex* bridgeTwin; // created in mesh extender
+	HDS_Vertex* flapTwin;
 
 	enum ReebsPointType{
 		Minimum,

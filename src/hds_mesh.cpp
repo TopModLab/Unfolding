@@ -609,9 +609,18 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
 		he_new->setFlip(he_new_flip);
 		he_new->f = bridgeFace;
 
-		cout<<"final cut face index............."<<finalCutFaceIndex<<endl;
 		if (finalCutFaceIndex != -1)
 			he_new_flip->f = faceMap[finalCutFaceIndex];
+		else {
+			face_t * cutFace = new face_t;
+			cutFace->index = HDS_Face::assignIndex();
+			finalCutFaceIndex = cutFace->index;
+			cutFace->isCutFace = true;
+			cutFace->he = he_new_flip;
+			he_new_flip->f = cutFace;
+			faceSet.insert(cutFace);
+			faceMap.insert(make_pair(cutFace->index, cutFace));
+		}
 
 		he_new->setCutEdge(true);
 

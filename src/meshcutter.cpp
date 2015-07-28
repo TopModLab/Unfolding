@@ -293,6 +293,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			delete f;
 		}
 	}
+
 	/// create face for new created half-edge
 	while (!cutEdgesFlips.empty())
 	{

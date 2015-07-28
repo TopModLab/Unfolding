@@ -715,7 +715,7 @@ void MainWindow::slot_undo()
 			break;
 		case Extended:
 			if(isExtended)
-				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 			else {
 				slot_undo();
 			}
