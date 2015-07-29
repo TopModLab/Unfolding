@@ -19,73 +19,64 @@ void HDS_Connector::setConnector(std::map<QString, double> config)
 	opening = (int)config["opening"];
 
 }
+void HDS_Connector::setOriginalPositions()
+{
+	QVector3D corner1, corner0, center, mid;
+	//find corner1 pos that corresponds to he->v
+	center = he->flip->f->center();
+	corner1 = center + (he->v->pos - center)/scale;
+	//find corner0 pos that corresponds to he->flip->v
+	corner0 = center + (he->flip->v->pos - center)/scale;
+	//get mid position
+	mid = (corner1 + corner0) /2.0;
+	//calculate p00 p01
+	p01 = mid + scale * (corner1 - mid);
+	p00 = mid + scale * (corner0 - mid);
+
+}
+
 HDS_Connector::HDS_Connector(HDS_HalfEdge* he, HDS_HalfEdge* hef)
 {
+
 	this->he = he;
 	this->hef = hef;
+	setOriginalPositions();
 
 
-	for (int n = 0; n < nSamples; n++){
-		HDS_Face * nf = new HDS_Face;
-		/// fix the new face
-		nf->index = HDS_Face::assignIndex();
-		nf->isConnector = true;
+	//push back all internal edges
+	for (int i = 0; i < nSamples-1; i++) {
+		HDS_Vertex* vs = new HDS_Vertex;
+		HDS_Vertex* ve = new HDS_Vertex;
+		vs->index = HDS_Vertex::assignIndex();
+		ve->index = HDS_Vertex::assignIndex();
+		//test for original connectors
+		vs->pos = p00;
+		ve->pos = p01;
 
-		if (n == 0) {
-			nf->he = he;
+		HDS_HalfEdge* he_new = new HDS_HalfEdge;
+		HDS_HalfEdge* he_new_flip = new HDS_HalfEdge;
+		he_new->index = HDS_HalfEdge::assignIndex();
+		he_new_flip->index = HDS_HalfEdge::assignIndex();
+		he_new->setFlip(he_new_flip);
 
-		}
+		vs->he = he_new;
+		ve->he = he_new_flip;
 
-		if (n > 1) {
-			//init two new vertices
-			//determine vertices positions
-			vector<HDS_Vertex*> vertices = calculateBezierCurve(n);
+		he_new->v = vs;
+		he_new_flip->v = ve;
 
-			//init a pair of half edges from these vertices
-			HDS_HalfEdge* newhe = new HDS_HalfEdge;
-			HDS_HalfEdge* newhe_flip = new HDS_HalfEdge;
+		//connect edge loop
+		he_new->prev = he_new_flip;
+		he_new->next = he_new_flip;
+		he_new_flip->prev = he_new;
+		he_new_flip->next = he_new;
 
-			newhe_flip->flip = newhe;
-			newhe->flip = newhe_flip;
-
-			newhe->index = HDS_HalfEdge::assignIndex();
-			newhe_flip->index = HDS_HalfEdge::assignIndex();
-			newhe->v = vertices.front();
-			newhe_flip->v = vertices.back();
-
-			//link adjacent faces to half edges
-			newhe->f = faces.at(n-1);
-			newhe_flip->f = nf;
-			nf->he = newhe_flip;
-
-
-			//link adjacent edges
-			newhe->next = faces.at(n-1)->he;
-			newhe->prev = faces.at(n-1)->he;
-			faces.at(n-1)->he->next = newhe;
-			faces.at(n-1)->he->prev = newhe;
-
-			for(auto v : vertices) {
-				v->he = newhe;
-				v->index = HDS_Vertex::assignIndex();
-			}
-			verts.insert(verts.end(),vertices.begin(),vertices.end());
-			hes.push_back(newhe);
-			hes.push_back(newhe_flip);
-
-		}
-		faces.push_back(nf);
+		hes.push_back(he_new);
+		hes.push_back(he_new_flip);
+		verts.push_back(vs);
+		verts.push_back(ve);
 	}
-	he->f = faces.front();
-	hef->f = faces.back();
 
-	//link original half edge
-	he->next = hes.empty()? hef:hes.front();
-	he->prev = hes.empty()? hef:hes.front();
-	hef->next = hes.empty()? he:hes.back();
-	hef->prev = hes.empty()? he:hes.back();
-
-	//nf->isFlap = hef->f->isCutFace || he->f->isCutFace;
 
 }
 vector<HDS_Vertex*> HDS_Connector::calculateBezierCurve(int index)

@@ -514,6 +514,25 @@ void HDS_Mesh:: flipShowNormals()
 	showNormals = !showNormals;
 }
 
+void HDS_Mesh::addHalfEdge(he_t* he)
+{
+	heSet.insert(he);
+	heMap.insert(make_pair(he->index, he));
+}
+
+void HDS_Mesh::addVertex(vert_t* vert)
+{
+	vertSet.insert(vert);
+	vertMap.insert(make_pair(vert->index, vert));
+}
+
+void HDS_Mesh::addFace(face_t* face)
+{
+	faceSet.insert(face);
+	faceMap.insert(make_pair(face->index, face));
+}
+
+
 vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
 {
 	he_t *he = v->he;

@@ -50,6 +50,7 @@ public:
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	double scalingFactor;
 	vector<QVector3D> scaledCorners;
+
 };
 
 #endif // HDS_FACE_H

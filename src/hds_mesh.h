@@ -67,6 +67,10 @@ public:
 	const unordered_set<vert_t*>& verts() const { return vertSet; }
 	unordered_set<vert_t*>& verts() { return vertSet; }
 
+	void addHalfEdge(he_t*);
+	void addVertex(vert_t*);
+	void addFace(face_t*);
+
 
 	vector<face_t *> incidentFaces(vert_t *v);
 	vector<he_t *> incidentEdges(vert_t *v);

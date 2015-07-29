@@ -3,6 +3,37 @@
 
 #include "utils.hpp"
 #include "mathutils.hpp"
+HDS_Mesh* MeshExtender::thismesh = nullptr;
+
+vector<HDS_Vertex*> MeshExtender::addConnector(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
+{
+	cout<<"creating a new connector"<<endl;
+	//new a connector object
+	HDS_Connector* connector = new HDS_Connector(he1, he2);
+	//add all internal edges and vertices to mesh
+	vector<HDS_HalfEdge*> hes = connector->hes;
+	if (!connector->hes.empty()) {
+		for (auto he : hes) {
+			thismesh->addHalfEdge(he);
+		}
+	}
+
+	hes.insert(hes.begin(),he1);
+	hes.push_back(he2);
+	for (auto he = hes.begin(); he != hes.end(); he+=2) {
+		if (he != prev(hes.end())) {
+			cout<<"build a new bridge"<<endl;
+			auto he_next = next(he);
+			//bridge each pair of edges
+			//get bridge faces, set to connector->faces
+			connector->faces.push_back(thismesh->bridging(*he, *he_next));
+
+		}
+	}
+	return connector->verts;
+
+}
+
 
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
@@ -11,8 +42,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	typedef HDS_Face face_t;
 	typedef HDS_Connector con_t;
 
-	//HDS_Mesh *extended_mesh = new HDS_Mesh;
-
+	thismesh = mesh;
 
 	set<int> oldFaces;
 	for (auto &f : mesh->faceSet) {
@@ -130,45 +160,48 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			vert_t* vertex = corners_new[fidx][i];
 			he_t* he = edges_new[fidx][i];
 			he_t* hef = he->flip;
-			mesh->vertSet.insert(vertex);
-			mesh->vertMap.insert(make_pair(vertex->index, vertex));
-			mesh->heSet.insert(he);
-			mesh->heMap.insert(make_pair(he->index, he));
-			mesh->heSet.insert(hef);
-			mesh->heMap.insert(make_pair(hef->index, hef));
+			mesh->addVertex(vertex);
+			mesh->addHalfEdge(he);
+			mesh->addHalfEdge(hef);
 
 		}
 	}
+
+	vector<vert_t*> verts_new;
+
 	//add bridges
 	if (hasBridgeEdge) {
-	for(auto v: mesh->vertSet) {
-		if (v->bridgeTwin != nullptr) {
-			///for all non-cut-edge edges, create bridge faces
+		for(auto v: mesh->vertSet) {
+			if (v->bridgeTwin != nullptr) {
+				///for all non-cut-edge edges, create bridge faces
 				//get half edges that are "hidden", no face assigned
 				HDS_HalfEdge* h1 = v->he;
 				HDS_HalfEdge* h2 = v->bridgeTwin->he;
 				HDS_HalfEdge *he1, *he2;
 				he1 = h1->f == nullptr? h1:h1->flip;
 				he2 = h2->f == nullptr? h2:h2->flip;
-				mesh->bridging(he1, he2);
+
+				vector<HDS_Vertex*> verts = addConnector(he1, he2);
+				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
+
 				v->bridgeTwin->bridgeTwin = nullptr;
 
 
 			}
+		}
 	}
-}
+
 	if (hasCutEdge) {
-	vector<vert_t*> verts_new;
-	for(auto v: mesh->vertSet) {
-		if(v->flapTwin != nullptr){
+		for(auto v: mesh->vertSet) {
+			if(v->flapTwin != nullptr){
 
-			/// for all cut-edge edges, create flaps
-			//get v->he boundary
-			HDS_HalfEdge* he1;
-			he1 = v->he->f->index == mesh->finalCutFaceIndex? v->he:v->he->flip;
-			//duplicate v->flapTwin->he as new he
+				/// for all cut-edge edges, create flaps
+				//get v->he boundary
+				HDS_HalfEdge* he1;
+				he1 = v->he->f->index == mesh->finalCutFaceIndex? v->he:v->he->flip;
+				//duplicate v->flapTwin->he as new he
 
-			he_t* twin_he = v->flapTwin->he;
+				he_t* twin_he = v->flapTwin->he;
 				he_t* flap_he = new he_t;
 				he_t* flap_he_flip = new he_t;
 
@@ -205,26 +238,24 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				verts_new.push_back(flap_vs);
 				verts_new.push_back(flap_ve);
 
-				mesh->heSet.insert(flap_he);
-				mesh->heMap.insert(make_pair(flap_he->index, flap_he));
-				mesh->heSet.insert(flap_he_flip);
-				mesh->heMap.insert(make_pair(flap_he_flip->index, flap_he_flip));
+				mesh->addHalfEdge(flap_he);
+				mesh->addHalfEdge(flap_he_flip);
 				twin_he->setCutEdge(false);
 
 				//bridge v->he and new he
 				cout<<"build bridge flap between "<<he1->v->index<<" and "<<flap_he_flip->v->index<<endl;
-				mesh->bridging(he1, flap_he_flip);
+				vector<HDS_Vertex*> verts = addConnector(he1, flap_he_flip);
+				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
+
+			}
 
 		}
 
 	}
 	//add new vertices
 	for (auto v: verts_new) {
-		mesh->vertSet.insert(v);
-		mesh->vertMap.insert(make_pair(v->index, v));
+		mesh->addVertex(v);
 	}
-}
-
 
 	/// update the curvature of each vertex
 	for (auto &v : mesh->vertSet) {
@@ -237,3 +268,4 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	cout<<"extend succeed............."<<endl;
 	return true;
 }
+

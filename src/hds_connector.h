@@ -28,10 +28,8 @@ public:
 	vector<HDS_HalfEdge*> hes; //corresponding half edges pointer
 	vector<HDS_Vertex*> verts; //corresponding vertices pointer
 
-	HDS_HalfEdge* he; //original corresponding he before adding connector
-	HDS_HalfEdge* hef;
-
-	HDS_Connector* twin; //points to its twin connector created in a cut event
+	//HDS_Connector* flapTwin; //points to its twin connector created in a cut event
+	void setOriginalPositions();
 
 	int index;
 	bool isFlap; //if original he is cutted, connector becomes flap
@@ -39,6 +37,13 @@ public:
 	//config connector
 	static void setConnector(std::map<QString, double> config);
 	static double getScale(){return scale;}
+
+private:
+	HDS_HalfEdge* he; //original corresponding he before adding connector
+	HDS_HalfEdge* hef;
+	QVector3D p00;
+	QVector3D p01;
+
 private:
 	vector<HDS_Vertex*> calculateBezierCurve(int index);
 

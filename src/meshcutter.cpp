@@ -93,9 +93,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		he->flip = he_new_flip;
 
 		he_new_flip->index = HDS_HalfEdge::assignIndex();
-		mesh->heSet.insert(he_new_flip);
+		mesh->addHalfEdge(he_new_flip);
 		cutEdgesFlips.insert(he_new_flip->index);//record new half-edge
-		mesh->heMap.insert(make_pair(he_new_flip->index, he_new_flip));
 
 		/// the flip of hef
 		hef_new_flip->flip = hef;
@@ -109,16 +108,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		hef->flip = hef_new_flip;
 
 		hef_new_flip->index = HDS_HalfEdge::assignIndex();
-		mesh->heSet.insert(hef_new_flip);
+		mesh->addHalfEdge(hef_new_flip);
 		cutEdgesFlips.insert(hef_new_flip->index);//record new half-edge
-		mesh->heMap.insert(make_pair(hef_new_flip->index, hef_new_flip));
 
 		/// fix the new face
 		nf->he = he_new_flip;
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = true;
-		mesh->faceSet.insert(nf);
-		mesh->faceMap.insert(make_pair(nf->index, nf));
+		mesh->addFace(nf);
 		cutFacesTotal.insert(nf->index);
 
 		/// record this cut event using twin
@@ -266,8 +263,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 			for( auto v : cv_new ) {
 				cout << "inserting vertex " << v->index << endl;
-				mesh->vertSet.insert(v);
-				mesh->vertMap.insert(make_pair(v->index, v));
+				mesh->addVertex(v);
 			}
 
 			mesh->printInfo("merged");
@@ -301,8 +297,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = true;
-		mesh->faceSet.insert(nf);
-		mesh->faceMap.insert(make_pair(nf->index, nf));
+		mesh->addFace(nf);
 		mesh->finalCutFaceIndex = nf->index;
 
 		auto he = mesh->heMap[*cutEdgesFlips.begin()];
