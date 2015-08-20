@@ -277,6 +277,7 @@
     <ClCompile Include="..\src\GeodesicComputer.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp" />
+    <ClCompile Include="..\src\hds_connector.cpp" />
     <ClCompile Include="..\src\MeshExtender.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp" />
@@ -398,6 +399,7 @@
     <ClInclude Include="..\src\GeodesicComputer.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.h" />
+    <ClInclude Include="..\src\hds_connector.h" />
     <ClInclude Include="..\src\MeshExtender.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.h" />
