@@ -402,43 +402,45 @@ void MeshManager::mapToExtendedMesh()
 
 void MeshManager::unfoldMesh(bool isExtended)
 {
-  QScopedPointer<HDS_Mesh> ref_mesh;
+	QScopedPointer<HDS_Mesh> ref_mesh;
 
-  if(!isExtended) {
-	  ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-  } else {
-	  ref_mesh.reset(new HDS_Mesh(*extended_cutted_mesh));
-}
-  ref_mesh->validate();
-  cout<<"unfolded mesh set"<<endl;
-
-  /// cut the mesh using the selected edges
-  set<int> selectedFaces;
-  for (auto f : ref_mesh->faces()) {
-	if( f->isPicked ) {
-	  /// use picked edges as cut edges
-	  f->setPicked(false);
-	  if( selectedFaces.find(f->index) == selectedFaces.end() ) {
-		selectedFaces.insert(f->index);
-	  }
+	if (!isExtended) {
+		ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
 	}
-  }
-  unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
+	else {
+		ref_mesh.reset(new HDS_Mesh(*extended_cutted_mesh));
+	}
+	ref_mesh->validate();
+	cout << "unfolded mesh set" << endl;
 
-  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
-	/// unfolded successfully
-	unfolded_mesh->printInfo("unfolded mesh:");
-	//unfolded_mesh->printMesh("unfolded mesh:");
-  }
-  else {
-	/// failed to unfold
-	cout << "Failed to unfold." << endl;
-  }
+	/// cut the mesh using the selected edges
+	set<int> selectedFaces;
+	for (auto f : ref_mesh->faces()) {
+		if (f->isPicked) {
+			/// use picked edges as cut edges
+			f->setPicked(false);
+			if (selectedFaces.find(f->index) == selectedFaces.end()) {
+				selectedFaces.insert(f->index);
+			}
+		}
+	}
+	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
+
+	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
+		/// unfolded successfully
+		unfolded_mesh->printInfo("unfolded mesh:");
+		//unfolded_mesh->printMesh("unfolded mesh:");
+	}
+	else {
+		/// failed to unfold
+		cout << "Failed to unfold." << endl;
+	}
 
 }
 
 
-void MeshManager::smoothMesh() {
+void MeshManager::smoothMesh()
+{
 	if( smoothed_mesh.isNull() )
 	{
 		cout<<"smoothmesh@@@"<<endl;
@@ -450,7 +452,8 @@ void MeshManager::smoothMesh() {
 	MeshSmoother::smoothMesh_Laplacian(smoothed_mesh.data());
 }
 
-void MeshManager::resetMesh() {
+void MeshManager::resetMesh()
+{
 	extended_mesh.reset();
 	cutted_mesh.reset();
 	unfolded_mesh.reset();
@@ -458,7 +461,8 @@ void MeshManager::resetMesh() {
 	extended_unfolded_mesh.reset();
 }
 
-bool MeshManager::saveMeshes() {
+bool MeshManager::saveMeshes()
+{
 	/// save only the cutted and unfolded
 	return true;
 }
@@ -503,7 +507,7 @@ void MeshManager::exportXMLFile(const char* filename)
 		SAW_CONNECTOR,
 		ADVSAW_CONNECTOR
 	};
-	ConnectorType cn_t = ADVSAW_CONNECTOR;
+	ConnectorType cn_t = SIMPLE_CONNECTOR;
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
 	if (err)
@@ -721,18 +725,10 @@ void MeshManager::exportXMLFile(const char* filename)
 				QVector2D a = QVector2D::dotProduct(d, T) * T;
 				QVector2D n = (a - d).normalized();
 
-				
-
 				QVector2D Pn = *Pthis + T * edge_len * 0.5;
 				QVector2D Psc = Pn + n * wid_conn * 1.5;
 
-				//connector segment length
-				
-				/*double edgeConn_len = len_conn;
-				if (edgeConn_len * 4 > edge_len)
-				{
-					edgeConn_len = edge_len * 0.25;
-				}*/
+				//connector segment length				
 				double edgeConn_len = edge_len * 0.5;
 
 				QVector2D *Pst = new QVector2D(Pn - edgeConn_len * T * 0.5);
@@ -785,24 +781,7 @@ void MeshManager::exportXMLFile(const char* filename)
 
 			}
 		}
-		//////////////////////////////////////////////////////////////////////////
-		/*cout << "Face normal:" << face->n << endl;
-		cout << "X dir:" << nx << endl;
-		cout << "Y dir:" << ny << endl;*/
-		/*fprintf(SVG_File,
-			"<g opacity=\"0.8\">\n" \
-			"\t<polygon id=\"%d\" points=\"",
-			face->index);
-		do {
-			fprintf(SVG_File, "%f,%f ",
-				(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
-				(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
-			curHE = curHE->next;
-		} while (curHE != he);
-		fprintf(SVG_File, "%f,%f\" stroke=\"red\" stroke-width=\"0.8\" fill=\"none\" />\n",
-				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
-				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);
-		*/
+		
 		/// draw connected faces
 		set<HDS_Face*> neighbourFaces = face->connectedFaces();
 		for (auto face : neighbourFaces)
