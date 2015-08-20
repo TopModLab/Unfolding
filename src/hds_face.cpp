@@ -8,6 +8,7 @@ HDS_Face::HDS_Face()
 	isPicked = false;
 	isCutFace = false;
 	isConnector = false;
+	isHole = false;
 	//isFlap = false;
 	index = -1;
 	he = nullptr;
@@ -22,7 +23,7 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 	isPicked = other.isPicked;
 	isCutFace = other.isCutFace;
 	isConnector = other.isConnector;
-
+	isHole = other.isHole;
 	isPlanar = other.isPlanar;
 	//isFlap = other.isFlap;
 	index = other.index;
@@ -90,22 +91,35 @@ QVector3D HDS_Face::computeNormal()
 	return n;
 }
 
-void HDS_Face::scaleDown(double factor)
+void HDS_Face::setScaledCorners(double factor)
 {
 	checkPlanar();
 
 	scalingFactor = factor;
 	if(isPlanar) {
-		cout<<"face "<<index<<" is Planar!!!"<<endl;
 		QVector3D c = center();
 		/// update the vertex position
 		auto vertices = corners();
 		for (auto v : vertices) {
 			QVector3D vec_cv = v->pos - c;
-			v->pos = c + scalingFactor * vec_cv;
+			scaledCorners.insert(scaledCorners.end(), c + scalingFactor * vec_cv);
 		}
 	}else {
 		//scale down non-planar face
+	}
+}
+
+vector<QVector3D> HDS_Face::getScaledCorners()
+{
+	return scaledCorners;
+}
+
+void HDS_Face::scaleDown()
+{
+	int n = 0;
+	for (auto v : corners()) {
+		v->pos = scaledCorners.at(n);
+		n++;
 	}
 }
 

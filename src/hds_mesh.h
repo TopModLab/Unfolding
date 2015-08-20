@@ -30,6 +30,8 @@ public:
 	~HDS_Mesh();
 
 	HDS_Mesh operator=(const HDS_Mesh& rhs);
+	void updateSortedFaces();
+	void clearSortedFaces();
 
 	void printInfo(const string &msg = "");
 	void printMesh(const string &msg = "");
@@ -38,6 +40,7 @@ public:
 	void setMesh(const vector<face_t*> &faces,
 					const vector<vert_t*> &verts,
 					const vector<he_t*> &hes);
+
 
 	unordered_set<vert_t*> getReebPoints(const vector<double> &val = vector<double>(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
@@ -64,12 +67,19 @@ public:
 	const unordered_set<vert_t*>& verts() const { return vertSet; }
 	unordered_set<vert_t*>& verts() { return vertSet; }
 
+	void addHalfEdge(he_t*);
+	void addVertex(vert_t*);
+	void addFace(face_t*);
+
 
 	vector<face_t *> incidentFaces(vert_t *v);
 	vector<he_t *> incidentEdges(vert_t *v);
 	vector<face_t *> incidentFaces(face_t *f);
 
 	he_t* incidentEdge(face_t *f1, face_t *f2);
+	he_t* incidentEdge(vert_t *v1, vert_t *v2);
+
+	face_t * bridging(he_t* h1, he_t* h2); //create a bridge between two boundary half edges
 
 	template <typename T>
 	void flipSelectionState(int idx, unordered_map<int, T> &m);
@@ -104,6 +114,8 @@ private:
 	unordered_map<int, he_t*> heMap;
 	unordered_map<int, face_t*> faceMap;
 	unordered_map<int, vert_t*> vertMap;
+
+	int finalCutFaceIndex;
 
 private:
 	bool showFace, showEdge, showVert, showNormals;

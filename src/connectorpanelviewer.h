@@ -33,15 +33,14 @@ private:
 	void setZRotation(int angle);
 	void draw();
 
-private:
+	QPoint lastPos;
+
 	int shapeIndex;
 	int curvature;
 	int nSamples;
 	int size;
 	int convergingPointPos;
 	int openingIndex;
-
-	QPoint lastPos;
 
 	int xRot;
 	int yRot;

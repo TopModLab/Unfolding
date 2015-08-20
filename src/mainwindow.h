@@ -63,7 +63,10 @@ private slots:
 	void slot_updateViewerColormap();
 
 	void slot_smoothMesh();
-	void slot_extendMesh(bool);
+	void slot_triggerExtendMesh(bool);
+
+	void slot_extendMesh();
+	void slot_cancelExtendMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
@@ -77,7 +80,13 @@ private slots:
 	void slot_updateCutLocusMethod(int);
 	void slot_disableclp();
 
-
+//	//connector
+//	void slot_setConnectorShape(int);
+//	void slot_setConnectorCurv(int);
+//	void slot_setConnectorSamples(int);
+//	void slot_setConnectorSize(int);
+//	void slot_setConnectorCP(int);
+//	void slot_setConnectorOpening(int);
 
 private:
 	void closeEvent(QCloseEvent *e);

@@ -275,13 +275,16 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
 void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 {
+	//restrain unwanted redrawing in the middle of cutting operation
+	if (extended_mesh != nullptr)
+		extended_mesh->clearSortedFaces();
 
 	QScopedPointer<HDS_Mesh> ref_mesh;
 	if (!isExtended)
 		ref_mesh.reset(new HDS_Mesh(*hds_mesh));
-	else
+	else {
 		ref_mesh.reset(new HDS_Mesh(*extended_mesh));
-
+	}
 
 	cout << "validating reference mesh" << endl;
 	ref_mesh->validate();
@@ -302,6 +305,7 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 			}
 		}
 	}
+
 	//cout << "Number of selected edges = " << selectedEdges.size() << endl;
 
 	bool isUnfoldable = false;
@@ -311,7 +315,6 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 		if (!isExtended) {
 			/// make a copy of the mesh with selected edges
 			cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
-
 			cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
 		}else {
 			/// make a copy of the mesh with selected edges
@@ -340,13 +343,13 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 		selectedEdges.clear();
 	}
 
-	for (auto f : cutted_mesh->faces())
-	{
-		if (f->isCutFace)
-		{
-			cout << "Face " << f->index << " is cutface" << endl;
-		}
-	}
+//	for (auto f : cutted_mesh->faces())
+//	{
+//		if (f->isCutFace)
+//		{
+//			cout << "Face " << f->index << " is cutface" << endl;
+//		}
+//	}
 	cout << ".........................." << endl;
 }
 
@@ -374,7 +377,7 @@ void MeshManager::mapToExtendedMesh()
 
 	//find original cut edges in extended mesh and mark out its face
 	for(auto f : des_mesh->faces()) {
-		if (f->isCutFace) {
+		if (f->isHole) {
 			HDS_HalfEdge* edge = f->he;
 			do {
 				//edge->setPicked(true);
@@ -382,14 +385,11 @@ void MeshManager::mapToExtendedMesh()
 				edge = edge->next;
 			}while(edge != f->he);
 		}
+
 		if (f->isConnector) {
 			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
 				f->he->setPicked(true);
-//				HDS_HalfEdge* edge = f->he->next;
-//				do {
-//					edge->setPicked(true);
-//					edge = edge->next;
-//				}while(edge != f->he);
+
 			}
 		}
 	}
@@ -398,72 +398,19 @@ void MeshManager::mapToExtendedMesh()
 
 }
 
-//void MeshManager::unfoldMesh()
-//{
-//	//HDS_Mesh* ref_mesh;
-//	QScopedPointer<HDS_Mesh> ref_mesh;
-////	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
-
-////	cout << "validating reference mesh" << endl;
-////	ref_mesh->validate();
-
-//	if (extended_mesh.isNull())
-//	{
-//		cout<<"ref mesh set to cutted mesh"<<endl;
-//		ref_mesh.reset(cutted_mesh.data());
-//		//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-//		//ref_mesh = cutted_mesh.data();
-//	}
-//	else
-//	{
-//		ref_mesh.reset(extended_mesh.data());
-//		//ref_mesh = extended_mesh.data();
-//	}
-
-//	cout<<"ref mesh set"<<endl;
-
-//	//unfolded_mesh.reset(ref_mesh.data());
-//	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh)); //bug when selecting all edges!!!!
-
-//	/// unfold the mesh using the selected faces
-//	set<int> selectedFaces;
-//	for (auto f : ref_mesh->faces())
-//	{
-//		if( f->isPicked )
-//		{
-//			/// use picked faces as unfold faces
-//			f->setPicked(false);
-
-//			if( selectedFaces.find(f->index) == selectedFaces.end() )
-//			{
-//				selectedFaces.insert(f->index);
-//			}
-//		}
-//	}
-//	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces))
-//	{
-//		/// unfolded successfully
-//		unfolded_mesh->printInfo("unfolded mesh:");
-//		//unfolded_mesh->printMesh("unfolded mesh:");
-//	}
-//	else
-//	{
-//		/// failed to unfold
-//		cout << "Failed to unfold." << endl;
-//	}
-//}
 
 
-void MeshManager::unfoldMesh(bool isExtended) {
-  HDS_Mesh* ref_mesh;
+void MeshManager::unfoldMesh(bool isExtended)
+{
+  QScopedPointer<HDS_Mesh> ref_mesh;
 
-  if(!isExtended)
-	  ref_mesh = cutted_mesh.data();
-  else
-	  ref_mesh = extended_cutted_mesh.data();
-
-
-  unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
+  if(!isExtended) {
+	  ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+  } else {
+	  ref_mesh.reset(new HDS_Mesh(*extended_cutted_mesh));
+}
+  ref_mesh->validate();
+  cout<<"unfolded mesh set"<<endl;
 
   /// cut the mesh using the selected edges
   set<int> selectedFaces;
@@ -471,14 +418,14 @@ void MeshManager::unfoldMesh(bool isExtended) {
 	if( f->isPicked ) {
 	  /// use picked edges as cut edges
 	  f->setPicked(false);
-
 	  if( selectedFaces.find(f->index) == selectedFaces.end() ) {
 		selectedFaces.insert(f->index);
 	  }
 	}
   }
+  unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
 
-  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh, selectedFaces)) {
+  if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
 	/// unfolded successfully
 	unfolded_mesh->printInfo("unfolded mesh:");
 	//unfolded_mesh->printMesh("unfolded mesh:");
@@ -516,19 +463,30 @@ bool MeshManager::saveMeshes() {
 	return true;
 }
 
-void MeshManager::extendMesh(int meshType, double scale)
+
+void MeshManager::extendMesh(int meshType, map<QString, double> config)
 {
+	HDS_Connector::setConnector(config);
+
 	switch(meshType){
 	case 0://original
 		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
-		MeshExtender::extendMesh(extended_mesh.data(), scale);
-
+		MeshExtender::extendMesh(extended_mesh.data());
+		//update sorted faces
+		extended_mesh->updateSortedFaces();
 		break;
 
-
+	case 2://cutted
+		extended_cutted_mesh.reset(new HDS_Mesh(*cutted_mesh));
+		MeshExtender::extendMesh(extended_cutted_mesh.data());
+		//update sorted faces
+		extended_cutted_mesh->updateSortedFaces();
+		break;
 	case 3://unfolded
 		extended_unfolded_mesh.reset(new HDS_Mesh(*unfolded_mesh));
-		MeshExtender::extendMesh(extended_unfolded_mesh.data(), scale);
+		MeshExtender::extendMesh(extended_unfolded_mesh.data());
+		//update sorted faces
+		extended_unfolded_mesh->updateSortedFaces();
 
 		break;
 	}
@@ -639,7 +597,7 @@ void MeshManager::exportXMLFile(const char* filename)
 					printEdgePts.push_back(Pnsn);
 
 					cutedges.erase(curHE);
-					cutedges.erase(curHE->flip->twin->flip);
+					cutedges.erase(curHE->flip->cutTwin->flip);
 				}
 				else
 				{
@@ -680,7 +638,7 @@ void MeshManager::exportXMLFile(const char* filename)
 					printEdgePtsCarves.push_back(Psn);
 
 					cutedges.erase(curHE);
-					cutedges.erase(curHE->flip->twin->flip);
+					cutedges.erase(curHE->flip->cutTwin->flip);
 				}
 				else
 				{

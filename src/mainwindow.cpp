@@ -93,6 +93,10 @@ bool MainWindow::connectComponents()
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
 	connect(clpanel, SIGNAL(sig_closedSignal()), this, SLOT(slot_disableclp()));
 
+	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_extendMesh()));
+	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
+
+
 	return true;
 }
 
@@ -144,11 +148,15 @@ void MainWindow::createActions()
 		connect(selectMultipleAct, SIGNAL(triggered()), this, SLOT(slot_selectMultiple()));
 		actionsMap["select multiple"] = selectMultipleAct;
 
-		QAction *selectCutEdgePairAct = new QAction(tr("Select Cut Edge Pair"), this);
-		selectCutEdgePairAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
-		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected cut edge"));
-		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCutEdgePair()));
+		QAction *selectCutEdgePairAct = new QAction(tr("Select Twin Pair"), this);
+		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected elements"));
+		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectTwinPair()));
 		actionsMap["select cut edge pair"] = selectCutEdgePairAct;
+
+		QAction *selectnextEdgeAct = new QAction(tr("Select Next Edge"), this);
+		selectnextEdgeAct->setStatusTip(tr("Select next half edge"));
+		connect(selectnextEdgeAct, SIGNAL(triggered()), viewer, SLOT(slot_selectNextEdge()));
+		actionsMap["select next edge"] = selectnextEdgeAct;
 
 		QAction *selectCPAct = new QAction(tr("Select Critical Points"), this);
 		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
@@ -318,7 +326,7 @@ void MainWindow::createActions()
 		extendAct->setStatusTip(tr("Extend mesh"));
 		extendAct->setCheckable(true);
 		extendAct->setChecked(false);
-		connect(extendAct, SIGNAL(toggled(bool)), this, SLOT(slot_extendMesh(bool)));
+		connect(extendAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
 		actionsMap["extend"] = extendAct;
 
 		//cut with popup submenu
@@ -382,6 +390,7 @@ void MainWindow::createMenus()
 
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select cut edge pair"]);
+		selectionMenu->addAction(actionsMap["select next edge"]);
 		selectionMenu->addSeparator();
 		selectionMenu->addAction(actionsMap["select mst"]);
 		selectionMenu->addAction(actionsMap["select cp"]);
@@ -556,7 +565,7 @@ void MainWindow::slot_performMeshCut() {
 
 void MainWindow::slot_unfoldMesh(bool checked) {
 	if(checked){
-		if (curMesh == Cutted) {
+		if (curMesh == Cutted || curMesh == Extended) {
 			MeshManager::getInstance()->unfoldMesh(isExtended);
 			meshStack.push(Unfolded);
 			updateCurrentMesh();
@@ -571,21 +580,13 @@ void MainWindow::slot_unfoldMesh(bool checked) {
 	}
 }
 
-void MainWindow::slot_extendMesh(bool checked)
+void MainWindow::slot_triggerExtendMesh(bool checked)
 {
 	if (checked) {
-		if(curMesh == Original || curMesh == Unfolded) {
+		if(curMesh == Original || curMesh == Cutted ||curMesh == Unfolded) {
 			conpanel->show();
+			conpanel->activateWindow();
 
-			MeshManager::getInstance()->extendMesh((int)curMesh, 0.75);
-			if(curMesh == Original)
-				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
-			else
-				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
-
-			meshStack.push(Extended);
-			updateCurrentMesh();
-			isExtended = true;
 		}
 	}else {
 
@@ -608,6 +609,26 @@ void MainWindow::slot_extendMesh(bool checked)
 			break;
 		}
 	}
+}
+
+void MainWindow::slot_extendMesh()
+{
+	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
+	if(curMesh == Original)
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+	else if (curMesh == Unfolded)
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
+	else {
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
+}
+	meshStack.push(Extended);
+	updateCurrentMesh();
+	isExtended = true;
+
+}
+void MainWindow::slot_cancelExtendMesh()
+{
+	actionsMap["extend"]->setChecked(false);
 }
 
 void MainWindow::slot_smoothMesh() {
@@ -694,7 +715,7 @@ void MainWindow::slot_undo()
 			break;
 		case Extended:
 			if(isExtended)
-				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
+				viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 			else {
 				slot_undo();
 			}

@@ -13,16 +13,18 @@ HDS_Mesh::HDS_Mesh()
 	showVert = true;
 	showEdge = true;
 	showNormals = false;
-
+	finalCutFaceIndex = -1;
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 {
+
 	/// need a deep copy
 	showFace = other.showFace;
 	showEdge = other.showEdge;
 	showVert = other.showVert;
 	showNormals = other.showNormals;
+	finalCutFaceIndex =  other.finalCutFaceIndex;
 
 	/// copy the vertices set
 	vertSet.clear();
@@ -56,14 +58,19 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	for( auto &he : heSet ) {
 		auto he_ref = other.heMap.at(he->index);
 		//cout << he_ref->index << endl;
+		if (he_ref->flip != nullptr)
 		he->flip = heMap.at(he_ref->flip->index);
+		if (he_ref->prev != nullptr)
 		he->prev = heMap.at(he_ref->prev->index);
+		if (he_ref->next != nullptr)
 		he->next = heMap.at(he_ref->next->index);
 
-		if (he_ref->twin != nullptr)
-			he->twin = heMap.at(he_ref->twin->index);
+		if (he_ref->cutTwin != nullptr)
+			he->cutTwin = heMap.at(he_ref->cutTwin->index);
 
-		he->f = faceMap.at(he_ref->f->index);
+		if (he_ref->f != nullptr)
+			he->f = faceMap.at(he_ref->f->index);
+		if (he_ref->v != nullptr)
 		he->v = vertMap.at(he_ref->v->index);
 	}
 
@@ -77,12 +84,41 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	for( auto &v : vertSet ) {
 		auto v_ref = other.vertMap.at(v->index);
 		v->he = heMap.at(v_ref->he->index);
+
+		if (v_ref->bridgeTwin != nullptr)
+			v->bridgeTwin = vertMap.at(v_ref->bridgeTwin->index);
 	}
+
+
 }
 
 HDS_Mesh::~HDS_Mesh() {
 	releaseMesh();
 }
+
+void HDS_Mesh::updateSortedFaces()
+{
+	/// create the sorted face set
+	sortedFaces.assign(faceSet.begin(), faceSet.end());
+	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
+		auto ca = fa->corners();
+		auto cb = fb->corners();
+		float minZa = 1e9, minZb = 1e9;
+		for (auto va : ca) {
+			minZa = std::min(va->pos.z(), minZa);
+		}
+		for (auto vb : cb) {
+			minZb = std::min(vb->pos.z(), minZb);
+		}
+		return minZa < minZb;
+	});
+}
+
+void HDS_Mesh::clearSortedFaces()
+{
+	sortedFaces.clear();
+}
+
 
 bool HDS_Mesh::validateEdge(he_t *e) {
 	if( heMap.find(e->index) == heMap.end() ) return false;
@@ -98,8 +134,9 @@ bool HDS_Mesh::validateEdge(he_t *e) {
 
 bool HDS_Mesh::validateFace(face_t *f)
 {
-	if( faceMap.find(f->index) == faceMap.end() ) return false;
-
+	if( faceMap.find(f->index) == faceMap.end() ) {
+		return false;
+	}
 	int maxEdges = 100;
 	he_t *he = f->he;
 	he_t *curHe = he;
@@ -159,6 +196,7 @@ void HDS_Mesh::printInfo(const string& msg)
 	cout << "#vertices = " << vertSet.size() << endl;
 	cout << "#faces = " << faceSet.size() << endl;
 	cout << "#half edges = " << heSet.size() << endl;
+	cout << "#sorted Faces = "<< sortedFaces.size() << endl;
 }
 
 void HDS_Mesh::printMesh(const string &msg)
@@ -234,20 +272,7 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
 		heMap[hefIdx] = he->flip;
 	}
 
-	/// sort the face set
-	sortedFaces.assign(faceSet.begin(), faceSet.end());
-	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
-		auto ca = fa->corners();
-		auto cb = fb->corners();
-		float minZa = 1e9, minZb = 1e9;
-		for (auto va : ca) {
-			minZa = std::min(va->pos.z(), minZa);
-		}
-		for (auto vb : cb) {
-			minZb = std::min(vb->pos.z(), minZb);
-		}
-		return minZa < minZb;
-	});
+	updateSortedFaces();
 }
 
 
@@ -297,13 +322,12 @@ void HDS_Mesh::draw(ColorMap cmap)
 	if( showFace )
 	{
 		/// traverse the mesh and render every single face
-		//  cout << "sorted faces = " << sortedFaces.size() << endl;
 		MeshViewer dd;
-
 		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
 		{
+
 			face_t* f = (*fit);
-			if( f->isCutFace ) continue; //invisible face
+			if( f->isCutFace || f->isHole ) continue; //invisible face
 			// render the faces
 			he_t* he = f->he;
 			he_t* hen = he->next;
@@ -317,13 +341,14 @@ void HDS_Mesh::draw(ColorMap cmap)
 			else if (f->isConnector) {
 				glColor4f(0.75, 0.75, 0.95, 1);
 			}
+
 			else {
 				glColor4f(0.75, 0.75, 0.75, 1);
 			}
 
-//			if (f->isFlap) {
-//				glColor4f(0.75, 0.95, 0.75, 1);
-//			}
+			//			if (f->isFlap) {
+			//				glColor4f(0.75, 0.95, 0.75, 1);
+			//			}
 
 			int vcount = 0;
 			glBegin(GL_POLYGON);
@@ -342,11 +367,14 @@ void HDS_Mesh::draw(ColorMap cmap)
 				curHe = curHe->next;
 			}while( curHe != he );
 			glEnd();
+
+
 		}
 	}
 
 	if( showEdge )
 	{
+
 		glColor4f(0.25, 0.25, 0.25, 1);
 		GLfloat line_mat_diffuse[4] = {0.25, 0.25, 0.25, 1};
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
@@ -486,6 +514,25 @@ void HDS_Mesh:: flipShowNormals()
 	showNormals = !showNormals;
 }
 
+void HDS_Mesh::addHalfEdge(he_t* he)
+{
+	heSet.insert(he);
+	heMap.insert(make_pair(he->index, he));
+}
+
+void HDS_Mesh::addVertex(vert_t* vert)
+{
+	vertSet.insert(vert);
+	vertMap.insert(make_pair(vert->index, vert));
+}
+
+void HDS_Mesh::addFace(face_t* face)
+{
+	faceSet.insert(face);
+	faceMap.insert(make_pair(face->index, face));
+}
+
+
 vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
 {
 	he_t *he = v->he;
@@ -534,6 +581,110 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::face_t *f1, HDS_Mesh::face_t *f
 		curHe = curHe->next;
 	} while( curHe != he );
 	return nullptr;
+}
+
+HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v2)
+{
+	if(v1 == v2) return nullptr;
+	he_t * he = v1->he;
+	he_t * curHE = he;
+	do {
+		if(curHE->flip->v == v2)
+			return curHE;
+		curHE = curHE->flip->next;
+	}while (curHE != he);
+	return nullptr;
+}
+
+HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
+{
+	//get 4 vertices from h1 h2
+	HDS_Vertex* v1s, *v1e, *v2s, *v2e;
+	v1s = he1->v;
+	v1e = he1->flip->v;
+	v2s = he2->v;
+	v2e = he2->flip->v;
+
+
+	//build new face
+	face_t * bridgeFace = new face_t;
+
+	//link he1 and he2 to face
+	he1->f = bridgeFace;
+	he2->f = bridgeFace;
+	//fix face
+	bridgeFace->index = HDS_Face::assignIndex();
+	bridgeFace->isCutFace = false;
+	bridgeFace->isConnector = true;
+
+
+	HDS_HalfEdge* nextHE, * prevHE;
+	//build 4 new half edges to connect original 4 vertices
+	for (int i = 0; i < 2; i++){
+		he_t* he_new = new he_t;
+		he_t *he_new_flip = new he_t;
+		he_new->index = HDS_HalfEdge::assignIndex();
+		he_new_flip->index = HDS_HalfEdge::assignIndex();
+		he_new->setFlip(he_new_flip);
+		he_new->f = bridgeFace;
+
+		if (finalCutFaceIndex != -1)
+			he_new_flip->f = faceMap[finalCutFaceIndex];
+		else {
+			face_t * cutFace = new face_t;
+			cutFace->index = HDS_Face::assignIndex();
+			finalCutFaceIndex = cutFace->index;
+			cutFace->isCutFace = true;
+			cutFace->he = he_new_flip;
+			he_new_flip->f = cutFace;
+			faceSet.insert(cutFace);
+			faceMap.insert(make_pair(cutFace->index, cutFace));
+		}
+
+		he_new->setCutEdge(true);
+
+		if (i == 0) {
+			//first edge (he_ v1e_v2s)
+			nextHE = he2;
+			prevHE = he1;
+			he_new->v = v1e;
+			he_new_flip->v = v2s;
+
+			//connect new half edges to face
+			bridgeFace->he = he_new;
+		}else {
+			//second edge (he_ v2e_v1s)
+			nextHE = he1;
+			prevHE = he2;
+			he_new->v = v2e;
+			he_new_flip->v = v1s;
+		}
+
+		//connect edge loop
+		he_new_flip->next = prevHE->next;
+		prevHE->next->prev = he_new_flip;
+		he_new_flip->prev = nextHE->prev;
+		nextHE->prev->next = he_new_flip;
+
+		prevHE->next = he_new;
+		nextHE->prev = he_new;
+		he_new->prev = prevHE;
+		he_new->next = nextHE;
+
+
+		heSet.insert(he_new);
+		heSet.insert(he_new_flip);
+
+		heMap.insert(make_pair(he_new->index, he_new));
+		heMap.insert(make_pair(he_new_flip->index, he_new_flip));
+
+	}
+
+	//add face to mesh
+	faceSet.insert(bridgeFace);
+	faceMap.insert(make_pair(bridgeFace->index, bridgeFace));
+	return bridgeFace;
+
 }
 
 void HDS_Mesh::drawVertexIndices()

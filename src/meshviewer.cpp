@@ -154,14 +154,41 @@ void MeshViewer::slot_selectCC()
 
 }
 
-void MeshViewer::slot_selectCutEdgePair()
+void MeshViewer::slot_selectTwinPair()
 {
 	switch (interactionState) {
 	case SelectEdge:
 		if (!heMesh->getSelectedHalfEdges().empty()) {
 			for (auto he :heMesh->getSelectedHalfEdges()) {
-				if (he->twin != nullptr)
-					he->twin->setPicked(true);
+				if (he->cutTwin != nullptr)
+					he->cutTwin->setPicked(true);
+				else if (he->flip->cutTwin != nullptr)
+					he->flip->cutTwin->setPicked(true);
+			}
+		}
+		break;
+	case SelectVertex:
+		if (!heMesh->getSelectedVertices().empty()) {
+			for (auto v :heMesh->getSelectedVertices()) {
+				if (v->bridgeTwin != nullptr)
+					v->bridgeTwin->setPicked(true);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	updateGL();
+}
+
+void MeshViewer::slot_selectNextEdge()
+{
+	switch (interactionState) {
+	case SelectEdge:
+		if (!heMesh->getSelectedHalfEdges().empty()) {
+			for (auto he :heMesh->getSelectedHalfEdges()) {
+				if (he->next != nullptr)
+					he->next->setPicked(true);
 			}
 		}
 		break;

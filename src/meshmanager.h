@@ -16,6 +16,7 @@
 #include "hds_face.h"
 #include "hds_halfedge.h"
 #include "hds_vertex.h"
+#include "hds_connector.h"
 
 #include "Graph.hpp"
 
@@ -69,6 +70,7 @@ public:
 		return extended_unfolded_mesh.data();
 	}
 
+
 	HDS_Mesh* getExtendedMesh() {
 		return extended_mesh.data();
 	}
@@ -117,10 +119,12 @@ public:
 	void mapToExtendedMesh();
 	void unfoldMesh(bool isExtended);
 	void smoothMesh();
-	void extendMesh(int meshType, double scale);
-	void resetMesh();
+
+	void extendMesh(int meshType, map<QString, double> config);
+
     void exportXMLFile(const char* filename);//export as svg files
 
+	void resetMesh();
 
 private:
 	typedef HDS_Mesh mesh_t;
