@@ -542,9 +542,10 @@ void MeshManager::exportXMLFile(const char* filename)
 		SIMPLE_CONNECTOR,
 		INSERT_CONNECTOR,
 		GEAR_CONNECTOR,
-		SAW_CONNECTOR
+		SAW_CONNECTOR,
+		ADVSAW_CONNECTOR
 	};
-	ConnectorType cn_t = GEAR_CONNECTOR;
+	ConnectorType cn_t = ADVSAW_CONNECTOR;
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
 	if (err)
@@ -609,7 +610,11 @@ void MeshManager::exportXMLFile(const char* filename)
 
 			printEdgePts.push_back(Pthis);
 
-			
+			//
+			// T: normalized vector representing current edge direction
+			// d: vector from current point to face center
+			// a: vector projected from d onto T
+			// n: normalized normal of the current edge
 			switch (cn_t)
 			{
 			case SIMPLE_CONNECTOR:
@@ -737,6 +742,45 @@ void MeshManager::exportXMLFile(const char* filename)
 				QVector2D *Psn = new QVector2D(Pn + len_conn * T * 0.5);
 				QVector2D *Pnst = new QVector2D(Psc - len_conn * T * 0.5);
 				QVector2D *Pnsn = new QVector2D(Psc + len_conn * T * 0.5);
+				QVector2D *Pnn = new QVector2D(Pn);
+
+				printEdgePts.push_back(Pst);
+				printEdgePts.push_back(Pnst);
+				printEdgePts.push_back(Pnsn);
+				printEdgePts.push_back(Psn);
+
+				printEdgePtsCarves.push_back(Pnn);
+				printEdgePtsCarves.push_back(Psn);
+
+				break;
+			}
+			case ADVSAW_CONNECTOR:
+			{
+				//calculate 
+				double edge_len = Pthis->distanceToPoint(*Pnext);
+				QVector2D T = (*Pnext - *Pthis).normalized();
+				QVector2D d = (Pc - *Pthis);
+				QVector2D a = QVector2D::dotProduct(d, T) * T;
+				QVector2D n = (a - d).normalized();
+
+				
+
+				QVector2D Pn = *Pthis + T * edge_len * 0.5;
+				QVector2D Psc = Pn + n * wid_conn * 1.5;
+
+				//connector segment length
+				
+				/*double edgeConn_len = len_conn;
+				if (edgeConn_len * 4 > edge_len)
+				{
+					edgeConn_len = edge_len * 0.25;
+				}*/
+				double edgeConn_len = edge_len * 0.5;
+
+				QVector2D *Pst = new QVector2D(Pn - edgeConn_len * T * 0.5);
+				QVector2D *Psn = new QVector2D(Pn + edgeConn_len * T * 0.1);
+				QVector2D *Pnst = new QVector2D(Psc - edgeConn_len * T * 0.25);
+				QVector2D *Pnsn = new QVector2D(Psc);
 				QVector2D *Pnn = new QVector2D(Pn);
 
 				printEdgePts.push_back(Pst);
