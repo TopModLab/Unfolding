@@ -169,6 +169,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 	vector<vert_t*> verts_new;
 
+
 	//add bridges
 	if (hasBridgeEdge) {
 		for(auto v: mesh->vertSet) {

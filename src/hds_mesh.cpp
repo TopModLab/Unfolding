@@ -333,6 +333,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 			he_t* hen = he->next;
 			he_t* hep = he->prev;
 
+
 			he_t* curHe = he;
 
 			if( f->isPicked ) {
@@ -346,7 +347,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 				glColor4f(0.75, 0.75, 0.75, 1);
 			}
 
-			//			if (f->isFlap) {
+			//	if (f->isFlap) {
 			//				glColor4f(0.75, 0.95, 0.75, 1);
 			//			}
 
