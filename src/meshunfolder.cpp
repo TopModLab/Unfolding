@@ -90,15 +90,18 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_
 	} while( curHE != he );
 }
 
-bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
-	/// for each vertex in the cutted_mesh, check the condition
+bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
+{
+	/// for each vertex in the cut_mesh, check the condition
 	auto isBadVertex = [](HDS_Vertex* v) -> bool {
 		double sum = 0;
 		auto he = v->he;
 		auto curHE = he->flip->next;
 		bool hasCutFace = false;
-		do {
-			if( !curHE->f->isCutFace ) {
+		do
+		{
+			if( !curHE->f->isCutFace )
+			{
 				QVector3D v1 = he->flip->v->pos - he->v->pos;
 				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
 				double nv1pnv2 = v1.length() * v2.length();
@@ -107,18 +110,28 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
 				double angle = acos(cosVal);
 				sum += angle;
 			}
-			else hasCutFace = true;
+			else
+			{
+				hasCutFace = true;
+			}
 
 			he = curHE;
 			curHE = he->flip->next;
 		}while( he != v->he ) ;
-
-		/// the sum must be smaller than PI2.
+		
+		// The sum of angles of an unfoldable vertex is smaller than pi*2 with cutface,
+		// Or equal to 2*pi without cutface
 		return sum > PI2 || (sum < PI2 && !hasCutFace);
 	};
-
-	if( any_of(cutted_mesh->vertSet.begin(), cutted_mesh->vertSet.end(), isBadVertex) ) return false;
-	else return true;
+	
+	if (any_of(cut_mesh->vertSet.begin(), cut_mesh->vertSet.end(), isBadVertex))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
@@ -131,11 +144,12 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 	unfoldingProgress->setCancelButton(0);
 	unfoldingProgress->setMinimumDuration(0);
 	
-	/*if( !unfoldable(ref_mesh) )
+	// Check if model is properly cut and unfoldable
+	if( !unfoldable(ref_mesh) )
 	{
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
-	}*/
+	}
 
 	if( fixedFaces.empty() )
 	{

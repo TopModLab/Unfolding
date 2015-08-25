@@ -10,6 +10,8 @@
 
 #include "colormap.h"
 
+#include "BBox.h"
+
 class HDS_Mesh
 {
 public:
@@ -90,6 +92,8 @@ public:
 	void validate();
 
 	void save(const string &filename);
+private:
+	BBox3D bound;
 private:
 	bool validateVertex(vert_t *v);
 	bool validateFace(face_t *f);

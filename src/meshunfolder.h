@@ -1,8 +1,9 @@
+#pragma once
 #ifndef MESHUNFOLDER_H
 #define MESHUNFOLDER_H
 
 #include "common.h"
-
+#include "BBox.h"
 //#include <QtGui/QVector3D>
 #include <QVector3D>
 #include <QProgressDialog>
