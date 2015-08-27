@@ -13,7 +13,6 @@ HDS_Mesh::HDS_Mesh()
 	showVert = true;
 	showEdge = true;
 	showNormals = false;
-	finalCutFaceIndex = -1;
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
@@ -24,7 +23,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	showEdge = other.showEdge;
 	showVert = other.showVert;
 	showNormals = other.showNormals;
-	finalCutFaceIndex =  other.finalCutFaceIndex;
 
 	/// copy the vertices set
 	vertSet.clear();
@@ -533,6 +531,12 @@ void HDS_Mesh::addFace(face_t* face)
 	faceMap.insert(make_pair(face->index, face));
 }
 
+void HDS_Mesh::deleteFace(face_t* face)
+{
+	faceSet.erase(face);
+	faceMap.erase(face->index);
+	//delete face;
+}
 
 vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
 {
@@ -596,8 +600,25 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v
 	}while (curHE != he);
 	return nullptr;
 }
+void HDS_Mesh::linkToCutFace(HDS_Mesh::he_t* he, HDS_Mesh::face_t* face)
+{
+	//if there's a corresponding cut face
+	if ( face != nullptr )
+		he->f = face;
+	else {
+		cout<<"no cut face found"<<endl;
+		//if non found, set a new cut face
+		face_t * cutFace = new face_t;
+		cutFace->index = HDS_Face::assignIndex();
+		cutFace->isCutFace = true;
+		cutFace->he = he;
+		he->f = cutFace;
+		faceSet.insert(cutFace);
+		faceMap.insert(make_pair(cutFace->index, cutFace));
+	}
+}
 
-HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
+HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, HDS_Mesh::face_t* cutFace)
 {
 	//get 4 vertices from h1 h2
 	HDS_Vertex* v1s, *v1e, *v2s, *v2e;
@@ -613,11 +634,6 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
 	//link he1 and he2 to face
 	he1->f = bridgeFace;
 	he2->f = bridgeFace;
-	//fix face
-	bridgeFace->index = HDS_Face::assignIndex();
-	bridgeFace->isCutFace = false;
-	bridgeFace->isConnector = true;
-
 
 	HDS_HalfEdge* nextHE, * prevHE;
 	//build 4 new half edges to connect original 4 vertices
@@ -629,19 +645,8 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
 		he_new->setFlip(he_new_flip);
 		he_new->f = bridgeFace;
 
-		if (finalCutFaceIndex != -1)
-			he_new_flip->f = faceMap[finalCutFaceIndex];
-		else {
-			face_t * cutFace = new face_t;
-			cutFace->index = HDS_Face::assignIndex();
-			finalCutFaceIndex = cutFace->index;
-			cutFace->isCutFace = true;
-			cutFace->he = he_new_flip;
-			he_new_flip->f = cutFace;
-			faceSet.insert(cutFace);
-			faceMap.insert(make_pair(cutFace->index, cutFace));
-		}
-
+		//link to corresponding cut face
+		linkToCutFace(he_new_flip, cutFace);
 		he_new->setCutEdge(true);
 
 		if (i == 0) {
@@ -681,9 +686,6 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
 
 	}
 
-	//add face to mesh
-	faceSet.insert(bridgeFace);
-	faceMap.insert(make_pair(bridgeFace->index, bridgeFace));
 	return bridgeFace;
 
 }

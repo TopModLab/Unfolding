@@ -8,6 +8,7 @@
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
 #include "connectorpanel.h"
+#include "hollowmeshpanel.h"
 
 namespace Ui {
 	class MainWindow;
@@ -64,8 +65,10 @@ private slots:
 
 	void slot_smoothMesh();
 	void slot_triggerExtendMesh(bool);
+	void slot_triggerHollowMesh(bool);
 
 	void slot_extendMesh();
+	void slot_hollowMesh();
 	void slot_cancelExtendMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
@@ -112,6 +115,7 @@ private:
 	CriticalPointsPanel *cppanel;
 	CutLocusPanel *clpanel;
 	ConnectorPanel *conpanel;
+	HollowMeshPanel *hmpanel;
 
 };
 

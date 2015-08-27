@@ -3,6 +3,7 @@
 #include "meshunfolder.h"
 #include "meshsmoother.h"
 #include "MeshExtender.h"
+#include "meshhollower.h"
 #include "MeshIterator.h"
 
 #include "utils.hpp"
@@ -494,6 +495,14 @@ void MeshManager::extendMesh(int meshType, map<QString, double> config)
 
 		break;
 	}
+
+}
+
+void MeshManager::setHollowMesh(double flapSize)
+{
+
+	MeshHollower::hollowMesh
+			(extended_mesh.data() == nullptr? extended_cutted_mesh.data() : extended_mesh.data());
 
 }
 

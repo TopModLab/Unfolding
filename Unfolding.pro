@@ -52,7 +52,9 @@ SOURCES += src/main.cpp\
     src/cutlocuspanel.cpp \
     src/hds_connector.cpp \
     src/connectorpanel.cpp \
-    src/connectorpanelviewer.cpp
+    src/connectorpanelviewer.cpp \
+    src/hollowmeshpanel.cpp \
+    src/meshhollower.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -92,12 +94,15 @@ HEADERS  += src/mainwindow.h \
     src/cutlocuspanel.h \
     src/hds_connector.h \
     src/connectorpanel.h \
-    src/connectorpanelviewer.h
+    src/connectorpanelviewer.h \
+    src/hollowmeshpanel.h \
+    src/meshhollower.h
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
     forms/criticalpointspanel.ui \
     forms/cutlocuspanel.ui \
-    forms/connectorpanel.ui
+    forms/connectorpanel.ui \
+    forms/hollowmeshpanel.ui
 
 RESOURCES += \
     icons.qrc

@@ -125,6 +125,7 @@ vector<QVector3D> HDS_Connector::calculateBezierCurve(QVector3D p0, QVector3D p1
 	///      p1    p2
 	///
  ///
+ ///
 	vector<QVector3D> pos;
 
 	iteration++;
