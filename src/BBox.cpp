@@ -1,39 +1,35 @@
 #include "BBox.h"
 
-template <typename vec_t>
-BBox::BBox()
-{
-	pMin = vec_t(INFINITY, INFINITY, INFINITY);
-	pMax = vec_t(-INFINITY, -INFINITY, -INFINITY);
-}
 
-template <typename vec_t>
-BBox::BBox(const vec_t& p) :pMin(p), pMax(p)
+BBox3::BBox3()
+{
+	float max_val = std::numeric_limits<float>::max();
+	float min_val = std::numeric_limits<float>::lowest();
+	pMin = QVector3D(min_val, min_val, min_val);
+	pMax = QVector3D(max_val, max_val, max_val);
+}
+BBox3::BBox3(const QVector3D& p) :pMin(p), pMax(p)
 {
 }
-template <typename vec_t>
-BBox::BBox(const vec_t& p1, const vec_t& p2)
+BBox3::BBox3(const QVector3D& p1, const QVector3D& p2)
 {
-	pMin = vec_t(min(p1.x, p2.x), min(p1.y, p2.y), min(p1.z, p2.z));
-	pMax = vec_t(max(p1.x, p2.x), max(p1.y, p2.y), max(p1.z, p2.z));
+	pMin = QVector3D(min(p1.x(), p2.x()), min(p1.y(), p2.y()), min(p1.z(), p2.z()));
+	pMax = QVector3D(max(p1.x(), p2.x()), max(p1.y(), p2.y()), max(p1.z(), p2.z()));
 }
-template <typename vec_t>
-BBox::~BBox()
+BBox3::~BBox3()
 {
 }
-template <typename vec_t>
-const vec_t BBox::getMidPoint() const
+const QVector3D BBox3::getMidPoint() const
 {
-	return (pMax + pMin) / 2.0;
+	return (pMax + pMin) * 0.5;
 }
-template <typename vec_t>
-void BBox::expand(double delta)
+void BBox3::expand(double delta)
 {
-	pMin -= vec_t(delta, delta, delta);
-	pMax += vec_t(delta, delta, delta);
+	pMin -= QVector3D(delta, delta, delta);
+	pMax += QVector3D(delta, delta, delta);
 }
 /*
-bool BBox::intersectP(const Ray& inRay, double *hitt0, double *hitt1) const
+bool BBox3::intersectP(const Ray& inRay, double *hitt0, double *hitt1) const
 {
 	double t0 = inRay.tmin, t1 = inRay.tmax;
 	//double t0 = 0, t1 = INFINITY;
@@ -62,8 +58,7 @@ bool BBox::intersectP(const Ray& inRay, double *hitt0, double *hitt1) const
 	}
 	return true;
 }*/
-template <typename vec_t>
-bool BBox::overlaps(const BBox& box) const
+bool BBox3::overlaps(const BBox3& box) const
 {
 	bool over = true;
 	for (int i = 0; i < 3; i++)
@@ -72,8 +67,11 @@ bool BBox::overlaps(const BBox& box) const
 	}
 	return over;
 }
-template <typename vec_t>
-void BBox::Union(const vec_t& p)
+bool BBox3::overlapon(const BBox3& box, AXIS axis /*= X_AXIS*/) const
+{
+	return (pMax[axis] >= box.pMin[axis]) && (pMin[axis] <= box.pMax[axis]);
+}
+void BBox3::Union(const QVector3D& p)
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -81,8 +79,7 @@ void BBox::Union(const vec_t& p)
 		this->pMax[i] = max(this->pMax[i], p[i]);
 	}
 }
-template <typename vec_t>
-void BBox::Union(const BBox& box)
+void BBox3::Union(const BBox3& box)
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -90,10 +87,9 @@ void BBox::Union(const BBox& box)
 		this->pMax[i] = max(this->pMax[i], box.pMax[i]);
 	}
 }
-template <typename vec_t>
-BBox Union(const BBox& box, const vec_t& p)
+BBox3 Union(const BBox3& box, const QVector3D& p)
 {
-	BBox ret = box;
+	BBox3 ret = box;
 	for (int i = 0; i < 3; i++)
 	{
 		ret.pMin[i] = min(box.pMin[i], p[i]);
@@ -101,10 +97,9 @@ BBox Union(const BBox& box, const vec_t& p)
 	}
 	return ret;
 }
-template <typename vec_t>
-BBox Union(const BBox& box1, const BBox& box2)
+BBox3 Union(const BBox3& box1, const BBox3& box2)
 {
-	BBox ret;
+	BBox3 ret;
 	for (int i = 0; i < 3; i++)
 	{
 		ret.pMin[i] = min(box1.pMin[i], box2.pMin[i]);
@@ -112,15 +107,14 @@ BBox Union(const BBox& box1, const BBox& box2)
 	}
 	return ret;
 }
-template <typename vec_t>
-int BBox::maxExtent() const
+int BBox3::maxExtent() const
 {
-	vec_t diag = pMax - pMin;
-	if (diag.x > diag.y && diag.x > diag.z)
+	QVector3D diag = pMax - pMin;
+	if (diag.x() > diag.y() && diag.x() > diag.z())
 	{
 		return 0;
 	}
-	else if (diag.y > diag.z)
+	else if (diag.y() > diag.z())
 	{
 		return 1;
 	}
@@ -129,14 +123,12 @@ int BBox::maxExtent() const
 		return 2;
 	}
 }
-template <typename vec_t>
-double BBox::surfaceArea() const
+double BBox3::surfaceArea() const
 {
-	vec_t d = pMax - pMin;
+	QVector3D d = pMax - pMin;
 	return 2.0 * (d[0] * d[1] + d[0] * d[2] + d[1] * d[2]);
 }
-template <typename vec_t>
-void BBox::printInfo() const
+void BBox3::printInfo() const
 {
 	/*std::cout << "min point:"; pMin.printInfo();
 	std::cout << "max point:"; pMax.printInfo();

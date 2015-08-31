@@ -3,37 +3,39 @@
 #define __BBox__
 
 #include "common.h"
-#include <QVector2D>
 #include <QVector3D>
 
 // Bounding Box Class
-template <typename vec_t>
-class BBox
+class BBox3
 {
 public:
-	vec_t pMin, pMax;
+	enum AXIS
+	{
+		X_AXIS,
+		Y_AXIS,
+		Z_AXIS
+	};
+	QVector3D pMin, pMax;
 
-	BBox();
-	BBox(const vec_t& p);
-	BBox(const vec_t& p1, const vec_t& p2);
-	~BBox();
+	BBox3();
+	BBox3(const QVector3D& p);
+	BBox3(const QVector3D& p1, const QVector3D& p2);
+	~BBox3();
 
 	void printInfo() const;
 
-	const vec_t getMidPoint() const;
+	const QVector3D getMidPoint() const;
 	/*bool intersectP(const Ray& inRay) const;*/
-	bool overlaps(const BBox& box) const;
+	bool overlaps(const BBox3& box) const;
+	bool overlapon(const BBox3& box, AXIS axis = X_AXIS) const;
 	void expand(double delta);
-	void Union(const vec_t& p);
-	void Union(const BBox& box);
-	friend BBox Union(const BBox& box, const vec_t& p);
-	friend BBox Union(const BBox& box1, const BBox& box2);
+	void Union(const QVector3D& p);
+	void Union(const BBox3& box);
+	friend BBox3 Union(const BBox3& box, const QVector3D& p);
+	friend BBox3 Union(const BBox3& box1, const BBox3& box2);
 
 	int maxExtent() const;
 	double surfaceArea() const;
 };
-typedef BBox<QVector2D> BBox2D;
-typedef BBox<QVector3D> BBox3D;
-//template class BBox < QVector2D > ;
-//template class BBox < QVector3D > ;
+
 #endif
