@@ -6,19 +6,19 @@
 #include <QtGui/QColor>
 
 namespace Utils {
-	template <typename Container>
-	Container interpolate(Container c0, Container c1, double alpha) {    
+template <typename Container>
+Container interpolate(Container c0, Container c1, double alpha) {
 	assert(c0.size() == c1.size());
 	Container c(c0.size());
 	for (int i = 0; i < c0.size(); ++i) {
 		c[i] = c0[i] * (1 - alpha) + c1[i] * alpha;
 	}
 	return c;
-	}
+}
 
-	inline bool exists(const string &filename) {
+inline bool exists(const string &filename) {
 	return std::ifstream(filename).good();
-	}
+}
 
 template <typename Container, typename Pred>
 Container filter(Container c, Pred p) {

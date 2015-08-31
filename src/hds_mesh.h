@@ -92,8 +92,7 @@ public:
 	void validate();
 
 	void save(const string &filename);
-private:
-	BBox3D bound;
+
 private:
 	bool validateVertex(vert_t *v);
 	bool validateFace(face_t *f);
