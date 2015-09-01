@@ -101,10 +101,9 @@ protected:
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
 	friend class MeshExtender;
+	friend class MeshHollower;
 	friend class MeshIterator;
 	friend class MeshViewer;
-	friend class MeshHollower;
-
 	friend class ReebGraph;
 private:
 	unordered_set<he_t*> heSet;

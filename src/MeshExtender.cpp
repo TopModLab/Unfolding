@@ -4,11 +4,13 @@
 #include "utils.hpp"
 #include "mathutils.hpp"
 HDS_Mesh* MeshExtender::thismesh = nullptr;
-
+bool MeshExtender::hasBridgeEdge = false;
+bool MeshExtender::hasCutEdge = false;
 
 vector<HDS_Vertex*> MeshExtender::addConnector(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 {
-	cout<<"creating a new connector"<<endl;
+	HDS_Face* cutFace = he1->f;
+	cout<<"creating a new connector, cut face: "<<he1->f->index<<endl;
 	//new a connector object
 	HDS_Connector* connector = new HDS_Connector(he1, he2);
 	//add all internal edges and vertices to mesh
@@ -26,7 +28,7 @@ vector<HDS_Vertex*> MeshExtender::addConnector(HDS_HalfEdge* he1, HDS_HalfEdge* 
 			auto he_next = next(he);
 			//bridge each pair of edges
 			//get bridge faces, set to connector->faces
-			HDS_Face* bridgeFace = thismesh->bridging(*he, *he_next, he1->f);
+			HDS_Face* bridgeFace = thismesh->bridging(*he, *he_next, cutFace);
 			//fix face
 			bridgeFace->index = HDS_Face::assignIndex();
 			bridgeFace->isCutFace = false;
@@ -41,20 +43,13 @@ vector<HDS_Vertex*> MeshExtender::addConnector(HDS_HalfEdge* he1, HDS_HalfEdge* 
 	return connector->verts;
 
 }
-
-
-bool MeshExtender::extendMesh(HDS_Mesh *mesh)
+void MeshExtender::scaleFaces()
 {
-	thismesh = mesh;
-
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
-	typedef HDS_Face face_t;
-	typedef HDS_Connector con_t;
-
 
 	set<int> oldFaces;
-	for (auto &f : mesh->faceSet) {
+	for (auto &f : thismesh->faceSet) {
 		if (f->isCutFace) continue;
 		else oldFaces.insert(f->index);
 	}
@@ -66,7 +61,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	HDS_HalfEdge::resetIndex();
 
 	for (auto fidx : oldFaces) {
-		auto face = mesh->faceMap[fidx];
+		auto face = thismesh->faceMap[fidx];
 		// update each face with the scaling factor
 		face->setScaledCorners(HDS_Connector::getScale());
 		int numOfCorners = face->corners().size();
@@ -77,7 +72,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			//find incident half edge
 			vert_t * vs = face->corners()[i];
 			vert_t * ve = i < numOfCorners-1? face->corners()[i+1] : face->corners()[0];
-			he_t* old_edge = mesh->incidentEdge(vs, ve);
+			he_t* old_edge = thismesh->incidentEdge(vs, ve);
 
 			//record old cut edges
 			v_new->he = old_edge;
@@ -90,7 +85,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		}
 	}
 
-	bool hasCutEdge, hasBridgeEdge = false;
 
 	for (auto v1 : corners_tmp) {
 		for (auto v2 : corners_tmp) {
@@ -116,7 +110,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 
 	for (auto fidx : oldFaces) {
-		auto face = mesh->faceMap[fidx];
+		auto face = thismesh->faceMap[fidx];
 		int numOfCorners = face->corners().size();
 		for (int i = 0; i < numOfCorners; i++) {
 			//build new edges, check if it's cut edge or not
@@ -160,30 +154,36 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	}
 
 	//clean all old vertices/edges
-	mesh->vertSet.clear();
-	mesh->vertMap.clear();
-	mesh->heSet.clear();
-	mesh->heMap.clear();
+	thismesh->vertSet.clear();
+	thismesh->vertMap.clear();
+	thismesh->heSet.clear();
+	thismesh->heMap.clear();
 
 	//add vertices, edges to mesh
 	for (auto fidx: oldFaces) {
-		auto face = mesh->faceMap[fidx];
+		auto face = thismesh->faceMap[fidx];
 		int numOfCorners = face->corners().size();
 
 		for (int i = 0; i < numOfCorners; i++) {
 			vert_t* vertex = corners_new[fidx][i];
 			he_t* he = edges_new[fidx][i];
 			he_t* hef = he->flip;
-			if (hef->f != nullptr)
-				if (hef->f->isCutFace)
-					cout<<"edge "<<hef->index<<", link to cut face "<<hef->f->index<<endl;
-			mesh->addVertex(vertex);
-			mesh->addHalfEdge(he);
-			mesh->addHalfEdge(hef);
+			thismesh->addVertex(vertex);
+			thismesh->addHalfEdge(he);
+			thismesh->addHalfEdge(hef);
 
 		}
 	}
+}
 
+bool MeshExtender::extendMesh(HDS_Mesh *mesh)
+{
+	thismesh = mesh;
+
+	typedef HDS_HalfEdge he_t;
+	typedef HDS_Vertex vert_t;
+
+	scaleFaces();
 	vector<vert_t*> verts_new;
 
 
@@ -205,12 +205,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				do {
 					curHE = curHE->v->bridgeTwin->he->prev;
 					if (curHE->isCutEdge) {
-						cout<<"edge "<<he1->index<<" has face "<<curHE->flip->f->index<<endl;
 						he1->f = curHE->flip->f;
 						break;
 					}
 				}while (curHE != h1);
-				cout<<"he1->f "<<he1->f->index<<endl;
 				vector<HDS_Vertex*> verts = addConnector(he1, he2);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
@@ -273,8 +271,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				twin_he->setCutEdge(false);
 
 				//bridge v->he and new he
-				cout<<"build bridge flap between "<<he1->v->index<<" and "<<flap_he_flip->v->index<<endl;
-				cout<<"he1->f "<<he1->f->index<<endl;
 				vector<HDS_Vertex*> verts = addConnector(he1, flap_he_flip);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 

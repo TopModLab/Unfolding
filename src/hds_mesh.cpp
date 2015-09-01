@@ -602,10 +602,11 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v
 }
 void HDS_Mesh::linkToCutFace(HDS_Mesh::he_t* he, HDS_Mesh::face_t* face)
 {
+
 	//if there's a corresponding cut face
-	if ( face != nullptr )
+	if ( face != nullptr ) {
 		he->f = face;
-	else {
+	} else {
 		cout<<"no cut face found"<<endl;
 		//if non found, set a new cut face
 		face_t * cutFace = new face_t;
