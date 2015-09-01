@@ -185,7 +185,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 				visitedFaces.insert(f->index);
 				fixedFaces.insert(f->index);
 				/// Find all connected faces except cut face
-				set<HDS_Face*> connectedFaces = Utils::filter_set(f->connectedFaces(), [](HDS_Face* f){
+				set<HDS_Face*> connectedFaces = Utils::filter_set(f->linkededFaces(), [](HDS_Face* f){
 						return !(f->isCutFace);
 				});
 				for(auto cf : connectedFaces)
@@ -248,7 +248,6 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		
 		if (!expSeq.empty())
 		{
-
 			/// compute the spanning vectors for the first face
 			/*QVector3D uvec, vvec;
 			HDS_Face *face0 = unfolded_mesh->faceMap.at(expSeq.front());
@@ -270,13 +269,13 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 
 			// Project the first face to XY plane
 			HDS_Face *face0_unf = unfolded_mesh->faceMap.at(expSeq.front());
-			auto oriP = he0_ref->v;
+			auto oriP = he0_ref->v->pos;// +QVector3D(rand(), rand(), rand());
 			auto he_unf = face0_unf->he;
 			auto curHE = he_unf;
 			do 
 			{
-				curHE->v->pos = QVector3D(QVector3D::dotProduct(curHE->v->pos - oriP->pos, uvec),
-					QVector3D::dotProduct(curHE->v->pos - oriP->pos, vvec), 0);
+				curHE->v->pos = QVector3D(QVector3D::dotProduct(curHE->v->pos - oriP, uvec),
+					QVector3D::dotProduct(curHE->v->pos - oriP, vvec), 0);
 				curHE = curHE->next;
 			} while (curHE != he_unf);
 			uvec = he_unf->v->pos - face0_unf->center();
@@ -291,7 +290,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		}
 		// Qt display progress
 		unfoldingProgress->setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
-		break;// debug break for each fixed face
+		//break;// debug break for each fixed face
 	}
 	// Qt display progress
 	unfoldingProgress->setValue(100);

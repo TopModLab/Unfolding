@@ -84,7 +84,7 @@ set<HDS_Face *> HDS_Face::linkededFaces()
 {
 	// Find all linked faces
 	set<HDS_Face*> faces;
-
+	set<HDS_Face*> visitedFaces;
 	queue<HDS_Face*> Q;
 	Q.push(this);
 	while (!Q.empty())
@@ -92,16 +92,23 @@ set<HDS_Face *> HDS_Face::linkededFaces()
 		auto cur = Q.front();
 		Q.pop();
 		faces.insert(cur);
-		auto curHE = cur->he;
+		if (visitedFaces.find(cur) == visitedFaces.end())
+		{
+			visitedFaces.insert(cur);
+		}
+
+		auto fhe = cur->he;
+		auto curHE = fhe;
 		do {
 			auto f = curHE->flip->f;
-			if (faces.find(f) == faces.end())
+			if (faces.find(f) == faces.end() && visitedFaces.find(f)== visitedFaces.end())
 			{
 				faces.insert(f);
+				visitedFaces.insert(f);
 				Q.push(f);
 			}
 			curHE = curHE->next;
-		} while (curHE != he);
+		} while (curHE != fhe);
 	}
 
 	cout << "#linked faces = " << faces.size() << endl;
