@@ -3,11 +3,11 @@
 
 #include "utils.hpp"
 #include "mathutils.hpp"
-HDS_Mesh* MeshExtender::thismesh = nullptr;
 bool MeshExtender::hasBridgeEdge = false;
 bool MeshExtender::hasCutEdge = false;
+bool MeshExtender::isHollow = false;
 
-vector<HDS_Vertex*> MeshExtender::addConnector(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
+vector<HDS_Vertex*> MeshExtender::addConnector(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 {
 	HDS_Face* cutFace = he1->f;
 	cout<<"creating a new connector, cut face: "<<he1->f->index<<endl;
@@ -43,13 +43,13 @@ vector<HDS_Vertex*> MeshExtender::addConnector(HDS_HalfEdge* he1, HDS_HalfEdge* 
 	return connector->verts;
 
 }
-void MeshExtender::scaleFaces()
+void MeshExtender::scaleFaces(HDS_Mesh* mesh)
 {
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
 
 	set<int> oldFaces;
-	for (auto &f : thismesh->faceSet) {
+	for (auto &f : mesh->faceSet) {
 		if (f->isCutFace) continue;
 		else oldFaces.insert(f->index);
 	}
@@ -61,7 +61,7 @@ void MeshExtender::scaleFaces()
 	HDS_HalfEdge::resetIndex();
 
 	for (auto fidx : oldFaces) {
-		auto face = thismesh->faceMap[fidx];
+		auto face = mesh->faceMap[fidx];
 		// update each face with the scaling factor
 		face->setScaledCorners(HDS_Connector::getScale());
 		int numOfCorners = face->corners().size();
@@ -72,7 +72,7 @@ void MeshExtender::scaleFaces()
 			//find incident half edge
 			vert_t * vs = face->corners()[i];
 			vert_t * ve = i < numOfCorners-1? face->corners()[i+1] : face->corners()[0];
-			he_t* old_edge = thismesh->incidentEdge(vs, ve);
+			he_t* old_edge = mesh->incidentEdge(vs, ve);
 
 			//record old cut edges
 			v_new->he = old_edge;
@@ -110,7 +110,7 @@ void MeshExtender::scaleFaces()
 
 
 	for (auto fidx : oldFaces) {
-		auto face = thismesh->faceMap[fidx];
+		auto face = mesh->faceMap[fidx];
 		int numOfCorners = face->corners().size();
 		for (int i = 0; i < numOfCorners; i++) {
 			//build new edges, check if it's cut edge or not
@@ -135,6 +135,7 @@ void MeshExtender::scaleFaces()
 			curHE->flip->v = i < edges_new[fidx].size()-1? corners_new[fidx][i+1] : corners_new[fidx][0];
 			curHE->v = corners_new[fidx][i];
 		}
+		if (!isHollow){
 		//link edge loop
 		for (int i = 0; i < numOfCorners; i++) {
 			he_t* curHE = edges_new[fidx][i];
@@ -145,6 +146,7 @@ void MeshExtender::scaleFaces()
 			curHE->flip->prev = nextHE->flip;
 			curHE->flip->next = prevHE->flip;
 		}
+		}
 		//link corners to edges
 		for (int i = 0; i < numOfCorners; i++) {
 			corners_new[fidx][i]->he = edges_new[fidx][i];
@@ -154,23 +156,23 @@ void MeshExtender::scaleFaces()
 	}
 
 	//clean all old vertices/edges
-	thismesh->vertSet.clear();
-	thismesh->vertMap.clear();
-	thismesh->heSet.clear();
-	thismesh->heMap.clear();
+	mesh->vertSet.clear();
+	mesh->vertMap.clear();
+	mesh->heSet.clear();
+	mesh->heMap.clear();
 
 	//add vertices, edges to mesh
 	for (auto fidx: oldFaces) {
-		auto face = thismesh->faceMap[fidx];
+		auto face = mesh->faceMap[fidx];
 		int numOfCorners = face->corners().size();
 
 		for (int i = 0; i < numOfCorners; i++) {
 			vert_t* vertex = corners_new[fidx][i];
 			he_t* he = edges_new[fidx][i];
 			he_t* hef = he->flip;
-			thismesh->addVertex(vertex);
-			thismesh->addHalfEdge(he);
-			thismesh->addHalfEdge(hef);
+			mesh->addVertex(vertex);
+			mesh->addHalfEdge(he);
+			mesh->addHalfEdge(hef);
 
 		}
 	}
@@ -178,12 +180,11 @@ void MeshExtender::scaleFaces()
 
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
-	thismesh = mesh;
 
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
 
-	scaleFaces();
+	scaleFaces(mesh);
 	vector<vert_t*> verts_new;
 
 
@@ -209,7 +210,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 						break;
 					}
 				}while (curHE != h1);
-				vector<HDS_Vertex*> verts = addConnector(he1, he2);
+				vector<HDS_Vertex*> verts = addConnector(mesh, he1, he2);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 				visited.insert(v->bridgeTwin);
@@ -271,7 +272,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				twin_he->setCutEdge(false);
 
 				//bridge v->he and new he
-				vector<HDS_Vertex*> verts = addConnector(he1, flap_he_flip);
+				vector<HDS_Vertex*> verts = addConnector(mesh, he1, flap_he_flip);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 			}

@@ -3,8 +3,8 @@
 size_t HDS_Connector::uid = 0;
 
 int HDS_Connector::shape = 0;
-double HDS_Connector::scale = 0.2;
-double HDS_Connector::curv = 0.3;
+double HDS_Connector::scale = 0.8;
+double HDS_Connector::curv = 0.5;
 int HDS_Connector::nSamples = 3;
 double HDS_Connector::cp = 0;
 int HDS_Connector::opening = 0;

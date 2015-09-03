@@ -97,6 +97,7 @@ HDS_Mesh::~HDS_Mesh() {
 void HDS_Mesh::updateSortedFaces()
 {
 	/// create the sorted face set
+	cout<<"updating sorted faces"<<endl;
 	sortedFaces.assign(faceSet.begin(), faceSet.end());
 	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
 		auto ca = fa->corners();
@@ -538,6 +539,13 @@ void HDS_Mesh::deleteFace(face_t* face)
 	//delete face;
 }
 
+void HDS_Mesh::deleteHalfEdge(he_t* edge)
+{
+	heSet.erase(edge);
+	heMap.erase(edge->index);
+	//delete edge;
+}
+
 vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
 {
 	he_t *he = v->he;
@@ -614,8 +622,8 @@ void HDS_Mesh::linkToCutFace(HDS_Mesh::he_t* he, HDS_Mesh::face_t* face)
 		cutFace->isCutFace = true;
 		cutFace->he = he;
 		he->f = cutFace;
-		faceSet.insert(cutFace);
-		faceMap.insert(make_pair(cutFace->index, cutFace));
+		addFace(cutFace);
+
 	}
 }
 
@@ -689,6 +697,27 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, 
 
 	return bridgeFace;
 
+}
+
+HDS_Mesh::he_t * HDS_Mesh::bridging(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
+{
+	he_t* he1 = new he_t;
+	he_t* he1_flip = new he_t;
+	he1->setFlip(he1_flip);
+
+	//link edge and vertices
+	he1->v = v1;
+	he1_flip->v = v2;
+	v1->he = he1;
+	v2->he = he1_flip;
+
+	//link edge loop
+	he1->next = he1_flip;
+	he1->prev = he1_flip;
+	he1_flip->next = he1;
+	he1_flip->prev = he1;
+
+	return he1;
 }
 
 void HDS_Mesh::drawVertexIndices()

@@ -625,7 +625,7 @@ void MainWindow::slot_triggerExtendMesh(bool checked)
 void MainWindow::slot_triggerHollowMesh(bool checked)
 {
 	if (checked) {
-		if(curMesh == Extended) {
+		if(curMesh == Original) {
 			hmpanel->show();
 			hmpanel->activateWindow();
 
@@ -638,6 +638,9 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 void MainWindow::slot_hollowMesh()
 {
 	MeshManager::getInstance()->setHollowMesh(hmpanel->getSize());
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+	meshStack.push(Cutted);
+	updateCurrentMesh();
 
 }
 void MainWindow::slot_extendMesh()

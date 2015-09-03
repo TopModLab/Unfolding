@@ -71,6 +71,7 @@ public:
 	void addVertex(vert_t*);
 	void addFace(face_t*);
 	void deleteFace(face_t*);
+	void deleteHalfEdge(he_t*);
 
 	vector<face_t *> incidentFaces(vert_t *v);
 	vector<he_t *> incidentEdges(vert_t *v);
@@ -81,6 +82,7 @@ public:
 
 	void linkToCutFace(he_t* he, face_t* cutFace);
 	face_t * bridging(he_t* h1, he_t* h2, face_t* cutFace); //create a bridge between two boundary half edges
+	he_t* bridging(vert_t* v1, vert_t* v2);
 
 	template <typename T>
 	void flipSelectionState(int idx, unordered_map<int, T> &m);

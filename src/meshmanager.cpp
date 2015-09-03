@@ -500,9 +500,9 @@ void MeshManager::extendMesh(int meshType, map<QString, double> config)
 
 void MeshManager::setHollowMesh(double flapSize)
 {
-
-	MeshHollower::hollowMesh
-			(extended_mesh.data() == nullptr? extended_cutted_mesh.data() : extended_mesh.data());
+	cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
+	MeshHollower::hollowMesh(cutted_mesh.data(), flapSize);
+	cutted_mesh->updateSortedFaces();
 
 }
 
