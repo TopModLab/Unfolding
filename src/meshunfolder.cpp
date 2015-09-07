@@ -184,7 +184,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 			{
 				visitedFaces.insert(f->index);
 				fixedFaces.insert(f->index);
-				/// Find all connected faces except cut face
+				/// Find all linked faces except cut face
 				set<HDS_Face*> connectedFaces = Utils::filter_set(f->linkededFaces(), [](HDS_Face* f){
 						return !(f->isCutFace);
 				});
@@ -199,6 +199,8 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		cout << "Fixed faces found: ";
 		Utils::print(fixedFaces);
 	}
+	//
+
 	unfoldingProgress->setValue(10);
 
 	int progressIndex = 0; // Qt display progress
@@ -248,13 +250,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		
 		if (!expSeq.empty())
 		{
-			/// compute the spanning vectors for the first face
-			/*QVector3D uvec, vvec;
-			HDS_Face *face0 = unfolded_mesh->faceMap.at(expSeq.front());
-			QVector3D cface0 = face0->center();
-			uvec = face0->he->v->pos - cface0;
-			vvec = face0->he->flip->v->pos - cface0;*/
-
+			
 			/// compute the spanning vectors for the first face
 			QVector3D uvec, vvec;
 			HDS_Face *face0_ref = ref_mesh->faceMap.at(expSeq.front());
