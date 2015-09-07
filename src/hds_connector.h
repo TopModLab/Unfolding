@@ -43,9 +43,12 @@ private:
 	HDS_HalfEdge* hef;
 	QVector3D p00;
 	QVector3D p01;
+	QVector3D p10, p11, p20, p21;
+	vector<QVector3D> bezierPos_front, bezierPos_back;
 
 private:
-	vector<HDS_Vertex*> calculateBezierCurve(int index);
+	vector<QVector3D> getBezierCurvePos(int index);
+	vector<QVector3D> calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2, int iteration);
 
 private:
 	static int shape;
