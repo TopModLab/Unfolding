@@ -14,9 +14,14 @@ HDS_Face::HDS_Face()
 	he = nullptr;
 	scalingFactor = 1;
 	isPlanar = true;
+
+	bound = nullptr;
 }
 
-HDS_Face::~HDS_Face(){}
+HDS_Face::~HDS_Face()
+{
+	delete bound;
+}
 
 HDS_Face::HDS_Face(const HDS_Face &other)
 {
@@ -31,6 +36,7 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 	he = nullptr;
 	scalingFactor = other.scalingFactor;
 
+	bound = nullptr;
 }
 
 HDS_Face HDS_Face::operator=(const HDS_Face &other)
@@ -40,7 +46,10 @@ HDS_Face HDS_Face::operator=(const HDS_Face &other)
 
 set<HDS_Face *> HDS_Face::connectedFaces()
 {
+	// Find all faces that are directly connected to current face
 	set<HDS_Face*> faces;
+	/*
+	// Peihong's solution
 	queue<HDS_Face*> Q;
 	Q.push(this);
 	while( !Q.empty() )
@@ -56,9 +65,55 @@ set<HDS_Face *> HDS_Face::connectedFaces()
 			}
 			curHE = curHE->next;
 		} while( curHE != he );
-	}
+	}*/
+	
+	faces.insert(this);
+	auto curHE = this->he;
+	do {
+		auto f = curHE->flip->f;
+		if (faces.find(f) == faces.end()) {
+			faces.insert(f);
+		}
+		curHE = curHE->next;
+	} while (curHE != he);
 	cout << "#connected faces = " << faces.size() << endl;
 	return faces;
+}
+
+set<HDS_Face *> HDS_Face::linkededFaces()
+{
+	// Find all linked faces
+	set<HDS_Face*> faces;
+	set<HDS_Face*> visitedFaces;
+	queue<HDS_Face*> Q;
+	Q.push(this);
+	while (!Q.empty())
+	{
+		auto cur = Q.front();
+		Q.pop();
+		faces.insert(cur);
+		if (visitedFaces.find(cur) == visitedFaces.end())
+		{
+			visitedFaces.insert(cur);
+		}
+
+		auto fhe = cur->he;
+		auto curHE = fhe;
+		do {
+			auto f = curHE->flip->f;
+			if (faces.find(f) == faces.end() && visitedFaces.find(f)== visitedFaces.end())
+			{
+				faces.insert(f);
+				visitedFaces.insert(f);
+				Q.push(f);
+			}
+			curHE = curHE->next;
+		} while (curHE != fhe);
+	}
+
+	cout << "#linked faces = " << faces.size() << endl;
+	return faces;
+
 }
 
 QVector3D HDS_Face::center() const
@@ -128,7 +183,15 @@ void HDS_Face::scaleDown()
 		n++;
 	}
 }
-
+void HDS_Face::update_bbox()
+{
+	auto curHE = he;
+	while(curHE->next != he)
+	{
+		bound->Union(curHE->v->pos);
+		curHE = curHE->next;
+	}
+}
 void HDS_Face::checkPlanar()
 {
 	isPlanar = true;
@@ -144,4 +207,19 @@ void HDS_Face::checkPlanar()
 		}
 	}
 
+}
+
+bool HDS_Face::isConnected(const HDS_Face *other)
+{	
+	auto curHe = he;
+	do 
+	{
+		if (curHe->flip->f == other)
+		{
+			return true;
+		}
+		curHe = curHe->next;
+	} while (curHe != he);
+
+	return false;
 }

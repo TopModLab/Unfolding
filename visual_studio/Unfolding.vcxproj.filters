@@ -234,6 +234,9 @@
     <ClCompile Include="..\src\hds_connector.cpp">
       <Filter>Source Files\HDS</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\BBox.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -355,6 +358,9 @@
     </ClInclude>
     <ClInclude Include="..\src\hds_connector.h">
       <Filter>Header Files\HDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BBox.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
