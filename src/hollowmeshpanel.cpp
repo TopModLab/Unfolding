@@ -8,8 +8,8 @@ HollowMeshPanel::HollowMeshPanel(QWidget *parent) :
 	ui->setupUi(this);
 	setWindowTitle(tr("Hollow Mesh Panel"));
 
-	connect(ui->pushButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
 	connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(slot_saved()));
+	connect(ui->pushButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
 
 }
 

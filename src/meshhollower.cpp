@@ -45,32 +45,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 		vertices_new.push_back(he2_v1);
 		vertices_new.push_back(he2_v2);
 
-//		//add additional flaps on hollow face
-//		if (flapSize != 0) {
-//		QVector3D he1_v0 = he_f->scaleCorner(he->prev->v);
-//		QVector3D he1_v3 = he_f->scaleCorner(he->next->flip->v);
-//		QVector3D he2_v0 = he_flip_f->scaleCorner(he->flip->next->flip->v);
-//		QVector3D he2_v3 = he_flip_f->scaleCorner(he->flip->prev->flip->v);
-
-//		vert_t* he_flap_v1 = new vert_t((1.0-flapSize)*he1_v1 + flapSize*he1_v0);
-//		vert_t* he_flap_v2 = new vert_t((1.0-flapSize)*he1_v2 + flapSize*he1_v3);
-//		vert_t* hef_flap_v1 = new vert_t((1.0-flapSize)*he2_v1 + flapSize*he2_v0);
-//		vert_t* hef_flap_v2 = new vert_t((1.0-flapSize)*he2_v2 + flapSize*he2_v3);
-//		//new edge pair based on new vertex position
-//		he_t* he1_flap = thismesh->bridging(he_flap_v1, he_flap_v2);
-//		he_t* he2_flap = thismesh->bridging(hef_flap_v1, hef_flap_v2);
-//		hes_new.push_back(he1_flap);
-//		hes_new.push_back(he1_flap->flip);
-//		hes_new.push_back(he2_flap);
-//		hes_new.push_back(he2_flap->flip);
-
-//		vertices_new.push_back(he_flap_v1);
-//		vertices_new.push_back(he_flap_v2);
-//		vertices_new.push_back(hef_flap_v1);
-//		vertices_new.push_back(hef_flap_v2);
-
-//		}
-
 		//new edge pair based on new vertex position
 		he_t* he1 = thismesh->bridging(he1_v1, he1_v2);
 		he_t* he2 = thismesh->bridging(he2_v1, he2_v2);
@@ -97,7 +71,44 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 		vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
 		he1->f = cutFace;
 
+		//add additional flaps on hollow face
+		if (flapSize > 0.01) {
+			QVector3D he1_v0 = he_f->scaleCorner(he->prev->v);
+			QVector3D he1_v3 = he_f->scaleCorner(he->next->flip->v);
+			QVector3D he2_v0 = he_flip_f->scaleCorner(he->flip->next->flip->v);
+			QVector3D he2_v3 = he_flip_f->scaleCorner(he->flip->prev->v);
 
+			vert_t* he_flap_v1 = new vert_t((1.0-flapSize)*he1_v1->pos + flapSize*he1_v0);
+			vert_t* he_flap_v2 = new vert_t((1.0-flapSize)*he1_v2->pos + flapSize*he1_v3);
+			vert_t* hef_flap_v1 = new vert_t((1.0-flapSize)*he2_v1->pos + flapSize*he2_v0);
+			vert_t* hef_flap_v2 = new vert_t((1.0-flapSize)*he2_v2->pos + flapSize*he2_v3);
+
+			//new edge pair based on new vertex position
+			he_t* he1_flap = thismesh->bridging(he_flap_v1, he_flap_v2);
+			he_t* he2_flap = thismesh->bridging(hef_flap_v1, hef_flap_v2);
+
+			he1_flap->f = cutFace;
+			he2_flap->flip->f = cutFace;
+			//set he1 and he2 to be non cut edge, flaps to be cut edge
+			he1->setCutEdge(false);
+			he2->setCutEdge(false);
+			he1_flap->setCutEdge(true);
+			he2_flap->setCutEdge(true);
+
+			hes_new.push_back(he1_flap);
+			hes_new.push_back(he1_flap->flip);
+			hes_new.push_back(he2_flap);
+			hes_new.push_back(he2_flap->flip);
+
+			vertices_new.push_back(he_flap_v1);
+			vertices_new.push_back(he_flap_v2);
+			vertices_new.push_back(hef_flap_v1);
+			vertices_new.push_back(hef_flap_v2);
+
+			thismesh->addFace(thismesh->bridging(he1_flap->flip, he1, cutFace));
+			thismesh->addFace(thismesh->bridging(he2->flip, he2_flap, cutFace));
+
+		}
 
 
 	}

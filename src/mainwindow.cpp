@@ -632,6 +632,8 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 		}
 	}else {
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+		meshStack.pop();
+		updateCurrentMesh();
 	}
 }
 
