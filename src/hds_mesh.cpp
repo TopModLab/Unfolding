@@ -17,7 +17,6 @@ HDS_Mesh::HDS_Mesh()
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 {
-
 	/// need a deep copy
 	showFace = other.showFace;
 	showEdge = other.showEdge;
@@ -37,7 +36,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	faceSet.clear();
 	faceMap.clear();
 	for( auto f : other.faceSet ) {
-		/// he is not set for this vertex
 		face_t *nf = new face_t(*f);
 		faceSet.insert(nf);
 		faceMap.insert(make_pair(f->index, nf));
@@ -71,7 +69,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		if (he_ref->v != nullptr)
 		he->v = vertMap.at(he_ref->v->index);
 	}
-
 	/// set the half edges for faces
 	for( auto &f : faceSet ) {
 		auto f_ref = other.faceMap.at(f->index);
@@ -86,7 +83,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		if (v_ref->bridgeTwin != nullptr)
 			v->bridgeTwin = vertMap.at(v_ref->bridgeTwin->index);
 	}
-
 
 }
 
@@ -120,14 +116,15 @@ void HDS_Mesh::clearSortedFaces()
 
 
 bool HDS_Mesh::validateEdge(he_t *e) {
-	if( heMap.find(e->index) == heMap.end() ) return false;
-	if( e->flip->flip != e ) return false;
-	if( e->next->prev != e ) return false;
-	if( e->prev->next != e ) return false;
-	if( e->f == nullptr ) return false;
-	if( e->v == nullptr ) return false;
-	if( faceSet.find(e->f) == faceSet.end() ) return false;
-	if( vertSet.find(e->v) == vertSet.end() ) return false;
+
+	if( heMap.find(e->index) == heMap.end() ){cout<<"hemap invalid"<<endl; return false;}
+	if( e->flip->flip != e ){cout<<"flip invalid"<<endl; return false;}
+	if( e->next->prev != e ){cout<<"next invalid"<<endl; return false;}
+	if( e->prev->next != e ){cout<<"prev invalid"<<endl; return false;}
+	if( e->f == nullptr ){cout<<"f invalid"<<endl; return false;}
+	if( e->v == nullptr ){cout<<"v invalid"<<endl; return false;}
+	if( faceSet.find(e->f) == faceSet.end() ){cout<<"->f invalid"<<endl; return false;}
+	if( vertSet.find(e->v) == vertSet.end() ) {cout<<"->v invalid"<<endl;return false;}
 	return true;
 }
 
@@ -179,12 +176,12 @@ void HDS_Mesh::validate() {
 			cout << "face #" << f->index << " is invalid." << endl;
 		}
 	}
-
 	for( auto e : heSet ) {
 		if( !validateEdge(e) ) {
 			cout << "half edge #" << e->index << " is invalid." << endl;
 		}
 	}
+
 }
 
 void HDS_Mesh::printInfo(const string& msg)

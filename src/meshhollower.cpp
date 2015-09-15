@@ -21,7 +21,20 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 		f->setScaledCorners(HDS_Connector::getScale());
 		old_faces.push_back(f);
 	}
+	for (auto f: old_faces) {
+		thismesh->deleteFace(f);
+	}
+	//clear old mesh
+	thismesh->vertSet.clear();
+	thismesh->vertMap.clear();
+	for (auto he: old_edges) {
+		thismesh->deleteHalfEdge(he);
+		thismesh->deleteHalfEdge(he->flip);
+	}
 
+
+	HDS_Vertex::resetIndex();
+	HDS_HalfEdge::resetIndex();
 	HDS_Face::resetIndex();
 
 	vector<vert_t*> vertices_new;
@@ -105,27 +118,23 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 			vertices_new.push_back(hef_flap_v1);
 			vertices_new.push_back(hef_flap_v2);
 
-			thismesh->addFace(thismesh->bridging(he1_flap->flip, he1, cutFace));
-			thismesh->addFace(thismesh->bridging(he2->flip, he2_flap, cutFace));
+			HDS_Face* bridgeFace_he1 = thismesh->bridging(he1_flap->flip, he1, cutFace);
+			bridgeFace_he1->index = HDS_Face::assignIndex();
+			bridgeFace_he1->isCutFace = false;
+			bridgeFace_he1->isConnector = true;
+			thismesh->addFace(bridgeFace_he1);
+			HDS_Face* bridgeFace_he2 = thismesh->bridging(he2->flip, he2_flap, cutFace);
+			bridgeFace_he2->index = HDS_Face::assignIndex();
+			bridgeFace_he2->isCutFace = false;
+			bridgeFace_he2->isConnector = true;
+			thismesh->addFace(bridgeFace_he2);
 
 		}
 
 
 	}
 
-	//clear old mesh
-	thismesh->vertSet.clear();
-	thismesh->vertMap.clear();
-	for (auto he: old_edges) {
-		thismesh->deleteHalfEdge(he);
-		thismesh->deleteHalfEdge(he->flip);
-	}
-	for (auto f: old_faces) {
-		thismesh->deleteFace(f);
-	}
 
-	HDS_Vertex::resetIndex();
-	HDS_HalfEdge::resetIndex();
 
 	//add new vertices and edges
 	for (auto v: vertices_new) {
@@ -143,6 +152,5 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 		v->computeCurvature();
 		//cout << v->index << ": " << (*v) << endl;
 	}
-
-
+	cout<<"hollow mesh he size "<<thismesh->halfedges().size()<<endl;
 }

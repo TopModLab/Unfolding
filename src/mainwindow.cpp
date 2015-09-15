@@ -575,7 +575,9 @@ void MainWindow::slot_performMeshCut() {
 
 void MainWindow::slot_unfoldMesh(bool checked) {
 	if(checked){
+		cout<<"checked"<<endl;
 		if (curMesh == Cutted || curMesh == Extended) {
+			cout<<"cur mesh = "<<curMesh<<endl;
 			MeshManager::getInstance()->unfoldMesh(isExtended);
 			meshStack.push(Unfolded);
 			updateCurrentMesh();
@@ -634,16 +636,17 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 		meshStack.pop();
 		updateCurrentMesh();
+		isExtended = false;
 	}
 }
 
 void MainWindow::slot_hollowMesh()
 {
 	MeshManager::getInstance()->setHollowMesh(hmpanel->getSize());
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
-	meshStack.push(Cutted);
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
+	meshStack.push(Extended);
 	updateCurrentMesh();
-
+	isExtended = true;
 }
 void MainWindow::slot_extendMesh()
 {

@@ -20,7 +20,7 @@ HDS_Face::HDS_Face()
 
 HDS_Face::~HDS_Face()
 {
-	delete bound;
+	//delete bound;
 }
 
 HDS_Face::HDS_Face(const HDS_Face &other)
@@ -191,6 +191,7 @@ void HDS_Face::update_bbox()
 		bound->Union(curHE->v->pos);
 		curHE = curHE->next;
 	}
+
 }
 void HDS_Face::checkPlanar()
 {

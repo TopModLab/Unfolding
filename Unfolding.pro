@@ -54,7 +54,8 @@ SOURCES += src/main.cpp\
     src/connectorpanel.cpp \
     src/connectorpanelviewer.cpp \
     src/hollowmeshpanel.cpp \
-    src/meshhollower.cpp
+    src/meshhollower.cpp \
+    src/BBox.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -96,7 +97,8 @@ HEADERS  += src/mainwindow.h \
     src/connectorpanel.h \
     src/connectorpanelviewer.h \
     src/hollowmeshpanel.h \
-    src/meshhollower.h
+    src/meshhollower.h \
+    src/BBox.h
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
     forms/criticalpointspanel.ui \
