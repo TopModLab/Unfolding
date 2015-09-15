@@ -614,6 +614,9 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 		int selectedElementIdx = getSelectedElementIndex(e->pos());//mouse positon;
 		cout << "selected element " << selectedElementIdx << endl;
 		if (selectedElementIdx >= 0) {
+			//for testing
+			cout<< "select edge's face index: "<<heMesh->heMap[selectedElementIdx]->f->index<<endl;
+			cout<< "select edge flip's face index: "<<heMesh->heMap[selectedElementIdx]->flip->f->index<<endl;
 			selectedElementsIdxQueue.push(selectedElementIdx);
 
 			switch (selectionMode) {

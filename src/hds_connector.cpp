@@ -3,9 +3,9 @@
 size_t HDS_Connector::uid = 0;
 
 int HDS_Connector::shape = 0;
-double HDS_Connector::scale = 0;
-double HDS_Connector::curv = 0;
-int HDS_Connector::nSamples = 0;
+double HDS_Connector::scale = 0.8;
+double HDS_Connector::curv = 0.5;
+int HDS_Connector::nSamples = 3;
 double HDS_Connector::cp = 0;
 int HDS_Connector::opening = 0;
 
@@ -124,6 +124,7 @@ vector<QVector3D> HDS_Connector::calculateBezierCurve(QVector3D p0, QVector3D p1
 	///       /    \    p1'    p2'
 	///      p1    p2
 	///
+ ///
  ///
 	vector<QVector3D> pos;
 

@@ -39,6 +39,7 @@ public:
 	bool isConnected(const HDS_Face *other);
 
 	void setScaledCorners(double factor);
+	QVector3D scaleCorner(HDS_Vertex* v);
 	vector<QVector3D> getScaledCorners();
 	void scaleDown();
 	double getScalingFactor(){ return scalingFactor; }

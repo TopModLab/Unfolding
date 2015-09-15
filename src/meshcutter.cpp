@@ -298,7 +298,6 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = true;
 		mesh->addFace(nf);
-		mesh->finalCutFaceIndex = nf->index;
 
 		auto he = mesh->heMap[*cutEdgesFlips.begin()];
 		nf->he = he;

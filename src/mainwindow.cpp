@@ -51,6 +51,7 @@ bool MainWindow::createComponents()
 		cppanel = new CriticalPointsPanel;
 		clpanel = new CutLocusPanel;
 		conpanel = new ConnectorPanel;
+		hmpanel = new HollowMeshPanel;
 
 		createActions();
 		createMenus();
@@ -96,6 +97,7 @@ bool MainWindow::connectComponents()
 	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_extendMesh()));
 	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
 
+	connect(hmpanel, SIGNAL(sig_saved()), this, SLOT(slot_hollowMesh()));
 
 	return true;
 }
@@ -329,6 +331,13 @@ void MainWindow::createActions()
 		connect(extendAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
 		actionsMap["extend"] = extendAct;
 
+		QAction *hollowAct = new QAction(QIcon(":/icons/HollowSphere.png"), tr("Generate Hollow Mesh"), this);
+		hollowAct->setStatusTip(tr("Generate Hollow Mesh"));
+		hollowAct->setCheckable(true);
+		hollowAct->setChecked(false);
+		connect(hollowAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerHollowMesh(bool)));
+		actionsMap["hollow"] = hollowAct;
+
 		//cut with popup submenu
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
 		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
@@ -469,6 +478,7 @@ void MainWindow::createToolBar()
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["smooth"]);
 		ui->mainToolBar->addAction(actionsMap["extend"]);
+		ui->mainToolBar->addAction(actionsMap["hollow"]);
 
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["mesh cut"]);
@@ -611,6 +621,30 @@ void MainWindow::slot_triggerExtendMesh(bool checked)
 	}
 }
 
+
+void MainWindow::slot_triggerHollowMesh(bool checked)
+{
+	if (checked) {
+		if(curMesh == Original) {
+			hmpanel->show();
+			hmpanel->activateWindow();
+
+		}
+	}else {
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+		meshStack.pop();
+		updateCurrentMesh();
+	}
+}
+
+void MainWindow::slot_hollowMesh()
+{
+	MeshManager::getInstance()->setHollowMesh(hmpanel->getSize());
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+	meshStack.push(Cutted);
+	updateCurrentMesh();
+
+}
 void MainWindow::slot_extendMesh()
 {
 	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
@@ -744,6 +778,7 @@ void MainWindow::slot_reset()
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 	actionsMap["mesh unfold"]->setChecked(false);
 	actionsMap["extend"]->setChecked(false);
+	actionsMap["hollow"]->setChecked(false);
 
 	MeshManager::getInstance()->resetMesh();
 }

@@ -72,7 +72,8 @@ public:
 	void addHalfEdge(he_t*);
 	void addVertex(vert_t*);
 	void addFace(face_t*);
-
+	void deleteFace(face_t*);
+	void deleteHalfEdge(he_t*);
 
 	vector<face_t *> incidentFaces(vert_t *v);
 	vector<he_t *> incidentEdges(vert_t *v);
@@ -81,7 +82,9 @@ public:
 	he_t* incidentEdge(face_t *f1, face_t *f2);
 	he_t* incidentEdge(vert_t *v1, vert_t *v2);
 
-	face_t * bridging(he_t* h1, he_t* h2); //create a bridge between two boundary half edges
+	void linkToCutFace(he_t* he, face_t* cutFace);
+	face_t * bridging(he_t* h1, he_t* h2, face_t* cutFace); //create a bridge between two boundary half edges
+	he_t* bridging(vert_t* v1, vert_t* v2);
 
 	template <typename T>
 	void flipSelectionState(int idx, unordered_map<int, T> &m);
@@ -103,9 +106,9 @@ protected:
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
 	friend class MeshExtender;
+	friend class MeshHollower;
 	friend class MeshIterator;
 	friend class MeshViewer;
-
 	friend class ReebGraph;
 private:
 	unordered_set<he_t*> heSet;
@@ -117,8 +120,6 @@ private:
 	unordered_map<int, he_t*> heMap;
 	unordered_map<int, face_t*> faceMap;
 	unordered_map<int, vert_t*> vertMap;
-
-	int finalCutFaceIndex;
 
 private:
 	bool showFace, showEdge, showVert, showNormals;
