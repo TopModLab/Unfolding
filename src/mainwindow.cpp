@@ -642,7 +642,8 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 
 void MainWindow::slot_hollowMesh()
 {
-	MeshManager::getInstance()->setHollowMesh(hmpanel->getSize());
+	HDS_Connector::setScale(hmpanel->getConnectorSize());
+	MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 	meshStack.push(Extended);
 	updateCurrentMesh();

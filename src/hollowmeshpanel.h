@@ -15,7 +15,9 @@ public:
 	explicit HollowMeshPanel(QWidget *parent = 0);
 	~HollowMeshPanel();
 
-	double getSize();
+	double getFlapSize();
+	double getConnectorSize();
+
 signals:
 	void sig_saved();
 
@@ -25,6 +27,7 @@ public slots:
 private:
 	Ui::HollowMeshPanel *ui;
 	int flapSize;
+	int connectorSize;
 };
 
 #endif // HOLLOWMESHPANEL_H

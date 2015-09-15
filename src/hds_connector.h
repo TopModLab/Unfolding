@@ -36,6 +36,8 @@ public:
 
 	//config connector
 	static void setConnector(std::map<QString, double> config);
+	static void setScale(double scale);
+
 	static double getScale(){return scale;}
 
 private:
