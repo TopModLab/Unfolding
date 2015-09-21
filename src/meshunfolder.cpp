@@ -145,6 +145,38 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
 	}
 }
 
+void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
+{
+	BBox3 bound(0);
+	for (auto piece : unfolded_mesh->pieceSet)
+	{
+		unordered_set<HDS_Vertex *> verts;
+		BBox3 curBound;
+		for (auto fid : piece)
+		{
+			auto cur_verts = unfolded_mesh->faceMap[fid]->corners();
+			for (auto vert : cur_verts)
+			{
+				if (verts.find(vert) == verts.end())
+				{
+					curBound.Union(vert->pos);
+					verts.insert(vert);
+				}
+			}
+		}
+		QVector3D bound_shift = QVector3D(bound.pMax.x() + 0.5, bound.pMin.y(), 0) - curBound.pMin;
+		if (bound.overlapon(curBound, BBox3::XY_PLANE))
+		{
+			cout << "hahahahahhahahahah\n";
+		}
+		for (auto vert : verts)
+		{
+			vert->pos += bound_shift;
+		}
+		bound.Union(curBound);
+	}
+}
+
 bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
 {
 	//progress dialog
@@ -161,7 +193,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
 	}
-
+	ref_mesh->updatePieceSet();
 	/// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
@@ -207,8 +239,18 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 	unfoldingProgress->setValue(10);
 
 	int progressIndex = 0; // Qt display progress
-	for( auto fid : fixedFaces )
+	for (auto piece : ref_mesh->pieceSet)
 	{
+		auto it_fid = piece.begin();
+		if (ref_mesh->faceMap[*it_fid]->isCutFace)
+		{
+			it_fid++;
+		}
+		int fid = *it_fid;
+
+	/*}
+	for( auto fid : fixedFaces )
+	{*/
 		/// start from a face, expand all faces
 		queue<HDS_Face*> Q;
 		//unfolded_mesh->printInfo();
@@ -268,7 +310,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 
 			// Project the first face to XY plane
 			HDS_Face *face0_unf = unfolded_mesh->faceMap.at(expSeq.front());
-			auto oriP = he0_ref->v->pos + QVector3D(rand(), rand(), rand());
+			auto oriP = he0_ref->v->pos;// +QVector3D(rand() % 5, rand() % 5, 0);
 			auto he_unf = face0_unf->he;
 			auto curHE = he_unf;
 			do 
@@ -291,6 +333,8 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		unfoldingProgress->setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
 		//break;// debug break for each fixed face
 	}
+	unfolded_mesh->updatePieceSet();
+	reset_layout(unfolded_mesh);
 	// Qt display progress
 	unfoldingProgress->setValue(100);
 

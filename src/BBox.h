@@ -9,15 +9,16 @@
 class BBox3
 {
 public:
-	enum AXIS
+	enum PLANE
 	{
-		X_AXIS,
-		Y_AXIS,
-		Z_AXIS
+		XY_PLANE,
+		YZ_PLAZE,
+		XZ_PLANE
 	};
 	QVector3D pMin, pMax;
 
 	BBox3();
+	BBox3(float val);
 	BBox3(const QVector3D& p);
 	BBox3(const QVector3D& p1, const QVector3D& p2);
 	~BBox3();
@@ -27,7 +28,7 @@ public:
 	const QVector3D getMidPoint() const;
 	/*bool intersectP(const Ray& inRay) const;*/
 	bool overlaps(const BBox3& box) const;
-	bool overlapon(const BBox3& box, AXIS axis = X_AXIS) const;
+	bool overlapon(const BBox3& box, PLANE over_plane = XY_PLANE) const;
 	void expand(double delta);
 	void Union(const QVector3D& p);
 	void Union(const BBox3& box);

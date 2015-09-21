@@ -35,6 +35,9 @@ public:
 	void updateSortedFaces();
 	void clearSortedFaces();
 
+	//////////////////////////////////////////////////////////////////////////
+	void updatePieceSet();
+	//////////////////////////////////////////////////////////////////////////
 	void printInfo(const string &msg = "");
 	void printMesh(const string &msg = "");
 	void releaseMesh();
@@ -121,6 +124,8 @@ private:
 	unordered_map<int, face_t*> faceMap;
 	unordered_map<int, vert_t*> vertMap;
 
+	// pieces information
+	set<set<int>> pieceSet;
 private:
 	bool showFace, showEdge, showVert, showNormals;
 };

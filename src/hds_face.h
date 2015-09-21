@@ -45,7 +45,7 @@ public:
 	double getScalingFactor(){ return scalingFactor; }
 	
 	//bounding box related, should only work on cut face
-	void update_bbox();
+	//void update_bbox();
 
 	QVector3D n;
 	HDS_HalfEdge *he;
@@ -62,7 +62,7 @@ public:
 	vector<QVector3D> scaledCorners;
 
 	// Bounding box for the objcet
-	BBox3 *bound;
+	//BBox3 *bound;
 };
 
 #endif // HDS_FACE_H
