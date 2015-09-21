@@ -119,7 +119,7 @@ public:
 	void mapToExtendedMesh();
 	void unfoldMesh(bool isExtended);
 	void smoothMesh();
-	void setHollowMesh(double size);
+	void setHollowMesh(double fsize);
 	void extendMesh(int meshType, map<QString, double> config);
 
     void exportXMLFile(const char* filename);//export as svg files

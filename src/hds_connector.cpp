@@ -19,6 +19,11 @@ void HDS_Connector::setConnector(std::map<QString, double> config)
 	opening = (int)config["opening"];
 
 }
+void HDS_Connector::setScale(double size)
+{
+	scale = size;
+}
+
 void HDS_Connector::setOriginalPositions()
 {
 	QVector3D corner1, corner0, center, mid;

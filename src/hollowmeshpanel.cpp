@@ -20,10 +20,15 @@ HollowMeshPanel::~HollowMeshPanel()
 
 void HollowMeshPanel::slot_saved()
 {
-	flapSize = ui->horizontalSlider->value();
+	flapSize = ui->flapSizeSlider->value();
+	connectorSize = ui->conSizeSlider->value();
 	close();
 }
-double HollowMeshPanel::getSize()
+double HollowMeshPanel::getFlapSize()
 {
-	return (double)flapSize / (double)ui->horizontalSlider->maximum();
+	return (double)flapSize / (double)ui->flapSizeSlider->maximum();
+}
+double HollowMeshPanel::getConnectorSize()
+{
+	return (double)connectorSize / (double)ui->conSizeSlider->maximum();
 }
