@@ -85,6 +85,9 @@
     <Filter Include="Header Files\geometry">
       <UniqueIdentifier>{57419b2c-ce31-4e11-8917-9a3e7fa9942b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
@@ -237,6 +240,18 @@
     <ClCompile Include="..\src\BBox.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_hollowmeshpanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_hollowmeshpanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\hollowmeshpanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\meshhollower.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -362,6 +377,15 @@
     <ClInclude Include="..\src\BBox.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_hollowmeshpanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\meshhollower.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
@@ -390,6 +414,15 @@
     </CustomBuild>
     <CustomBuild Include="..\src\connectorpanelviewer.h">
       <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\hollowmeshpanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\hollowmeshpanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\unfoldviewer.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

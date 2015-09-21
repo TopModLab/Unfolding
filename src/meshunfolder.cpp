@@ -188,6 +188,9 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 				set<HDS_Face*> connectedFaces = Utils::filter_set(f->linkededFaces(), [](HDS_Face* f){
 						return !(f->isCutFace);
 				});
+				// record the pieces
+				pieces.insert(&connectedFaces);
+
 				for(auto cf : connectedFaces)
 				{
 					visitedFaces.insert(cf->index);
@@ -265,7 +268,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 
 			// Project the first face to XY plane
 			HDS_Face *face0_unf = unfolded_mesh->faceMap.at(expSeq.front());
-			auto oriP = he0_ref->v->pos;// +QVector3D(rand(), rand(), rand());
+			auto oriP = he0_ref->v->pos + QVector3D(rand(), rand(), rand());
 			auto he_unf = face0_unf->he;
 			auto curHE = he_unf;
 			do 

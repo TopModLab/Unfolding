@@ -9,8 +9,8 @@
 #include <QProgressDialog>
 
 class HDS_Mesh;
-
-
+class HDS_Face;
+static set<set<HDS_Face*>*> pieces;
 
 class MeshUnfolder
 {
@@ -23,7 +23,10 @@ public:
 private:
 	static void unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
 					const QVector3D &uvec, const QVector3D &vvec);
-
+	
+public:
+	//Keep record all the pieces
+	
 
 };
 
