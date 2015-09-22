@@ -19,7 +19,9 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	viewerState.updateModelView();
 	heMesh = nullptr;
 	colormap = ColorMap::getDefaultColorMap();
-	enableLighting = false;
+
+	lightingState = Wireframe;
+
 	showReebPoints = false;
 
 	showCut = false;
@@ -859,21 +861,29 @@ void MeshViewer::resizeGL(int w, int h)
 
 void MeshViewer::paintGL()
 {
-	//glEnable(GL_DEPTH_TEST);
+
 	glClearColor(1., 1., 1., 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	if (lightingState != Wireframe) {
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+}
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	// the model view matrix is updated somewhere else
 	glMultMatrixf(viewerState.modelview.constData());
 
+	if (lightingState == Smooth) {
 	glEnable(GL_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
 
 	glShadeModel(GL_SMOOTH);
+	}
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_ZERO, GL_SRC_COLOR);
@@ -886,10 +896,10 @@ void MeshViewer::paintGL()
 						  QVector3D(-1, 1, 0));
 	}
 	else {
-		if (enableLighting)
+		if (lightingState != Wireframe)
 			enableLights();
 		heMesh->draw(colormap);
-		if (enableLighting)
+		if (lightingState != Wireframe)
 			disableLights();
 
 		switch (interactionState) {
@@ -1522,9 +1532,19 @@ void MeshViewer::selectCutLocusEdges()
 #endif
 }
 
-void MeshViewer::slot_toggleLighting()
+void MeshViewer::slot_toggleLightingSmooth()
 {
-	enableLighting = !enableLighting;
+	lightingState = Smooth;
+}
+
+void MeshViewer::slot_toggleLightingFlat()
+{
+	lightingState = Flat;
+}
+
+void MeshViewer::slot_toggleLightingWireframe()
+{
+	lightingState = Wireframe;
 }
 
 void MeshViewer::slot_toggleText()

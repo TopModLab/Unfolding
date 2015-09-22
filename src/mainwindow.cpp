@@ -263,13 +263,26 @@ void MainWindow::createActions()
 		connect(showIndexAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleText()));
 		actionsMap["show index"] = showIndexAct;
 
-		QAction *showLightingAct = new QAction(tr("Show &Lighting"), this);
-		showLightingAct->setShortcut(Qt::Key_L);
-		showLightingAct->setCheckable(true);
-		showLightingAct->setChecked(false);
-		showLightingAct->setStatusTip(tr("Show Lighting"));
-		connect(showLightingAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLighting()));
-		actionsMap["show lighting"] = showLightingAct;
+		QAction *showLightingSmoothAct = new QAction(tr("Smooth Shading"), this);
+		showLightingSmoothAct->setCheckable(true);
+		showLightingSmoothAct->setChecked(false);
+		showLightingSmoothAct->setStatusTip(tr("Lighting set to smooth shading"));
+		connect(showLightingSmoothAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingSmooth()));
+		actionsMap["lighting smooth"] = showLightingSmoothAct;
+
+		QAction *showLightingFlatAct = new QAction(tr("Flat Shading"), this);
+		showLightingFlatAct->setCheckable(true);
+		showLightingFlatAct->setChecked(false);
+		showLightingFlatAct->setStatusTip(tr("Lighting set to flat shading"));
+		connect(showLightingFlatAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingFlat()));
+		actionsMap["lighting flat"] = showLightingFlatAct;
+
+		QAction *showLightingWireframeAct = new QAction(tr("Wireframe"), this);
+		showLightingWireframeAct->setCheckable(true);
+		showLightingWireframeAct->setChecked(true);
+		showLightingWireframeAct->setStatusTip(tr("Lighting set to wireframe"));
+		connect(showLightingWireframeAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingWireframe()));
+		actionsMap["lighting wireframe"] = showLightingWireframeAct;
 
 		QAction *showCPAct = new QAction(tr("Show &Critical Points"), this);
 		showCPAct->setShortcut(Qt::Key_C);
@@ -422,8 +435,18 @@ void MainWindow::createMenus()
 		displayMenu->addAction(actionsMap["show faces"]);
 		displayMenu->addAction(actionsMap["show normals"]);
 		displayMenu->addAction(actionsMap["show index"]);
-		displayMenu->addSeparator();
-		displayMenu->addAction(actionsMap["show lighting"]);
+		displayMenu->addSeparator()->setText(tr("Lighting"));
+
+		QActionGroup *lightGroup = new QActionGroup(displayMenu);
+
+		lightGroup->addAction(actionsMap["lighting smooth"]);
+		lightGroup->addAction(actionsMap["lighting flat"]);
+		lightGroup->addAction(actionsMap["lighting wireframe"]);
+		lightGroup->setExclusive(true);
+
+		displayMenu->addAction(actionsMap["lighting smooth"]);
+		displayMenu->addAction(actionsMap["lighting flat"]);
+		displayMenu->addAction(actionsMap["lighting wireframe"]);
 
 		displayMenu->addSeparator();
 		displayMenu->addAction(actionsMap["show CP"]);

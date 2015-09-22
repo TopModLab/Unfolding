@@ -296,7 +296,6 @@ void drawString(const char* str, int numb) {
 	//}
 }
 void display(int num) {
-	//     glClear(GL_COLOR_BUFFER_BIT);
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 	//    glRasterPos2f(0.0f, 0.0f);
@@ -307,9 +306,6 @@ void display(int num) {
 	num=0;
 
 }
-//usage unknown
-
-
 
 
 void HDS_Mesh::draw(ColorMap cmap)
@@ -407,7 +403,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 #if 0
 			glutSolidSphere(0.125, 16, 16);
 #else
-			glPointSize(15.0);
+			glPointSize(5.0);
 			if( v->isPicked ){
 				glColor4f(1, 0, 0.5, 1);
 				//       display(v->index);

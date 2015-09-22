@@ -76,7 +76,10 @@ protected:
 
 
 public slots:
-	void slot_toggleLighting();
+	void slot_toggleLightingSmooth();
+	void slot_toggleLightingFlat();
+	void slot_toggleLightingWireframe();
+
 	void slot_toggleCriticalPoints();
 	void slot_toggleText();
 
@@ -173,7 +176,7 @@ public:
 
 	enum SelectionMode {
 		single = 0,
-		multiple,
+		multiple
 
 	};
 	void setSelectionMode(SelectionMode mode) {selectionMode = mode; }
@@ -222,7 +225,13 @@ private:
 private:
 	ColorMap colormap;    /// color for negative curvature and positive curvature
 
-	bool enableLighting;
+	enum LightingState {
+		Smooth,
+		Flat,
+		Wireframe
+	};
+	LightingState lightingState;
+
 	void enableLights();
 	void disableLights();
 
