@@ -55,11 +55,11 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		auto he_ref = other.heMap.at(he->index);
 		//cout << he_ref->index << endl;
 		if (he_ref->flip != nullptr)
-		he->flip = heMap.at(he_ref->flip->index);
+			he->flip = heMap.at(he_ref->flip->index);
 		if (he_ref->prev != nullptr)
-		he->prev = heMap.at(he_ref->prev->index);
+			he->prev = heMap.at(he_ref->prev->index);
 		if (he_ref->next != nullptr)
-		he->next = heMap.at(he_ref->next->index);
+			he->next = heMap.at(he_ref->next->index);
 
 		if (he_ref->cutTwin != nullptr)
 			he->cutTwin = heMap.at(he_ref->cutTwin->index);
@@ -67,7 +67,7 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		if (he_ref->f != nullptr)
 			he->f = faceMap.at(he_ref->f->index);
 		if (he_ref->v != nullptr)
-		he->v = vertMap.at(he_ref->v->index);
+			he->v = vertMap.at(he_ref->v->index);
 	}
 	/// set the half edges for faces
 	for( auto &f : faceSet ) {
@@ -313,11 +313,15 @@ void HDS_Mesh::draw(ColorMap cmap)
 	QGLWidget  aaa;
 	if( showFace )
 	{
+		GLfloat face_mat_diffuse[4] = {0.75, 0.75, 0.75, 1};
+		GLfloat face_mat_diffuse_selected[4] = {1, 0, 0.5, 1};
+		GLfloat face_mat_diffuse_connector[4] = {0.75, 0.75, 0.95, 1};
+
+
 		/// traverse the mesh and render every single face
 		MeshViewer dd;
 		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
 		{
-
 			face_t* f = (*fit);
 			if( f->isCutFace || f->isHole ) continue; //invisible face
 			// render the faces
@@ -330,18 +334,18 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 			if( f->isPicked ) {
 				glColor4f(1, 0, 0.5, 1);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_selected);
+
 			}
 			else if (f->isConnector) {
 				glColor4f(0.75, 0.75, 0.95, 1);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_connector);
 			}
 
 			else {
 				glColor4f(0.75, 0.75, 0.75, 1);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse);
 			}
-
-			//	if (f->isFlap) {
-			//				glColor4f(0.75, 0.95, 0.75, 1);
-			//			}
 
 			int vcount = 0;
 			glBegin(GL_POLYGON);
@@ -370,7 +374,10 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 		glColor4f(0.25, 0.25, 0.25, 1);
 		GLfloat line_mat_diffuse[4] = {0.25, 0.25, 0.25, 1};
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
+		GLfloat line_mat_diffuse_selected[4] = {1, 0, 0.5, 1};
+		GLfloat line_mat_diffuse_cutEdge[4] = {0, 1, 0, 1};
+
+
 		glLineWidth(2.0);
 		// render the boundaires
 		for(auto eit=heSet.begin();eit!=heSet.end();eit++)
@@ -379,10 +386,16 @@ void HDS_Mesh::draw(ColorMap cmap)
 			he_t* en = e->next;
 
 			QColor c = Qt::black;
-			if( e->isPicked )
+			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
+
+			if( e->isPicked ) {
 				c.setRgbF(1.0,0.0,0.5,1.0);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse_selected);
+			}
 			else if( e->isCutEdge ) {
 				c = Qt::green;
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse_cutEdge);
+
 			}
 
 			GLUtils::drawLine(e->v->pos, en->v->pos, c);
@@ -391,12 +404,14 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 	if(showVert || showNormals) {
 		glColor4f(0, 0, 1, 1);
-		GLfloat line_mat_diffuse[4] = {1, 0, 0, 1};
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
+		GLfloat vert_mat_diffuse[4] = {1, 1, 0, 1};
+		GLfloat vert_mat_diffuse_selected[4] = {1, 0, 0.5, 1};
+
 
 		// render the boundaires
 		for(auto vit=vertSet.begin();vit!=vertSet.end();vit++)
 		{
+			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vert_mat_diffuse);
 			vert_t* v = (*vit);
 			glPushMatrix();
 			glTranslatef(v->x(), v->y(), v->z());
@@ -406,7 +421,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 			glPointSize(5.0);
 			if( v->isPicked ){
 				glColor4f(1, 0, 0.5, 1);
-				//       display(v->index);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vert_mat_diffuse_selected);
 
 			}
 

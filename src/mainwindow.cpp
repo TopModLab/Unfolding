@@ -209,7 +209,7 @@ void MainWindow::createActions()
 		actionsMap["show edges"] = showEdgesAct;
 
 		//vertices
-		QAction *showVerticesAct = new QAction(tr("Show All"), this);
+		QAction *showVerticesAct = new QAction(tr("Show Vertices"), this);
 		showVerticesAct->setShortcut(Qt::Key_V);
 		showVerticesAct->setCheckable(true);
 		showVerticesAct->setChecked(true);

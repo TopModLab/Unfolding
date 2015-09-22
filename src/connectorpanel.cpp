@@ -68,7 +68,7 @@ void ConnectorPanel::slot_saved()
 	 connectorConfig["shape"] = ui->shapeComboBox->currentIndex();
 	 connectorConfig["curv"] = (double)ui->curvSlider->value()/(double)ui->curvSlider->maximum();
 	 connectorConfig["samples"] = ui->samplesSlider->value();
-	 connectorConfig["size"] = (double)ui->sizeSlider->value()/(double)ui->sizeSlider->maximum();
+	 connectorConfig["size"] = 1.0 - (double)ui->sizeSlider->value()/(double)ui->sizeSlider->maximum();
 	 connectorConfig["cp"] = (double)ui->convergeSlider->value()/(double)ui->convergeSlider->maximum();
 	 connectorConfig["opening"] = ui->adhesiveComboBox->currentIndex();
 

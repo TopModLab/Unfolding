@@ -80,7 +80,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 		//add connector
 		he1->f = he_f;//pass original face to addConnector function
 
-		vector<vert_t*> verts = MeshExtender::addConnector(thismesh, he1->flip, he2);
+		vector<vert_t*> verts = MeshExtender::addConnector(thismesh, he1->flip, he2, he_f);
 		vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
 		he1->f = cutFace;
 

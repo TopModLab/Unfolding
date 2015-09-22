@@ -116,7 +116,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <property name="invertedAppearance">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </item>

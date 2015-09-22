@@ -15,7 +15,7 @@ class MeshExtender
 public:
 	MeshExtender(){}
 	static bool extendMesh(HDS_Mesh *mesh);
-	static vector<HDS_Vertex*> addConnector(HDS_Mesh*, HDS_HalfEdge* he1, HDS_HalfEdge* he2);
+	static vector<HDS_Vertex*> addConnector(HDS_Mesh*, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Face* cutFace);
 	static void scaleFaces(HDS_Mesh* mesh);
 
 protected:

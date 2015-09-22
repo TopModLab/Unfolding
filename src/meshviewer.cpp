@@ -625,13 +625,13 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 			case single:
 				if (selectedElementsIdxQueue.size() > 1) {
 					if (selectedElementsIdxQueue.front() != selectedElementsIdxQueue.back()) {
-					if (interactionState == SelectEdge) {
-						heMesh->heMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
-					} else if (interactionState == SelectFace) {
-						heMesh->faceMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
-					} else if (interactionState == SelectVertex){
-						heMesh->vertMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
-					}
+						if (interactionState == SelectEdge) {
+							heMesh->heMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
+						} else if (interactionState == SelectFace) {
+							heMesh->faceMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
+						} else if (interactionState == SelectVertex){
+							heMesh->vertMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
+						}
 					}
 					selectedElementsIdxQueue.pop();
 
@@ -864,28 +864,35 @@ void MeshViewer::paintGL()
 
 	glClearColor(1., 1., 1., 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	if (lightingState != Wireframe) {
-	// Enable depth test
-	glEnable(GL_DEPTH_TEST);
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-}
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	// the model view matrix is updated somewhere else
 	glMultMatrixf(viewerState.modelview.constData());
 
 	if (lightingState == Smooth) {
-	glEnable(GL_SMOOTH);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_POLYGON_SMOOTH);
+		glEnable(GL_SMOOTH);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_POINT_SMOOTH);
+		glEnable(GL_POLYGON_SMOOTH);
 
-	glShadeModel(GL_SMOOTH);
+		glShadeModel(GL_SMOOTH);
 	}
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (lightingState != Wireframe) {
+		// Enable depth test
+		glEnable(GL_DEPTH_TEST);
+		// Accept fragment if it closer to the camera than the former one
+		glDepthFunc(GL_LESS);
+	}else
+		glDisable(GL_DEPTH_TEST);
+
+	if (lightingState == Wireframe) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}else
+		glDisable(GL_BLEND);
+
 	//glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 
 	if (heMesh == nullptr) {
@@ -921,7 +928,6 @@ void MeshViewer::paintGL()
 			selectCutLocusEdges();
 		}
 		glColor4f(0.0,0.0,0.0,0.5);
-		//glEnable(GL_DEPTH_TEST);
 		QFont fnt;
 		fnt.setPointSize(8);
 		for(auto vit=heMesh->vertSet.begin();vit!=heMesh->vertSet.end();vit++)
@@ -1070,11 +1076,11 @@ void MeshViewer::drawSelectionBox() {
 
 void MeshViewer::enableLights()
 {
-	GLfloat light_position[] = { 10.0, 4.0, 10.0, 1.0 };
+	GLfloat light_position[] = { 100.0, 40.0, 100.0, 1.0 };
 	GLfloat mat_specular[] = { 0.8, 0.8, 0.8, 1.0 };
 	GLfloat mat_diffuse[] = { 0.375, 0.375, 0.375, 1.0 };
 	GLfloat mat_shininess[] = { 25.0 };
-	GLfloat light_ambient[] = { 0.05, 0.05, 0.05, 1.0 };
+	GLfloat light_ambient[] = { 0.9, 0.9, 0.9, 1.0 };
 	GLfloat white_light[] = { 1.0, 1.0, 1.0, 1.0 };
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
@@ -1107,20 +1113,30 @@ void MeshViewer::disableLights()
 void MeshViewer::drawReebPoints()
 {
 	//cout << "nReebPoints = " << reebPoints.size() << endl;
-	glPointSize(15.0);
+	glPointSize(10.0);
 	glBegin(GL_POINTS);
 	for (auto p : reebPoints) {
+		GLfloat max_mat_diffuse[4] = {0, 1, 0, 1};
+		GLfloat min_mat_diffuse[4] = {1, 0, 0.5, 1};
+		GLfloat saddle_mat_diffuse[4] = {0, 0, 1, 1};
+
 		switch (p->rtype) {
 		case HDS_Vertex::Maximum://green
 			glColor4f(0,1.0, 0, 1);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, max_mat_diffuse);
+
 			mm+=1;
 			break;
 		case HDS_Vertex::Minimum: //pink
 			glColor4f(1, 0, 0.5, 1);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, min_mat_diffuse);
+
 			nm+=1;
 			break;
 		case HDS_Vertex::Saddle: //blue
 			glColor4f(0, 0, 1, 1);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, saddle_mat_diffuse);
+
 			nn+=1;
 			break;
 		}

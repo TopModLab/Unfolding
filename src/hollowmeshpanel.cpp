@@ -30,5 +30,5 @@ double HollowMeshPanel::getFlapSize()
 }
 double HollowMeshPanel::getConnectorSize()
 {
-	return (double)connectorSize / (double)ui->conSizeSlider->maximum();
+	return 1.0 -(double)connectorSize / (double)ui->conSizeSlider->maximum();
 }
