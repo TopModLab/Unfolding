@@ -164,11 +164,9 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 				}
 			}
 		}
-		QVector3D bound_shift = QVector3D(bound.pMax.x() + 0.5, bound.pMin.y(), 0) - curBound.pMin;
-		if (bound.overlapon(curBound, BBox3::XY_PLANE))
-		{
-			cout << "hahahahahhahahahah\n";
-		}
+		QVector3D bound_shift = QVector3D(bound.pMax.x() + 0.1, bound.pMin.y(), 0) - curBound.pMin;
+		curBound.pMin += bound_shift;
+		curBound.pMax += bound_shift;
 		for (auto vert : verts)
 		{
 			vert->pos += bound_shift;
