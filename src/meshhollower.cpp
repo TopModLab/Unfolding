@@ -1,10 +1,12 @@
 #include "meshhollower.h"
 #include "MeshExtender.h"
 
+double MeshHollower::flapSize = 20;
 
-void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
+void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 {
 	/*ignore cut edges*/
+	flapSize = newFlapSize;//Flap size needed in export function
 
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
@@ -102,6 +104,8 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 
 			he1_flap->f = cutFace;
 			he2_flap->flip->f = cutFace;
+			cutFace->he = he1_flap;//K added
+			he1_flap->isExtended = true;
 			//set he1 and he2 to be non cut edge, flaps to be cut edge
 			he1->setCutEdge(false);
 			he2->setCutEdge(false);
@@ -153,4 +157,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double flapSize)
 		//cout << v->index << ": " << (*v) << endl;
 	}
 	cout<<"hollow mesh he size "<<thismesh->halfedges().size()<<endl;
+
+	// Set mark for hollowed mesh
+	thismesh->isHollowed = true;
 }

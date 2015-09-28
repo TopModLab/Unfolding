@@ -60,9 +60,8 @@ public:
 		return extended_cutted_mesh.data();
 	}
 
-	HDS_Mesh* getUnfoldedMesh() {
-		/*unfolded_mesh->printMesh("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk");
-		cout << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;*/
+	HDS_Mesh* getUnfoldedMesh()
+	{
         return unfolded_mesh.data();
     }
 
@@ -122,7 +121,8 @@ public:
 	void setHollowMesh(double fsize);
 	void extendMesh(int meshType, map<QString, double> config);
 
-    void exportXMLFile(const char* filename);//export as svg files
+	// Export as SVG files
+    void exportXMLFile(const char* filename);
 
 	void resetMesh();
 

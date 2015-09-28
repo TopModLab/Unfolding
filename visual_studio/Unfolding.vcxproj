@@ -280,6 +280,7 @@
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp" />
     <ClCompile Include="..\src\hds_connector.cpp" />
     <ClCompile Include="..\src\hollowmeshpanel.cpp" />
+    <ClCompile Include="..\src\MeshConnector.cpp" />
     <ClCompile Include="..\src\MeshExtender.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp" />
@@ -371,6 +372,7 @@
   <ItemGroup>
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.h" />
+    <ClInclude Include="..\src\MeshConnector.h" />
     <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h" />
     <CustomBuild Include="..\src\connectorpanel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

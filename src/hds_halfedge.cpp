@@ -6,6 +6,7 @@ HDS_HalfEdge::HDS_HalfEdge()
 {
 	isPicked = false;
 	isCutEdge = false;
+	isExtended = false;
 	index = -1;
 	f = nullptr;
 	v = nullptr;

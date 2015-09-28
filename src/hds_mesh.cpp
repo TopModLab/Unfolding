@@ -126,7 +126,7 @@ void HDS_Mesh::updatePieceSet()
 	unordered_set<int> visitedFaces;
 
 	int progressIndex = 0;
-	// find all faces
+	// Find all faces
 	for (auto f : this->faceSet)
 	{
 		/// If f has not been visited yet

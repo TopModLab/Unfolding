@@ -105,14 +105,16 @@ private:
 	bool validateEdge(he_t *e);
 
 protected:
+	friend class ReebGraph;
 	friend class MeshCutter;
+	friend class MeshViewer;
+	friend class MeshManager;
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
 	friend class MeshExtender;
 	friend class MeshHollower;
 	friend class MeshIterator;
-	friend class MeshViewer;
-	friend class ReebGraph;
+	friend class MeshConnector;
 private:
 	unordered_set<he_t*> heSet;
 	unordered_set<face_t*> faceSet;
@@ -127,6 +129,7 @@ private:
 	// pieces information
 	set<set<int>> pieceSet;
 private:
+	bool isHollowed;
 	bool showFace, showEdge, showVert, showNormals;
 };
 

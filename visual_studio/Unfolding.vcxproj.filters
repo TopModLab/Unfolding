@@ -252,6 +252,9 @@
     <ClCompile Include="..\src\meshhollower.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MeshConnector.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -385,6 +388,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshConnector.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

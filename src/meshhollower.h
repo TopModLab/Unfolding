@@ -10,9 +10,8 @@ class MeshHollower
 {
 public:
 	MeshHollower(){}
-	static void hollowMesh(HDS_Mesh * mesh, double flapSize);
-
-
-
+	static void hollowMesh(HDS_Mesh * mesh, double newFlapSize);
+public:
+	static double flapSize;
 };
 

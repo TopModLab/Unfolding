@@ -35,6 +35,7 @@ public:
 	int index;
 	bool isPicked;
 	bool isCutEdge;
+	bool isExtended;//From hollower
 };
 
 #endif // HDS_EDGE_H
