@@ -5,8 +5,8 @@ BBox3::BBox3()
 {
 	float max_val = std::numeric_limits<float>::max();
 	float min_val = std::numeric_limits<float>::lowest();
-	pMin = QVector3D(min_val, min_val, min_val);
-	pMax = QVector3D(max_val, max_val, max_val);
+	pMin = QVector3D(max_val, max_val, max_val);
+	pMax = QVector3D(min_val, min_val, min_val);
 }
 BBox3::BBox3(const QVector3D& p) :pMin(p), pMax(p)
 {
@@ -16,6 +16,12 @@ BBox3::BBox3(const QVector3D& p1, const QVector3D& p2)
 	pMin = QVector3D(min(p1.x(), p2.x()), min(p1.y(), p2.y()), min(p1.z(), p2.z()));
 	pMax = QVector3D(max(p1.x(), p2.x()), max(p1.y(), p2.y()), max(p1.z(), p2.z()));
 }
+
+BBox3::BBox3(float val)
+	: pMin(val, val, val), pMax(val, val, val)
+{
+}
+
 BBox3::~BBox3()
 {
 }
@@ -67,9 +73,10 @@ bool BBox3::overlaps(const BBox3& box) const
 	}
 	return over;
 }
-bool BBox3::overlapon(const BBox3& box, AXIS axis /*= X_AXIS*/) const
+bool BBox3::overlapon(const BBox3& box, PLANE over_plane) const
 {
-	return (pMax[axis] >= box.pMin[axis]) && (pMin[axis] <= box.pMax[axis]);
+	return (pMax[over_plane] >= box.pMin[over_plane])
+		&& (pMin[over_plane] <= box.pMax[over_plane]);
 }
 void BBox3::Union(const QVector3D& p)
 {

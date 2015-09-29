@@ -35,6 +35,9 @@ public:
 	void updateSortedFaces();
 	void clearSortedFaces();
 
+	//////////////////////////////////////////////////////////////////////////
+	void updatePieceSet();
+	//////////////////////////////////////////////////////////////////////////
 	void printInfo(const string &msg = "");
 	void printMesh(const string &msg = "");
 	void releaseMesh();
@@ -102,14 +105,16 @@ private:
 	bool validateEdge(he_t *e);
 
 protected:
+	friend class ReebGraph;
 	friend class MeshCutter;
+	friend class MeshViewer;
+	friend class MeshManager;
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
 	friend class MeshExtender;
 	friend class MeshHollower;
 	friend class MeshIterator;
-	friend class MeshViewer;
-	friend class ReebGraph;
+	friend class MeshConnector;
 private:
 	unordered_set<he_t*> heSet;
 	unordered_set<face_t*> faceSet;
@@ -121,7 +126,10 @@ private:
 	unordered_map<int, face_t*> faceMap;
 	unordered_map<int, vert_t*> vertMap;
 
+	// pieces information
+	set<set<int>> pieceSet;
 private:
+	bool isHollowed;
 	bool showFace, showEdge, showVert, showNormals;
 };
 

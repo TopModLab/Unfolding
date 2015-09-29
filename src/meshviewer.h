@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-
-
 #include <QGLWidget>
 #include <QGLFunctions>
 #include <QGLFormat>

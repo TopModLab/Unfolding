@@ -15,7 +15,7 @@ HDS_Face::HDS_Face()
 	scalingFactor = 1;
 	isPlanar = true;
 
-	bound = nullptr;
+	//bound = nullptr;
 }
 
 HDS_Face::~HDS_Face()
@@ -36,7 +36,7 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 	he = nullptr;
 	scalingFactor = other.scalingFactor;
 
-	bound = nullptr;
+	//bound = nullptr;
 }
 
 HDS_Face HDS_Face::operator=(const HDS_Face &other)
@@ -48,25 +48,7 @@ set<HDS_Face *> HDS_Face::connectedFaces()
 {
 	// Find all faces that are directly connected to current face
 	set<HDS_Face*> faces;
-	/*
-	// Peihong's solution
-	queue<HDS_Face*> Q;
-	Q.push(this);
-	while( !Q.empty() )
-	{
-		auto cur = Q.front();
-		Q.pop();
-		faces.insert(cur);
-		auto curHE = cur->he;
-		do {
-			auto f = curHE->flip->f;
-			if( faces.find(f) == faces.end() ) {
-				faces.insert(f);
-			}
-			curHE = curHE->next;
-		} while( curHE != he );
-	}*/
-	
+		
 	faces.insert(this);
 	auto curHE = this->he;
 	do {
@@ -183,6 +165,7 @@ void HDS_Face::scaleDown()
 		n++;
 	}
 }
+/*
 void HDS_Face::update_bbox()
 {
 	auto curHE = he;
@@ -192,7 +175,7 @@ void HDS_Face::update_bbox()
 		curHE = curHE->next;
 	}
 
-}
+}*/
 void HDS_Face::checkPlanar()
 {
 	isPlanar = true;

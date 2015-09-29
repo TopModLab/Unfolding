@@ -115,9 +115,42 @@ void HDS_Mesh::clearSortedFaces()
 }
 
 
+void HDS_Mesh::updatePieceSet()
+{
+	for (auto piece : pieceSet)
+	{
+		piece.clear();
+	}
+	pieceSet.clear();
+
+	unordered_set<int> visitedFaces;
+
+	int progressIndex = 0;
+	// Find all faces
+	for (auto f : this->faceSet)
+	{
+		/// If f has not been visited yet
+		/// Add to selected faces
+		if (visitedFaces.find(f->index) == visitedFaces.end())
+		{
+			visitedFaces.insert(f->index);
+			/// Find all linked faces except cut face
+			set<HDS_Face*> linkedFaces = f->linkededFaces();
+
+			set<int> curPiece;
+			for (auto cf : linkedFaces)
+			{
+				curPiece.insert(cf->index);
+				visitedFaces.insert(cf->index);
+			}
+			pieceSet.insert(curPiece);
+		}
+	}
+}
+
 bool HDS_Mesh::validateEdge(he_t *e) {
 
-	if( heMap.find(e->index) == heMap.end() ){cout<<"hemap invalid"<<endl; return false;}
+	if( heMap.find(e->index) == heMap.end() ){cout<<"heMap invalid"<<endl; return false;}
 	if( e->flip->flip != e ){cout<<"flip invalid"<<endl; return false;}
 	if( e->next->prev != e ){cout<<"next invalid"<<endl; return false;}
 	if( e->prev->next != e ){cout<<"prev invalid"<<endl; return false;}

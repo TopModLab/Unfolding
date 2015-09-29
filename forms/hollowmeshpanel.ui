@@ -60,9 +60,19 @@
      </spacer>
     </item>
     <item>
+     <widget class="QLabel" name="flap_val_label">
+      <property name="text">
+       <string>20</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QSlider" name="flapSizeSlider">
       <property name="maximum">
        <number>50</number>
+      </property>
+      <property name="value">
+       <number>10</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -103,6 +113,13 @@
        </size>
       </property>
      </spacer>
+    </item>
+    <item>
+     <widget class="QLabel" name="con_val_label">
+      <property name="text">
+       <string>40</string>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QSlider" name="conSizeSlider">
@@ -249,8 +266,46 @@
    </property>
   </widget>
  </widget>
+<<<<<<< HEAD
  <resources>
   <include location="../icons.qrc"/>
  </resources>
  <connections/>
+=======
+ <resources/>
+ <connections>
+  <connection>
+   <sender>flapSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>flap_val_label</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>92</x>
+     <y>75</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>conSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>con_val_label</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>25</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>120</x>
+     <y>25</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+>>>>>>> origin/GroupComponet
 </ui>
