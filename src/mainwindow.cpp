@@ -58,6 +58,7 @@ bool MainWindow::createComponents()
 		createToolBar();
 		createDock();
 		createStatusBar();
+		createStateMachine();
 	}
 	catch(UnfoldingAppException &e) {
 		QMessageBox::critical(this, tr("Error"), e.what());
@@ -533,6 +534,18 @@ void MainWindow::createStatusBar()
 	catch(...) {
 		throw UnfoldingAppException("Failed to create status bar!");
 	}
+}
+
+void MainWindow::createStateMachine()
+{
+	original = new QState();
+	extended = new QState();
+	cutted = new QState();
+	hollowed = new QState();
+	unfolded = new QState();
+
+	original->addTransition(actionsMap["extend"], SIGNAL(clicked()), extended);
+
 }
 
 void MainWindow::slot_newFile()

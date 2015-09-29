@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStateMachine>
 
 #include "meshviewer.h"
 #include "../extras/colormap_editor/colormapeditor.h"
@@ -34,6 +35,7 @@ protected:
 	void createToolBar();
 	void createDock();
 	void createStatusBar();
+	void createStateMachine();
 
 private slots:
 	void slot_newFile();
@@ -110,6 +112,14 @@ private:
 	CutLocusPanel *clpanel;
 	ConnectorPanel *conpanel;
 	HollowMeshPanel *hmpanel;
+
+private:
+	QStateMachine S_machine;
+	QState *original;
+	QState *extended;
+	QState *cutted;
+	QState *hollowed;
+	QState *unfolded;
 
 };
 

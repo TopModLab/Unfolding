@@ -7,8 +7,9 @@ bool MeshExtender::hasBridgeEdge = false;
 bool MeshExtender::hasCutEdge = false;
 bool MeshExtender::isHollow = false;
 
-vector<HDS_Vertex*> MeshExtender::addConnector(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Face* cutFace)
+vector<HDS_Vertex*> MeshExtender::addConnector(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 {
+	HDS_Face* cutFace = he1->f;
 	//new a connector object
 	HDS_Connector* connector = new HDS_Connector(he1, he2);
 	//add all internal edges and vertices to mesh
@@ -208,7 +209,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 						break;
 					}
 				}while (curHE != h1);
-				vector<HDS_Vertex*> verts = addConnector(mesh, he1, he2, he1->f);
+				vector<HDS_Vertex*> verts = addConnector(mesh, he1, he2);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 				visited.insert(v->bridgeTwin);
@@ -270,7 +271,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				twin_he->setCutEdge(false);
 
 				//bridge v->he and new he
-				vector<HDS_Vertex*> verts = addConnector(mesh, he1, flap_he_flip, he1->f);
+				vector<HDS_Vertex*> verts = addConnector(mesh, he1, flap_he_flip);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 			}
