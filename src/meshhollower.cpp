@@ -104,12 +104,9 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 
 			he1_flap->f = cutFace;
 			he2_flap->flip->f = cutFace;
-<<<<<<< HEAD
-			//cutFace->he = he1_flap;
-=======
+
 			cutFace->he = he1_flap;//K added
 			he1_flap->isExtended = true;
->>>>>>> origin/GroupComponet
 			//set he1 and he2 to be non cut edge, flaps to be cut edge
 			he1->setCutEdge(false);
 			he2->setCutEdge(false);

@@ -549,8 +549,8 @@ void MeshManager::exportXMLFile(const char* filename)
 	/************************************************************************/
 	
 	double he_offset(10), he_scale(20), wid_conn(10), len_conn(10);
-	double circle_offset;
-	err = scanf_s("%lf", &circle_offset);
+	double circle_offset = 3;
+	//err = scanf_s("%lf", &circle_offset);
 
 	int printFaceID(0), printCircleID(0);
 	for (auto piece : unfolded_mesh->pieceSet)

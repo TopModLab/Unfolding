@@ -677,7 +677,6 @@ void MainWindow::slot_hollowMesh()
 
 void MainWindow::slot_setConnector()
 {
-	cout<<"connector set!"<<endl;
 	HDS_Connector::setConnector(conpanel->getConfigValues());
 
 }
