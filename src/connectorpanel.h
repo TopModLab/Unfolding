@@ -17,8 +17,10 @@ public:
 	explicit ConnectorPanel(QWidget *parent = 0);
 	~ConnectorPanel();
 	std::map<QString, double> getConfigValues();
+	void setSaveMode(bool);
 
 signals:
+	void sig_save2extend();
 	void sig_saved();
 	void sig_canceled();
 

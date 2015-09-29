@@ -67,6 +67,7 @@ private slots:
 	void slot_triggerExtendMesh(bool);
 	void slot_triggerHollowMesh(bool);
 
+	void slot_setConnector();
 	void slot_extendMesh();
 	void slot_hollowMesh();
 	void slot_cancelExtendMesh();
@@ -83,13 +84,6 @@ private slots:
 	void slot_updateCutLocusMethod(int);
 	void slot_disableclp();
 
-//	//connector
-//	void slot_setConnectorShape(int);
-//	void slot_setConnectorCurv(int);
-//	void slot_setConnectorSamples(int);
-//	void slot_setConnectorSize(int);
-//	void slot_setConnectorCP(int);
-//	void slot_setConnectorOpening(int);
 
 private:
 	void closeEvent(QCloseEvent *e);

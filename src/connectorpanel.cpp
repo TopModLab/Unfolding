@@ -14,8 +14,6 @@ ConnectorPanel::ConnectorPanel(QWidget *parent) :
 	ui->viewerLayout->addWidget(viewer);
 
 	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(slot_saved()));
-	connect(ui->buttonBox, SIGNAL(accepted()), this, SIGNAL(sig_saved()));
-
 	connect(ui->buttonBox, SIGNAL(rejected()), this, SIGNAL(sig_canceled()));
 	connect(ui->buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(close()));
 
@@ -34,6 +32,16 @@ ConnectorPanel::~ConnectorPanel()
 {
 	delete ui;
 }
+
+void ConnectorPanel::setSaveMode(bool isExtend)
+{
+	if (isExtend)
+		connect(ui->buttonBox, SIGNAL(accepted()), this, SIGNAL(sig_save2extend()));
+	else
+		connect(ui->buttonBox, SIGNAL(accepted()), this, SIGNAL(sig_saved()));
+
+}
+
 void ConnectorPanel::slot_restrainSliders(int index)
 {
 	switch(index){

@@ -94,10 +94,13 @@ bool MainWindow::connectComponents()
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
 	connect(clpanel, SIGNAL(sig_closedSignal()), this, SLOT(slot_disableclp()));
 
-	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_extendMesh()));
+	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_setConnector()));
+	connect(conpanel, SIGNAL(sig_save2extend()), this, SLOT(slot_extendMesh()));
+
 	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
 
 	connect(hmpanel, SIGNAL(sig_saved()), this, SLOT(slot_hollowMesh()));
+	connect(hmpanel, SIGNAL(sig_setConnector(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
 
 	return true;
 }
@@ -617,12 +620,11 @@ void MainWindow::slot_unfoldMesh(bool checked) {
 
 void MainWindow::slot_triggerExtendMesh(bool checked)
 {
-	if (checked) {
-		if(curMesh == Original || curMesh == Cutted ||curMesh == Unfolded) {
-			conpanel->show();
-			conpanel->activateWindow();
 
-		}
+	if (checked) {
+		conpanel->setSaveMode((sender() == hmpanel)? false:true);
+		conpanel->show();
+		conpanel->activateWindow();
 	}else {
 
 		if(curMesh == Extended) {
@@ -672,6 +674,14 @@ void MainWindow::slot_hollowMesh()
 	updateCurrentMesh();
 	isExtended = true;
 }
+
+void MainWindow::slot_setConnector()
+{
+	cout<<"connector set!"<<endl;
+	HDS_Connector::setConnector(conpanel->getConfigValues());
+
+}
+
 void MainWindow::slot_extendMesh()
 {
 	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
