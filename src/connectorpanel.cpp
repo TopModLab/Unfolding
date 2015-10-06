@@ -51,27 +51,28 @@ void ConnectorPanel::slot_restrainSliders(int index)
 		ui->curvSlider->show();
 		ui->samplesSlider->show();
 		ui->convergeSlider->show();
+		ui->curvLabel->show();
+		ui->sampleLabel->show();
+		ui->convergeLabel->show();
 		ui->image->setPixmap(QPixmap(":icons/bezier.PNG"));
 		break;
 	case 1: // original
 		ui->curvSlider->hide();
 		ui->samplesSlider->hide();
 		ui->convergeSlider->hide();
+		ui->curvLabel->hide();
+		ui->sampleLabel->hide();
+		ui->convergeLabel->hide();
 		ui->image->setPixmap(QPixmap(":icons/original.PNG"));
-
-		ui->curvSlider->setValue(ui->curvSlider->maximum());
-		ui->samplesSlider->setValue(2);
-		ui->convergeSlider->setValue(0);
 		break;
 	case 2: // flat
 		ui->curvSlider->hide();
 		ui->samplesSlider->hide();
 		ui->convergeSlider->hide();
+		ui->curvLabel->hide();
+		ui->sampleLabel->hide();
+		ui->convergeLabel->hide();
 		ui->image->setPixmap(QPixmap(":icons/flat.PNG"));
-
-		ui->curvSlider->setValue(ui->curvSlider->minimum());
-		ui->samplesSlider->setValue(1);
-		ui->convergeSlider->setValue(0);
 		break;
 	}
 }
