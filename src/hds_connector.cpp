@@ -147,13 +147,19 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 vector<QVector3D> HDS_Connector::calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2)
 {
 	vector<QVector3D> pos;
-	for( float i = 1.0/(float)nSamples ; i < 1 ; i += 1.0/(float)nSamples )
+	if (shape == 1)
 	{
-		QVector3D pa = getPt( p0 , p1 , i );
-		QVector3D pb = getPt( p1 , p2 , i );
+		pos.push_back(p1);
+	}else {
 
-		QVector3D p = getPt( pa , pb , i );
-		pos.push_back(p);
+		for( float i = 1.0/(float)nSamples ; i < 1 ; i += 1.0/(float)nSamples )
+		{
+			QVector3D pa = getPt( p0 , p1 , i );
+			QVector3D pb = getPt( p1 , p2 , i );
+
+			QVector3D p = getPt( pa , pb , i );
+			pos.push_back(p);
+		}
 	}
 	return pos;
 }

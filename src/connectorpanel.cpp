@@ -10,8 +10,10 @@ ConnectorPanel::ConnectorPanel(QWidget *parent) :
 	ui->setupUi(this);
 	setWindowTitle(tr("Connector Panel"));
 
+	ui->image->setPixmap(QPixmap(":icons/bezier.PNG"));
+
 	viewer = new ConnectorPanelViewer(this);
-	ui->viewerLayout->addWidget(viewer);
+	//ui->viewerLayout->addWidget(viewer);
 
 	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(slot_saved()));
 	connect(ui->buttonBox, SIGNAL(rejected()), this, SIGNAL(sig_canceled()));
@@ -46,23 +48,26 @@ void ConnectorPanel::slot_restrainSliders(int index)
 {
 	switch(index){
 	case 0: // bezier
-		ui->curvSlider->setEnabled(true);
-		ui->samplesSlider->setEnabled(true);
-		ui->convergeSlider->setEnabled(true);
+		ui->curvSlider->show();
+		ui->samplesSlider->show();
+		ui->convergeSlider->show();
+		ui->image->setPixmap(QPixmap(":icons/bezier.PNG"));
 		break;
 	case 1: // original
-		ui->curvSlider->setEnabled(false);
-		ui->samplesSlider->setEnabled(false);
-		ui->convergeSlider->setEnabled(false);
+		ui->curvSlider->hide();
+		ui->samplesSlider->hide();
+		ui->convergeSlider->hide();
+		ui->image->setPixmap(QPixmap(":icons/original.PNG"));
 
 		ui->curvSlider->setValue(ui->curvSlider->maximum());
 		ui->samplesSlider->setValue(2);
 		ui->convergeSlider->setValue(0);
 		break;
 	case 2: // flat
-		ui->curvSlider->setEnabled(false);
-		ui->samplesSlider->setEnabled(false);
-		ui->convergeSlider->setEnabled(false);
+		ui->curvSlider->hide();
+		ui->samplesSlider->hide();
+		ui->convergeSlider->hide();
+		ui->image->setPixmap(QPixmap(":icons/flat.PNG"));
 
 		ui->curvSlider->setValue(ui->curvSlider->minimum());
 		ui->samplesSlider->setValue(1);
