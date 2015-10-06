@@ -49,8 +49,8 @@ private:
 	vector<QVector3D> bezierPos_front, bezierPos_back;
 
 private:
-	vector<QVector3D> getBezierCurvePos(int index);
-	vector<QVector3D> calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2, int iteration);
+
+	vector<QVector3D> calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2);
 
 private:
 	static int shape;

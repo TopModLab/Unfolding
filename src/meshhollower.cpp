@@ -73,7 +73,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 		cutFace->index = HDS_Face::assignIndex();
 		cutFace->isCutFace = true;
 		cutFace->he = he1;
-		he1->flip->f = cutFace;
 		he1->setCutEdge(true);
 		he2->flip->f = cutFace;
 		he2->setCutEdge(true);
@@ -82,7 +81,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 		//add connector
 		he1->f = he_f;//pass original face to addConnector function
 
-		vector<vert_t*> verts = MeshExtender::addConnector(thismesh, he1->flip, he2);
+		vector<vert_t*> verts = MeshExtender::addConnector(thismesh, he1->flip, he2, cutFace);
 		vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
 		he1->f = cutFace;
 
@@ -108,7 +107,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 			he2_flap->flip->isExtended = true;
 
 
-			cutFace->he = he1_flap;//K added
+			cutFace->he = he1_flap;
 			//set he1 and he2 to be non cut edge, flaps to be cut edge
 			he1->setCutEdge(false);
 			he2->setCutEdge(false);
