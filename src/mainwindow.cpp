@@ -355,6 +355,13 @@ void MainWindow::createActions()
 		connect(hollowAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerHollowMesh(bool)));
 		actionsMap["hollow"] = hollowAct;
 
+        QAction *bindingAct = new QAction(QIcon(":/icons/.png"), tr("Generate Binding Composition Mesh"), this);
+        bindingAct->setStatusTip(tr("Generate Bind Mesh"));
+        bindingAct->setCheckable(true);
+        bindingAct->setChecked(false);
+        connect(bindingAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerBindingMesh(bool)));
+        actionsMap["bind"] = bindingAct;
+
 		//cut with popup submenu
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
 		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
@@ -635,7 +642,7 @@ void MainWindow::slot_triggerExtendMesh(bool checked)
 {
 
 	if (checked) {
-		conpanel->setSaveMode((sender() == hmpanel)? false:true);
+        conpanel->setSaveMode((sender() == hmpanel)? false:true);
 		conpanel->show();
 		conpanel->activateWindow();
 	}else {
@@ -678,14 +685,40 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 	}
 }
 
+void MainWindow::slot_triggerBindingMesh(bool checked)
+{
+    if (checked) {
+        if(curMesh == Original) {
+            bmpanel->show();
+            bmpanel->activateWindow();
+
+        }
+    }else {
+        viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+        meshStack.pop();
+        updateCurrentMesh();
+        isExtended = false;
+    }
+}
+
 void MainWindow::slot_hollowMesh()
 {
 	HDS_Connector::setScale(hmpanel->getConnectorSize());
-	MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize());
+    MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize(), hmpanel->getType(), hmpanel->getShift());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 	meshStack.push(Extended);
 	updateCurrentMesh();
 	isExtended = true;
+}
+
+void MainWindow::slot_bindingMesh()
+{
+    HDS_Connector::setScale(bmpanel->getConnectorSize());
+    MeshManager::getInstance()->setBindingMesh();
+    viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
+    meshStack.push(Extended);
+    updateCurrentMesh();
+    isExtended = true;
 }
 
 void MainWindow::slot_setConnector()

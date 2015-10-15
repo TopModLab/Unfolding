@@ -3,7 +3,7 @@
 
 double MeshHollower::flapSize = 20;
 
-void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
+void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, double shift)
 {
 	/*ignore cut edges*/
 	flapSize = newFlapSize;//Flap size needed in export function
