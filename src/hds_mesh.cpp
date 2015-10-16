@@ -8,20 +8,18 @@
 using namespace std;
 
 HDS_Mesh::HDS_Mesh()
+	: showFace(true), showVert(true)
+	, showEdge(true), showNormals(false)
+	, isHollowed(false)
 {
-	showFace = true;
-	showVert = true;
-	showEdge = true;
-	showNormals = false;
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
+	: showFace(other.showFace), showEdge(other.showEdge)
+	, showVert(other.showVert), showNormals(other.showNormals)
+	, isHollowed(other.isHollowed)
 {
 	/// need a deep copy
-	showFace = other.showFace;
-	showEdge = other.showEdge;
-	showVert = other.showVert;
-	showNormals = other.showNormals;
 
 	/// copy the vertices set
 	vertSet.clear();

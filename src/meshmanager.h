@@ -109,7 +109,7 @@ private:
 	static MeshManager* instance;
 
 	friend class MeshViewer;
-
+	friend class MeshConnector;
 
 public:
 	bool loadOBJFile(const string& filename);
