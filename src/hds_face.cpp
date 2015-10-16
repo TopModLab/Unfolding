@@ -128,7 +128,7 @@ QVector3D HDS_Face::computeNormal()
 	return n;
 }
 
-void HDS_Face::setScaledCorners(double factor)
+void HDS_Face::setScaleFactor(double factor)
 {
 	scalingFactor = factor;
 }

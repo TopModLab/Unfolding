@@ -61,7 +61,7 @@ void MeshExtender::scaleFaces(HDS_Mesh* mesh)
 	for (auto fidx : oldFaces) {
 		auto face = mesh->faceMap[fidx];
 		// update each face with the scaling factor
-		face->setScaledCorners(HDS_Connector::getScale());
+		face->setScaleFactor(HDS_Connector::getScale());
 		int numOfCorners = face->corners().size();
 		for (int i = 0; i < numOfCorners; i++) {
 			//build new corners

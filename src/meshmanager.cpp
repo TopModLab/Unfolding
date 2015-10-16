@@ -4,6 +4,7 @@
 #include "meshsmoother.h"
 #include "MeshExtender.h"
 #include "meshhollower.h"
+#include "meshbinder.h"
 #include "MeshIterator.h"
 
 #include "utils.hpp"
@@ -300,7 +301,7 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 			he->setCutEdge(true);
 
 			if( selectedEdges.find(he->index) == selectedEdges.end() &&
-				selectedEdges.find(he->flip->index) == selectedEdges.end() )
+					selectedEdges.find(he->flip->index) == selectedEdges.end() )
 			{
 				selectedEdges.insert(he->index);
 			}
@@ -344,13 +345,13 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 		selectedEdges.clear();
 	}
 
-//	for (auto f : cutted_mesh->faces())
-//	{
-//		if (f->isCutFace)
-//		{
-//			cout << "Face " << f->index << " is cutface" << endl;
-//		}
-//	}
+	//	for (auto f : cutted_mesh->faces())
+	//	{
+	//		if (f->isCutFace)
+	//		{
+	//			cout << "Face " << f->index << " is cutface" << endl;
+	//		}
+	//	}
 	cout << ".........................." << endl;
 }
 
@@ -501,9 +502,15 @@ void MeshManager::extendMesh(int meshType, map<QString, double> config)
 void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 {
 	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-    MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize, type, shift);
+	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize, type, shift);
 	extended_cutted_mesh->updateSortedFaces();
 
+}
+void MeshManager::setBindingMesh()
+{
+	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
+	MeshBinder::bindingMesh(extended_cutted_mesh.data());
+	extended_cutted_mesh->updateSortedFaces();
 }
 
 void MeshManager::exportXMLFile(const char* filename)
@@ -602,15 +609,15 @@ void MeshManager::exportXMLFile(const char* filename)
 				do
 				{
 					fprintf(SVG_File, "%f,%f ",
-						curHE->v->pos.x() * he_scale,
-						curHE->v->pos.y() * he_scale);
+							curHE->v->pos.x() * he_scale,
+							curHE->v->pos.y() * he_scale);
 					curHE = curHE->next;
 				} while (curHE != he);
 				// Close face loop
 				fprintf(SVG_File,
-					"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.01\" />\n",
-					curHE->v->pos.x() * he_scale,
-					curHE->v->pos.y() * he_scale);
+						"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.01\" />\n",
+						curHE->v->pos.x() * he_scale,
+						curHE->v->pos.y() * he_scale);
 				curHE = curHE->next;
 			}
 			
@@ -621,10 +628,10 @@ void MeshManager::exportXMLFile(const char* filename)
 		for (auto circlepos : printCirclePos)
 		{
 			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.5\" " \
-				"style=\"stroke:black;stroke-width:0.01;fill:white\" />\n",
-				printCircleID++, circlepos.x(), circlepos.y());
+							  "style=\"stroke:black;stroke-width:0.01;fill:white\" />\n",
+					printCircleID++, circlepos.x(), circlepos.y());
 		}
-			
+
 		/************************************************************************/
 		/* Write out edge for cut                                               */
 		/************************************************************************/
@@ -651,7 +658,7 @@ void MeshManager::exportXMLFile(const char* filename)
 		vector<QVector2D*> printEdgePts;
 		vector<QVector2D*> printEdgePtsCarves;
 		// Get all edges on cut face
-		do 
+		do
 		{
 			cutedges.insert(curHE);
 			curHE = curHE->next;
@@ -689,14 +696,14 @@ void MeshManager::exportXMLFile(const char* filename)
 				{
 				case HOLLOW_CONNECTOR:
 				{
-					
+
 					break;
 				}
 				case SIMPLE_CONNECTOR:
 				{
 					if (cutedges.find(curHE) != cutedges.end())
 					{
-						//calculate 
+						//calculate
 						QVector2D T = (*Pnext - *Pthis).normalized();
 						QVector2D d = (Pc - *Pthis);
 						QVector2D a = QVector2D::dotProduct(d, T) * T;
@@ -871,9 +878,9 @@ void MeshManager::exportXMLFile(const char* filename)
 			} while (curHE != he);
 		}
 		/************************************************************************/
-		/* Write out edge for cut                                               */
-		/************************************************************************/
-		/*fprintf(SVG_File,
+	/* Write out edge for cut                                               */
+	/************************************************************************/
+	/*fprintf(SVG_File,
 			"<g opacity=\"0.8\">\n" \
 			"\t<polygon id=\"%d\" points=\"",
 			face->index);
@@ -883,12 +890,12 @@ void MeshManager::exportXMLFile(const char* filename)
 		}
 		fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.01\" />\n",
 			printEdgePts[0]->x(), printEdgePts[0]->y());*/
-		/************************************************************************/
-		/* Print carve edges                                                    */
-		/************************************************************************/
-		/*if (printEdgePtsCarves.size() > 0)
+	/************************************************************************/
+	/* Print carve edges                                                    */
+	/************************************************************************/
+	/*if (printEdgePtsCarves.size() > 0)
 		{
-			
+
 			for (int i = 0; i < printEdgePtsCarves.size(); i += 2)
 			{
 				fprintf(SVG_File, "\t<polyline id=\"%d\" points=\"%f,%f %f,%f\" " \
@@ -899,9 +906,9 @@ void MeshManager::exportXMLFile(const char* filename)
 
 			}
 		}*/
-		
-		/// draw connected faces
-		/*set<HDS_Face*> neighbourFaces = face->connectedFaces();
+
+	/// draw connected faces
+	/*set<HDS_Face*> neighbourFaces = face->connectedFaces();
 		for (auto face : neighbourFaces)
 		{
 			HDS_HalfEdge *he = face->he;

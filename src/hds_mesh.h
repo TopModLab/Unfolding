@@ -87,7 +87,7 @@ public:
 
 	void linkToCutFace(he_t* he, face_t* cutFace);
 	face_t * bridging(he_t* h1, he_t* h2, face_t* cutFace); //create a bridge between two boundary half edges
-	he_t* bridging(vert_t* v1, vert_t* v2);
+	he_t* insertEdge(vert_t* v1, vert_t* v2);
 
 	template <typename T>
 	void flipSelectionState(int idx, unordered_map<int, T> &m);
@@ -113,6 +113,7 @@ protected:
 	friend class MeshSmoother;
 	friend class MeshExtender;
 	friend class MeshHollower;
+	friend class MeshBinder;
 	friend class MeshIterator;
 	friend class MeshConnector;
 private:

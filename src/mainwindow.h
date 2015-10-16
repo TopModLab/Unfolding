@@ -10,9 +10,10 @@
 #include "cutlocuspanel.h"
 #include "connectorpanel.h"
 #include "hollowmeshpanel.h"
+#include "bindingmeshpanel.h"
 
 namespace Ui {
-	class MainWindow;
+class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -42,7 +43,7 @@ private slots:
 	void slot_closeFile();
 	void slot_saveFile();
 
-    void slot_exportFile();
+	void slot_exportFile();
 
 	void slot_selectMultiple();
 
@@ -68,10 +69,12 @@ private slots:
 	void slot_smoothMesh();
 	void slot_triggerExtendMesh(bool);
 	void slot_triggerHollowMesh(bool);
+	void slot_triggerBindingMesh(bool);
 
 	void slot_setConnector();
 	void slot_extendMesh();
 	void slot_hollowMesh();
+	void slot_bindingMesh();
 	void slot_cancelExtendMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
@@ -112,6 +115,7 @@ private:
 	CutLocusPanel *clpanel;
 	ConnectorPanel *conpanel;
 	HollowMeshPanel *hmpanel;
+	BindingMeshPanel *bmpanel;
 
 private:
 	QStateMachine S_machine;

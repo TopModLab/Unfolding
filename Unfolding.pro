@@ -56,8 +56,8 @@ SOURCES += src/main.cpp\
     src/hollowmeshpanel.cpp \
     src/meshhollower.cpp \
     src/BBox.cpp \
-    forms/bindingmeshpanel.cpp \
-    src/bindingmeshpanel.cpp
+    src/bindingmeshpanel.cpp \
+    src/meshbinder.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -101,7 +101,8 @@ HEADERS  += src/mainwindow.h \
     src/hollowmeshpanel.h \
     src/meshhollower.h \
     src/BBox.h \
-    src/bindingmeshpanel.h
+    src/bindingmeshpanel.h \
+    src/meshbinder.h
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
     forms/criticalpointspanel.ui \

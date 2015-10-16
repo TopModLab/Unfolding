@@ -62,8 +62,8 @@ public:
 
 	HDS_Mesh* getUnfoldedMesh()
 	{
-        return unfolded_mesh.data();
-    }
+		return unfolded_mesh.data();
+	}
 
 	HDS_Mesh* getExtendedUnfoldedMesh() {
 		return extended_unfolded_mesh.data();
@@ -118,11 +118,12 @@ public:
 	void mapToExtendedMesh();
 	void unfoldMesh(bool isExtended);
 	void smoothMesh();
-    void setHollowMesh(double fsize, int type, double shift);
+	void setHollowMesh(double fsize, int type, double shift);
+	void setBindingMesh();
 	void extendMesh(int meshType, map<QString, double> config);
 
 	// Export as SVG files
-    void exportXMLFile(const char* filename);
+	void exportXMLFile(const char* filename);
 
 	void resetMesh();
 
@@ -131,7 +132,7 @@ private:
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Face face_t;
 	typedef HDS_Vertex vert_t;
-    
+
 	QScopedPointer<HDS_Mesh> hds_mesh, extended_mesh, smoothed_mesh, cutted_mesh, extended_cutted_mesh, unfolded_mesh, extended_unfolded_mesh;
 	QScopedPointer<GeodesicComputer> gcomp;
 	QScopedPointer<DiscreteGeoComputer> dis_gcomp;

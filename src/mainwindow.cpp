@@ -52,6 +52,7 @@ bool MainWindow::createComponents()
 		clpanel = new CutLocusPanel;
 		conpanel = new ConnectorPanel;
 		hmpanel = new HollowMeshPanel;
+		bmpanel = new BindingMeshPanel;
 
 		createActions();
 		createMenus();
@@ -102,6 +103,9 @@ bool MainWindow::connectComponents()
 
 	connect(hmpanel, SIGNAL(sig_saved()), this, SLOT(slot_hollowMesh()));
 	connect(hmpanel, SIGNAL(sig_setConnector(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
+
+	connect(bmpanel, SIGNAL(sig_saved()), this, SLOT(slot_bindingMesh()));
+	connect(bmpanel, SIGNAL(sig_setConnector()), this, SLOT(slot_triggerExtendMesh(bool)));
 
 	return true;
 }
@@ -355,12 +359,12 @@ void MainWindow::createActions()
 		connect(hollowAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerHollowMesh(bool)));
 		actionsMap["hollow"] = hollowAct;
 
-        QAction *bindingAct = new QAction(QIcon(":/icons/.png"), tr("Generate Binding Composition Mesh"), this);
-        bindingAct->setStatusTip(tr("Generate Bind Mesh"));
-        bindingAct->setCheckable(true);
-        bindingAct->setChecked(false);
-        connect(bindingAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerBindingMesh(bool)));
-        actionsMap["bind"] = bindingAct;
+		QAction *bindingAct = new QAction(QIcon(":/icons/.png"), tr("Generate Binding Composition Mesh"), this);
+		bindingAct->setStatusTip(tr("Generate Bind Mesh"));
+		bindingAct->setCheckable(true);
+		bindingAct->setChecked(false);
+		connect(bindingAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerBindingMesh(bool)));
+		actionsMap["bind"] = bindingAct;
 
 		//cut with popup submenu
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
@@ -433,12 +437,12 @@ void MainWindow::createMenus()
 		selectionMenu->addAction(actionsMap["select clear"]);
 
 		QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
-//		QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));
-//		displayVertexMenu->setDefaultAction(actionsMap["show vertices"]);
-//		displayVertexMenu->addAction(actionsMap["show vertices"]);
-//		displayVertexMenu->addAction(actionsMap["show mins"]);
-//		displayVertexMenu->addAction(actionsMap["show maxs"]);
-//		displayVertexMenu->addAction(actionsMap["show saddles"]);
+		//		QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));
+		//		displayVertexMenu->setDefaultAction(actionsMap["show vertices"]);
+		//		displayVertexMenu->addAction(actionsMap["show vertices"]);
+		//		displayVertexMenu->addAction(actionsMap["show mins"]);
+		//		displayVertexMenu->addAction(actionsMap["show maxs"]);
+		//		displayVertexMenu->addAction(actionsMap["show saddles"]);
 
 		displayMenu->addAction(actionsMap["show vertices"]);
 
@@ -513,6 +517,7 @@ void MainWindow::createToolBar()
 		ui->mainToolBar->addAction(actionsMap["smooth"]);
 		ui->mainToolBar->addAction(actionsMap["extend"]);
 		ui->mainToolBar->addAction(actionsMap["hollow"]);
+		ui->mainToolBar->addAction(actionsMap["bind"]);
 
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["mesh cut"]);
@@ -551,7 +556,7 @@ void MainWindow::createStateMachine()
 	hollowed = new QState();
 	unfolded = new QState();
 
-	original->addTransition(actionsMap["extend"], SIGNAL(clicked()), extended);
+	//original->addTransition(actionsMap["extend"], SIGNAL(clicked()), extended);
 
 }
 
@@ -642,11 +647,10 @@ void MainWindow::slot_triggerExtendMesh(bool checked)
 {
 
 	if (checked) {
-        conpanel->setSaveMode((sender() == hmpanel)? false:true);
+		conpanel->setSaveMode((sender() == actionsMap["extend"] )? true:false);
 		conpanel->show();
 		conpanel->activateWindow();
-	}else {
-
+	}else if (!checked && sender() == actionsMap["extend"]){
 		if(curMesh == Extended) {
 			meshStack.pop();
 			updateCurrentMesh();
@@ -665,6 +669,8 @@ void MainWindow::slot_triggerExtendMesh(bool checked)
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
 			break;
 		}
+	}else {
+
 	}
 }
 
@@ -687,24 +693,24 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 
 void MainWindow::slot_triggerBindingMesh(bool checked)
 {
-    if (checked) {
-        if(curMesh == Original) {
-            bmpanel->show();
-            bmpanel->activateWindow();
+	if (checked) {
+		if(curMesh == Original) {
+			bmpanel->show();
+			bmpanel->activateWindow();
 
-        }
-    }else {
-        viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
-        meshStack.pop();
-        updateCurrentMesh();
-        isExtended = false;
-    }
+		}
+	}else {
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+		meshStack.pop();
+		updateCurrentMesh();
+		isExtended = false;
+	}
 }
 
 void MainWindow::slot_hollowMesh()
 {
 	HDS_Connector::setScale(hmpanel->getConnectorSize());
-    MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize(), hmpanel->getType(), hmpanel->getShift());
+	MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize(), hmpanel->getType(), hmpanel->getShift());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 	meshStack.push(Extended);
 	updateCurrentMesh();
@@ -713,12 +719,12 @@ void MainWindow::slot_hollowMesh()
 
 void MainWindow::slot_bindingMesh()
 {
-    HDS_Connector::setScale(bmpanel->getConnectorSize());
-    MeshManager::getInstance()->setBindingMesh();
-    viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
-    meshStack.push(Extended);
-    updateCurrentMesh();
-    isExtended = true;
+	HDS_Connector::setScale(bmpanel->getConnectorSize());
+	MeshManager::getInstance()->setBindingMesh();
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
+	meshStack.push(Extended);
+	updateCurrentMesh();
+	isExtended = true;
 }
 
 void MainWindow::slot_setConnector()
@@ -736,7 +742,7 @@ void MainWindow::slot_extendMesh()
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
 	else {
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
-}
+	}
 	meshStack.push(Extended);
 	updateCurrentMesh();
 	isExtended = true;

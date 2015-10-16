@@ -655,6 +655,7 @@ void HDS_Mesh::linkToCutFace(HDS_Mesh::he_t* he, HDS_Mesh::face_t* face)
 	//if there's a corresponding cut face
 	if ( face != nullptr ) {
 		he->f = face;
+		face->he = he;
 	} else {
 		cout<<"no cut face found"<<endl;
 		//if non found, set a new cut face
@@ -740,8 +741,12 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, 
 
 }
 
-HDS_Mesh::he_t * HDS_Mesh::bridging(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
+HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
 {
+	bool v1_isNew = false, v2_isNew = false;
+	if(v1->he == null) v1_isNew = true;
+	if(v2->he == null) v2_isNew = true;
+
 	he_t* he1 = new he_t;
 	he_t* he1_flip = new he_t;
 	he1->setFlip(he1_flip);
@@ -749,6 +754,7 @@ HDS_Mesh::he_t * HDS_Mesh::bridging(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
 	//link edge and vertices
 	he1->v = v1;
 	he1_flip->v = v2;
+	if (v1_isNew && v2_isNew) {
 	v1->he = he1;
 	v2->he = he1_flip;
 
@@ -757,7 +763,7 @@ HDS_Mesh::he_t * HDS_Mesh::bridging(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
 	he1->prev = he1_flip;
 	he1_flip->next = he1;
 	he1_flip->prev = he1;
-
+	}
 	return he1;
 }
 
