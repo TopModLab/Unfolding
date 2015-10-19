@@ -34,7 +34,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 		thismesh->deleteHalfEdge(he->flip);
 	}
 
-
 	HDS_Vertex::resetIndex();
 	HDS_HalfEdge::resetIndex();
 	HDS_Face::resetIndex();
@@ -140,9 +139,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 
 
 	}
-
-
-
 	//add new vertices and edges
 	for (auto v: vertices_new) {
 		v->index = HDS_Vertex::assignIndex();
@@ -162,5 +158,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 	cout<<"hollow mesh he size "<<thismesh->halfedges().size()<<endl;
 
 	// Set mark for hollowed mesh
-	thismesh->isHollowed = true;
+	thismesh->updatePieceSet();
+	thismesh->processType = HDS_Mesh::HOLLOWED_PROC;
 }

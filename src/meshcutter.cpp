@@ -319,8 +319,13 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 	cuttingProgress->setValue(100);
 	mesh->updateSortedFaces();
-
+	mesh->updatePieceSet();
 	return true;
+}
+
+bool MeshCutter::cutMeshAllFaces(HDS_Mesh *mesh)
+{
+	return false;
 }
 
 MeshCutter::PathInfo MeshCutter::allPairShortestPath(HDS_Mesh *mesh) {

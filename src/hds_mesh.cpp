@@ -10,14 +10,14 @@ using namespace std;
 HDS_Mesh::HDS_Mesh()
 	: showFace(true), showVert(true)
 	, showEdge(true), showNormals(false)
-	, isHollowed(false)
+	, processType(REGULAR_PROC)//, isHollowed(false)
 {
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	: showFace(other.showFace), showEdge(other.showEdge)
 	, showVert(other.showVert), showNormals(other.showNormals)
-	, isHollowed(other.isHollowed)
+	, processType(other.processType)//, isHollowed(other.isHollowed)
 {
 	/// need a deep copy
 
@@ -82,6 +82,9 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 			v->bridgeTwin = vertMap.at(v_ref->bridgeTwin->index);
 	}
 
+	// Copy piece set information
+	this->pieceSet = other.pieceSet;
+
 }
 
 HDS_Mesh::~HDS_Mesh() {
@@ -133,7 +136,7 @@ void HDS_Mesh::updatePieceSet()
 		{
 			visitedFaces.insert(f->index);
 			/// Find all linked faces except cut face
-			set<HDS_Face*> linkedFaces = f->linkededFaces();
+			set<HDS_Face*> linkedFaces = f->linkedFaces();
 
 			set<int> curPiece;
 			for (auto cf : linkedFaces)

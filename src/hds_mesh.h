@@ -20,7 +20,13 @@ public:
 	typedef HDS_Vertex vert_t;
 	typedef HDS_HalfEdge he_t;
 
-
+	enum PROCESS_TYPE
+	{
+		REGULAR_PROC,
+		HOLLOWED_PROC,
+		EXTENDED_PROC,
+		RIMMED_PROC
+	};
 	enum ElementType {
 		Face = 0,
 		Edge,
@@ -129,7 +135,8 @@ private:
 	// pieces information
 	set<set<int>> pieceSet;
 private:
-	bool isHollowed;
+	//bool isHollowed;
+	int processType;
 	bool showFace, showEdge, showVert, showNormals;
 };
 

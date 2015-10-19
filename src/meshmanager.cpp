@@ -295,7 +295,8 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 	set<int> selectedEdges;
 	for(auto he : ref_mesh->halfedges())
 	{
-		if( he->isPicked ) {
+		if( he->isPicked )
+		{
 			/// use picked edges as cut edges
 			he->setPicked(false);
 			he->setCutEdge(true);
@@ -400,8 +401,6 @@ void MeshManager::mapToExtendedMesh()
 
 }
 
-
-
 void MeshManager::unfoldMesh(bool isExtended)
 {
 	QScopedPointer<HDS_Mesh> ref_mesh;
@@ -439,7 +438,6 @@ void MeshManager::unfoldMesh(bool isExtended)
 	}
 
 }
-
 
 void MeshManager::smoothMesh()
 {
@@ -497,6 +495,43 @@ void MeshManager::extendMesh(int meshType, map<QString, double> config)
 		break;
 	}
 
+}
+
+void MeshManager::rimMesh(double rimSize)
+{
+	if (extended_mesh != nullptr)
+		extended_mesh->clearSortedFaces();
+
+	QScopedPointer<HDS_Mesh> ref_mesh;
+	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+
+	// Select all edges to cut all faces
+	set<int> selectedEdges;
+	for (auto he : ref_mesh->halfedges())
+	{
+		if (selectedEdges.find(he->index) == selectedEdges.end() &&
+			selectedEdges.find(he->flip->index) == selectedEdges.end())
+		{
+			selectedEdges.insert(he->index);
+		}
+	}
+
+	bool rimSucceeded;
+	/// make a copy of the mesh with selected edges
+	cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
+	rimSucceeded = MeshCutter::cutMeshUsingEdges(
+		cutted_mesh.data(), selectedEdges);
+	
+	if (rimSucceeded)
+	{
+		//cutted_mesh->isHollowed
+		cutted_mesh->processType = HDS_Mesh::RIMMED_PROC;
+		/// cutting performed successfully
+		cout << "Rimming succeed!" << endl;
+	}
+
+	/// discard the selected edges now
+	selectedEdges.clear();
 }
 
 void MeshManager::setHollowMesh(double flapSize)

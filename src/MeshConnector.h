@@ -39,9 +39,11 @@ public:
 		ADVSAW_CONNECTOR,
 		HOLLOW_CONNECTOR
 	};
+	static void exportXML(mesh_t *unfolded_mesh, const char *filename);
+private:
 	static void exportHollowPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
 	static void exportRegularPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
-	static void exportXML(mesh_t *unfolded_mesh, const char *filename);
+	static void exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
 };
 
 #endif

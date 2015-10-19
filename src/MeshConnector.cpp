@@ -24,8 +24,7 @@
 
 const char SVG_HEAD[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
-"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\"" \
-" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n";
+"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">\n";
 
 MeshConnector::MeshConnector()
 {
@@ -470,15 +469,138 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh,
 	fclose(SVG_File);
 	cout << "SVG file saved successfully!" << endl;
 }
+void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename, int mode)
+{
+	if (unfolded_mesh == nullptr)
+	{
+		//assert();
+		return;
+	}
+	FILE *SVG_File;
+	errno_t err = fopen_s(&SVG_File, filename, "w");
+	if (err)
+	{
+		printf("Can't write to file %s!\n", filename);
+		return;
+	}
+	int size_x(360), size_y(360);
+
+	//SVG file head
+	fprintf(SVG_File, SVG_HEAD, size_x, size_y);// define the size of export graph
+
+	/************************************************************************/
+	/* for cut layer                                                        */
+	/************************************************************************/
+
+	double he_offset(10), he_scale(20), wid_conn(10), len_conn(10);
+	double circle_offset = 3;
+	//err = scanf_s("%lf", &circle_offset);
+
+	int printFaceID(0), printPinholeID(0);
+	for (auto piece : unfolded_mesh->pieceSet)
+	{
+		vector<face_t *> cutfaces;
+
+		vector<QVector2D> printRimPts;//Edges on the boundary
+		vector<QVector2D> printPinholes;
+		double outerR, innerR, innerPinR, outerPinR, offRad;
+
+		// Group current piece
+		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
+		for (auto fid : piece)
+		{
+			face_t *curFace = unfolded_mesh->faceMap[fid];
+			
+			if (curFace->isCutFace)
+			{
+				auto he = curFace->he;
+				auto curHE = he;
+
+				auto fc = curFace->center().toVector2D() * he_scale;
+				double edgeLen = (curHE->v->pos - curHE->next->v->pos).length() * he_scale;
+
+				outerR = edgeLen * 2.0 / 3.0;
+				innerR = outerR - wid_conn * 2.0 / 3.0 * sqrt(2);
+				innerPinR = innerR + (outerR - innerR) / 3.0;
+				outerPinR = outerR - (outerR - innerR) / 3.0;
+				offRad = M_PI * 30.0 / 180.0;
+				QVector2D endDir(cos(offRad),sin(offRad));
+
+				QVector2D v0 = fc + QVector2D(0, outerR);
+				QVector2D v1 = fc + endDir * outerR;
+				QVector2D v2 = fc + endDir * innerR;
+				QVector2D v3 = fc + QVector2D(0, innerR);
+
+				printRimPts.push_back(v0);
+				printRimPts.push_back(v1);
+				printRimPts.push_back(v2);
+				printRimPts.push_back(v3);
+
+				// Pinhole positions
+				for (int i = 0; i < 9; i++)
+				{
+					QVector2D pinDir(cos(i * offRad), -sin(i * offRad));
+					printPinholes.push_back(fc + innerPinR * pinDir);
+					printPinholes.push_back(fc + outerPinR * pinDir);
+				}
+
+			}
+		}
+		/************************************************************************/
+		/* Write pinholes                                                    */
+		/************************************************************************/
+		for (auto pinpos : printPinholes)
+		{
+			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.8\" " \
+				"style=\"stroke:black;stroke-width:0.1;fill:none\" />\n",
+				printPinholeID++, pinpos.x(), pinpos.y());
+		}
+
+		/************************************************************************/
+		/* Write out edge for cut                                               */
+		/************************************************************************/
+		// graph is upside down, rotation direction should be flipped
+		fprintf(SVG_File,
+			"<path d=\"M %lf %lf " \
+			"A %lf %lf, 0, 1, 1, %lf %lf " \
+			"L %lf %lf " \
+			"A %lf %lf, 0, 1, 0, %lf %lf " \
+			"Z\" style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n",
+			printRimPts[0].x(), printRimPts[0].y(),
+			outerR, outerR, printRimPts[1].x(), printRimPts[1].y(),
+			printRimPts[2].x(), printRimPts[2].y(),
+			innerR, innerR, printRimPts[3].x(), printRimPts[3].y());
+
+		
+		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+	}
+	/************************************************************************/
+	/* End of SVG File End                                                  */
+	/************************************************************************/
+	fprintf(SVG_File, "</svg>");
+	fclose(SVG_File);
+	/*fprintf(SVG_File,
+		"<path d=\"M p1x p1y " \
+		"A R R, 0, 1, 0, p2x p2y " \
+		"L p3x p3y " \
+		"A r r, 0, 1, 1, p4x p4y " \
+		"Z\" />");*/
+
+	cout << "SVG file saved successfully!" << endl;
+}
 
 void MeshConnector::exportXML(mesh_t *unfolded_mesh, const char *filename)
 {
-	if (unfolded_mesh->isHollowed)
+	switch (unfolded_mesh->processType)
 	{
+	case HDS_Mesh::HOLLOWED_PROC:
 		exportHollowPiece(unfolded_mesh, filename);
-	}
-	else
-	{
+		break;
+	case HDS_Mesh::RIMMED_PROC:
+		exportRimmedPiece(unfolded_mesh, filename);
+		break;
+	default:
 		exportRegularPiece(unfolded_mesh, filename);
+		break;
 	}
 }

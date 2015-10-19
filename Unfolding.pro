@@ -16,7 +16,15 @@ CONFIG += console
 
 QMAKE_CXXFLAGS += -std=c++11
 
-#INCLUDEPATH += /usr/local/include /Users/phg/Utils/armadillo-4.450.4/include
+INCLUDEPATH += extras/colormap_editor src
+#Release:DESTDIR = build/Release
+#Debug:DESTDIR = build/Debug
+#OBJECTS_DIR = $$DESTDIR/.obj
+#MOC_DIR = $$DESTDIR/.moc
+#RCC_DIR = $$DESTDIR/.qrc
+#UI_DIR = $$DESTDIR/.ui
+#OUT_PWD = $$DESTDIR/../qmake/
+
 #LIBS += -L/usr/local/lib/OpenMesh -lOpenMeshCore -lOpenMeshTools -L/usr/local/lib -framework Accelerate
 
 SOURCES += src/main.cpp\
@@ -31,11 +39,11 @@ SOURCES += src/main.cpp\
     src/stringutils.cpp \
     src/meshcutter.cpp \
     src/meshunfolder.cpp \
-    extras/colormap_editor/colormapeditor.cpp \
     src/colormap.cpp \
     src/unionfind.cpp \
     src/meshsmoother.cpp \
     src/criticalpointspanel.cpp \
+    extras/colormap_editor/colormapeditor.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/BaseModel.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ExactMethodForDGP.cpp \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ICHWithFurtherPriorityQueue.cpp \
@@ -55,7 +63,9 @@ SOURCES += src/main.cpp\
     src/connectorpanelviewer.cpp \
     src/hollowmeshpanel.cpp \
     src/meshhollower.cpp \
-    src/BBox.cpp
+    src/BBox.cpp \
+    src/ConnectorSelectionPanel.cpp \
+    src/MeshConnector.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -72,11 +82,11 @@ HEADERS  += src/mainwindow.h \
     src/meshcutter.h \
     src/utils.hpp \
     src/meshunfolder.h \
-    extras/colormap_editor/colormapeditor.h \
     src/colormap.h \
     src/unionfind.h \
     src/meshsmoother.h \
     src/criticalpointspanel.h \
+    extras/colormap_editor/colormapeditor.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/BaseModel.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ExactMethodForDGP.h \
     extras/SVG_LC_code/SVG_precompute/LocalGeodesics/ICHWithFurtherPriorityQueue.h \
@@ -98,13 +108,16 @@ HEADERS  += src/mainwindow.h \
     src/connectorpanelviewer.h \
     src/hollowmeshpanel.h \
     src/meshhollower.h \
-    src/BBox.h
+    src/BBox.h \
+    src/ConnectorSelectionPanel.h \
+    src/MeshConnector.h
 FORMS    += forms/mainwindow.ui \
-    extras/colormap_editor/colormapeditor.ui \
     forms/criticalpointspanel.ui \
     forms/cutlocuspanel.ui \
     forms/connectorpanel.ui \
-    forms/hollowmeshpanel.ui
+    forms/hollowmeshpanel.ui \
+    extras/colormap_editor/colormapeditor.ui \
+    forms/ConnectorSelectionPanel.ui
 
 RESOURCES += \
     icons.qrc

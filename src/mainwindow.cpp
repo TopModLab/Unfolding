@@ -103,6 +103,8 @@ bool MainWindow::connectComponents()
 	connect(hmpanel, SIGNAL(sig_saved()), this, SLOT(slot_hollowMesh()));
 	connect(hmpanel, SIGNAL(sig_setConnector(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
 
+	// connect connector pannel
+
 	return true;
 }
 
@@ -355,6 +357,14 @@ void MainWindow::createActions()
 		connect(hollowAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerHollowMesh(bool)));
 		actionsMap["hollow"] = hollowAct;
 
+		QAction *rimfaceAct = new QAction(QIcon(":/icons/rimface.png"), tr("Rim faces"), this);
+		rimfaceAct->setStatusTip(tr("Rim Faces"));
+		rimfaceAct->setCheckable(true);
+		rimfaceAct->setChecked(false);
+		connect(rimfaceAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerRimmedMesh(bool)));
+		actionsMap["rimface"] = rimfaceAct;
+
+
 		//cut with popup submenu
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
 		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
@@ -506,6 +516,7 @@ void MainWindow::createToolBar()
 		ui->mainToolBar->addAction(actionsMap["smooth"]);
 		ui->mainToolBar->addAction(actionsMap["extend"]);
 		ui->mainToolBar->addAction(actionsMap["hollow"]);
+		ui->mainToolBar->addAction(actionsMap["rimface"]);
 
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["mesh cut"]);
@@ -569,10 +580,14 @@ void MainWindow::slot_newFile()
 
 void MainWindow::slot_exportFile()
 {
-	cout << "Export as..." << endl;
+	if (curMesh != Unfolded)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Unable to export mesh! Unfold it first!"), QMessageBox::Close);
+		return;
+	}
+
 	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "export/untitled.svg", tr("XML files (*.svg *.xml)"));
 	MeshManager::getInstance()->exportXMLFile(filename.toUtf8().constData());
-	//Needed to be implemented
 }
 
 void MainWindow::slot_closeFile()          //later add this function
@@ -590,7 +605,8 @@ void MainWindow::slot_saveFile()
 
 void MainWindow::slot_performMeshCut() {
 
-	if (curMesh == Original || curMesh == Extended) {
+	if (curMesh == Original || curMesh == Extended)
+	{
 
 		MeshManager::getInstance()->cutMeshWithSelectedEdges(false);
 		meshStack.push(Cutted);
@@ -610,7 +626,6 @@ void MainWindow::slot_performMeshCut() {
 	}
 
 }
-
 
 void MainWindow::slot_unfoldMesh(bool checked) {
 	if(checked){
@@ -661,20 +676,45 @@ void MainWindow::slot_triggerExtendMesh(bool checked)
 	}
 }
 
-
 void MainWindow::slot_triggerHollowMesh(bool checked)
 {
-	if (checked) {
-		if(curMesh == Original) {
+	if (checked)
+	{
+		if(curMesh == Original)
+		{
 			hmpanel->show();
 			hmpanel->activateWindow();
-
 		}
-	}else {
+	}
+	else
+	{
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 		meshStack.pop();
 		updateCurrentMesh();
 		isExtended = false;
+	}
+}
+
+void MainWindow::slot_triggerRimmedMesh(bool checked)
+{
+	if (checked)
+	{
+		if (curMesh == Original)
+		{
+			MeshManager::getInstance()->rimMesh();
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getCuttedMesh());
+			meshStack.push(Cutted);
+			//meshStack.pop();
+			updateCurrentMesh();
+			
+		}
+	}
+	else
+	{
+		/*viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+		meshStack.pop();
+		updateCurrentMesh();
+		isExtended = false;*/
 	}
 }
 
@@ -701,9 +741,10 @@ void MainWindow::slot_extendMesh()
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
 	else if (curMesh == Unfolded)
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedUnfoldedMesh());
-	else {
+	else
+	{
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
-}
+	}
 	meshStack.push(Extended);
 	updateCurrentMesh();
 	isExtended = true;
@@ -712,6 +753,11 @@ void MainWindow::slot_extendMesh()
 void MainWindow::slot_cancelExtendMesh()
 {
 	actionsMap["extend"]->setChecked(false);
+}
+
+void MainWindow::slot_rimMesh()
+{
+
 }
 
 void MainWindow::slot_smoothMesh() {

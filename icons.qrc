@@ -21,5 +21,6 @@
         <file>icons/HollowSphere.png</file>
         <file>icons/hollow_multFlap.png</file>
         <file>icons/hollow_oneFlap.png</file>
+        <file>icons/rimface.png</file>
     </qresource>
 </RCC>
