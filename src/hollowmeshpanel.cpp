@@ -17,7 +17,7 @@ HollowMeshPanel::HollowMeshPanel(QWidget *parent) :
 	connect(flapTypeGroup, SIGNAL(buttonClicked(int)), this, SLOT(slot_restrainSliders(int)));
 	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(slot_saved()));
 	connect(ui->okButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
-	connect(ui->connectorPanelButton, SIGNAL(clicked(bool)), this, SIGNAL(sig_setConnector(bool)));
+	connect(ui->bridgerPanelButton, SIGNAL(clicked(bool)), this, SIGNAL(sig_setBridger(bool)));
 }
 
 HollowMeshPanel::~HollowMeshPanel()
@@ -39,7 +39,7 @@ void HollowMeshPanel::slot_saved()
 {
 	flapType = ui->oneFlapButton->isChecked()? 0:1;
 	flapSize = ui->flapSizeSlider->value();
-	connectorSize = ui->conSizeSlider->value();
+	bridgerSize = ui->bridgerSizeSlider->value();
 	shiftAmount = ui->shiftSlider->value();
 	close();
 }
@@ -47,9 +47,9 @@ double HollowMeshPanel::getFlapSize()
 {
 	return (double)flapSize / (double)ui->flapSizeSlider->maximum();
 }
-double HollowMeshPanel::getConnectorSize()
+double HollowMeshPanel::getBridgerSize()
 {
-	return 1.0 -(double)connectorSize / (double)ui->conSizeSlider->maximum();
+	return 1.0 -(double)bridgerSize / (double)ui->bridgerSizeSlider->maximum();
 }
 
 double HollowMeshPanel::getShift()

@@ -2,11 +2,15 @@
 #include "MeshExtender.h"
 
 double MeshHollower::flapSize = 20;
+HDS_Mesh* MeshHollower::thismesh = nullptr;
+vector<HDS_Vertex*> MeshHollower::vertices_new;
+vector<HDS_HalfEdge*> MeshHollower::hes_new;
 
-void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, double shift)
+void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 {
 	/*ignore cut edges*/
 	flapSize = newFlapSize;//Flap size needed in export function
+	thismesh = mesh;
 
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
@@ -20,7 +24,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, 
 	}
 
 	for (auto f: thismesh->faceSet) {
-		f->setScaleFactor(HDS_Connector::getScale());
+		f->setScaleFactor(HDS_Bridger::getScale());
 		old_faces.push_back(f);
 	}
 	for (auto f: old_faces) {
@@ -39,11 +43,10 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, 
 	HDS_HalfEdge::resetIndex();
 	HDS_Face::resetIndex();
 
-	vector<vert_t*> vertices_new;
-	vector<he_t*> hes_new;
-	//set new connector on each edge
+
+	//set new bridger on each edge
 	for (auto he: old_edges) {
-		cout<<"connector based on original edge "<<he->index<<endl;
+		cout<<"bridger based on original edge "<<he->index<<endl;
 		//get edge vertex, calculate scaled vertex
 		vert_t* he_v = he->v;
 		vert_t* he_flip_v = he->flip->v;
@@ -78,15 +81,25 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, 
 		he2->setCutEdge(true);
 		thismesh->addFace(cutFace);
 
-		//add connector
-		he1->f = he_f;//pass original face to addConnector function
+		//add bridger
+		he1->f = he_f;//pass original face to addBridger function
 
-		vector<vert_t*> verts = MeshExtender::addConnector(thismesh, he1->flip, he2, cutFace);
+		vector<vert_t*> verts = MeshExtender::addBridger(thismesh, he1->flip, he2, cutFace);
 		vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
 		he1->f = cutFace;
 
+		//add face for bind mesh
+		if (type == -1) {
+
+			he1->setCutEdge(false);
+			thismesh->addFace(addBindFace(he_f, he, he1, cutFace));
+			he2->setCutEdge(false);
+			thismesh->addFace(addBindFace(he_flip_f, he->flip,he2->flip, cutFace));
+		}
+
 		//add additional flaps on hollow face
 		if (flapSize > 0.01) {
+			cout<<"creating flap for hollow face"<<endl;
 			QVector3D he1_v0 = he_f->scaleCorner(he->prev->v);
 			QVector3D he1_v3 = he_f->scaleCorner(he->next->flip->v);
 			QVector3D he2_v0 = he_flip_f->scaleCorner(he->flip->next->flip->v);
@@ -127,19 +140,18 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, 
 			HDS_Face* bridgeFace_he1 = thismesh->bridging(he1_flap->flip, he1, cutFace);
 			bridgeFace_he1->index = HDS_Face::assignIndex();
 			bridgeFace_he1->isCutFace = false;
-			bridgeFace_he1->isConnector = true;
+			bridgeFace_he1->isBridger = true;
 			thismesh->addFace(bridgeFace_he1);
 			HDS_Face* bridgeFace_he2 = thismesh->bridging(he2->flip, he2_flap, cutFace);
 			bridgeFace_he2->index = HDS_Face::assignIndex();
 			bridgeFace_he2->isCutFace = false;
-			bridgeFace_he2->isConnector = true;
+			bridgeFace_he2->isBridger = true;
 			thismesh->addFace(bridgeFace_he2);
 
 		}
 
 
 	}
-
 
 
 	//add new vertices and edges
@@ -151,7 +163,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, 
 		he->index = HDS_HalfEdge::assignIndex();
 		thismesh->addHalfEdge(he);
 	}
-
 	/// update the curvature of each vertex
 	for (auto &v : thismesh->vertSet) {
 		v->computeNormal();
@@ -162,4 +173,43 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize, int type, 
 
 	// Set mark for hollowed mesh
 	thismesh->isHollowed = true;
+}
+
+HDS_Face* MeshHollower::addBindFace(HDS_Face* he_f, HDS_HalfEdge* originalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace )
+{
+	typedef HDS_HalfEdge he_t;
+	typedef HDS_Vertex vert_t;
+	typedef HDS_Face face_t;
+
+	auto curHE = originalHE->next;
+	auto curV = startHE->flip->v;
+	face_t * newFace = new face_t;
+	newFace->index = HDS_Face::assignIndex();
+	newFace->he = startHE;
+
+	startHE->f = newFace;
+	cout<<"added new face"<<endl;
+	do {
+		vert_t* newV = new vert_t(he_f->scaleCorner(curHE->flip->v));
+		cout<<"added new vert"<<endl;
+		vertices_new.push_back(newV);
+		he_t* newHE = thismesh->insertEdge(curV, newV);
+		newHE->f = newFace;
+		newHE->flip->f = cutFace;
+		newHE->setCutEdge(true);
+		hes_new.push_back(newHE);
+		hes_new.push_back(newHE->flip);
+		curHE = curHE->next;
+		curV = newV;
+	}while(curHE != originalHE->prev);
+
+	//link last edge of the face
+	he_t* lastHE = thismesh->insertEdge(curV, startHE->v);
+	lastHE->f = newFace;
+	lastHE->flip->f = cutFace;
+	lastHE->setCutEdge(true);
+	hes_new.push_back(lastHE);
+	hes_new.push_back(lastHE->flip);
+
+	return newFace;
 }

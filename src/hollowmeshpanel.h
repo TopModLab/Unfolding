@@ -16,13 +16,13 @@ public:
 	~HollowMeshPanel();
 
 	double getFlapSize();
-	double getConnectorSize();
+	double getBridgerSize();
 	double getShift();
 	int getType();
 
 signals:
 	void sig_saved();
-	void sig_setConnector(bool);
+	void sig_setBridger(bool);
 
 public slots:
 	void slot_saved();
@@ -32,7 +32,7 @@ private:
 	Ui::HollowMeshPanel *ui;
 	int flapType; //0 for one flap, 1 for extended multiple flaps
 	int flapSize;
-	int connectorSize;
+	int bridgerSize;
 	int shiftAmount;
 };
 

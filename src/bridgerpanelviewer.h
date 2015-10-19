@@ -3,12 +3,12 @@
 
 #include <QGLWidget>
 
-class ConnectorPanelViewer : public QGLWidget
+class BridgerPanelViewer : public QGLWidget
 {
 	Q_OBJECT
 public:
-	explicit ConnectorPanelViewer(QWidget *parent = 0);
-	~ConnectorPanelViewer();
+	explicit BridgerPanelViewer(QWidget *parent = 0);
+	~BridgerPanelViewer();
 
 protected:
 	void initializeGL();

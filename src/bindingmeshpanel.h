@@ -15,18 +15,18 @@ public:
 	explicit BindingMeshPanel(QWidget *parent = 0);
 	~BindingMeshPanel();
 
-	double getConnectorSize();
+	double getBridgerSize();
 
 signals:
 	void sig_saved();
-	void sig_setConnector(bool);
+	void sig_setBridger(bool);
 
 public slots:
 	void slot_saved();
 
 private:
 	Ui::BindingMeshPanel *ui;
-	int connectorSize;
+	int bridgerSize;
 
 };
 

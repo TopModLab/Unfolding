@@ -348,7 +348,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 	{
 		GLfloat face_mat_diffuse[4] = {0.75, 0.75, 0.75, 1};
 		GLfloat face_mat_diffuse_selected[4] = {1, 0, 0.5, 1};
-		GLfloat face_mat_diffuse_connector[4] = {0.75, 0.75, 0.95, 1};
+		GLfloat face_mat_diffuse_bridger[4] = {0.75, 0.75, 0.95, 1};
 
 
 		/// traverse the mesh and render every single face
@@ -370,9 +370,9 @@ void HDS_Mesh::draw(ColorMap cmap)
 				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_selected);
 
 			}
-			else if (f->isConnector) {
+			else if (f->isBridger) {
 				glColor4f(0.75, 0.75, 0.95, 1);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_connector);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_bridger);
 			}
 
 			else {
@@ -388,7 +388,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 				vert_t* v = curHe->v;
 
 				/// interpolation
-				if (!f->isConnector) {
+				if (!f->isBridger) {
 					//QColor clr = cmap.getColor_discrete(v->colorVal);
 					//GLUtils::setColor(QColor(0.75,0.75,0.75), 0.3); //commented out face color variation
 				}
@@ -686,6 +686,33 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, 
 	he1->f = bridgeFace;
 	he2->f = bridgeFace;
 
+//	//insert two cut edges
+//	he_t* he_v1e_v2s = insertEdge(v1e, v2s);
+//	he_t* he_v2e_v1s = insertEdge(v2e, v1s);
+
+//	he_v1e_v2s->index = HDS_HalfEdge::assignIndex();
+//	he_v1e_v2s->flip->index = HDS_HalfEdge::assignIndex();
+//	he_v2e_v1s->index = HDS_HalfEdge::assignIndex();
+//	he_v2e_v1s->flip->index = HDS_HalfEdge::assignIndex();
+
+//	//connect new half edges to face
+//	bridgeFace->he = he_v1e_v2s;
+
+//	he_v1e_v2s->f = bridgeFace;
+//	he_v2e_v1s->f = bridgeFace;
+
+//	linkToCutFace(he_v1e_v2s->flip, cutFace);
+//	linkToCutFace(he_v2e_v1s->flip, cutFace);
+//	he_v1e_v2s->setCutEdge(true);
+//	he_v2e_v1s->setCutEdge(true);
+
+
+//	addHalfEdge(he_v1e_v2s);
+//	addHalfEdge(he_v1e_v2s->flip);
+//	addHalfEdge(he_v2e_v1s);
+//	addHalfEdge(he_v2e_v1s->flip);
+
+
 	HDS_HalfEdge* nextHE, * prevHE;
 	//build 4 new half edges to connect original 4 vertices
 	for (int i = 0; i < 2; i++){
@@ -744,8 +771,9 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, 
 HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
 {
 	bool v1_isNew = false, v2_isNew = false;
-	if(v1->he == null) v1_isNew = true;
-	if(v2->he == null) v2_isNew = true;
+
+	if(v1->he == NULL) v1_isNew = true;
+	if(v2->he == NULL) v2_isNew = true;
 
 	he_t* he1 = new he_t;
 	he_t* he1_flip = new he_t;
@@ -754,15 +782,31 @@ HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2
 	//link edge and vertices
 	he1->v = v1;
 	he1_flip->v = v2;
-	if (v1_isNew && v2_isNew) {
-	v1->he = he1;
-	v2->he = he1_flip;
+	if (v1_isNew ) v1->he = he1;
+	if (v2_isNew) v2->he = he1_flip;
+		//link edge loop
+		he1->next = he1_flip;
+		he1->prev = he1_flip;
+		he1_flip->next = he1;
+		he1_flip->prev = he1;
 
-	//link edge loop
-	he1->next = he1_flip;
-	he1->prev = he1_flip;
-	he1_flip->next = he1;
-	he1_flip->prev = he1;
+	if(!v1_isNew) {
+		he_t* prevHE, *nextHE;
+		nextHE = v1->he->flip->next;
+		prevHE = v1->he->flip;
+		he1_flip->next = nextHE;
+		nextHE->prev = he1_flip;
+		prevHE->next = he1;
+		he1->prev = prevHE;
+	}
+	if(!v2_isNew) {
+		he_t* prevHE, *nextHE;
+		nextHE = v2->he;
+		prevHE = v2->he->prev;
+		nextHE->prev = he1;
+		he1->next = nextHE;
+		prevHE->next = he1_flip;
+		he1_flip->prev = prevHE;
 	}
 	return he1;
 }

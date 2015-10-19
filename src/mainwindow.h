@@ -8,7 +8,7 @@
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
-#include "connectorpanel.h"
+#include "bridgerpanel.h"
 #include "hollowmeshpanel.h"
 #include "bindingmeshpanel.h"
 
@@ -71,7 +71,7 @@ private slots:
 	void slot_triggerHollowMesh(bool);
 	void slot_triggerBindingMesh(bool);
 
-	void slot_setConnector();
+	void slot_setBridger();
 	void slot_extendMesh();
 	void slot_hollowMesh();
 	void slot_bindingMesh();
@@ -113,7 +113,7 @@ private:
 	ColormapEditor *ceditor;
 	CriticalPointsPanel *cppanel;
 	CutLocusPanel *clpanel;
-	ConnectorPanel *conpanel;
+	BridgerPanel *conpanel;
 	HollowMeshPanel *hmpanel;
 	BindingMeshPanel *bmpanel;
 

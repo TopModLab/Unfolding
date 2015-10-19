@@ -7,13 +7,13 @@ bool MeshExtender::hasBridgeEdge = false;
 bool MeshExtender::hasCutEdge = false;
 bool MeshExtender::isHollow = false;
 
-vector<HDS_Vertex*> MeshExtender::addConnector(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Face* cutFace)
+vector<HDS_Vertex*> MeshExtender::addBridger(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Face* cutFace)
 {
-	//new a connector object
-	HDS_Connector* connector = new HDS_Connector(he1, he2);
+	//new a Bridger object
+	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2);
 	//add all internal edges and vertices to mesh
-	vector<HDS_HalfEdge*> hes = connector->hes;
-	if (!connector->hes.empty()) {
+	vector<HDS_HalfEdge*> hes = Bridger->hes;
+	if (!Bridger->hes.empty()) {
 		for (auto he : hes) {
 			thismesh->addHalfEdge(he);
 		}
@@ -25,20 +25,20 @@ vector<HDS_Vertex*> MeshExtender::addConnector(HDS_Mesh* thismesh, HDS_HalfEdge*
 		if (he != prev(hes.end())) {
 			auto he_next = next(he);
 			//bridge each pair of edges
-			//get bridge faces, set to connector->faces
+			//get bridge faces, set to Bridger->faces
 			HDS_Face* bridgeFace = thismesh->bridging(*he, *he_next, cutFace);
 			//fix face
 			bridgeFace->index = HDS_Face::assignIndex();
 			bridgeFace->isCutFace = false;
-			bridgeFace->isConnector = true;
+			bridgeFace->isBridger = true;
 			//add face to mesh
 			thismesh->addFace(bridgeFace);
 
-			connector->faces.push_back(bridgeFace);
+			Bridger->faces.push_back(bridgeFace);
 
 		}
 	}
-	return connector->verts;
+	return Bridger->verts;
 
 }
 void MeshExtender::scaleFaces(HDS_Mesh* mesh)
@@ -61,7 +61,7 @@ void MeshExtender::scaleFaces(HDS_Mesh* mesh)
 	for (auto fidx : oldFaces) {
 		auto face = mesh->faceMap[fidx];
 		// update each face with the scaling factor
-		face->setScaleFactor(HDS_Connector::getScale());
+		face->setScaleFactor(HDS_Bridger::getScale());
 		int numOfCorners = face->corners().size();
 		for (int i = 0; i < numOfCorners; i++) {
 			//build new corners
@@ -208,7 +208,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 						break;
 					}
 				}while (curHE != h1);
-				vector<HDS_Vertex*> verts = addConnector(mesh, he1, he2, cutFace);
+				vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, cutFace);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 				visited.insert(v->bridgeTwin);
@@ -270,7 +270,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				twin_he->setCutEdge(false);
 
 				//bridge v->he and new he
-				vector<HDS_Vertex*> verts = addConnector(mesh, he1, flap_he_flip, he1->f);
+				vector<HDS_Vertex*> verts = addBridger(mesh, he1, flap_he_flip, he1->f);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 			}

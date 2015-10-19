@@ -3,19 +3,19 @@
 
 #include <QWidget>
 #include <map>
-#include "connectorpanelviewer.h"
+#include "bridgerpanelviewer.h"
 
 namespace Ui {
-class ConnectorPanel;
+class BridgerPanel;
 }
 
-class ConnectorPanel : public QWidget
+class BridgerPanel : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit ConnectorPanel(QWidget *parent = 0);
-	~ConnectorPanel();
+	explicit BridgerPanel(QWidget *parent = 0);
+	~BridgerPanel();
 	std::map<QString, double> getConfigValues();
 	void setSaveMode(bool);
 
@@ -29,9 +29,9 @@ public slots:
 	void slot_restrainSliders(int);
 
 private:
-	Ui::ConnectorPanel *ui;
-	ConnectorPanelViewer *viewer;
-	std::map<QString,double> connectorConfig;
+	Ui::BridgerPanel *ui;
+	BridgerPanelViewer *viewer;
+	std::map<QString,double> bridgerConfig;
 
 
 

@@ -26,7 +26,7 @@
     <string>OK</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="connectorPanelButton">
+  <widget class="QPushButton" name="bridgerPanelButton">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -36,7 +36,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Set Connector...</string>
+    <string>Set Bridger...</string>
    </property>
    <property name="checkable">
     <bool>true</bool>
@@ -55,12 +55,15 @@
     <item>
      <widget class="QLabel" name="sizeLabel">
       <property name="text">
-       <string>Connector Size</string>
+       <string>Bridger Size</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QSlider" name="sizeSlider">
+      <property name="value">
+       <number>20</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>

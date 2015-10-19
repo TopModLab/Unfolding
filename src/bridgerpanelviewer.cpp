@@ -1,9 +1,9 @@
-#include "connectorpanelviewer.h"
+#include "bridgerpanelviewer.h"
 
 #include <QMouseEvent>
 #include <QMessageBox>
 
-ConnectorPanelViewer::ConnectorPanelViewer(QWidget *parent)
+BridgerPanelViewer::BridgerPanelViewer(QWidget *parent)
 	: QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
 
@@ -15,7 +15,7 @@ ConnectorPanelViewer::ConnectorPanelViewer(QWidget *parent)
 	openingIndex = 0;
 }
 
-ConnectorPanelViewer::~ConnectorPanelViewer()
+BridgerPanelViewer::~BridgerPanelViewer()
 {
 
 }
@@ -28,7 +28,7 @@ static void qNormalizeAngle(int &angle)
 		angle -= 360 * 16;
 }
 
-void ConnectorPanelViewer::setXRotation(int angle)
+void BridgerPanelViewer::setXRotation(int angle)
 {
 	qNormalizeAngle(angle);
 	if (angle != xRot) {
@@ -37,7 +37,7 @@ void ConnectorPanelViewer::setXRotation(int angle)
 	}
 }
 
-void ConnectorPanelViewer::setYRotation(int angle)
+void BridgerPanelViewer::setYRotation(int angle)
 {
 	qNormalizeAngle(angle);
 	if (angle != yRot) {
@@ -46,7 +46,7 @@ void ConnectorPanelViewer::setYRotation(int angle)
 	}
 }
 
-void ConnectorPanelViewer::setZRotation(int angle)
+void BridgerPanelViewer::setZRotation(int angle)
 {
 	qNormalizeAngle(angle);
 	if (angle != zRot) {
@@ -55,7 +55,7 @@ void ConnectorPanelViewer::setZRotation(int angle)
 	}
 }
 
-void ConnectorPanelViewer::initializeGL()
+void BridgerPanelViewer::initializeGL()
 {
 	qglClearColor(Qt::white);
 
@@ -69,7 +69,7 @@ void ConnectorPanelViewer::initializeGL()
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 }
 
-void ConnectorPanelViewer::paintGL()
+void BridgerPanelViewer::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -80,7 +80,7 @@ void ConnectorPanelViewer::paintGL()
 	draw();
 }
 
-void ConnectorPanelViewer::resizeGL(int width, int height)
+void BridgerPanelViewer::resizeGL(int width, int height)
 {
 	int side = qMin(width, height);
 	glViewport((width - side) / 2, (height - side) / 2, side, side);
@@ -96,13 +96,13 @@ void ConnectorPanelViewer::resizeGL(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void ConnectorPanelViewer::mousePressEvent(QMouseEvent *event)
+void BridgerPanelViewer::mousePressEvent(QMouseEvent *event)
 {
 	lastPos = event->pos();
 
 }
 
-void ConnectorPanelViewer::mouseMoveEvent(QMouseEvent *event)
+void BridgerPanelViewer::mouseMoveEvent(QMouseEvent *event)
 {
 	int dx = event->x() - lastPos.x();
 	int dy = event->y() - lastPos.y();
@@ -118,7 +118,7 @@ void ConnectorPanelViewer::mouseMoveEvent(QMouseEvent *event)
 	lastPos = event->pos();
 }
 
-void ConnectorPanelViewer::draw()
+void BridgerPanelViewer::draw()
 {
 	glColor4f(0.25, 0.25, 0.25, 1);
 	glBegin(GL_QUADS);
@@ -138,32 +138,32 @@ void ConnectorPanelViewer::draw()
 
 }
 
-void ConnectorPanelViewer::setShape(int)
+void BridgerPanelViewer::setShape(int)
 {
 
 }
 
-void ConnectorPanelViewer::setCurvature(int curv)
+void BridgerPanelViewer::setCurvature(int curv)
 {
 
 }
 
-void ConnectorPanelViewer::setSamples(int n)
+void BridgerPanelViewer::setSamples(int n)
 {
 
 }
 
-void ConnectorPanelViewer::setSize(int size)
+void BridgerPanelViewer::setSize(int size)
 {
 
 }
 
-void ConnectorPanelViewer::setConvergingPoint(int pos)
+void BridgerPanelViewer::setConvergingPoint(int pos)
 {
 
 }
 
-void ConnectorPanelViewer::setOpeningType(int index)
+void BridgerPanelViewer::setOpeningType(int index)
 {
 
 }

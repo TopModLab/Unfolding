@@ -7,7 +7,7 @@ HDS_Face::HDS_Face()
 {
 	isPicked = false;
 	isCutFace = false;
-	isConnector = false;
+	isBridger = false;
 	isHole = false;
 	//isFlap = false;
 	index = -1;
@@ -27,7 +27,7 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 {
 	isPicked = other.isPicked;
 	isCutFace = other.isCutFace;
-	isConnector = other.isConnector;
+	isBridger = other.isBridger;
 	isHole = other.isHole;
 	isPlanar = other.isPlanar;
 	//isFlap = other.isFlap;

@@ -16,7 +16,7 @@
 #include "hds_face.h"
 #include "hds_halfedge.h"
 #include "hds_vertex.h"
-#include "hds_connector.h"
+#include "hds_bridger.h"
 
 #include "Graph.hpp"
 
@@ -119,7 +119,6 @@ public:
 	void unfoldMesh(bool isExtended);
 	void smoothMesh();
 	void setHollowMesh(double fsize, int type, double shift);
-	void setBindingMesh();
 	void extendMesh(int meshType, map<QString, double> config);
 
 	// Export as SVG files

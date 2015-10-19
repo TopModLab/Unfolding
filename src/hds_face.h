@@ -54,7 +54,7 @@ public:
 	bool isPicked;
 	bool isCutFace; //invisible face between cut edges
 	bool isHole;
-	bool isConnector;
+	bool isBridger;
 
 	bool isPlanar;
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces

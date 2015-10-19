@@ -4,7 +4,6 @@
 #include "meshsmoother.h"
 #include "MeshExtender.h"
 #include "meshhollower.h"
-#include "meshbinder.h"
 #include "MeshIterator.h"
 
 #include "utils.hpp"
@@ -388,7 +387,7 @@ void MeshManager::mapToExtendedMesh()
 			}while(edge != f->he);
 		}
 
-		if (f->isConnector) {
+		if (f->isBridger) {
 			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
 				f->he->setPicked(true);
 
@@ -472,7 +471,7 @@ bool MeshManager::saveMeshes()
 
 void MeshManager::extendMesh(int meshType, map<QString, double> config)
 {
-	HDS_Connector::setConnector(config);
+	HDS_Bridger::setBridger(config);
 
 	switch(meshType){
 	case 0://original
@@ -506,16 +505,11 @@ void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 	extended_cutted_mesh->updateSortedFaces();
 
 }
-void MeshManager::setBindingMesh()
-{
-	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-	MeshBinder::bindingMesh(extended_cutted_mesh.data());
-	extended_cutted_mesh->updateSortedFaces();
-}
+
 
 void MeshManager::exportXMLFile(const char* filename)
 {
-	enum ConnectorType
+	enum BridgerType
 	{
 		SIMPLE_CONNECTOR,
 		INSERT_CONNECTOR,
@@ -524,7 +518,7 @@ void MeshManager::exportXMLFile(const char* filename)
 		ADVSAW_CONNECTOR,
 		HOLLOW_CONNECTOR
 	};
-	ConnectorType cn_t = SIMPLE_CONNECTOR;
+	BridgerType cn_t = SIMPLE_CONNECTOR;
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
 	if (err)
@@ -712,7 +706,7 @@ void MeshManager::exportXMLFile(const char* filename)
 						QVector2D Pn = *Pthis + a;
 						QVector2D Psc = Pn + n * wid_conn;
 
-						//draw connector
+						//draw bridger
 
 						QVector2D *Pnst = new QVector2D(Psc - len_conn * T);
 						QVector2D *Pnsn = new QVector2D(Psc + len_conn * T);
@@ -755,7 +749,7 @@ void MeshManager::exportXMLFile(const char* filename)
 
 				 if (cutedges.find(curHE) != cutedges.end())
 				 {
-				 //draw connector
+				 //draw bridger
 				 printEdgePtsCarves.push_back(Pst);
 				 printEdgePtsCarves.push_back(Pcvt);
 				 printEdgePtsCarves.push_back(Pcvn);
@@ -785,7 +779,7 @@ void MeshManager::exportXMLFile(const char* filename)
 
 				 //division number
 				 int ndiv = 8;
-				 //connector segment length
+				 //bridger segment length
 				 double len_seg = Pthis->distanceToPoint(*Pnext) / ndiv * 0.5;
 
 				 QVector2D *Pst = Pthis;
@@ -848,7 +842,7 @@ void MeshManager::exportXMLFile(const char* filename)
 				 QVector2D Pn = *Pthis + T * edge_len * 0.5;
 				 QVector2D Psc = Pn + n * wid_conn * 1.5;
 
-				 //connector segment length
+				 //bridger segment length
 				 double edgeConn_len = edge_len * 0.5;
 
 				 QVector2D *Pst = new QVector2D(Pn - edgeConn_len * T * 0.5);

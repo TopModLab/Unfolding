@@ -1,18 +1,18 @@
-#include "connectorpanel.h"
-#include "ui_connectorpanel.h"
-#include "connectorpanelviewer.h"
+#include "bridgerpanel.h"
+#include "ui_bridgerpanel.h"
+#include "bridgerpanelviewer.h"
 
 
-ConnectorPanel::ConnectorPanel(QWidget *parent) :
+BridgerPanel::BridgerPanel(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::ConnectorPanel)
+	ui(new Ui::BridgerPanel)
 {
 	ui->setupUi(this);
-	setWindowTitle(tr("Connector Panel"));
+	setWindowTitle(tr("Bridger Panel"));
 
 	ui->image->setPixmap(QPixmap(":icons/bezier.PNG"));
 
-	viewer = new ConnectorPanelViewer(this);
+	viewer = new BridgerPanelViewer(this);
 	//ui->viewerLayout->addWidget(viewer);
 
 	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(slot_saved()));
@@ -30,12 +30,12 @@ ConnectorPanel::ConnectorPanel(QWidget *parent) :
 
 }
 
-ConnectorPanel::~ConnectorPanel()
+BridgerPanel::~BridgerPanel()
 {
 	delete ui;
 }
 
-void ConnectorPanel::setSaveMode(bool isExtend)
+void BridgerPanel::setSaveMode(bool isExtend)
 {
 	if (isExtend)
 		connect(ui->buttonBox, SIGNAL(accepted()), this, SIGNAL(sig_save2extend()));
@@ -44,7 +44,7 @@ void ConnectorPanel::setSaveMode(bool isExtend)
 
 }
 
-void ConnectorPanel::slot_restrainSliders(int index)
+void BridgerPanel::slot_restrainSliders(int index)
 {
 	switch(index){
 	case 0: // bezier
@@ -77,20 +77,20 @@ void ConnectorPanel::slot_restrainSliders(int index)
 	}
 }
 
-void ConnectorPanel::slot_saved()
+void BridgerPanel::slot_saved()
 {
-	 connectorConfig["shape"] = ui->shapeComboBox->currentIndex();
-	 connectorConfig["curv"] = (double)ui->curvSlider->value()/(double)ui->curvSlider->maximum();
-	 connectorConfig["samples"] = ui->samplesSlider->value();
-	 connectorConfig["size"] = 1.0 - (double)ui->sizeSlider->value()/(double)ui->sizeSlider->maximum();
-	 connectorConfig["cp"] = (double)ui->convergeSlider->value()/(double)ui->convergeSlider->maximum();
-	 connectorConfig["opening"] = ui->adhesiveComboBox->currentIndex();
+	 bridgerConfig["shape"] = ui->shapeComboBox->currentIndex();
+	 bridgerConfig["curv"] = (double)ui->curvSlider->value()/(double)ui->curvSlider->maximum();
+	 bridgerConfig["samples"] = ui->samplesSlider->value();
+	 bridgerConfig["size"] = 1.0 - (double)ui->sizeSlider->value()/(double)ui->sizeSlider->maximum();
+	 bridgerConfig["cp"] = (double)ui->convergeSlider->value()/(double)ui->convergeSlider->maximum();
+	 bridgerConfig["opening"] = ui->adhesiveComboBox->currentIndex();
 
 }
 
-std::map<QString, double> ConnectorPanel::getConfigValues()
+std::map<QString, double> BridgerPanel::getConfigValues()
 {
-	return connectorConfig;
+	return bridgerConfig;
 }
 
 

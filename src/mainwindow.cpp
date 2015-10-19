@@ -50,7 +50,7 @@ bool MainWindow::createComponents()
 		ceditor = new ColormapEditor;
 		cppanel = new CriticalPointsPanel;
 		clpanel = new CutLocusPanel;
-		conpanel = new ConnectorPanel;
+		conpanel = new BridgerPanel;
 		hmpanel = new HollowMeshPanel;
 		bmpanel = new BindingMeshPanel;
 
@@ -96,16 +96,16 @@ bool MainWindow::connectComponents()
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
 	connect(clpanel, SIGNAL(sig_closedSignal()), this, SLOT(slot_disableclp()));
 
-	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_setConnector()));
+	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_setBridger()));
 	connect(conpanel, SIGNAL(sig_save2extend()), this, SLOT(slot_extendMesh()));
 
 	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
 
 	connect(hmpanel, SIGNAL(sig_saved()), this, SLOT(slot_hollowMesh()));
-	connect(hmpanel, SIGNAL(sig_setConnector(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
+	connect(hmpanel, SIGNAL(sig_setBridger(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
 
 	connect(bmpanel, SIGNAL(sig_saved()), this, SLOT(slot_bindingMesh()));
-	connect(bmpanel, SIGNAL(sig_setConnector()), this, SLOT(slot_triggerExtendMesh(bool)));
+	connect(bmpanel, SIGNAL(sig_setBridger(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
 
 	return true;
 }
@@ -669,8 +669,6 @@ void MainWindow::slot_triggerExtendMesh(bool checked)
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getUnfoldedMesh());
 			break;
 		}
-	}else {
-
 	}
 }
 
@@ -709,7 +707,7 @@ void MainWindow::slot_triggerBindingMesh(bool checked)
 
 void MainWindow::slot_hollowMesh()
 {
-	HDS_Connector::setScale(hmpanel->getConnectorSize());
+	HDS_Bridger::setScale(hmpanel->getBridgerSize());
 	MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize(), hmpanel->getType(), hmpanel->getShift());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 	meshStack.push(Extended);
@@ -719,17 +717,17 @@ void MainWindow::slot_hollowMesh()
 
 void MainWindow::slot_bindingMesh()
 {
-	HDS_Connector::setScale(bmpanel->getConnectorSize());
-	MeshManager::getInstance()->setBindingMesh();
+	HDS_Bridger::setScale(bmpanel->getBridgerSize());
+	MeshManager::getInstance()->setHollowMesh(0, -1, 0);
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 	meshStack.push(Extended);
 	updateCurrentMesh();
 	isExtended = true;
 }
 
-void MainWindow::slot_setConnector()
+void MainWindow::slot_setBridger()
 {
-	HDS_Connector::setConnector(conpanel->getConfigValues());
+	HDS_Bridger::setBridger(conpanel->getConfigValues());
 
 }
 

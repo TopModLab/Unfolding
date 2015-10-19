@@ -1,15 +1,15 @@
-#include "hds_connector.h"
+#include "hds_bridger.h"
 
-size_t HDS_Connector::uid = 0;
+size_t HDS_Bridger::uid = 0;
 
-int HDS_Connector::shape = 0;
-double HDS_Connector::scale = 0.8;
-double HDS_Connector::curv = 0.5;
-int HDS_Connector::nSamples = 3;
-double HDS_Connector::cp = 0;
-int HDS_Connector::opening = 0;
+int HDS_Bridger::shape = 0;
+double HDS_Bridger::scale = 0.8;
+double HDS_Bridger::curv = 0.5;
+int HDS_Bridger::nSamples = 3;
+double HDS_Bridger::cp = 0;
+int HDS_Bridger::opening = 0;
 
-void HDS_Connector::setConnector(std::map<QString, double> config)
+void HDS_Bridger::setBridger(std::map<QString, double> config)
 {
 	shape = (int)config["shape"]; //0 bezier 1 original 2 flat
 	scale = config["size"];
@@ -20,12 +20,12 @@ void HDS_Connector::setConnector(std::map<QString, double> config)
 
 }
 
-void HDS_Connector::setScale(double size)
+void HDS_Bridger::setScale(double size)
 {
 	scale = size;
 }
 
-void HDS_Connector::setOriginalPositions()
+void HDS_Bridger::setOriginalPositions()
 {
 	QVector3D corner1, corner0, center, mid;
 	//find corner1 pos that corresponds to he->v
@@ -50,7 +50,7 @@ void HDS_Connector::setOriginalPositions()
 	}
 }
 
-HDS_Connector::HDS_Connector(HDS_HalfEdge* he, HDS_HalfEdge* hef)
+HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef)
 {
 
 	this->he = he;
@@ -108,7 +108,7 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 
 
 /////recursive function on bezier curve
-//vector<QVector3D> HDS_Connector::calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2, int iteration)
+//vector<QVector3D> HDS_Bridger::calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2, int iteration)
 //{
 //	cout<<"bezier curve recursion, iter = "<<iteration<<endl;
 //	///bezier curve calculator
@@ -144,7 +144,7 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 //	return pos;
 //}
 
-vector<QVector3D> HDS_Connector::calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2)
+vector<QVector3D> HDS_Bridger::calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2)
 {
 	vector<QVector3D> pos;
 	if (shape == 1)
@@ -164,7 +164,7 @@ vector<QVector3D> HDS_Connector::calculateBezierCurve(QVector3D p0, QVector3D p1
 	return pos;
 }
 
-HDS_Connector::~HDS_Connector()
+HDS_Bridger::~HDS_Bridger()
 {
 
 }

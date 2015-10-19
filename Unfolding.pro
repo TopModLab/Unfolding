@@ -50,14 +50,13 @@ SOURCES += src/main.cpp\
     src/MeshExtender.cpp \
     src/discretegeocomputer.cpp \
     src/cutlocuspanel.cpp \
-    src/hds_connector.cpp \
-    src/connectorpanel.cpp \
-    src/connectorpanelviewer.cpp \
+	src/hds_bridger.cpp \
+	src/bridgerpanel.cpp \
+	src/bridgerpanelviewer.cpp \
     src/hollowmeshpanel.cpp \
     src/meshhollower.cpp \
     src/BBox.cpp \
-    src/bindingmeshpanel.cpp \
-    src/meshbinder.cpp
+    src/bindingmeshpanel.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -95,19 +94,19 @@ HEADERS  += src/mainwindow.h \
     src/MeshExtender.h \
     src/discretegeocomputer.h \
     src/cutlocuspanel.h \
-    src/hds_connector.h \
-    src/connectorpanel.h \
-    src/connectorpanelviewer.h \
+	src/hds_bridger.h \
+	src/bridgerpanel.h \
+	src/bridgerpanelviewer.h \
     src/hollowmeshpanel.h \
     src/meshhollower.h \
     src/BBox.h \
-    src/bindingmeshpanel.h \
-    src/meshbinder.h
+    src/bindingmeshpanel.h
+
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
     forms/criticalpointspanel.ui \
     forms/cutlocuspanel.ui \
-    forms/connectorpanel.ui \
+	forms/bridgerpanel.ui \
     forms/hollowmeshpanel.ui \
     forms/bindingmeshpanel.ui
 
