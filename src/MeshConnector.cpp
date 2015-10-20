@@ -62,7 +62,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 	/* for cut layer                                                        */
 	/************************************************************************/
 
-	double he_offset(10), he_scale(20), wid_conn(10), len_conn(10);
+	double he_offset(10), he_scale(40), wid_conn(10), len_conn(10);
 	double circle_offset = 3;
 	//err = scanf_s("%lf", &circle_offset);
 
@@ -73,7 +73,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 
 		vector<QVector2D> printBorderEdgePts;//Edges on the boundary
 		vector<QVector2D> printEdgePtsCarves;
-		vector<QVector2D> printCirclePos;
+		vector<QVector2D> printPinholes;
 
 		// Group current piece
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
@@ -86,26 +86,55 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 			{
 				do
 				{
-					if (curHE->isExtended)
+					// Find flipped corner
+					if (!curHE->flip->f->isConnector
+						&& !curHE->next->flip->f->isConnector
+						&& !curHE->next->next->flip->f->isConnector)
 					{
-						QVector2D Pc = curHE->flip->f->center().toVector2D() * he_scale;
+						QVector2D Pc = curHE->flip->f->center().toVector2D() ;
 
-						QVector2D v0 = curHE->prev->v->pos.toVector2D() * he_scale;
+						QVector2D v0 = curHE->v->pos.toVector2D();
+						QVector2D v1 = curHE->next->v->pos.toVector2D();
+						QVector2D v2 = curHE->next->next->v->pos.toVector2D();
+						QVector2D v3 = curHE->next->next->next->v->pos.toVector2D();
+
+						QVector2D d0 = (v3 - v0).normalized();
+						QVector2D d1 = v0 - v1;
+						QVector2D d2 = v1 - v2;
+						QVector2D d3 = v3 - v2;
+
+						QVector2D dirPin0 = d1 + d1.length() * d0;
+						QVector2D dirPin1 = d3 - d3.length() * d0;
+
+						/*QVector2D d1 = ((v0 - v1).normalized()
+							+ (v2 - v1).normalized()).normalized();
+						/ *QVector2D d2 = ((v1 - v2).normalized()
+							+ (v3 - v2).normalized()).normalized();* /*/
+						//if (d1.lengthSquared() != 0)
+						{
+							printPinholes.push_back(v1 + dirPin0 * 2.0 / 3.0);
+							printPinholes.push_back(v1 + dirPin0 / 3.0);
+							printPinholes.push_back(v2 + dirPin1 * 2.0 / 3.0);
+							printPinholes.push_back(v2 + dirPin1 / 3.0);
+						}
+						/*QVector2D v0 = curHE->prev->v->pos.toVector2D() * he_scale;
 						QVector2D v1 = curHE->v->pos.toVector2D() * he_scale;
 						QVector2D v2 = curHE->next->v->pos.toVector2D() * he_scale;
 						QVector2D v3 = curHE->next->next->v->pos.toVector2D() * he_scale;
 
-						QVector2D d1 = ((v0 - v1).normalized() + (v2 - v1).normalized()).normalized();
-						QVector2D d2 = ((v1 - v2).normalized() + (v3 - v2).normalized()).normalized();
+						QVector2D d1 = ((v0 - v1).normalized()
+							+ (v2 - v1).normalized()).normalized();
+						QVector2D d2 = ((v1 - v2).normalized()
+							+ (v3 - v2).normalized()).normalized();
 						if (d1.lengthSquared() != 0 && d2.lengthSquared() != 0)
 						{
-							printCirclePos.push_back(v1 + d1 * circle_offset);
-							printCirclePos.push_back(v1 + d1 * circle_offset * 2);
-							printCirclePos.push_back(v2 + d2 * circle_offset);
-							printCirclePos.push_back(v2 + d2 * circle_offset * 2);
-						}
+							printPinholes.push_back(v1 + d1 * circle_offset);
+							printPinholes.push_back(v1 + d1 * circle_offset * 2);
+							printPinholes.push_back(v2 + d2 * circle_offset);
+							printPinholes.push_back(v2 + d2 * circle_offset * 2);
+						}*/
 					}
-					printBorderEdgePts.push_back(curHE->v->pos.toVector2D() * he_scale);
+					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
 					curHE = curHE->next;
 				} while (curHE != he);
 			}
@@ -122,7 +151,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 				} while (curHE != he);
 				// Close face loop
 				fprintf(SVG_File,
-					"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.01\" />\n",
+					"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.1\" />\n",
 					curHE->v->pos.x() * he_scale,
 					curHE->v->pos.y() * he_scale);
 				curHE = curHE->next;
@@ -132,11 +161,11 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 		/************************************************************************/
 		/* Write out circles                                                    */
 		/************************************************************************/
-		for (auto circlepos : printCirclePos)
+		for (auto circlepos : printPinholes)
 		{
 			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.5\" " \
-				"style=\"stroke:black;stroke-width:0.01;fill:white\" />\n",
-				printCircleID++, circlepos.x(), circlepos.y());
+				"style=\"stroke:black;stroke-width:0.1;fill:none\" />\n",
+				printCircleID++, circlepos.x() * he_scale, circlepos.y() * he_scale);
 		}
 
 		/************************************************************************/
@@ -145,7 +174,9 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
 		for (int isec = 0; isec < printBorderEdgePts.size(); isec++)
 		{
-			fprintf(SVG_File, "%f,%f ", printBorderEdgePts[isec].x(), printBorderEdgePts[isec].y());
+			fprintf(SVG_File, "%f,%f ",
+				printBorderEdgePts[isec].x() * he_scale,
+				printBorderEdgePts[isec].y() * he_scale);
 		}
 		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
 		/*fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",

@@ -3,6 +3,7 @@
 size_t HDS_HalfEdge::uid = 0;
 
 HDS_HalfEdge::HDS_HalfEdge()
+	: status(DEFAULT)
 {
 	isPicked = false;
 	isCutEdge = false;
@@ -22,10 +23,12 @@ HDS_HalfEdge::~HDS_HalfEdge()
 }
 
 HDS_HalfEdge::HDS_HalfEdge(const HDS_HalfEdge &other)
+	: status(other.status)
+	, index(other.index)
 {
 	isPicked = other.isPicked;
 	isCutEdge = other.isCutEdge;
-	index = other.index;
+	//index = other.index;
 	f = nullptr;
 	v = nullptr;
 	flip = nullptr;

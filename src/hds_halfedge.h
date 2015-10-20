@@ -13,6 +13,14 @@ private:
 	static size_t uid;
 
 public:
+	enum EDGE_STATUS
+	{
+		DEFAULT = 0,
+		PICKED = 1,
+		CUTEDGE = 1 << 1,
+		EXTENDED = 1 << 2
+	};
+
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
 
@@ -36,6 +44,7 @@ public:
 	bool isPicked;
 	bool isCutEdge;
 	bool isExtended;//From hollower
+	int status;
 };
 
 #endif // HDS_EDGE_H

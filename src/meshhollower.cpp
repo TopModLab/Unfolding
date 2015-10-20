@@ -127,12 +127,12 @@ void MeshHollower::hollowMesh(HDS_Mesh* thismesh, double newFlapSize)
 			HDS_Face* bridgeFace_he1 = thismesh->bridging(he1_flap->flip, he1, cutFace);
 			bridgeFace_he1->index = HDS_Face::assignIndex();
 			bridgeFace_he1->isCutFace = false;
-			bridgeFace_he1->isConnector = true;
+			//bridgeFace_he1->isConnector = true;
 			thismesh->addFace(bridgeFace_he1);
 			HDS_Face* bridgeFace_he2 = thismesh->bridging(he2->flip, he2_flap, cutFace);
 			bridgeFace_he2->index = HDS_Face::assignIndex();
 			bridgeFace_he2->isCutFace = false;
-			bridgeFace_he2->isConnector = true;
+			//bridgeFace_he2->isConnector = true;
 			thismesh->addFace(bridgeFace_he2);
 
 		}
