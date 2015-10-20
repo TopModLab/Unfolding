@@ -359,7 +359,7 @@ void MainWindow::createActions()
 		connect(hollowAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerHollowMesh(bool)));
 		actionsMap["hollow"] = hollowAct;
 
-		QAction *bindingAct = new QAction(QIcon(":/icons/.png"), tr("Generate Binding Composition Mesh"), this);
+		QAction *bindingAct = new QAction(QIcon(":/icons/bind.PNG"), tr("Generate Binding Composition Mesh"), this);
 		bindingAct->setStatusTip(tr("Generate Bind Mesh"));
 		bindingAct->setCheckable(true);
 		bindingAct->setChecked(false);

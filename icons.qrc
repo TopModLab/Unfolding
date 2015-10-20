@@ -24,5 +24,6 @@
         <file>icons/bezier.PNG</file>
         <file>icons/flat.PNG</file>
         <file>icons/original.PNG</file>
+        <file>icons/bind.PNG</file>
     </qresource>
 </RCC>
