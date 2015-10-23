@@ -627,7 +627,7 @@ void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 	ConnectorSelectionPanel *connPanel = new ConnectorSelectionPanel;
 	connPanel->exec();
 	
-	const char* filename = (connPanel->getFilename()).toUtf8().constData();
+	const char* filename = connPanel->getFilename().toUtf8().constData();
 	switch (unfolded_mesh->processType)
 	{
 	case HDS_Mesh::HOLLOWED_PROC:
