@@ -489,6 +489,7 @@ void MainWindow::createToolBar()
 	try {
 		ui->mainToolBar->addAction(actionsMap["new"]);
 		ui->mainToolBar->addAction(actionsMap["save"]);
+		ui->mainToolBar->addAction(actionsMap["export"]);
 		ui->mainToolBar->addSeparator();
 
 		QActionGroup *selectGroup = new QActionGroup(ui->mainToolBar);
@@ -586,8 +587,7 @@ void MainWindow::slot_exportFile()
 		return;
 	}
 
-	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "export/untitled.svg", tr("XML files (*.svg *.xml)"));
-	MeshManager::getInstance()->exportXMLFile(filename.toUtf8().constData());
+	MeshManager::getInstance()->exportXMLFile();
 }
 
 void MainWindow::slot_closeFile()          //later add this function

@@ -123,7 +123,7 @@ public:
 	void rimMesh(double rimSize = 0.0);
 
 	// Export as SVG files
-    void exportXMLFile(const char* filename);
+    void exportXMLFile();
 
 	void resetMesh();
 

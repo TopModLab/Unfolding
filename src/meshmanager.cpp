@@ -542,14 +542,13 @@ void MeshManager::setHollowMesh(double flapSize)
 
 }
 
-void MeshManager::exportXMLFile(const char* filename)
+void MeshManager::exportXMLFile()
 {
-	if (!filename)
+	if (true)// No connector generated
 	{
-		cout << "No file exported" << endl;
-		return;
+		MeshConnector::generateConnector(unfolded_mesh.data());
 	}
-	MeshConnector::exportXML(unfolded_mesh.data(), filename);	
+	
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx)

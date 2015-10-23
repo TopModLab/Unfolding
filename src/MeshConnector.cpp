@@ -7,6 +7,8 @@
 #include "MeshIterator.h"
 #include "MeshConnector.h"
 
+#include "ConnectorSelectionPanel.h"
+
 #include "utils.hpp"
 
 #if USE_REEB_GRAPH
@@ -620,8 +622,11 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 	cout << "SVG file saved successfully!" << endl;
 }
 
-void MeshConnector::exportXML(mesh_t *unfolded_mesh, const char *filename)
+void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 {
+	ConnectorSelectionPanel *connPanel = new ConnectorSelectionPanel;
+	connPanel->exec();
+	const char* filename;
 	switch (unfolded_mesh->processType)
 	{
 	case HDS_Mesh::HOLLOWED_PROC:
@@ -634,4 +639,5 @@ void MeshConnector::exportXML(mesh_t *unfolded_mesh, const char *filename)
 		exportRegularPiece(unfolded_mesh, filename);
 		break;
 	}
+	delete connPanel;
 }

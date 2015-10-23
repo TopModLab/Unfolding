@@ -3,20 +3,26 @@
 #define _CONNECTORSELECTIONPANEL_
 
 #include <QWidget>
+#include <QDialog>
+#include <QFileDialog>
 #include "ui_ConnectorSelectionPanel.h"
 
-class ConnectorSelectionPanel : public QWidget
+class ConnectorSelectionPanel : public QDialog
 {
 	Q_OBJECT
 
 public:
-	ConnectorSelectionPanel(QWidget *parent  = nullptr);
+	ConnectorSelectionPanel(QDialog *parent = nullptr);
 	~ConnectorSelectionPanel();
 
+	void setMeshType(int mt);
+private slots:
+	void slot_getFileName();
 private:
 	Ui::ConnectorSelectionPanel *ui;
 	int meshType;
 	int connectorType;
+	double scaleSize();
 };
 
 
