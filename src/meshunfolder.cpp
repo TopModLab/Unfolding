@@ -191,7 +191,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
 	}
-	ref_mesh->updatePieceSet();
+	//ref_mesh->updatePieceSet();
 	/// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
@@ -215,7 +215,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 				visitedFaces.insert(f->index);
 				fixedFaces.insert(f->index);
 				/// Find all linked faces except cut face
-				set<HDS_Face*> connectedFaces = Utils::filter_set(f->linkededFaces(), [](HDS_Face* f){
+				set<HDS_Face*> connectedFaces = Utils::filter_set(f->linkedFaces(), [](HDS_Face* f){
 						return !(f->isCutFace);
 				});
 				// record the pieces
@@ -324,7 +324,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		unfoldingProgress->setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
 	}
 
-	unfolded_mesh->updatePieceSet();
+	//unfolded_mesh->updatePieceSet();
 	// Layout pieces
 	reset_layout(unfolded_mesh);
 	// Qt display progress

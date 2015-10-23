@@ -5,6 +5,7 @@
 #include "MeshExtender.h"
 #include "meshhollower.h"
 #include "MeshIterator.h"
+#include "MeshConnector.h"
 
 #include "utils.hpp"
 
@@ -294,7 +295,8 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 	set<int> selectedEdges;
 	for(auto he : ref_mesh->halfedges())
 	{
-		if( he->isPicked ) {
+		if( he->isPicked )
+		{
 			/// use picked edges as cut edges
 			he->setPicked(false);
 			he->setCutEdge(true);
@@ -399,8 +401,6 @@ void MeshManager::mapToExtendedMesh()
 
 }
 
-
-
 void MeshManager::unfoldMesh(bool isExtended)
 {
 	QScopedPointer<HDS_Mesh> ref_mesh;
@@ -438,7 +438,6 @@ void MeshManager::unfoldMesh(bool isExtended)
 	}
 
 }
-
 
 void MeshManager::smoothMesh()
 {
@@ -504,433 +503,53 @@ void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize, type, shift);
 	extended_cutted_mesh->updateSortedFaces();
 
+	QScopedPointer<HDS_Mesh> ref_mesh;
+	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+
+	// Select all edges to cut all faces
+	set<int> selectedEdges;
+	for (auto he : ref_mesh->halfedges())
+	{
+		if (selectedEdges.find(he->index) == selectedEdges.end() &&
+			selectedEdges.find(he->flip->index) == selectedEdges.end())
+		{
+			selectedEdges.insert(he->index);
+		}
+	}
+
+	bool rimSucceeded;
+	/// make a copy of the mesh with selected edges
+	cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
+	rimSucceeded = MeshCutter::cutMeshUsingEdges(
+		cutted_mesh.data(), selectedEdges);
+	
+	if (rimSucceeded)
+	{
+		//cutted_mesh->isHollowed
+		cutted_mesh->processType = HDS_Mesh::RIMMED_PROC;
+		/// cutting performed successfully
+		cout << "Rimming succeed!" << endl;
+	}
+
+	/// discard the selected edges now
+	selectedEdges.clear();
 }
 
-
-void MeshManager::exportXMLFile(const char* filename)
+void MeshManager::setHollowMesh(double flapSize)
 {
-	enum BridgerType
+	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
+	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize);
+	extended_cutted_mesh->updateSortedFaces();
+
+}
+
+void MeshManager::exportXMLFile()
+{
+	if (true)// No connector generated
 	{
-		SIMPLE_CONNECTOR,
-		INSERT_CONNECTOR,
-		GEAR_CONNECTOR,
-		SAW_CONNECTOR,
-		ADVSAW_CONNECTOR,
-		HOLLOW_CONNECTOR
-	};
-	BridgerType cn_t = SIMPLE_CONNECTOR;
-	FILE *SVG_File;
-	errno_t err = fopen_s(&SVG_File, filename, "w");
-	if (err)
-	{
-		printf("Can't write to file %s!\n", filename);
-		return;
+		MeshConnector::generateConnector(unfolded_mesh.data());
 	}
-	int size_x(360), size_y(360);
-	//printf("Type in SVG file size: ");
-	//err = scanf_s("%d%d", &size_x, &size_y);
 	
-	/*unordered_set<face_t*> faces = unfolded_mesh->faces();
-	unordered_set<face_t*> cutfaces;// , infaces;
-	for (auto face : faces)
-	{
-		if (face->isCutFace)
-		{
-			cutfaces.insert(face);
-		}
-	}*/
-	//SVG file head
-	fprintf(SVG_File,
-			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
-			"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n",
-			size_x, size_y);// define the size of export graph
-
-	/************************************************************************/
-	/* for cut layer                                                        */
-	/************************************************************************/
-	
-	double he_offset(10), he_scale(20), wid_conn(10), len_conn(10);
-	double circle_offset = 3;
-	//err = scanf_s("%lf", &circle_offset);
-
-	int printFaceID(0), printCircleID(0);
-	for (auto piece : unfolded_mesh->pieceSet)
-	{
-		vector<face_t *> cutfaces;
-
-		vector<QVector2D> printBorderEdgePts;//Edges on the boundary
-		vector<QVector2D> printEdgePtsCarves;
-		vector<QVector2D> printCirclePos;
-
-		// Group current piece
-		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
-		for (auto fid : piece)
-		{
-			face_t *curFace = unfolded_mesh->faceMap[fid];
-			auto he = curFace->he;
-			auto curHE = he;
-			if (curFace->isCutFace)
-			{
-				do
-				{
-					if (curHE->isExtended)
-					{
-						QVector2D Pc = curHE->flip->f->center().toVector2D() * he_scale;
-						
-						QVector2D v0 = curHE->prev->v->pos.toVector2D() * he_scale;
-						QVector2D v1 = curHE->v->pos.toVector2D() * he_scale;
-						QVector2D v2 = curHE->next->v->pos.toVector2D() * he_scale;
-						QVector2D v3 = curHE->next->next->v->pos.toVector2D() * he_scale;
-
-						QVector2D d1 = ((v0 - v1).normalized() + (v2 - v1).normalized()).normalized();
-						QVector2D d2 = ((v1 - v2).normalized() + (v3 - v2).normalized()).normalized();
-						if (d1.lengthSquared() != 0 && d2.lengthSquared() != 0)
-						{
-							printCirclePos.push_back(v1 + d1 * circle_offset);
-							printCirclePos.push_back(v1 + d1 * circle_offset * 2);
-							printCirclePos.push_back(v2 + d2 * circle_offset);
-							printCirclePos.push_back(v2 + d2 * circle_offset * 2);
-						}
-					}
-					printBorderEdgePts.push_back(curHE->v->pos.toVector2D() * he_scale);
-					curHE = curHE->next;
-				} while (curHE != he);
-			}
-			else
-			{
-				fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
-				// Write points of each edge
-				do
-				{
-					fprintf(SVG_File, "%f,%f ",
-							curHE->v->pos.x() * he_scale,
-							curHE->v->pos.y() * he_scale);
-					curHE = curHE->next;
-				} while (curHE != he);
-				// Close face loop
-				fprintf(SVG_File,
-						"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.01\" />\n",
-						curHE->v->pos.x() * he_scale,
-						curHE->v->pos.y() * he_scale);
-				curHE = curHE->next;
-			}
-			
-		}
-		/************************************************************************/
-		/* Write out circles                                                    */
-		/************************************************************************/
-		for (auto circlepos : printCirclePos)
-		{
-			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.5\" " \
-							  "style=\"stroke:black;stroke-width:0.01;fill:white\" />\n",
-					printCircleID++, circlepos.x(), circlepos.y());
-		}
-
-		/************************************************************************/
-		/* Write out edge for cut                                               */
-		/************************************************************************/
-		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
-		for (int isec = 0; isec < printBorderEdgePts.size(); isec++)
-		{
-			fprintf(SVG_File, "%f,%f ", printBorderEdgePts[isec].x(), printBorderEdgePts[isec].y());
-		}
-		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
-		/*fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
-			printBorderEdgePts[0].x(), printBorderEdgePts[0].y());*/
-		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
-	}
-	/*
-	for (auto face : cutfaces)
-	{
-		HDS_HalfEdge *he = face->he;
-		HDS_HalfEdge *curHE = he;
-
-		
-		//////////////////////////////////////////////////////////////////////////
-		unordered_set<he_t*> cutedges;
-		//unordered_set<HDS_HalfEdge*> cutTwinEdges;
-		vector<QVector2D*> printEdgePts;
-		vector<QVector2D*> printEdgePtsCarves;
-		// Get all edges on cut face
-		do
-		{
-			cutedges.insert(curHE);
-			curHE = curHE->next;
-		} while (curHE != he);
-
-		if (unfolded_mesh->isHollowed)
-		{
-			cn_t = HOLLOW_CONNECTOR;
-			do
-			{
-				QVector2D *Pthis = new QVector2D(curHE->v->pos.toVector2D() * he_scale);
-				printEdgePts.push_back(Pthis);
-				curHE = curHE->next;
-			} while (curHE != he);
-			printEdgePts.push_back(printEdgePts[0]);
-			//continue;
-		}
-		else
-		{
-			QVector2D *Pthis = new QVector2D(curHE->v->pos.toVector2D() * he_scale);
-			do
-			{
-				//QVector3D faceCenter = curHE->flip->f->center();
-				QVector2D Pc = curHE->flip->f->center().toVector2D() * he_scale;
-
-				QVector2D *Pnext = new QVector2D(curHE->next->v->pos.toVector2D() * he_scale);
-
-				printEdgePts.push_back(Pthis);
-
-				// T: normalized vector representing current edge direction
-				// d: vector from current point to face center
-				// a: vector projected from d onto T
-				// n: normalized normal of the current edge
-				switch (cn_t)
-				{
-				case HOLLOW_CONNECTOR:
-				{
-
-					break;
-				}
-				case SIMPLE_CONNECTOR:
-				{
-					if (cutedges.find(curHE) != cutedges.end())
-					{
-						//calculate
-						QVector2D T = (*Pnext - *Pthis).normalized();
-						QVector2D d = (Pc - *Pthis);
-						QVector2D a = QVector2D::dotProduct(d, T) * T;
-						QVector2D n = (a - d).normalized();
-
-						QVector2D Pn = *Pthis + a;
-						QVector2D Psc = Pn + n * wid_conn;
-
-						//draw bridger
-
-						QVector2D *Pnst = new QVector2D(Psc - len_conn * T);
-						QVector2D *Pnsn = new QVector2D(Psc + len_conn * T);
-
-						printEdgePts.push_back(Pnst);
-						printEdgePts.push_back(Pnsn);
-
-						cutedges.erase(curHE);
-						//cutedges.erase(curHE->flip->cutTwin->flip);
-					}
-					else
-					{
-						//draw receiver
-					}
-					break;
-				}/*
-				 case INSERT_CONNECTOR:
-				 {
-				 //calculate
-				 QVector2D T = (*Pnext - *Pthis).normalized();
-				 QVector2D d = (Pc - *Pthis);
-				 QVector2D a = QVector2D::dotProduct(d, T) * T;
-				 QVector2D n = (a - d).normalized();
-
-				 QVector2D Pn = *Pthis + a;
-				 QVector2D Psc = Pn + n * wid_conn;
-
-				 QVector2D *Pst = new QVector2D(Pn - len_conn * T);
-				 QVector2D *Psn = new QVector2D(Pn + len_conn * T);
-				 QVector2D *Pnst = new QVector2D(Psc - len_conn * T);
-				 QVector2D *Pnsn = new QVector2D(Psc + len_conn * T);
-
-				 QVector2D *Pcvt = new QVector2D(Pn - 0.5 * len_conn * T);
-				 QVector2D *Pcvn = new QVector2D(Pn + 0.5 * len_conn * T);
-
-				 printEdgePts.push_back(Pst);
-				 printEdgePts.push_back(Pnst);
-				 printEdgePts.push_back(Pnsn);
-				 printEdgePts.push_back(Psn);
-
-				 if (cutedges.find(curHE) != cutedges.end())
-				 {
-				 //draw bridger
-				 printEdgePtsCarves.push_back(Pst);
-				 printEdgePtsCarves.push_back(Pcvt);
-				 printEdgePtsCarves.push_back(Pcvn);
-				 printEdgePtsCarves.push_back(Psn);
-
-				 cutedges.erase(curHE);
-				 cutedges.erase(curHE->flip->cutTwin->flip);
-				 }
-				 else
-				 {
-				 //draw receiver
-				 printEdgePtsCarves.push_back(Pcvt);
-				 printEdgePtsCarves.push_back(Pcvn);
-				 }
-				 break;
-				 }
-				 case GEAR_CONNECTOR:
-				 {
-				 //calculate
-				 QVector2D T = (*Pnext - *Pthis).normalized();
-				 QVector2D d = (Pc - *Pthis);
-				 QVector2D a = QVector2D::dotProduct(d, T) * T;
-				 QVector2D n = (a - d).normalized();
-
-				 QVector2D Pn = *Pthis + a;
-				 QVector2D Psc = Pn + n * wid_conn;
-
-				 //division number
-				 int ndiv = 8;
-				 //bridger segment length
-				 double len_seg = Pthis->distanceToPoint(*Pnext) / ndiv * 0.5;
-
-				 QVector2D *Pst = Pthis;
-				 for (int i = 0; i < ndiv; i++)
-				 {
-				 if (i > 0)
-				 {
-				 printEdgePts.push_back(Pst);
-				 }
-				 QVector2D seg_T = T * len_seg;
-				 QVector2D *Pnst = new QVector2D(*Pst + n * len_seg);
-				 QVector2D *Pnsn = new QVector2D(*Pnst + seg_T);
-				 QVector2D *Psn = new QVector2D(*Pst + seg_T);
-
-				 Pst = new QVector2D(*Psn + seg_T);
-
-				 printEdgePts.push_back(Pnst);
-				 printEdgePts.push_back(Pnsn);
-				 printEdgePts.push_back(Psn);
-
-				 }
-				 break;
-				 }
-				 case SAW_CONNECTOR:
-				 {
-				 //calculate
-				 QVector2D T = (*Pnext - *Pthis).normalized();
-				 QVector2D d = (Pc - *Pthis);
-				 QVector2D a = QVector2D::dotProduct(d, T) * T;
-				 QVector2D n = (a - d).normalized();
-
-				 QVector2D Pn = *Pthis + a;
-				 QVector2D Psc = Pn + n * wid_conn * 0.6;
-
-				 QVector2D *Pst = new QVector2D(Pn - len_conn * T * 0.5);
-				 QVector2D *Psn = new QVector2D(Pn + len_conn * T * 0.5);
-				 QVector2D *Pnst = new QVector2D(Psc - len_conn * T * 0.5);
-				 QVector2D *Pnsn = new QVector2D(Psc + len_conn * T * 0.5);
-				 QVector2D *Pnn = new QVector2D(Pn);
-
-				 printEdgePts.push_back(Pst);
-				 printEdgePts.push_back(Pnst);
-				 printEdgePts.push_back(Pnsn);
-				 printEdgePts.push_back(Psn);
-
-				 printEdgePtsCarves.push_back(Pnn);
-				 printEdgePtsCarves.push_back(Psn);
-
-				 break;
-				 }
-				 case ADVSAW_CONNECTOR:
-				 {
-				 //calculate
-				 double edge_len = Pthis->distanceToPoint(*Pnext);
-				 QVector2D T = (*Pnext - *Pthis).normalized();
-				 QVector2D d = (Pc - *Pthis);
-				 QVector2D a = QVector2D::dotProduct(d, T) * T;
-				 QVector2D n = (a - d).normalized();
-
-				 QVector2D Pn = *Pthis + T * edge_len * 0.5;
-				 QVector2D Psc = Pn + n * wid_conn * 1.5;
-
-				 //bridger segment length
-				 double edgeConn_len = edge_len * 0.5;
-
-				 QVector2D *Pst = new QVector2D(Pn - edgeConn_len * T * 0.5);
-				 QVector2D *Psn = new QVector2D(Pn + edgeConn_len * T * 0.1);
-				 QVector2D *Pnst = new QVector2D(Psc - edgeConn_len * T * 0.25);
-				 QVector2D *Pnsn = new QVector2D(Psc);
-				 QVector2D *Pnn = new QVector2D(Pn);
-
-				 printEdgePts.push_back(Pst);
-				 printEdgePts.push_back(Pnst);
-				 printEdgePts.push_back(Pnsn);
-				 printEdgePts.push_back(Psn);
-
-				 printEdgePtsCarves.push_back(Pnn);
-				 printEdgePtsCarves.push_back(Psn);
-
-				 break;
-				 }
-				default:
-					break;
-				}
-
-				//printEdgePts.push_back(Pnext);
-
-				Pthis = Pnext;
-				curHE = curHE->next;
-			} while (curHE != he);
-		}
-		/************************************************************************/
-	/* Write out edge for cut                                               */
-	/************************************************************************/
-	/*fprintf(SVG_File,
-			"<g opacity=\"0.8\">\n" \
-			"\t<polygon id=\"%d\" points=\"",
-			face->index);
-		for (int i = 0; i < printEdgePts.size(); i++)
-		{
-			fprintf(SVG_File, "%f,%f ", printEdgePts[i]->x(), printEdgePts[i]->y());
-		}
-		fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.01\" />\n",
-			printEdgePts[0]->x(), printEdgePts[0]->y());*/
-	/************************************************************************/
-	/* Print carve edges                                                    */
-	/************************************************************************/
-	/*if (printEdgePtsCarves.size() > 0)
-		{
-
-			for (int i = 0; i < printEdgePtsCarves.size(); i += 2)
-			{
-				fprintf(SVG_File, "\t<polyline id=\"%d\" points=\"%f,%f %f,%f\" " \
-					"style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
-					i,
-					printEdgePtsCarves[i]->x(), printEdgePtsCarves[i]->y(),
-					printEdgePtsCarves[i + 1]->x(), printEdgePtsCarves[i + 1]->y());
-
-			}
-		}*/
-
-	/// draw connected faces
-	/*set<HDS_Face*> neighbourFaces = face->connectedFaces();
-		for (auto face : neighbourFaces)
-		{
-			HDS_HalfEdge *he = face->he;
-			HDS_HalfEdge *curHE = he;
-			// Write polygon header
-			fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", face->index);
-			// Write points of each edge
-			do {
-				{
-					fprintf(SVG_File, "%f,%f ",
-						curHE->v->pos.x(), curHE->v->pos.y());
-				}
-				curHE = curHE->next;
-			} while (curHE != he);
-			// Close face loop
-			fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.01\" />\n",
-				curHE->v->pos.x(), curHE->v->pos.y());
-		}
-		//////////////////////////////////////////////////////////////////////////
-		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
-	}*/
-	
-	/************************************************************************/
-	/* End of SVG File End                                                  */
-	/************************************************************************/
-	fprintf(SVG_File, "</svg>");
-	fclose(SVG_File);
-	printf("SVG file %s saved successfully!\n", filename);
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx)

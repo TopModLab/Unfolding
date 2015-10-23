@@ -41,7 +41,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		thismesh->deleteHalfEdge(he->flip);
 	}
 
-
 	HDS_Vertex::resetIndex();
 	HDS_HalfEdge::resetIndex();
 	HDS_Face::resetIndex();
@@ -136,12 +135,12 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 				HDS_Face* bridgeFace_he1 = thismesh->bridging(he1_flap->flip, he1, cutFace);
 				bridgeFace_he1->index = HDS_Face::assignIndex();
 				bridgeFace_he1->isCutFace = false;
-				bridgeFace_he1->isBridger = true;
+				//bridgeFace_he1->isBridger = true;
 				thismesh->addFace(bridgeFace_he1);
 				HDS_Face* bridgeFace_he2 = thismesh->bridging(he2->flip, he2_flap, cutFace);
 				bridgeFace_he2->index = HDS_Face::assignIndex();
 				bridgeFace_he2->isCutFace = false;
-				bridgeFace_he2->isBridger = true;
+				//bridgeFace_he2->isBridger = true;
 				thismesh->addFace(bridgeFace_he2);
 			}
 			break;
@@ -164,9 +163,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 
 
 	}
-
-
-
 	//add new vertices and edges
 	for (auto v: vertices_new) {
 		v->index = HDS_Vertex::assignIndex();
@@ -186,7 +182,8 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 
 
 	// Set mark for hollowed mesh
-	thismesh->isHollowed = true;
+	thismesh->updatePieceSet();
+	thismesh->processType = HDS_Mesh::HOLLOWED_PROC;
 }
 
 HDS_Face* MeshHollower::addBindFace(HDS_Face* he_f, HDS_HalfEdge* originalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace )

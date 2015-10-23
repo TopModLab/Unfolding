@@ -255,6 +255,15 @@
     <ClCompile Include="..\src\MeshConnector.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ConnectorSelectionPanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ConnectorSelectionPanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ConnectorSelectionPanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -392,6 +401,9 @@
     <ClInclude Include="..\src\MeshConnector.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ConnectorSelectionPanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
@@ -429,6 +441,12 @@
     </CustomBuild>
     <CustomBuild Include="..\forms\unfoldviewer.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\ConnectorSelectionPanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\ConnectorSelectionPanel.h">
+      <Filter>Header Files\UI</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

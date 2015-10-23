@@ -15,6 +15,7 @@ class MeshCutter
 {
 public:
 	static bool cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges);
+	static bool cutMeshAllFaces(HDS_Mesh *mesh);
 
 private:
 	struct Edge {

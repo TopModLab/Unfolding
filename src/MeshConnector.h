@@ -16,7 +16,7 @@
 #include "hds_face.h"
 #include "hds_halfedge.h"
 #include "hds_vertex.h"
-#include "hds_bridger.h"
+#include "hds_connector.h"
 
 #include "Graph.hpp"
 
@@ -39,7 +39,7 @@ public:
 		ADVSAW_CONNECTOR,
 		HOLLOW_CONNECTOR
 	};
-	static void exportXML(mesh_t *unfolded_mesh, const char *filename);
+	static void generateConnector(mesh_t *unfolded_mesh);
 private:
 	static void exportHollowPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
 	static void exportRegularPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
