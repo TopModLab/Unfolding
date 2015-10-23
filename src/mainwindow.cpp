@@ -718,7 +718,7 @@ void MainWindow::slot_hollowMesh()
 void MainWindow::slot_bindingMesh()
 {
 	HDS_Bridger::setScale(bmpanel->getBridgerSize());
-	MeshManager::getInstance()->setHollowMesh(0, -1, 0);
+	MeshManager::getInstance()->setHollowMesh(0, 2, 0);
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
 	meshStack.push(Extended);
 	updateCurrentMesh();
