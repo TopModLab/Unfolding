@@ -89,9 +89,9 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 				do
 				{
 					// Find flipped corner
-					if (!curHE->flip->f->isConnector
-						&& !curHE->next->flip->f->isConnector
-						&& !curHE->next->next->flip->f->isConnector)
+					if (!curHE->flip->f->isBridger
+						&& !curHE->next->flip->f->isBridger
+						&& !curHE->next->next->flip->f->isBridger)
 					{
 						QVector2D Pc = curHE->flip->f->center().toVector2D() ;
 
@@ -556,7 +556,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 				innerR = outerR - wid_conn * 2.0 / 3.0 * sqrt(2);
 				innerPinR = innerR + (outerR - innerR) / 3.0;
 				outerPinR = outerR - (outerR - innerR) / 3.0;
-				offRad = M_PI * 30.0 / 180.0;
+                offRad = M_PI * 30.0 / 180.0;
 				QVector2D endDir(cos(offRad),sin(offRad));
 
 				QVector2D v0 = fc + QVector2D(0, outerR);
@@ -626,7 +626,8 @@ void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 {
 	ConnectorSelectionPanel *connPanel = new ConnectorSelectionPanel;
 	connPanel->exec();
-	const char* filename;
+	
+	const char* filename = (connPanel->getFilename()).toUtf8().constData();
 	switch (unfolded_mesh->processType)
 	{
 	case HDS_Mesh::HOLLOWED_PROC:

@@ -216,25 +216,25 @@
     <ClCompile Include="..\src\discretegeocomputer.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_connectorpanel.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanel.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_connectorpanel.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_bridgerpanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\connectorpanel.cpp">
+    <ClCompile Include="..\src\bridgerpanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_connectorpanelviewer.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanelviewer.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_connectorpanelviewer.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_bridgerpanelviewer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\connectorpanelviewer.cpp">
+    <ClCompile Include="..\src\bridgerpanelviewer.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\hds_connector.cpp">
+    <ClCompile Include="..\src\hds_bridger.cpp">
       <Filter>Source Files\HDS</Filter>
     </ClCompile>
     <ClCompile Include="..\src\BBox.cpp">
@@ -263,6 +263,15 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_ConnectorSelectionPanel.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_bindingmeshpanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_bindingmeshpanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\bindingmeshpanel.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -380,10 +389,10 @@
     <ClInclude Include="..\src\GeodesicComputer.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_connectorpanel.h">
+    <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\hds_connector.h">
+    <ClInclude Include="..\src\hds_bridger.h">
       <Filter>Header Files\HDS</Filter>
     </ClInclude>
     <ClInclude Include="..\src\BBox.h">
@@ -402,6 +411,9 @@
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ConnectorSelectionPanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_bindingmeshpanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -424,13 +436,13 @@
     <CustomBuild Include="..\src\meshviewer.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\forms\connectorpanel.ui">
+    <CustomBuild Include="..\forms\bridgerpanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\connectorpanel.h">
+    <CustomBuild Include="..\src\bridgerpanel.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\connectorpanelviewer.h">
+    <CustomBuild Include="..\src\bridgerpanelviewer.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\hollowmeshpanel.h">
@@ -446,6 +458,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\ConnectorSelectionPanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\bindingmeshpanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\bindingmeshpanel.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
   </ItemGroup>

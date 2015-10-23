@@ -497,11 +497,10 @@ void MeshManager::extendMesh(int meshType, map<QString, double> config)
 
 }
 
-void MeshManager::setHollowMesh(double flapSize, int type, double shift)
+void MeshManager::rimMesh(double rimSize)
 {
-	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize, type, shift);
-	extended_cutted_mesh->updateSortedFaces();
+	if (extended_mesh != nullptr)
+		extended_mesh->clearSortedFaces();
 
 	QScopedPointer<HDS_Mesh> ref_mesh;
 	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
@@ -522,7 +521,7 @@ void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 	cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
 	rimSucceeded = MeshCutter::cutMeshUsingEdges(
 		cutted_mesh.data(), selectedEdges);
-	
+
 	if (rimSucceeded)
 	{
 		//cutted_mesh->isHollowed
@@ -535,10 +534,10 @@ void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 	selectedEdges.clear();
 }
 
-void MeshManager::setHollowMesh(double flapSize)
+void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 {
 	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize);
+	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize, type, shift);
 	extended_cutted_mesh->updateSortedFaces();
 
 }

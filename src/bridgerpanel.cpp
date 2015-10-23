@@ -10,7 +10,7 @@ BridgerPanel::BridgerPanel(QWidget *parent) :
 	ui->setupUi(this);
 	setWindowTitle(tr("Bridger Panel"));
 
-	ui->image->setPixmap(QPixmap(":icons/bezier.PNG"));
+	ui->image->setPixmap(QPixmap(":icons/bezier.png"));
 
 	viewer = new BridgerPanelViewer(this);
 	//ui->viewerLayout->addWidget(viewer);
@@ -54,7 +54,7 @@ void BridgerPanel::slot_restrainSliders(int index)
 		ui->curvLabel->show();
 		ui->sampleLabel->show();
 		ui->convergeLabel->show();
-		ui->image->setPixmap(QPixmap(":icons/bezier.PNG"));
+		ui->image->setPixmap(QPixmap(":icons/bezier.png"));
 		break;
 	case 1: // original
 		ui->curvSlider->hide();
@@ -63,7 +63,7 @@ void BridgerPanel::slot_restrainSliders(int index)
 		ui->curvLabel->hide();
 		ui->sampleLabel->hide();
 		ui->convergeLabel->hide();
-		ui->image->setPixmap(QPixmap(":icons/original.PNG"));
+		ui->image->setPixmap(QPixmap(":icons/original.png"));
 		break;
 	case 2: // flat
 		ui->curvSlider->hide();
@@ -72,7 +72,7 @@ void BridgerPanel::slot_restrainSliders(int index)
 		ui->curvLabel->hide();
 		ui->sampleLabel->hide();
 		ui->convergeLabel->hide();
-		ui->image->setPixmap(QPixmap(":icons/flat.PNG"));
+		ui->image->setPixmap(QPixmap(":icons/flat.png"));
 		break;
 	}
 }

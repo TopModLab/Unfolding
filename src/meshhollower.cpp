@@ -205,7 +205,7 @@ HDS_Face* MeshHollower::addBindFace(HDS_Face* he_f, HDS_HalfEdge* originalHE, HD
 
 HDS_Face* MeshHollower::addOneFlapFace()
 {
-
+	return nullptr;
 }
 
 //vertPos: [new verts..]

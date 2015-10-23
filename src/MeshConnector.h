@@ -16,7 +16,7 @@
 #include "hds_face.h"
 #include "hds_halfedge.h"
 #include "hds_vertex.h"
-#include "hds_connector.h"
+#include "hds_bridger.h"
 
 #include "Graph.hpp"
 
