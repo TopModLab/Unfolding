@@ -24,6 +24,7 @@ public:
 	{
 		REGULAR_PROC,
 		HOLLOWED_PROC,
+		BINDED_PROC,
 		EXTENDED_PROC,
 		RIMMED_PROC
 	};
@@ -135,6 +136,7 @@ private:
 
 	// pieces information
 	set<set<int>> pieceSet;
+	BBox3* bound;
 private:
 	//bool isHollowed;
 	int processType;

@@ -26,7 +26,7 @@ public:
 	void printInfo() const;
 
 	const QVector3D getMidPoint() const;
-	/*bool intersectP(const Ray& inRay) const;*/
+	const QVector3D getDiagnal() const;
 	bool overlaps(const BBox3& box) const;
 	bool overlapon(const BBox3& box, PLANE over_plane = XY_PLANE) const;
 	void expand(double delta);

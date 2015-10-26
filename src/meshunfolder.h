@@ -10,7 +10,7 @@
 
 class HDS_Mesh;
 class HDS_Face;
-static set<set<HDS_Face*>*> pieces;
+//static set<set<HDS_Face*>*> pieces;
 
 class MeshUnfolder
 {
@@ -26,7 +26,8 @@ private:
 					const QVector3D &uvec, const QVector3D &vvec);
 	
 public:
-	//Keep record all the pieces
+private:
+	//static BBox3* bound;// Bounding box for unfolded mesh
 	
 
 };

@@ -56,7 +56,7 @@ SOURCES += src/main.cpp\
     src/meshhollower.cpp \
     src/BBox.cpp \
     src/bindingmeshpanel.cpp \
-    src/ConnectorSelectionPanel.cpp \
+    src/ConnectorPanel.cpp \
     src/MeshConnector.cpp
 
 HEADERS  += src/mainwindow.h \
@@ -102,7 +102,7 @@ HEADERS  += src/mainwindow.h \
     src/meshhollower.h \
     src/BBox.h \
     src/bindingmeshpanel.h \
-    src/ConnectorSelectionPanel.h \
+    src/ConnectorPanel.h \
     src/MeshConnector.h
 
 FORMS    += forms/mainwindow.ui \
@@ -112,7 +112,7 @@ FORMS    += forms/mainwindow.ui \
 	forms/bridgerpanel.ui \
     forms/hollowmeshpanel.ui \
     forms/bindingmeshpanel.ui \
-    forms/ConnectorSelectionPanel.ui
+    forms/ConnectorPanel.ui
 
 RESOURCES += \
     icons.qrc

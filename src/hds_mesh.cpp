@@ -10,14 +10,16 @@ using namespace std;
 HDS_Mesh::HDS_Mesh()
 	: showFace(true), showVert(true)
 	, showEdge(true), showNormals(false)
-	, processType(REGULAR_PROC)//, isHollowed(false)
+	, processType(REGULAR_PROC)
+	, bound(nullptr)
 {
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	: showFace(other.showFace), showEdge(other.showEdge)
 	, showVert(other.showVert), showNormals(other.showNormals)
-	, processType(other.processType)//, isHollowed(other.isHollowed)
+	, processType(other.processType)
+	, bound(nullptr)
 {
 	/// need a deep copy
 
@@ -87,7 +89,8 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 
 }
 
-HDS_Mesh::~HDS_Mesh() {
+HDS_Mesh::~HDS_Mesh()
+{
 	releaseMesh();
 }
 
@@ -265,9 +268,15 @@ void HDS_Mesh::releaseMesh() {
 		if( (*heit) != nullptr )
 			delete (*heit);
 	heSet.clear();
+
+	delete bound;
 }
 
-void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex *> &verts, const vector<HDS_HalfEdge *> &hes) {
+void HDS_Mesh::setMesh(
+	const vector<HDS_Face *> &faces,
+	const vector<HDS_Vertex *> &verts,
+	const vector<HDS_HalfEdge *> &hes)
+{
 	releaseMesh();
 
 	// reset the UIDs, hack
@@ -310,7 +319,8 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
 //usage unknown
 #define MAX_CHAR        128
 
-void drawString(const char* str, int numb) {
+void drawString(const char* str, int numb)
+{
 	static int isFirstCall = 1;
 	static GLuint lists;
 
@@ -329,7 +339,8 @@ void drawString(const char* str, int numb) {
 
 	//}
 }
-void display(int num) {
+void display(int num)
+{
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 	//    glRasterPos2f(0.0f, 0.0f);

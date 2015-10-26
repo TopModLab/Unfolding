@@ -255,15 +255,6 @@
     <ClCompile Include="..\src\MeshConnector.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ConnectorSelectionPanel.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ConnectorSelectionPanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ConnectorSelectionPanel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_bindingmeshpanel.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -271,6 +262,15 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\src\bindingmeshpanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ConnectorPanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ConnectorPanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ConnectorPanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -410,10 +410,10 @@
     <ClInclude Include="..\src\MeshConnector.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_ConnectorSelectionPanel.h">
+    <ClInclude Include="GeneratedFiles\ui_bindingmeshpanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_bindingmeshpanel.h">
+    <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -454,17 +454,17 @@
     <CustomBuild Include="..\forms\unfoldviewer.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\forms\ConnectorSelectionPanel.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\ConnectorSelectionPanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\forms\bindingmeshpanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\bindingmeshpanel.h">
       <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\ConnectorPanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\ConnectorPanel.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

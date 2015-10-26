@@ -93,6 +93,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		switch(type)
 		{
 		case 0:
+			thismesh->processType = HDS_Mesh::HOLLOWED_PROC;
 			if(flapSize > 0.01){
 				cout<<"creating one flap for hollow face"<<endl;
 				QVector3D he1_v0 = he_f->scaleCorner(he->prev->v);
@@ -152,6 +153,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 			break;
 
 		case 2: // add bind face
+			thismesh->processType = HDS_Mesh::BINDED_PROC;
 			he1->setCutEdge(false);
 			thismesh->addFace(addBindFace(he_f, he, he1, cutFace));
 			he2->setCutEdge(false);
@@ -183,7 +185,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 
 	// Set mark for hollowed mesh
 	thismesh->updatePieceSet();
-	thismesh->processType = HDS_Mesh::HOLLOWED_PROC;
 }
 
 HDS_Face* MeshHollower::addBindFace(HDS_Face* he_f, HDS_HalfEdge* originalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace )

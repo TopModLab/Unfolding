@@ -19,7 +19,35 @@
 #include "hds_bridger.h"
 
 #include "Graph.hpp"
-
+enum class ConnectorConf
+{
+	// General
+	SCALE = 0,
+	WIDTH,
+	LENGTH,
+	// Regular
+		// Gear
+		GEAR_COUNT
+};
+/*
+namespace ConnectorConf
+{
+	enum ConnectorType
+	{
+		// Regular type
+		SIMPLE_CONNECTOR = 0,
+		INSERT_CONNECTOR = 1,
+		GEAR_CONNECTOR = 2,
+		SAW_CONNECTOR = 3,
+		ADVSAW_CONNECTOR = 4,
+		// Hollow type
+		HOLLOW_CONNECTOR = 0,
+		// Rim type
+		ARCH_CONNECTOR = 0,
+		RING_CONNECTOR = 1
+	};
+	
+}*/
 class MeshConnector
 {
 private:
@@ -32,18 +60,32 @@ public:
 	~MeshConnector();
 	enum ConnectorType
 	{
-		SIMPLE_CONNECTOR,
-		INSERT_CONNECTOR,
-		GEAR_CONNECTOR,
-		SAW_CONNECTOR,
-		ADVSAW_CONNECTOR,
-		HOLLOW_CONNECTOR
+		// Regular type
+		SIMPLE_CONNECTOR = 0,
+		INSERT_CONNECTOR = 1,
+		GEAR_CONNECTOR = 2,
+		SAW_CONNECTOR = 3,
+		ADVSAW_CONNECTOR = 4,
+		// Hollow type
+		HOLLOW_CONNECTOR = 0,
+		// Rim type
+		ARCH_CONNECTOR = 0,
+		RING_CONNECTOR = 1
 	};
 	static void generateConnector(mesh_t *unfolded_mesh);
 private:
-	static void exportHollowPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
-	static void exportRegularPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
-	static void exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename, int mode = 0);
+	static void exportHollowPiece(mesh_t* unfolded_mesh, const char* filename,
+		const unordered_map<ConnectorConf, double>& conf,
+		int cn_t = HOLLOW_CONNECTOR);
+	static void exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
+		const unordered_map<ConnectorConf, double>& conf,
+		int cn_t = HOLLOW_CONNECTOR);
+	static void exportRegularPiece(mesh_t* unfolded_mesh, const char* filename,
+		const unordered_map<ConnectorConf, double>& conf,
+		int cn_t = SIMPLE_CONNECTOR);
+	static void exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
+		const unordered_map<ConnectorConf, double>& conf,
+		int cn_t = ARCH_CONNECTOR);
 };
 
 #endif

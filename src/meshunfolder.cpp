@@ -6,12 +6,15 @@
 
 #include <QDebug>
 
+//BBox3* MeshUnfolder::bound = nullptr;
+
 MeshUnfolder::MeshUnfolder()
 {
 }
-
-void MeshUnfolder::unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
-							  const QVector3D &uvec, const QVector3D &vvec) {
+void MeshUnfolder::unfoldFace(int fprev, int fcur,
+	HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
+	const QVector3D &uvec, const QVector3D &vvec)
+{
 	typedef HDS_Face face_t;
 	typedef HDS_Vertex vert_t;
 	typedef HDS_HalfEdge he_t;
@@ -147,7 +150,12 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
 
 void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 {
-	BBox3 bound(0);
+	delete unfolded_mesh->bound;
+	unfolded_mesh->bound = new BBox3(0);
+	auto bound = unfolded_mesh->bound;
+
+	QVector3D bound_shift;
+
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
 		unordered_set<HDS_Vertex *> verts;
@@ -164,14 +172,18 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 				}
 			}
 		}
-		QVector3D bound_shift = QVector3D(bound.pMax.x() + 0.1, bound.pMin.y(), 0) - curBound.pMin;
+		bound_shift = QVector3D(bound->pMax.x() + 0.1, bound->pMin.y(), 0) - curBound.pMin;
+		if (unfolded_mesh->processType == HDS_Mesh::RIMMED_PROC)
+		{
+			bound_shift *= 1.5;
+		}
 		curBound.pMin += bound_shift;
 		curBound.pMax += bound_shift;
 		for (auto vert : verts)
 		{
 			vert->pos += bound_shift;
 		}
-		bound.Union(curBound);
+		bound->Union(curBound);
 	}
 }
 
@@ -219,7 +231,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 						return !(f->isCutFace);
 				});
 				// record the pieces
-				pieces.insert(&connectedFaces);
+				//pieces.insert(&connectedFaces);
 
 				for(auto cf : connectedFaces)
 				{

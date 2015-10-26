@@ -7,7 +7,7 @@
 #include "MeshIterator.h"
 #include "MeshConnector.h"
 
-#include "ConnectorSelectionPanel.h"
+#include "ConnectorPanel.h"
 
 #include "utils.hpp"
 
@@ -37,15 +37,15 @@ MeshConnector::~MeshConnector()
 {
 }
 
-void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
-	const char* filename, int mode)
+void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filename,
+	const unordered_map<ConnectorConf, double>& conf, int cn_t)
 {
 	if (unfolded_mesh == nullptr)
 	{
 		//assert();
 		return;
 	}
-	ConnectorType cn_t = SIMPLE_CONNECTOR;
+	//ConnectorType cn_t = SIMPLE_CONNECTOR;
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
 	if (err)
@@ -53,20 +53,23 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 		printf("Can't write to file %s!\n", filename);
 		return;
 	}
-	int size_x(360), size_y(360);
-	//printf("Type in SVG file size: ");
-	//err = scanf_s("%d%d", &size_x, &size_y);
+
+	/************************************************************************/
+	/* Scalors                                                              */
+	/************************************************************************/
+	double he_offset(10);
+	double he_scale = conf.find(ConnectorConf::SCALE)->second;
+	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
+	double len_conn = conf.find(ConnectorConf::LENGTH)->second; 
+	
+	double circle_offset = 3;
+	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
-	fprintf(SVG_File, SVG_HEAD,	size_x, size_y);// define the size of export graph
-
-	/************************************************************************/
-	/* for cut layer                                                        */
-	/************************************************************************/
-
-	double he_offset(10), he_scale(40), wid_conn(10), len_conn(10);
-	double circle_offset = 3;
-	//err = scanf_s("%lf", &circle_offset);
+	// define the size of export graph
+	fprintf(SVG_File, SVG_HEAD,
+		static_cast<int>(size_vec.x() * he_scale),
+		static_cast<int>(size_vec.y() * he_scale));
 
 	int printFaceID(0), printCircleID(0);
 	for (auto piece : unfolded_mesh->pieceSet)
@@ -86,55 +89,38 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 			auto curHE = he;
 			if (curFace->isCutFace)
 			{
+				vector<QVector2D> connCorners;
 				do
 				{
 					// Find flipped corner
-					if (!curHE->flip->f->isBridger
-						&& !curHE->next->flip->f->isBridger
-						&& !curHE->next->next->flip->f->isBridger)
+					if (!curHE->flip->f->isBridger &&
+						!curHE->next->flip->f->isBridger)// &&
+						//!curHE->next->next->flip->f->isBridger)
 					{
 						QVector2D Pc = curHE->flip->f->center().toVector2D() ;
 
 						QVector2D v0 = curHE->v->pos.toVector2D();
 						QVector2D v1 = curHE->next->v->pos.toVector2D();
 						QVector2D v2 = curHE->next->next->v->pos.toVector2D();
-						QVector2D v3 = curHE->next->next->next->v->pos.toVector2D();
-
-						QVector2D d0 = (v3 - v0).normalized();
+						
 						QVector2D d1 = v0 - v1;
-						QVector2D d2 = v1 - v2;
-						QVector2D d3 = v3 - v2;
+						QVector2D d2 = v2 - v1;
 
-						QVector2D dirPin0 = d1 + d1.length() * d0;
-						QVector2D dirPin1 = d3 - d3.length() * d0;
-
-						/*QVector2D d1 = ((v0 - v1).normalized()
-							+ (v2 - v1).normalized()).normalized();
-						/ *QVector2D d2 = ((v1 - v2).normalized()
-							+ (v3 - v2).normalized()).normalized();* /*/
-						//if (d1.lengthSquared() != 0)
+						double len_1 = d1.length();
+						double len_2 = d2.length();
+						
+						QVector2D dirPin;
+						if (len_1 < len_2)
 						{
-							printPinholes.push_back(v1 + dirPin0 * 2.0 / 3.0);
-							printPinholes.push_back(v1 + dirPin0 / 3.0);
-							printPinholes.push_back(v2 + dirPin1 * 2.0 / 3.0);
-							printPinholes.push_back(v2 + dirPin1 / 3.0);
+							dirPin = d1 + len_1 * d2.normalized();
 						}
-						/*QVector2D v0 = curHE->prev->v->pos.toVector2D() * he_scale;
-						QVector2D v1 = curHE->v->pos.toVector2D() * he_scale;
-						QVector2D v2 = curHE->next->v->pos.toVector2D() * he_scale;
-						QVector2D v3 = curHE->next->next->v->pos.toVector2D() * he_scale;
-
-						QVector2D d1 = ((v0 - v1).normalized()
-							+ (v2 - v1).normalized()).normalized();
-						QVector2D d2 = ((v1 - v2).normalized()
-							+ (v3 - v2).normalized()).normalized();
-						if (d1.lengthSquared() != 0 && d2.lengthSquared() != 0)
+						else
 						{
-							printPinholes.push_back(v1 + d1 * circle_offset);
-							printPinholes.push_back(v1 + d1 * circle_offset * 2);
-							printPinholes.push_back(v2 + d2 * circle_offset);
-							printPinholes.push_back(v2 + d2 * circle_offset * 2);
-						}*/
+							dirPin = d2 + len_2 * d1.normalized();
+						}
+
+						printPinholes.push_back(v1 + dirPin * 2.0 / 3.0);
+						printPinholes.push_back(v1 + dirPin / 3.0);
 					}
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
 					curHE = curHE->next;
@@ -193,19 +179,130 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh,
 	printf("SVG file %s saved successfully!\n", filename);
 }
 
-void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh,
-	const char* filename, int mode)
+void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename, const unordered_map<ConnectorConf, double>& conf, int cn_t /*= HOLLOW_CONNECTOR*/)
 {
-
-	enum ConnectorType
+	if (unfolded_mesh == nullptr)
 	{
-		SIMPLE_CONNECTOR,
-		INSERT_CONNECTOR,
-		GEAR_CONNECTOR,
-		SAW_CONNECTOR,
-		ADVSAW_CONNECTOR
-	};
-	ConnectorType cn_t = SIMPLE_CONNECTOR;
+		//assert();
+		return;
+	}
+	//ConnectorType cn_t = SIMPLE_CONNECTOR;
+	FILE *SVG_File;
+	errno_t err = fopen_s(&SVG_File, filename, "w");
+	if (err)
+	{
+		printf("Can't write to file %s!\n", filename);
+		return;
+	}
+
+	/************************************************************************/
+	/* Scalors                                                              */
+	/************************************************************************/
+	double he_offset(10);
+	double he_scale = conf.find(ConnectorConf::SCALE)->second;
+	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
+	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+
+	double circle_offset = 3;
+	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
+
+	//SVG file head
+	// define the size of export graph
+	fprintf(SVG_File, SVG_HEAD,
+		static_cast<int>(size_vec.x() * he_scale),
+		static_cast<int>(size_vec.y() * he_scale));
+
+	int printFaceID(0), printCircleID(0);
+	for (auto piece : unfolded_mesh->pieceSet)
+	{
+		vector<face_t *> cutfaces;
+
+		vector<QVector2D> printBorderEdgePts;//Edges on the boundary
+		vector<QVector2D> printEdgePtsCarves;
+		vector<QVector2D> printPinholes;
+
+		// Group current piece
+		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
+		for (auto fid : piece)
+		{
+			face_t *curFace = unfolded_mesh->faceMap[fid];
+			auto he = curFace->he;
+			auto curHE = he;
+			if (curFace->isCutFace)
+			{
+				vector<QVector2D> connCorners;
+				do
+				{
+					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
+					curHE = curHE->next;
+				} while (curHE != he);
+			}
+			else
+			{
+				if (!curFace->isBridger)
+				{
+					QVector2D centerPt = curFace->center().toVector2D();
+					do
+					{
+						printPinholes.push_back((curHE->v->pos.toVector2D() + centerPt) * 0.5);
+						curHE = curHE->next;
+					} while (curHE != he);
+				}
+				fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
+				// Write points of each edge
+				do
+				{
+					fprintf(SVG_File, "%f,%f ",
+						curHE->v->pos.x() * he_scale,
+						curHE->v->pos.y() * he_scale);
+					curHE = curHE->next;
+				} while (curHE != he);
+				// Close face loop
+				fprintf(SVG_File,
+					"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.1\" />\n",
+					curHE->v->pos.x() * he_scale,
+					curHE->v->pos.y() * he_scale);
+				curHE = curHE->next;
+			}
+
+		}
+		/************************************************************************/
+		/* Write out circles                                                    */
+		/************************************************************************/
+		for (auto circlepos : printPinholes)
+		{
+			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.5\" " \
+				"style=\"stroke:black;stroke-width:0.1;fill:none\" />\n",
+				printCircleID++, circlepos.x() * he_scale, circlepos.y() * he_scale);
+		}
+
+		/************************************************************************/
+		/* Write out edge for cut                                               */
+		/************************************************************************/
+		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
+		for (int isec = 0; isec < printBorderEdgePts.size(); isec++)
+		{
+			fprintf(SVG_File, "%f,%f ",
+				printBorderEdgePts[isec].x() * he_scale,
+				printBorderEdgePts[isec].y() * he_scale);
+		}
+		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
+		/*fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
+		printBorderEdgePts[0].x(), printBorderEdgePts[0].y());*/
+		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+	}
+	/************************************************************************/
+	/* End of SVG File End                                                  */
+	/************************************************************************/
+	fprintf(SVG_File, "</svg>");
+	fclose(SVG_File);
+	printf("SVG file %s saved successfully!\n", filename);
+}
+
+void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filename,
+	const unordered_map<ConnectorConf, double>& conf, int cn_t)
+{
+	//ConnectorType cn_t = SIMPLE_CONNECTOR;
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
 	if (err)
@@ -213,9 +310,6 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh,
 		printf("Can't write to files!\n");
 		return;
 	}
-	int size_x(360), size_y(360);
-	//printf("Type in SVG file size: ");
-	//err = scanf_s("%d%d", &size_x, &size_y);
 
 	unordered_set<HDS_Mesh::face_t*> faces = unfolded_mesh->faces();
 	unordered_set<HDS_Mesh::face_t*> cutfaces;// , infaces;
@@ -226,12 +320,52 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh,
 			cutfaces.insert(face);
 		}
 	}
-	//SVG file head
-	fprintf(SVG_File, SVG_HEAD, size_x, size_y);// define the size of export graph
-	//for cut layer
-	//QVector3D nx, ny;
-	double he_offset(10), he_scale(20), wid_conn(10), len_conn(10);
+	/************************************************************************/
+	/* Scalors                                                              */
+	/************************************************************************/
+	double he_offset(10);
+	double he_scale = conf.find(ConnectorConf::SCALE)->second;
+	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
+	double len_conn = conf.find(ConnectorConf::LENGTH)->second; 
+	
+	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
+	//SVG file head
+	// define the size of export graph
+	fprintf(SVG_File, SVG_HEAD,
+		static_cast<int>(size_vec.x() * he_scale),
+		static_cast<int>(size_vec.y() * he_scale));
+
+	int printFaceID(0), printCircleID(0);
+	/*for (auto piece : unfolded_mesh->pieceSet)
+	{
+		vector<face_t *> cutfaces;
+
+		vector<QVector2D> printBorderEdgePts;//Edges on the boundary
+		vector<QVector2D> printEdgePtsCarves;
+		vector<QVector2D> printPinholes;
+
+		// Group current piece
+		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
+		for (auto fid : piece)
+		{
+			face_t *curFace = unfolded_mesh->faceMap[fid];
+			auto he = curFace->he;
+			auto curHE = he;
+			if (curFace->isCutFace)
+			{
+				vector<QVector2D> connCorners;
+				do
+				{
+					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
+					curHE = curHE->next;
+				} while (curHE != he);
+			}
+			else
+			{
+			}
+		}
+	}*/
 	for (auto face : cutfaces)
 	{
 		HDS_HalfEdge *he = face->he;
@@ -352,6 +486,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh,
 				QVector2D Psc = Pn + n * wid_conn;
 
 				//division number
+				// Gear count
 				int ndiv = 8;
 				//connector segment length
 				double len_seg = Pthis->distanceToPoint(*Pnext) / ndiv * 0.5;
@@ -474,22 +609,15 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh,
 		set<HDS_Face*> neighbourFaces = face->connectedFaces();
 		for (auto face : neighbourFaces)
 		{
-			//double he_offset(10), he_scale(20);
 			HDS_HalfEdge *he = face->he;
 			HDS_HalfEdge *curHE = he;
 			fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", face->index);
 
 			do {
-				//fprintf(SVG_File, "%f,%f ",
-				//		(QVector3D::dotProduct(curHE->v->pos, nx) + he_offset) * he_scale,
-				//		(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset) * he_scale);
 				fprintf(SVG_File, "%f,%f ",
 					curHE->v->pos.x() * he_scale, curHE->v->pos.y() * he_scale);
 				curHE = curHE->next;
 			} while (curHE != he);
-			/*fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.8\" />\n",
-				(QVector3D::dotProduct(he->v->pos, nx) + he_offset) * he_scale,
-				(QVector3D::dotProduct(he->v->pos, ny) + he_offset) * he_scale);*/
 			fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.8\" />\n",
 				he->v->pos.x() * he_scale, he->v->pos.y() * he_scale);
 		}
@@ -502,41 +630,63 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh,
 	fclose(SVG_File);
 	cout << "SVG file saved successfully!" << endl;
 }
-void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename, int mode)
+void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
+	const unordered_map<ConnectorConf, double>& conf, int cn_t)
 {
-	if (unfolded_mesh == nullptr)
+	assert(unfolded_mesh != nullptr);
+	/*if (unfolded_mesh == nullptr)
 	{
-		//assert();
 		return;
-	}
+	}*/
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
-	if (err)
+	if (err)// Unable to save to disk
 	{
 		printf("Can't write to file %s!\n", filename);
 		return;
 	}
-	int size_x(360), size_y(360);
+	/************************************************************************/
+	/* Scalors                                                              */
+	/************************************************************************/
+	double he_offset(10);
+	double he_scale = conf.find(ConnectorConf::SCALE)->second;
+	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
+	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+
+	double circle_offset = 3;
+	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
-	fprintf(SVG_File, SVG_HEAD, size_x, size_y);// define the size of export graph
-
-	/************************************************************************/
-	/* for cut layer                                                        */
-	/************************************************************************/
-
-	double he_offset(10), he_scale(20), wid_conn(10), len_conn(10);
-	double circle_offset = 3;
-	//err = scanf_s("%lf", &circle_offset);
+	// define the size of export graph
+	fprintf(SVG_File, SVG_HEAD,
+		static_cast<int>(size_vec.x() * he_scale),
+		static_cast<int>(size_vec.y() * he_scale));
 
 	int printFaceID(0), printPinholeID(0);
+
+	// Pinhole numbers on each piece
+	int n_pinhole;// = cn_t == ARCH_CONNECTOR
+	switch (cn_t)
+	{
+	case ARCH_CONNECTOR:
+		n_pinhole = 9;
+		break;
+	case RING_CONNECTOR:
+		n_pinhole = 12;
+		break;
+	default:
+		break;
+	}
+
+	// Start to record each piece
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
 		vector<face_t *> cutfaces;
 
+		QVector2D centerPt; // piece center position
 		vector<QVector2D> printRimPts;//Edges on the boundary
 		vector<QVector2D> printPinholes;
-		double outerR, innerR, innerPinR, outerPinR, offRad;
+		double outerR, innerR, innerPinR, outerPinR, offRad, offPinRad;
 
 		// Group current piece
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
@@ -549,7 +699,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 				auto he = curFace->he;
 				auto curHE = he;
 
-				auto fc = curFace->center().toVector2D() * he_scale;
+				centerPt = curFace->center().toVector2D() * he_scale;
 				double edgeLen = (curHE->v->pos - curHE->next->v->pos).length() * he_scale;
 
 				outerR = edgeLen * 2.0 / 3.0;
@@ -557,12 +707,13 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 				innerPinR = innerR + (outerR - innerR) / 3.0;
 				outerPinR = outerR - (outerR - innerR) / 3.0;
                 offRad = M_PI * 30.0 / 180.0;
+				offPinRad = offRad * 0.5;
 				QVector2D endDir(cos(offRad),sin(offRad));
 
-				QVector2D v0 = fc + QVector2D(0, outerR);
-				QVector2D v1 = fc + endDir * outerR;
-				QVector2D v2 = fc + endDir * innerR;
-				QVector2D v3 = fc + QVector2D(0, innerR);
+				QVector2D v0 = centerPt + QVector2D(0, outerR);
+				QVector2D v1 = centerPt + endDir * outerR;
+				QVector2D v2 = centerPt + endDir * innerR;
+				QVector2D v3 = centerPt + QVector2D(0, innerR);
 
 				printRimPts.push_back(v0);
 				printRimPts.push_back(v1);
@@ -570,11 +721,13 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 				printRimPts.push_back(v3);
 
 				// Pinhole positions
-				for (int i = 0; i < 9; i++)
+
+				for (int i = 0; i < n_pinhole; i++)
 				{
-					QVector2D pinDir(cos(i * offRad), -sin(i * offRad));
-					printPinholes.push_back(fc + innerPinR * pinDir);
-					printPinholes.push_back(fc + outerPinR * pinDir);
+					double rad = i * offRad + offPinRad;
+					QVector2D pinDir(cos(rad), -sin(rad));
+					printPinholes.push_back(centerPt + innerPinR * pinDir);
+					printPinholes.push_back(centerPt + outerPinR * pinDir);
 				}
 
 			}
@@ -585,7 +738,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 		for (auto pinpos : printPinholes)
 		{
 			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.8\" " \
-				"style=\"stroke:black;stroke-width:0.1;fill:none\" />\n",
+				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
 				printPinholeID++, pinpos.x(), pinpos.y());
 		}
 
@@ -593,16 +746,41 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 		/* Write out edge for cut                                               */
 		/************************************************************************/
 		// graph is upside down, rotation direction should be flipped
-		fprintf(SVG_File,
-			"<path d=\"M %lf %lf " \
-			"A %lf %lf, 0, 1, 1, %lf %lf " \
-			"L %lf %lf " \
-			"A %lf %lf, 0, 1, 0, %lf %lf " \
-			"Z\" style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n",
-			printRimPts[0].x(), printRimPts[0].y(),
-			outerR, outerR, printRimPts[1].x(), printRimPts[1].y(),
-			printRimPts[2].x(), printRimPts[2].y(),
-			innerR, innerR, printRimPts[3].x(), printRimPts[3].y());
+		switch (cn_t)
+		{
+		case ARCH_CONNECTOR:
+			fprintf(SVG_File,
+				"<path id=\"Rim%d\" d=\"M %lf %lf " \
+				"A %lf %lf, 0, 1, 1, %lf %lf " \
+				"L %lf %lf " \
+				"A %lf %lf, 0, 1, 0, %lf %lf " \
+				"Z\" style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n",
+				printFaceID++,
+				printRimPts[0].x(), printRimPts[0].y(),
+				outerR, outerR, printRimPts[1].x(), printRimPts[1].y(),
+				printRimPts[2].x(), printRimPts[2].y(),
+				innerR, innerR, printRimPts[3].x(), printRimPts[3].y());
+			break;
+		case RING_CONNECTOR:
+			fprintf(SVG_File, // Outer circle
+				"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
+				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
+				printFaceID, centerPt.x(), centerPt.y(), outerR);
+			fprintf(SVG_File, // Inner circle
+				"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
+				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
+				printFaceID, centerPt.x(), centerPt.y(), innerR);
+			fprintf(SVG_File, // Carve edge
+				"<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
+				"style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n",
+				printFaceID++,
+				printRimPts[1].x(), printRimPts[1].y(),
+				printRimPts[2].x(), printRimPts[2].y());
+			break;
+		default:
+			break;
+		}
+		
 
 		
 		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
@@ -624,20 +802,28 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 
 void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 {
-	ConnectorSelectionPanel *connPanel = new ConnectorSelectionPanel;
+	ConnectorPanel *connPanel = new ConnectorPanel(unfolded_mesh->processType);
 	connPanel->exec();
 	
-	const char* filename = connPanel->getFilename().toUtf8().constData();
+	QString filename = connPanel->getFilename();
+	//double scale = connPanel->getScale();
+	int cn_t = connPanel->getConnectorType();
+	auto conf = connPanel->getConfiguration();
 	switch (unfolded_mesh->processType)
 	{
+	case HDS_Mesh::REGULAR_PROC:
+		exportRegularPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		break;
 	case HDS_Mesh::HOLLOWED_PROC:
-		exportHollowPiece(unfolded_mesh, filename);
+		exportHollowPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		break;
+	case HDS_Mesh::BINDED_PROC:
+		exportBindPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
 		break;
 	case HDS_Mesh::RIMMED_PROC:
-		exportRimmedPiece(unfolded_mesh, filename);
+		exportRimmedPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
 		break;
 	default:
-		exportRegularPiece(unfolded_mesh, filename);
 		break;
 	}
 	delete connPanel;
