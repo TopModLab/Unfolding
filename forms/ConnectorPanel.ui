@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ConnectorSelectionPanel</class>
- <widget class="QWidget" name="ConnectorSelectionPanel">
+ <class>ConnectorPanel</class>
+ <widget class="QWidget" name="ConnectorPanel">
   <property name="geometry">
    <rect>
     <x>0</x>
