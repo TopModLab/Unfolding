@@ -92,7 +92,7 @@ void ConnectorPanel::initConnectorType()
 
 void ConnectorPanel::slot_setFileName()
 {
-	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "export/untitled.svg", tr("XML files (*.svg *.xml)"));
+	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "export/untitled.svg", tr("SVG files (*.svg)"));
 	ui->filename_text->setText(filename);
 }
 

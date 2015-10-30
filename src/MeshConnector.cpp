@@ -24,9 +24,42 @@
 #include <vtkVariantArray.h>
 #endif
 
-const char SVG_HEAD[] =
-"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
-"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+
+const char SVG_HEAD[] =		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
+							"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+const char SVG_CIRCLE[] = 	"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"1.0\" " \
+							"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n";
+const char SVG_LINE[] = 	"<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
+							"style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n";
+const char SVG_TEXT[] = 	"\t<text x=\"%lf\" y=\"%lf\" fill=\"green\" " \
+							"transform=\"rotate(%lf %lf,%lf)\" " \
+							"style=\"font-size:24;stroke:green;stroke-width:0.1;fill:none;\" >" \
+							"%s</text>\n";
+const char SVG_ARCH[] = 	"<path id=\"Rim%d\" d=\"M %lf %lf " \
+							"A %lf %lf, 0, 1, 1, %lf %lf " \
+							"L %lf %lf " \
+							"A %lf %lf, 0, 1, 0, %lf %lf " \
+							"Z\" style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n";
+							/*
+							"<path d=\"M p1x p1y " \
+							"A R R, 0, 1, 0, p2x p2y " \
+							"L p3x p3y " \
+							"A r r, 0, 1, 1, p4x p4y " \
+							"Z\" />");
+							*/
+void printText(FILE* file, double x, double y, double angle, const QString &text)
+{
+	fprintf(file, SVG_TEXT, x, y, angle, x, y, text.constData());
+}
+
+//////////////////////////////////////////////////////////////////////////
+// SVG formats
+// 
+// Text:	left-bottom corner as orginal position
+//			rotation without position means rotating around origin point.
+// Rim/Ring: 
+// 
+//////////////////////////////////////////////////////////////////////////
 
 MeshConnector::MeshConnector()
 {
@@ -80,6 +113,10 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		vector<QVector2D> printEdgePtsCarves;
 		vector<QVector2D> printPinholes;
 
+		vector<QVector2D> printTextPos;
+		vector<double> printTextRot;
+		vector<QString> printTextIfo;
+
 		// Group current piece
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
 		for (auto fid : piece)
@@ -121,6 +158,10 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 
 						printPinholes.push_back(v1 + dirPin * 2.0 / 3.0);
 						printPinholes.push_back(v1 + dirPin / 3.0);
+
+						printTextPos.push_back(v1 + dirPin * 0.5);
+						printTextRot.push_back(atan2(dirPin.y(), dirPin.x()));
+						printTextIfo.push_back(QString::number(curHE->next->v->index));
 					}
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
 					curHE = curHE->next;
@@ -146,13 +187,25 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 			}
 
 		}
+
+		/************************************************************************/
+		/* Print Text                                                           */
+		/************************************************************************/
+		for (int i = 0; i < printTextPos.size(); i++)
+		{
+			auto pos = printTextPos[i];
+			auto rot = printTextRot[i];
+			auto ifo = printTextIfo[i];
+			printText(SVG_File, pos.x() * he_scale, pos.y() * he_scale, rot, ifo);
+			
+		}
 		/************************************************************************/
 		/* Write out circles                                                    */
 		/************************************************************************/
 		for (auto circlepos : printPinholes)
 		{
 			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.5\" " \
-				"style=\"stroke:black;stroke-width:0.1;fill:none\" />\n",
+				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
 				printCircleID++, circlepos.x() * he_scale, circlepos.y() * he_scale);
 		}
 
@@ -271,9 +324,7 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 		/************************************************************************/
 		for (auto circlepos : printPinholes)
 		{
-			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.5\" " \
-				"style=\"stroke:black;stroke-width:0.1;fill:none\" />\n",
-				printCircleID++, circlepos.x() * he_scale, circlepos.y() * he_scale);
+			fprintf(SVG_File, SVG_CIRCLE, printCircleID++, circlepos.x() * he_scale, circlepos.y() * he_scale);
 		}
 
 		/************************************************************************/
@@ -737,9 +788,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 		/************************************************************************/
 		for (auto pinpos : printPinholes)
 		{
-			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.8\" " \
-				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
-				printPinholeID++, pinpos.x(), pinpos.y());
+			fprintf(SVG_File, SVG_CIRCLE, printPinholeID++, pinpos.x(), pinpos.y());
 		}
 
 		/************************************************************************/
@@ -750,11 +799,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 		{
 		case ARCH_CONNECTOR:
 			fprintf(SVG_File,
-				"<path id=\"Rim%d\" d=\"M %lf %lf " \
-				"A %lf %lf, 0, 1, 1, %lf %lf " \
-				"L %lf %lf " \
-				"A %lf %lf, 0, 1, 0, %lf %lf " \
-				"Z\" style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n",
+				SVG_ARCH,
 				printFaceID++,
 				printRimPts[0].x(), printRimPts[0].y(),
 				outerR, outerR, printRimPts[1].x(), printRimPts[1].y(),
@@ -771,8 +816,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
 				printFaceID, centerPt.x(), centerPt.y(), innerR);
 			fprintf(SVG_File, // Carve edge
-				"<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
-				"style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n",
+				SVG_LINE,
 				printFaceID++,
 				printRimPts[1].x(), printRimPts[1].y(),
 				printRimPts[2].x(), printRimPts[2].y());
@@ -790,13 +834,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 	/************************************************************************/
 	fprintf(SVG_File, "</svg>");
 	fclose(SVG_File);
-	/*fprintf(SVG_File,
-		"<path d=\"M p1x p1y " \
-		"A R R, 0, 1, 0, p2x p2y " \
-		"L p3x p3y " \
-		"A r r, 0, 1, 1, p4x p4y " \
-		"Z\" />");*/
-
+	
 	cout << "SVG file saved successfully!" << endl;
 }
 
