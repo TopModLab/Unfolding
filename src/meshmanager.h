@@ -109,7 +109,7 @@ private:
 	static MeshManager* instance;
 
 	friend class MeshViewer;
-
+	friend class MeshConnector;
 
 public:
 	bool loadOBJFile(const string& filename);
@@ -120,9 +120,10 @@ public:
 	void smoothMesh();
 	void setHollowMesh(double fsize, int type, double shift);
 	void extendMesh(int meshType, map<QString, double> config);
+	void rimMesh(double rimSize = 0.0);
 
 	// Export as SVG files
-	void exportXMLFile(const char* filename);
+    void exportXMLFile();
 
 	void resetMesh();
 
@@ -132,7 +133,11 @@ private:
 	typedef HDS_Face face_t;
 	typedef HDS_Vertex vert_t;
 
-	QScopedPointer<HDS_Mesh> hds_mesh, extended_mesh, smoothed_mesh, cutted_mesh, extended_cutted_mesh, unfolded_mesh, extended_unfolded_mesh;
+	QScopedPointer<HDS_Mesh> hds_mesh,
+		extended_mesh, smoothed_mesh,
+		cutted_mesh, extended_cutted_mesh,
+		unfolded_mesh, extended_unfolded_mesh,
+		rimmed_mesh;
 	QScopedPointer<GeodesicComputer> gcomp;
 	QScopedPointer<DiscreteGeoComputer> dis_gcomp;
 

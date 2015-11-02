@@ -29,6 +29,12 @@ const QVector3D BBox3::getMidPoint() const
 {
 	return (pMax + pMin) * 0.5;
 }
+
+const QVector3D BBox3::getDiagnal() const
+{
+	return pMax - pMin;
+}
+
 void BBox3::expand(double delta)
 {
 	pMin -= QVector3D(delta, delta, delta);

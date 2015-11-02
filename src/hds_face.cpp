@@ -62,7 +62,7 @@ set<HDS_Face *> HDS_Face::connectedFaces()
 	return faces;
 }
 
-set<HDS_Face *> HDS_Face::linkededFaces()
+set<HDS_Face *> HDS_Face::linkedFaces()
 {
 	// Find all linked faces
 	set<HDS_Face*> faces;

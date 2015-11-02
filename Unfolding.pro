@@ -16,8 +16,7 @@ CONFIG += console
 
 QMAKE_CXXFLAGS += -std=c++11
 
-#INCLUDEPATH += /usr/local/include /Users/phg/Utils/armadillo-4.450.4/include
-#LIBS += -L/usr/local/lib/OpenMesh -lOpenMeshCore -lOpenMeshTools -L/usr/local/lib -framework Accelerate
+INCLUDEPATH += extras/colormap_editor src
 
 SOURCES += src/main.cpp\
         src/mainwindow.cpp \
@@ -56,7 +55,9 @@ SOURCES += src/main.cpp\
     src/hollowmeshpanel.cpp \
     src/meshhollower.cpp \
     src/BBox.cpp \
-    src/bindingmeshpanel.cpp
+    src/bindingmeshpanel.cpp \
+    src/ConnectorPanel.cpp \
+    src/MeshConnector.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_face.h \
@@ -100,7 +101,9 @@ HEADERS  += src/mainwindow.h \
     src/hollowmeshpanel.h \
     src/meshhollower.h \
     src/BBox.h \
-    src/bindingmeshpanel.h
+    src/bindingmeshpanel.h \
+    src/ConnectorPanel.h \
+    src/MeshConnector.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
@@ -108,7 +111,8 @@ FORMS    += forms/mainwindow.ui \
     forms/cutlocuspanel.ui \
 	forms/bridgerpanel.ui \
     forms/hollowmeshpanel.ui \
-    forms/bindingmeshpanel.ui
+    forms/bindingmeshpanel.ui \
+    forms/ConnectorPanel.ui
 
 RESOURCES += \
     icons.qrc
@@ -116,7 +120,3 @@ RESOURCES += \
 OTHER_FILES +=
 LIBS += -glut32
 LIBS += -Lc:\glut
-#unix: LIBS += -L$$PWD/../../Utils/levmar-2.6/ -llevmar
-#INCLUDEPATH += $$PWD/../../Utils/levmar-2.6
-#DEPENDPATH += $$PWD/../../Utils/levmar-2.6
-#unix: PRE_TARGETDEPS += $$PWD/../../Utils/levmar-2.6/liblevmar.a

@@ -8,20 +8,20 @@
 using namespace std;
 
 HDS_Mesh::HDS_Mesh()
+	: showFace(true), showVert(true)
+	, showEdge(true), showNormals(false)
+	, processType(REGULAR_PROC)
+	, bound(nullptr)
 {
-	showFace = true;
-	showVert = true;
-	showEdge = true;
-	showNormals = false;
 }
 
 HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
+	: showFace(other.showFace), showEdge(other.showEdge)
+	, showVert(other.showVert), showNormals(other.showNormals)
+	, processType(other.processType)
+	, bound(nullptr)
 {
 	/// need a deep copy
-	showFace = other.showFace;
-	showEdge = other.showEdge;
-	showVert = other.showVert;
-	showNormals = other.showNormals;
 
 	/// copy the vertices set
 	vertSet.clear();
@@ -84,9 +84,13 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 			v->bridgeTwin = vertMap.at(v_ref->bridgeTwin->index);
 	}
 
+	// Copy piece set information
+	this->pieceSet = other.pieceSet;
+
 }
 
-HDS_Mesh::~HDS_Mesh() {
+HDS_Mesh::~HDS_Mesh()
+{
 	releaseMesh();
 }
 
@@ -135,7 +139,7 @@ void HDS_Mesh::updatePieceSet()
 		{
 			visitedFaces.insert(f->index);
 			/// Find all linked faces except cut face
-			set<HDS_Face*> linkedFaces = f->linkededFaces();
+			set<HDS_Face*> linkedFaces = f->linkedFaces();
 
 			set<int> curPiece;
 			for (auto cf : linkedFaces)
@@ -264,9 +268,15 @@ void HDS_Mesh::releaseMesh() {
 		if( (*heit) != nullptr )
 			delete (*heit);
 	heSet.clear();
+
+	delete bound;
 }
 
-void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex *> &verts, const vector<HDS_HalfEdge *> &hes) {
+void HDS_Mesh::setMesh(
+	const vector<HDS_Face *> &faces,
+	const vector<HDS_Vertex *> &verts,
+	const vector<HDS_HalfEdge *> &hes)
+{
 	releaseMesh();
 
 	// reset the UIDs, hack
@@ -309,7 +319,8 @@ void HDS_Mesh::setMesh(const vector<HDS_Face *> &faces, const vector<HDS_Vertex 
 //usage unknown
 #define MAX_CHAR        128
 
-void drawString(const char* str, int numb) {
+void drawString(const char* str, int numb)
+{
 	static int isFirstCall = 1;
 	static GLuint lists;
 
@@ -328,7 +339,8 @@ void drawString(const char* str, int numb) {
 
 	//}
 }
-void display(int num) {
+void display(int num)
+{
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 	//    glRasterPos2f(0.0f, 0.0f);

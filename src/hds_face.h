@@ -28,7 +28,7 @@ public:
 	/// Find all directly connected faces
 	set<HDS_Face *> connectedFaces();
 	/// Find all linked faces in current partiction
-	set<HDS_Face *> linkededFaces();
+	set<HDS_Face *> linkedFaces();
 
 	QVector3D center() const;
 	vector<HDS_Vertex*> corners() const;

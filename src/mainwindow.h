@@ -69,6 +69,7 @@ private slots:
 	void slot_smoothMesh();
 	void slot_triggerExtendMesh(bool);
 	void slot_triggerHollowMesh(bool);
+	void slot_triggerRimmedMesh(bool);
 	void slot_triggerBindingMesh(bool);
 
 	void slot_setBridger();
@@ -76,6 +77,7 @@ private slots:
 	void slot_hollowMesh();
 	void slot_bindingMesh();
 	void slot_cancelExtendMesh();
+	void slot_rimMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
@@ -97,7 +99,8 @@ private:
 		Original = 0,
 		Extended = 1,
 		Cutted = 2,
-		Unfolded = 3
+		Unfolded = 3,
+		Rimmed = 4
 	};
 
 	CurrentMesh curMesh;
