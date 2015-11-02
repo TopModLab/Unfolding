@@ -16,6 +16,7 @@ private:
 public:
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
+	void setRefId(int id) { refid = id << 2 + 10; }
 
 	HDS_Face();
 	~HDS_Face();
@@ -51,6 +52,7 @@ public:
 	HDS_HalfEdge *he;
 
 	int index;
+	int refid;
 	bool isPicked;
 	bool isCutFace; //invisible face between cut edges
 	bool isHole;

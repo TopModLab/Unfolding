@@ -169,7 +169,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
 	for(size_t i=0;i<facesCount;i++)
 	{
-		faces[i] = new face_t;              //no value;
+		faces[i] = new face_t;
 	}
 
 	map<pair<int, int>, he_t*> heMap;
@@ -183,7 +183,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 
 		for(size_t j=0;j<Fi.v.size();j++)
 		{
-			he_t* curHe = new he_t;;
+			he_t* curHe = new he_t;
 			vert_t* curVert = verts[Fi.v[j]];
 			curHe->v = curVert;
 			curHe->f = curFace;

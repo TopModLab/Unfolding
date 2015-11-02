@@ -15,6 +15,7 @@ private:
 public:
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
+	void setRefId(int id) { refid = id << 2 +00; }
 
 	HDS_Vertex();
 	HDS_Vertex(const QVector3D &pos);
@@ -37,6 +38,7 @@ public:
 	HDS_HalfEdge *he;
 
 	int index;
+	int refid;
 	double curvature;
 	bool isPicked;
 	double colorVal;

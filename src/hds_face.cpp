@@ -11,6 +11,7 @@ HDS_Face::HDS_Face()
 	isHole = false;
 	//isFlap = false;
 	index = -1;
+	refid = -1;
 	he = nullptr;
 	scalingFactor = 1;
 	isPlanar = true;
@@ -32,6 +33,7 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 	isPlanar = other.isPlanar;
 	//isFlap = other.isFlap;
 	index = other.index;
+	refid = other.refid;
 	n = other.n;
 	he = nullptr;
 	scalingFactor = other.scalingFactor;

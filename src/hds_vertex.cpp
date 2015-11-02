@@ -10,6 +10,7 @@ size_t HDS_Vertex::uid = 0;
 HDS_Vertex::HDS_Vertex() {
 	isPicked = false;
 	index = -1;
+	refid = -1;
 	colorVal = 0;
 	he = nullptr;
 	bridgeTwin = nullptr;
@@ -19,6 +20,7 @@ HDS_Vertex::HDS_Vertex() {
 HDS_Vertex::HDS_Vertex(const QVector3D &pos):pos(pos) {
 	isPicked = false;
 	index = -1;
+	refid = -1;
 	he = nullptr;
 	bridgeTwin = nullptr;
 	flapTwin = nullptr;
@@ -29,6 +31,7 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
 {
 	isPicked = v.isPicked;
 	index = v.index;
+	refid = v.refid;
 	pos = v.pos;
 	normal = v.normal;
 	curvature = v.curvature;

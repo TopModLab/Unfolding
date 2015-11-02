@@ -9,6 +9,7 @@ HDS_HalfEdge::HDS_HalfEdge()
 	isCutEdge = false;
 	isExtended = false;
 	index = -1;
+	refid = -1;
 	f = nullptr;
 	v = nullptr;
 	flip = nullptr;

@@ -23,6 +23,7 @@ public:
 
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
+	void setRefId(int id) { refid = id << 2 +01; }
 
 	HDS_HalfEdge();
 	~HDS_HalfEdge();
@@ -41,6 +42,8 @@ public:
 	HDS_HalfEdge *cutTwin;  // pointer to its twin halfedge created in a cut event
 
 	int index;
+	int refid;
+
 	bool isPicked;
 	bool isCutEdge;
 	bool isExtended;//From hollower

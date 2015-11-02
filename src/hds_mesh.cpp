@@ -286,6 +286,7 @@ void HDS_Mesh::setMesh(
 
 	for (auto &f : faces) {
 		int faceIdx = HDS_Face::assignIndex();
+		f->setRefId(faceIdx);
 		faceMap[faceIdx] = f;
 		f->index = faceIdx;
 		faceSet.insert(f);
@@ -293,6 +294,7 @@ void HDS_Mesh::setMesh(
 
 	for (auto &v : verts) {
 		int vertIdx = HDS_Vertex::assignIndex();
+		v->setRefId(vertIdx);
 		vertMap[vertIdx] = v;
 		v->index = vertIdx;
 		vertSet.insert(v);
@@ -303,10 +305,12 @@ void HDS_Mesh::setMesh(
 		if( he->index >= 0 ) continue;
 
 		int heIdx = HDS_HalfEdge::assignIndex();
+		he->setRefId(heIdx);
 		heMap[heIdx] = he;
 		he->index = heIdx;
 
 		int hefIdx = HDS_HalfEdge::assignIndex();
+		he->flip->setRefId(heIdx);
 		he->flip->index = hefIdx;
 		heMap[hefIdx] = he->flip;
 	}

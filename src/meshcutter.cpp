@@ -93,6 +93,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		he->flip = he_new_flip;
 
 		he_new_flip->index = HDS_HalfEdge::assignIndex();
+		he_new_flip->refid = he->refid;
 		mesh->addHalfEdge(he_new_flip);
 		cutEdgesFlips.insert(he_new_flip->index);//record new half-edge
 
@@ -108,6 +109,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		hef->flip = hef_new_flip;
 
 		hef_new_flip->index = HDS_HalfEdge::assignIndex();
+		hef_new_flip->refid = hef->refid;
+
 		mesh->addHalfEdge(hef_new_flip);
 		cutEdgesFlips.insert(hef_new_flip->index);//record new half-edge
 
@@ -209,6 +212,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 				/// assign a new id to the vertex
 				cv_new[i]->index = HDS_Vertex::assignIndex();
+				cv_new[i]->refid = cv.first->refid;
 			}
 
 			/// divide all incident half edges into k groups, k = cutSize
