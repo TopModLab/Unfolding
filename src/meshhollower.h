@@ -17,6 +17,7 @@ private:
 	static HDS_Face* createFace(HDS_Vertex* startV, vector<QVector3D> vertPos, HDS_Vertex* endV, HDS_Face* cutFace);
 public:
 	static double flapSize;
+	static double shiftAmount;
 
 private:
 	static vector<HDS_Vertex*> vertices_new;

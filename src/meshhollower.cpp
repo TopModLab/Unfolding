@@ -2,7 +2,9 @@
 #include "MeshExtender.h"
 
 
-double MeshHollower::flapSize = 0.2;
+double MeshHollower::flapSize = 0.2;//[0 - 1]
+double MeshHollower::shiftAmount = 0;//[-1 - 1]
+
 HDS_Mesh* MeshHollower::thismesh = nullptr;
 vector<HDS_Vertex*> MeshHollower::vertices_new;
 vector<HDS_HalfEdge*> MeshHollower::hes_new;
@@ -12,8 +14,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 	/*ignore cut edges*/
 	flapSize = newFlapSize;//Flap size needed in export function
 	thismesh = mesh;
-	type = type;
-	shift = shift;
+	shiftAmount = shift;
 
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
@@ -120,7 +121,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		v->computeCurvature();
 		//cout << v->index << ": " << (*v) << endl;
 	}
-	cout<<"hollow mesh he size "<<thismesh->halfedges().size()<<endl;
 
 
 	// Set mark for hollowed mesh
@@ -132,19 +132,57 @@ HDS_Face* MeshHollower::addFlapFace(int type, HDS_HalfEdge* originalHE, HDS_Half
 	vector<QVector3D> vertPos;
 	HDS_Face* he_f = originalHE->f;
 
+	QVector3D v0 = he_f->scaleCorner(originalHE->prev->v);
+	QVector3D v3 = he_f->scaleCorner(originalHE->next->flip->v);
+
+	QVector3D v2_flap =(1.0-flapSize)*startHE->flip->v->pos + flapSize*v3;
+	QVector3D v1_flap = (1.0-flapSize)*startHE->v->pos + flapSize*v0;
 	switch(type)
 	{
 	case 0://one flap
 	{
-		QVector3D he1_v0 = he_f->scaleCorner(originalHE->prev->v);
-		QVector3D he1_v3 = he_f->scaleCorner(originalHE->next->flip->v);
-
-		vertPos.push_back((1.0-flapSize)*startHE->flip->v->pos + flapSize*he1_v3);
-		vertPos.push_back((1.0-flapSize)*startHE->v->pos + flapSize*he1_v0);
+		vertPos.push_back(v2_flap);
+		vertPos.push_back(v1_flap);
 		break;
 	}
 	case 1://mult flap
+	{
+		QVector3D v0_prev = he_f->scaleCorner(originalHE->prev->prev->v);
+		QVector3D v3_prev = he_f->scaleCorner(originalHE->next->next->flip->v);
+
+		QVector3D v0_flap = (1.0-flapSize)*v0 + flapSize*v0_prev;
+		QVector3D v3_flap = (1.0-flapSize)*v3 + flapSize*v3_prev;
+
+		QVector3D v2_flap_flap = (1.0-flapSize)*v2_flap + flapSize*v1_flap;
+		QVector3D v1_flap_flap = (1.0-flapSize)*v1_flap + flapSize*v2_flap;
+
+		float right_scale = (shiftAmount + 1)/2;
+		float left_scale = 1 - right_scale;
+
+		if(shiftAmount != -1) {
+			//right flap
+			QVector3D v3_scaled = (1.0-right_scale)*v2_flap + right_scale*v3;
+			QVector3D v3_flap_scaled = (1.0-right_scale)*v2_flap_flap + right_scale*v3_flap;
+			vertPos.push_back(v3_scaled);
+			vertPos.push_back(v3_flap_scaled);
+			vertPos.push_back(v2_flap_flap);
+		}else {
+			vertPos.push_back(v2_flap);
+		}
+
+		if(shiftAmount != 1) {
+			//left flap
+			QVector3D v0_scaled = (1.0-left_scale)*v1_flap + left_scale*v0;
+			QVector3D v0_flap_scaled = (1.0-left_scale)*v1_flap_flap + left_scale*v0_flap;
+			vertPos.push_back(v1_flap_flap);
+			vertPos.push_back(v0_flap_scaled);
+			vertPos.push_back(v0_scaled);
+		}else {
+			vertPos.push_back(v1_flap);
+		}
+
 		break;
+	}
 	case 2://bind
 	{
 		auto curHE = originalHE->next;
