@@ -91,77 +91,10 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
 		he1->f = cutFace;
 
-<<<<<<< HEAD
 		if(type != 2 && flapSize < 0.01){
 			continue;
 		}else{
 
-=======
-		switch(type)
-		{
-		case 0:
-			thismesh->processType = HDS_Mesh::HOLLOWED_PROC;
-			if(flapSize > 0.01){
-				cout<<"creating one flap for hollow face"<<endl;
-				QVector3D he1_v0 = he_f->scaleCorner(he->prev->v);
-				QVector3D he1_v3 = he_f->scaleCorner(he->next->flip->v);
-				QVector3D he2_v0 = he_flip_f->scaleCorner(he->flip->next->flip->v);
-				QVector3D he2_v3 = he_flip_f->scaleCorner(he->flip->prev->v);
-
-				vert_t* he_flap_v1 = new vert_t((1.0-flapSize)*he1_v1->pos + flapSize*he1_v0);
-				vert_t* he_flap_v2 = new vert_t((1.0-flapSize)*he1_v2->pos + flapSize*he1_v3);
-				vert_t* hef_flap_v1 = new vert_t((1.0-flapSize)*he2_v1->pos + flapSize*he2_v0);
-				vert_t* hef_flap_v2 = new vert_t((1.0-flapSize)*he2_v2->pos + flapSize*he2_v3);
-
-				//new edge pair based on new vertex position
-				he_t* he1_flap = thismesh->insertEdge(he_flap_v1, he_flap_v2);
-				he_t* he2_flap = thismesh->insertEdge(hef_flap_v1, hef_flap_v2);
-
-				he1_flap->f = cutFace;
-				he1_flap->isExtended = true;
-				he2_flap->flip->f = cutFace;
-				he2_flap->flip->isExtended = true;
-
-
-				cutFace->he = he1_flap;
-				//set he1 and he2 to be non cut edge, flaps to be cut edge
-				he1->setCutEdge(false);
-				he2->setCutEdge(false);
-				he1_flap->setCutEdge(true);
-				he2_flap->setCutEdge(true);
-
-				hes_new.push_back(he1_flap);
-				hes_new.push_back(he1_flap->flip);
-				hes_new.push_back(he2_flap);
-				hes_new.push_back(he2_flap->flip);
-
-				vertices_new.push_back(he_flap_v1);
-				vertices_new.push_back(he_flap_v2);
-				vertices_new.push_back(hef_flap_v1);
-				vertices_new.push_back(hef_flap_v2);
-
-				HDS_Face* bridgeFace_he1 = thismesh->bridging(he1_flap->flip, he1, cutFace);
-				bridgeFace_he1->index = HDS_Face::assignIndex();
-				bridgeFace_he1->isCutFace = false;
-				//bridgeFace_he1->isBridger = true;
-				thismesh->addFace(bridgeFace_he1);
-				HDS_Face* bridgeFace_he2 = thismesh->bridging(he2->flip, he2_flap, cutFace);
-				bridgeFace_he2->index = HDS_Face::assignIndex();
-				bridgeFace_he2->isCutFace = false;
-				//bridgeFace_he2->isBridger = true;
-				thismesh->addFace(bridgeFace_he2);
-			}
-			break;
-
-		case 1:	// add additional flaps on hollow face
-			if(flapSize > 0.01) {
-
-			}
-			break;
-
-		case 2: // add bind face
-			thismesh->processType = HDS_Mesh::BINDED_PROC;
->>>>>>> origin/GroupComponet
 			he1->setCutEdge(false);
 			he2->setCutEdge(false);
 
@@ -169,6 +102,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 			thismesh->addFace(addFlapFace(type, he->flip, he2, cutFace));
 		}
 	}
+
 	//add new vertices and edges
 	for (auto v: vertices_new) {
 		v->index = HDS_Vertex::assignIndex();
@@ -204,12 +138,16 @@ HDS_Face* MeshHollower::addFlapFace(int type, HDS_HalfEdge* originalHE, HDS_Half
 	{
 	case 0://one flap
 	{
+		thismesh->processType = HDS_Mesh::HOLLOWED_PROC;
+
 		vertPos.push_back(v2_flap);
 		vertPos.push_back(v1_flap);
 		break;
 	}
 	case 1://mult flap
 	{
+		thismesh->processType = HDS_Mesh::HOLLOWED_PROC;
+
 		QVector3D v0_prev = he_f->scaleCorner(originalHE->prev->prev->v);
 		QVector3D v3_prev = he_f->scaleCorner(originalHE->next->next->flip->v);
 
@@ -248,6 +186,7 @@ HDS_Face* MeshHollower::addFlapFace(int type, HDS_HalfEdge* originalHE, HDS_Half
 	}
 	case 2://bind
 	{
+		thismesh->processType = HDS_Mesh::BINDED_PROC;
 		auto curHE = originalHE->next;
 		do {
 			vertPos.push_back(he_f->scaleCorner(curHE->flip->v));
@@ -266,13 +205,7 @@ HDS_Face* MeshHollower::addFlapFace(int type, HDS_HalfEdge* originalHE, HDS_Half
 	return newFace;
 }
 
-<<<<<<< HEAD
-=======
-HDS_Face* MeshHollower::addOneFlapFace()
-{
-	return nullptr;
-}
->>>>>>> origin/GroupComponet
+
 
 //vertPos: [new verts..]
 HDS_Face* MeshHollower::createFace(HDS_Vertex* startV, vector<QVector3D> vertPos, HDS_Vertex* endV, HDS_Face* cutFace)
