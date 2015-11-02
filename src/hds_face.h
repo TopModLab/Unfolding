@@ -2,6 +2,7 @@
 #define HDS_FACE_H
 
 #include "common.h"
+#include "hds_common.h"
 #include "BBox.h"
 #include <QVector3D>
 

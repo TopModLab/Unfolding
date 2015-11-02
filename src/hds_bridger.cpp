@@ -59,40 +59,41 @@ HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef)
 
 
 	if (shape != 2) { // not flat
-	//push back all internal edges
-	for (int i = 0; i < nSamples-1; i++) {
-		HDS_Vertex* vs = new HDS_Vertex;
-		HDS_Vertex* ve = new HDS_Vertex;
-		vs->index = HDS_Vertex::assignIndex();
-		ve->index = HDS_Vertex::assignIndex();
-		vs->pos = bezierPos_front[i];
-		ve->pos = bezierPos_back[i];
+		//push back all internal edges
+		for (int i = 0; i < nSamples - 1; i++)
+		{
+			HDS_Vertex* vs = new HDS_Vertex;
+			HDS_Vertex* ve = new HDS_Vertex;
+			vs->index = HDS_Vertex::assignIndex();
+			ve->index = HDS_Vertex::assignIndex();
+			vs->pos = bezierPos_front[i];
+			ve->pos = bezierPos_back[i];
 
-		HDS_HalfEdge* he_new = new HDS_HalfEdge;
-		HDS_HalfEdge* he_new_flip = new HDS_HalfEdge;
+			HDS_HalfEdge* he_new = new HDS_HalfEdge;
+			HDS_HalfEdge* he_new_flip = new HDS_HalfEdge;
 
 
-		he_new->index = HDS_HalfEdge::assignIndex();
-		he_new_flip->index = HDS_HalfEdge::assignIndex();
-		he_new->setFlip(he_new_flip);
+			he_new->index = HDS_HalfEdge::assignIndex();
+			he_new_flip->index = HDS_HalfEdge::assignIndex();
+			he_new->setFlip(he_new_flip);
 
-		vs->he = he_new;
-		ve->he = he_new_flip;
+			vs->he = he_new;
+			ve->he = he_new_flip;
 
-		he_new->v = vs;
-		he_new_flip->v = ve;
+			he_new->v = vs;
+			he_new_flip->v = ve;
 
-		//connect edge loop
-		he_new->prev = he_new_flip;
-		he_new->next = he_new_flip;
-		he_new_flip->prev = he_new;
-		he_new_flip->next = he_new;
+			//connect edge loop
+			he_new->prev = he_new_flip;
+			he_new->next = he_new_flip;
+			he_new_flip->prev = he_new;
+			he_new_flip->next = he_new;
 
-		hes.push_back(he_new);
-		hes.push_back(he_new_flip);
-		verts.push_back(vs);
-		verts.push_back(ve);
-	}
+			hes.push_back(he_new);
+			hes.push_back(he_new_flip);
+			verts.push_back(vs);
+			verts.push_back(ve);
+		}
 	}
 
 

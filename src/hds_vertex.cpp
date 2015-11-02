@@ -7,20 +7,24 @@ using namespace std;
 
 size_t HDS_Vertex::uid = 0;
 
-HDS_Vertex::HDS_Vertex() {
+HDS_Vertex::HDS_Vertex()
+{
 	isPicked = false;
 	index = -1;
-	refid = -1;
+	refid = 0;
 	colorVal = 0;
 	he = nullptr;
 	bridgeTwin = nullptr;
 	flapTwin = nullptr;
 }
 
-HDS_Vertex::HDS_Vertex(const QVector3D &pos):pos(pos) {
+HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
+	: pos(pos)
+	, index(idx), refid(rid)
+{
 	isPicked = false;
-	index = -1;
-	refid = -1;
+	/*index = -1;
+	refid = 0;*/
 	he = nullptr;
 	bridgeTwin = nullptr;
 	flapTwin = nullptr;

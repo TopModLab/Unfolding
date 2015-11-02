@@ -49,7 +49,7 @@ const char SVG_ARCH[] = 	"<path id=\"Rim%d\" d=\"M %lf %lf " \
 							*/
 void printText(FILE* file, double x, double y, double angle, const QString &text)
 {
-	fprintf(file, SVG_TEXT, x, y, angle, x, y, text.constData());
+	fprintf(file, SVG_TEXT, x, y, angle, x, y, text.toUtf8().data());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 
 						printTextPos.push_back(v1 + dirPin * 0.5);
 						printTextRot.push_back(atan2(dirPin.y(), dirPin.x()));
-						printTextIfo.push_back(QString::number(curHE->next->v->index));
+						printTextIfo.push_back(QString::number(curHE->next->v->refid));
 					}
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
 					curHE = curHE->next;
@@ -427,6 +427,11 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 		unordered_set<HDS_HalfEdge*> cutTwinEdges;
 		vector<QVector2D*> printEdgePts;
 		vector<QVector2D*> printEdgePtsCarves;
+
+		// Connection label
+		vector<QVector2D> printTextPos;
+		vector<double> printTextRot;
+		vector<QString> printTextIfo;
 		do
 		{
 			cutedges.insert(curHE);
@@ -450,6 +455,14 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			// d: vector from current point to face center
 			// a: vector projected from d onto T
 			// n: normalized normal of the current edge
+			QVector2D T = (*Pnext - *Pthis).normalized();
+			QVector2D d = (Pc - *Pthis);
+			QVector2D a = QVector2D::dotProduct(d, T) * T;
+			QVector2D n = (a - d).normalized();
+
+			QVector2D Pn = *Pthis + a;
+			QVector2D Psc = Pn + n * wid_conn * 0.6;
+
 			switch (cn_t)
 			{
 			case SIMPLE_CONNECTOR:
@@ -457,13 +470,13 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 				if (cutedges.find(curHE) != cutedges.end())
 				{
 					//calculate 
-					QVector2D T = (*Pnext - *Pthis).normalized();
+					/*QVector2D T = (*Pnext - *Pthis).normalized();
 					QVector2D d = (Pc - *Pthis);
 					QVector2D a = QVector2D::dotProduct(d, T) * T;
 					QVector2D n = (a - d).normalized();
 
 					QVector2D Pn = *Pthis + a;
-					QVector2D Psc = Pn + n * wid_conn;
+					QVector2D Psc = Pn + n * wid_conn;*/
 
 					//draw connector
 
@@ -475,6 +488,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 
 					cutedges.erase(curHE);
 					//cutedges.erase(curHE->flip->cutTwin->flip);
+
 				}
 				else
 				{
@@ -485,13 +499,13 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			case INSERT_CONNECTOR:
 			{
 				//calculate 
-				QVector2D T = (*Pnext - *Pthis).normalized();
+				/*QVector2D T = (*Pnext - *Pthis).normalized();
 				QVector2D d = (Pc - *Pthis);
 				QVector2D a = QVector2D::dotProduct(d, T) * T;
 				QVector2D n = (a - d).normalized();
 
 				QVector2D Pn = *Pthis + a;
-				QVector2D Psc = Pn + n * wid_conn;
+				QVector2D Psc = Pn + n * wid_conn;*/
 
 				QVector2D *Pst = new QVector2D(Pn - len_conn * T);
 				QVector2D *Psn = new QVector2D(Pn + len_conn * T);
@@ -528,13 +542,13 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			case GEAR_CONNECTOR:
 			{
 				//calculate 
-				QVector2D T = (*Pnext - *Pthis).normalized();
+				/*QVector2D T = (*Pnext - *Pthis).normalized();
 				QVector2D d = (Pc - *Pthis);
 				QVector2D a = QVector2D::dotProduct(d, T) * T;
 				QVector2D n = (a - d).normalized();
 
 				QVector2D Pn = *Pthis + a;
-				QVector2D Psc = Pn + n * wid_conn;
+				QVector2D Psc = Pn + n * wid_conn;*/
 
 				//division number
 				// Gear count
@@ -566,13 +580,13 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			case SAW_CONNECTOR:
 			{
 				//calculate 
-				QVector2D T = (*Pnext - *Pthis).normalized();
+				/*QVector2D T = (*Pnext - *Pthis).normalized();
 				QVector2D d = (Pc - *Pthis);
 				QVector2D a = QVector2D::dotProduct(d, T) * T;
 				QVector2D n = (a - d).normalized();
 
 				QVector2D Pn = *Pthis + a;
-				QVector2D Psc = Pn + n * wid_conn * 0.6;
+				QVector2D Psc = Pn + n * wid_conn * 0.6;*/
 
 				QVector2D *Pst = new QVector2D(Pn - len_conn * T * 0.5);
 				QVector2D *Psn = new QVector2D(Pn + len_conn * T * 0.5);
@@ -594,10 +608,10 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			{
 				//calculate 
 				double edge_len = Pthis->distanceToPoint(*Pnext);
-				QVector2D T = (*Pnext - *Pthis).normalized();
+				/*QVector2D T = (*Pnext - *Pthis).normalized();
 				QVector2D d = (Pc - *Pthis);
 				QVector2D a = QVector2D::dotProduct(d, T) * T;
-				QVector2D n = (a - d).normalized();
+				QVector2D n = (a - d).normalized();*/
 
 				QVector2D Pn = *Pthis + T * edge_len * 0.5;
 				QVector2D Psc = Pn + n * wid_conn * 1.5;
@@ -625,12 +639,29 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 				break;
 			}
 
+			// add text
+			printTextPos.push_back(Pn - n * wid_conn * 0.6);
+			printTextRot.push_back(Radian2Degree(atan2(T.y(), T.x())));
+			printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->refid));
+
 			printEdgePts.push_back(Pnext);
 
 			Pthis = Pnext;
 			curHE = curHE->next;
 		} while (curHE != he);
 
+		/************************************************************************/
+		/* Print Text                                                           */
+		/************************************************************************/
+		for (int i = 0; i < printTextPos.size(); i++)
+		{
+			auto pos = printTextPos[i];
+			auto rot = printTextRot[i];
+			auto ifo = printTextIfo[i];
+			printText(SVG_File, pos.x(), pos.y(), rot, ifo);
+
+		}
+		//////////////////////////////////////////////////////////////////////////
 		fprintf(SVG_File,
 			"<g opacity=\"0.8\">\n" \
 			"\t<polygon id=\"%d\" points=\"",
@@ -681,6 +712,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 	fclose(SVG_File);
 	cout << "SVG file saved successfully!" << endl;
 }
+
 void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
 	const unordered_map<ConnectorConf, double>& conf, int cn_t)
 {

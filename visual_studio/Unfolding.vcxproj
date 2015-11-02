@@ -281,6 +281,7 @@
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp" />
     <ClCompile Include="..\src\hds_bridger.cpp" />
+    <ClCompile Include="..\src\hds_common.cpp" />
     <ClCompile Include="..\src\hollowmeshpanel.cpp" />
     <ClCompile Include="..\src\MeshConnector.cpp" />
     <ClCompile Include="..\src\MeshExtender.cpp" />
@@ -426,6 +427,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CONSOLE -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL "-I$(SolutionDir)..\src" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I.\debug"</Command>
     </CustomBuild>
+    <ClInclude Include="..\src\hds_common.h" />
     <ClInclude Include="..\src\MeshConnector.h" />
     <ClInclude Include="GeneratedFiles\ui_bindingmeshpanel.h" />
     <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h" />

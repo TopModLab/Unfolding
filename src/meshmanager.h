@@ -97,7 +97,7 @@ protected:
 		static QMutex mutex;
 		mutex.lock();
 		delete instance;
-		instance = NULL;
+		instance = nullptr;
 		mutex.unlock();
 	}
 

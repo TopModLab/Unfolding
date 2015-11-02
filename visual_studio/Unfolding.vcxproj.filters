@@ -273,6 +273,9 @@
     <ClCompile Include="..\src\ConnectorPanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\hds_common.cpp">
+      <Filter>Header Files\HDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -415,6 +418,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\hds_common.h">
+      <Filter>Header Files\HDS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

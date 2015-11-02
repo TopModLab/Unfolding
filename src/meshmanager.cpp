@@ -22,7 +22,7 @@
 #include <vtkVariantArray.h>
 #endif
 
-MeshManager* MeshManager::instance = NULL;
+MeshManager* MeshManager::instance = nullptr;
 
 bool MeshManager::loadOBJFile(const string& filename) {
 #if USE_REEB_GRAPH

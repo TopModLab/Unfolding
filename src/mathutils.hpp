@@ -59,4 +59,15 @@ T interpolate(double c, T c1, T c2, T c3) {
 	}
 }
 
+template <typename T>
+inline T Radian2Degree(T radian)
+{
+	return radian * 180.0 / M_PI;
+}
+template <typename T>
+inline T Degree2Radian(T degree)
+{
+	return degree * M_PI / 180.0;
+}
+
 #endif // MATHUTILS_HPP

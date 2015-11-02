@@ -11,7 +11,7 @@ HDS_Face::HDS_Face()
 	isHole = false;
 	//isFlap = false;
 	index = -1;
-	refid = -1;
+	refid = 0;
 	he = nullptr;
 	scalingFactor = 1;
 	isPlanar = true;
@@ -137,9 +137,11 @@ void HDS_Face::setScaleFactor(double factor)
 
 QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 {
-	QVector3D c = center();
+	/*QVector3D c = center();
 	QVector3D vec_cv = v->pos - c;
-	return c + scalingFactor * vec_cv;
+	return c + scalingFactor * vec_cv;*/
+	return scalingFactor * v->pos
+		+ (1 - scalingFactor) * center();
 
 }
 
@@ -153,7 +155,7 @@ vector<QVector3D> HDS_Face::getScaledCorners()
 		for (auto v : vertices) {
 			scaledCorners.insert(scaledCorners.end(), scaleCorner(v));
 		}
-	}else {
+	} else {
 		//scale down non-planar face
 	}
 	return scaledCorners;

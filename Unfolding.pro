@@ -20,10 +20,11 @@ INCLUDEPATH += extras/colormap_editor src
 
 SOURCES += src/main.cpp\
         src/mainwindow.cpp \
-    src/hds_face.cpp \
+    src/hds_common.cpp \
     src/hds_vertex.cpp \
-    src/hds_mesh.cpp \
     src/hds_halfedge.cpp \
+    src/hds_face.cpp \
+    src/hds_mesh.cpp \
     src/meshviewer.cpp \
     src/meshmanager.cpp \
     src/meshloader.cpp \
@@ -60,10 +61,11 @@ SOURCES += src/main.cpp\
     src/MeshConnector.cpp
 
 HEADERS  += src/mainwindow.h \
-    src/hds_face.h \
+    src/hds_common.h \
     src/hds_vertex.h \
-    src/hds_mesh.h \
     src/hds_halfedge.h \
+    src/hds_face.h \
+    src/hds_mesh.h \
     src/meshviewer.h \
     src/common.h \
     src/glutils.hpp \

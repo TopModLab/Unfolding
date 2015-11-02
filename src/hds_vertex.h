@@ -2,6 +2,7 @@
 #define HDS_VERTEX_H
 
 #include "common.h"
+#include "hds_common.h"
 
 #include <QtGui/QVector3D>
 
@@ -15,10 +16,10 @@ private:
 public:
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
-	void setRefId(int id) { refid = id << 2 +00; }
+	void setRefId(int id) { refid = id << 2 + 00; }
 
 	HDS_Vertex();
-	HDS_Vertex(const QVector3D &pos);
+	HDS_Vertex(const QVector3D &pos, int idx = -1, int refid = 0);
 	~HDS_Vertex();
 
 	HDS_Vertex(const HDS_Vertex &other);

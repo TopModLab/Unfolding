@@ -17,6 +17,7 @@
 #include "hds_halfedge.h"
 #include "hds_vertex.h"
 #include "hds_bridger.h"
+#include "mathutils.hpp"
 
 #include "Graph.hpp"
 enum class ConnectorConf
