@@ -129,8 +129,12 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 				vector<QVector2D> connCorners;
 				do
 				{
+					/*if (curHE->isCutEdge && !curHE->flip->isCutEdge)
+					{
+						cout << "hehe" << endl;
+					}*/
 					// Find flipped corner
-					if (!curHE->flip->f->isBridger &&
+					/*if (!curHE->flip->f->isBridger &&
 						!curHE->next->flip->f->isBridger)// &&
 						//!curHE->next->next->flip->f->isBridger)
 					{
@@ -162,10 +166,61 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 						printTextPos.push_back(v1 + dirPin * 0.5);
 						printTextRot.push_back(Radian2Degree(atan2(dirPin.y(), dirPin.x())));
 						printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->next->v->refid));
-					}
+					}*/
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
 					curHE = curHE->next;
 				} while (curHE != he);
+			}
+			else if (!curFace->isBridger)
+			{
+				// Add pinholes
+				vector<he_t*> cutedges;
+				he_t* refedge;
+
+				double scale = MeshHollower::flapSize;
+				do
+				{
+					if (!curHE->isCutEdge)
+					{
+						refedge = curHE;
+					}
+					else if (curHE->prev->isCutEdge)
+					{
+						cutedges.push_back(curHE);
+					}
+					curHE = curHE->next;
+				} while (curHE != he);
+				for (auto cut_he : cutedges)
+				{
+					vert_t* targetV;
+					vert_t* targetNextV;
+					if (cut_he->next == refedge)
+					{
+						targetV = refedge->v;
+						targetNextV = refedge->flip->v;
+					}
+					else
+					{
+						targetV = refedge->flip->v;
+						targetNextV = refedge->v;
+					}
+					QVector3D targPos = targetV->pos * (1 - scale) + targetNextV->pos * scale;
+					QVector2D startPos = cut_he->v->pos.toVector2D();
+					QVector2D dirPin = targPos.toVector2D() - startPos;
+					printPinholes.push_back(startPos + dirPin * 2.0 / 3.0);
+					printPinholes.push_back(startPos + dirPin / 3.0);
+
+					// Add labels for pinholes
+					printTextPos.push_back(startPos + dirPin * 0.5);
+					printTextRot.push_back(Radian2Degree(atan2(dirPin.y(), dirPin.x())));
+					printTextIfo.push_back(HDS_Common::ref_ID2String(cut_he->v->refid));
+				}
+				// Add labels for face
+				QVector2D faceDir = (refedge->v->pos - refedge->flip->v->pos).toVector2D();
+				printTextPos.push_back(curFace->center().toVector2D());
+				printTextRot.push_back(Radian2Degree(atan2(faceDir.y(), faceDir.x())));
+				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
+
 			}
 			else
 			{

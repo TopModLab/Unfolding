@@ -50,7 +50,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 	//set new bridger on each edge
 	for (auto he : old_edges)
 	{
-		cout<<"bridger based on original edge "<<he->index<<endl;
+		cout << "bridger based on original edge " << he->index << endl;
 		//get edge vertex, calculate scaled vertex
 		vert_t* he_v = he->v;
 		vert_t* he_flip_v = he->flip->v;
@@ -62,7 +62,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		vert_t* he2_v1 = new vert_t(he_flip_f->scaleCorner(he_v));
 		vert_t* he2_v2 = new vert_t(he_flip_f->scaleCorner(he_flip_v));
 
-		// Assign refid
+		// Assign id and refid
 		he1_v1->refid = he2_v1->refid = he_v->refid;
 		//	= HDS_Common::assignRef_ID(he_v->index, HDS_Common::FROM_VERTEX);
 		he1_v2->refid = he2_v2->refid = he_flip_v->refid;
@@ -98,6 +98,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		cutFace->index = HDS_Face::assignIndex();
 		cutFace->isCutFace = true;
 		cutFace->he = he1;
+		//cutFace->refid = he_f->refid;
 		he1->setCutEdge(true);
 		he2->f = cutFace;
 		he2->setCutEdge(true);
@@ -157,7 +158,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	QVector3D v2_flap = (1.0 - flapSize) * startHE->flip->v->pos + flapSize * v3;
 	QVector3D v1_flap = (1.0 - flapSize) * startHE->v->pos + flapSize * v0;
 
-	vector<HDS_Vertex*> vertices;//kkkkkkkkkkkkk
+	vector<HDS_Vertex*> vertices;
 	vertices.push_back(startHE->flip->v);
 	switch(type)
 	{
@@ -174,8 +175,8 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 		hv2_f->pos = v2_flap;*/
 		hv1_flap->refid = startHE->v->refid;
 		hv2_flap->refid = startHE->flip->v->refid;
-		vertices.push_back(hv2_flap);//kkkkkkkkkkkkk
-		vertices.push_back(hv1_flap);//kkkkkkkkkkkkk
+		vertices.push_back(hv2_flap);
+		vertices.push_back(hv1_flap);
 
 		break;
 	}
@@ -210,9 +211,9 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 				= new HDS_Vertex((1.0 - right_scale) * v2_flap_flap + right_scale * v3_flap);
 			HDS_Vertex* hv2_flap_flap = new HDS_Vertex(v2_flap_flap);
 
-			vertices.push_back(hv3_scaled);//kkkkkkkkkkkkk
-			vertices.push_back(hv3_flap_scaled);//kkkkkkkkkkkkk
-			vertices.push_back(hv2_flap_flap);//kkkkkkkkkkkkk
+			vertices.push_back(hv3_scaled);
+			vertices.push_back(hv3_flap_scaled);
+			vertices.push_back(hv2_flap_flap);
 		}
 		else
 		{
@@ -235,9 +236,9 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 			HDS_Vertex* hv0_scaled
 				= new HDS_Vertex((1.0 - left_scale) * v1_flap + left_scale * v0);
 
-			vertices.push_back(hv1_flap_flap);//kkkkkkkkkkkkk
-			vertices.push_back(hv0_flap_scaled);//kkkkkkkkkkkkk
-			vertices.push_back(hv0_scaled);//kkkkkkkkkkkkk
+			vertices.push_back(hv1_flap_flap);
+			vertices.push_back(hv0_flap_scaled);
+			vertices.push_back(hv0_scaled);
 		}
 		else
 		{
@@ -245,7 +246,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 
 			HDS_Vertex* hv1_flap = new HDS_Vertex(v1_flap);
 
-			vertices.push_back(hv1_flap);//kkkkkkkkkkkkk
+			vertices.push_back(hv1_flap);
 		}
 
 		break;
@@ -256,12 +257,10 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 		auto curHE = originalHE->next;
 		do
 		{
-			//vertPos.push_back(he_f->scaleCorner(curHE->flip->v));
-			
 			HDS_Vertex* newV = new HDS_Vertex;
 			newV->pos = he_f->scaleCorner(curHE->flip->v);
 			newV->refid = curHE->flip->v->refid;
-			vertices.push_back(newV);//kkkkkkkkkkkkk
+			vertices.push_back(newV);
 
 			curHE = curHE->next;
 		} while (curHE != originalHE->prev);
@@ -270,11 +269,12 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	default:
 		break;
 	}
-	vertices.push_back(startHE->v);//kkkkkkkkkkkkk
+	vertices.push_back(startHE->v);
 
 	//HDS_Face * newFace = createFace(startHE->flip->v, vertPos, startHE->v, cutFace);
-	HDS_Face* newFace = createFace(vertices, cutFace);//kkkkkkkkkkkkk
+	HDS_Face* newFace = createFace(vertices, cutFace);
 	newFace->he = startHE;
+	newFace->refid = he_f->refid;
 	startHE->f = newFace;
 
 	return newFace;
@@ -325,6 +325,7 @@ HDS_Face* MeshHollower::createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFa
 
 	face_t * newFace = new face_t;
 	newFace->index = HDS_Face::assignIndex();
+	newFace->refid = cutFace->refid;
 
 	auto preV = vertices.front();
 	for (int i = 1; i < vertices.size() - 1; i++)

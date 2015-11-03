@@ -68,6 +68,7 @@ unordered_map<ConnectorConf, double> ConnectorPanel::getConfiguration() const
 
 void ConnectorPanel::initConnectorType()
 {
+	ui->mesh_type->setCurrentIndex(meshType);
 	switch (meshType)
 	{
 	case HDS_Mesh::REGULAR_PROC:
