@@ -71,7 +71,7 @@ MeshConnector::~MeshConnector()
 }
 
 void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filename,
-	const unordered_map<ConnectorConf, double>& conf, int cn_t)
+	const confMap& conf, int cn_t)
 {
 	if (unfolded_mesh == nullptr)
 	{
@@ -287,7 +287,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	printf("SVG file %s saved successfully!\n", filename);
 }
 
-void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename, const unordered_map<ConnectorConf, double>& conf, int cn_t /*= HOLLOW_CONNECTOR*/)
+void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename, const confMap& conf, int cn_t /*= HOLLOW_CONNECTOR*/)
 {
 	if (unfolded_mesh == nullptr)
 	{
@@ -406,7 +406,7 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 }
 
 void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filename,
-	const unordered_map<ConnectorConf, double>& conf, int cn_t)
+	const confMap& conf, int cn_t)
 {
 	//ConnectorType cn_t = SIMPLE_CONNECTOR;
 	FILE *SVG_File;
@@ -769,7 +769,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 }
 
 void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
-	const unordered_map<ConnectorConf, double>& conf, int cn_t)
+	const confMap& conf, int cn_t)
 {
 	assert(unfolded_mesh != nullptr);
 	/*if (unfolded_mesh == nullptr)

@@ -12,6 +12,7 @@
 #include "hds_mesh.h"
 #include "MeshConnector.h"
 
+
 class ConnectorPanel : public QDialog
 {
 	Q_OBJECT
@@ -24,7 +25,7 @@ public:
 	QString getFilename() const;
 	double getScale() const;
 	int getConnectorType() const;
-	unordered_map<ConnectorConf, double> getConfiguration() const;
+	confMap getConfiguration() const;
 private:
 	void initConnectorType();
 private slots:

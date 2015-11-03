@@ -22,7 +22,7 @@
 #include <numeric>
 #include <memory>
 #include <limits>
-
+#include <math.h>
 using namespace std;
 
 class UnfoldingAppException: public exception {

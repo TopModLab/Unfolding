@@ -1,11 +1,14 @@
 #ifndef MATHUTILS_HPP
 #define MATHUTILS_HPP
 
-#include "math.h"
+#include <math.h>
 
 //#include <QtGui/QColor>
 #include <QColor>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 static const double Pi = 3.14159265358979323846;
 static const double PI2 = Pi * 2.0;
 
