@@ -32,6 +32,17 @@ enum class ConnectorConf
 		GEAR_COUNT
 };
 
+struct EnumClassHash
+{
+	template <typename T>
+	std::size_t operator()(T t) const
+	{
+		return static_cast<std::size_t>(t);
+	}
+};
+
+typedef std::unordered_map<ConnectorConf, double, EnumClassHash > confMap;
+
 class MeshConnector
 {
 private:
@@ -59,16 +70,16 @@ public:
 	static void generateConnector(mesh_t *unfolded_mesh);
 private:
 	static void exportHollowPiece(mesh_t* unfolded_mesh, const char* filename,
-		const unordered_map<ConnectorConf, double>& conf,
+		const confMap& conf,
 		int cn_t = HOLLOW_CONNECTOR);
 	static void exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
-		const unordered_map<ConnectorConf, double>& conf,
+		const confMap& conf,
 		int cn_t = HOLLOW_CONNECTOR);
 	static void exportRegularPiece(mesh_t* unfolded_mesh, const char* filename,
-		const unordered_map<ConnectorConf, double>& conf,
+		const confMap& conf,
 		int cn_t = SIMPLE_CONNECTOR);
 	static void exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
-		const unordered_map<ConnectorConf, double>& conf,
+		const confMap& conf,
 		int cn_t = ARCH_CONNECTOR);
 };
 

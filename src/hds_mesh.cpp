@@ -884,7 +884,6 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getSelectedVertices()
 	unordered_set<vert_t*> pickedVerts;
 	for(auto v: vertSet) {
 		if (v->isPicked) {
-			cout<<"picked++"<<endl;
 			pickedVerts.insert(v);
 		}
 	}

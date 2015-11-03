@@ -56,9 +56,9 @@ int ConnectorPanel::getConnectorType() const
 	return ui->connector_type->currentIndex();
 }
 
-unordered_map<ConnectorConf, double> ConnectorPanel::getConfiguration() const
+confMap ConnectorPanel::getConfiguration() const
 {
-	unordered_map<ConnectorConf, double> ret;
+	confMap ret;
 	ret.insert(make_pair(ConnectorConf::SCALE, ui->scale_val->value()));
 	ret.insert(make_pair(ConnectorConf::WIDTH, ui->width_val->value()));
 	ret.insert(make_pair(ConnectorConf::LENGTH, ui->length_val->value()));
