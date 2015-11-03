@@ -20,6 +20,7 @@
 #include "mathutils.hpp"
 
 #include "Graph.hpp"
+
 enum class ConnectorConf
 {
 	// General
@@ -30,25 +31,7 @@ enum class ConnectorConf
 		// Gear
 		GEAR_COUNT
 };
-/*
-namespace ConnectorConf
-{
-	enum ConnectorType
-	{
-		// Regular type
-		SIMPLE_CONNECTOR = 0,
-		INSERT_CONNECTOR = 1,
-		GEAR_CONNECTOR = 2,
-		SAW_CONNECTOR = 3,
-		ADVSAW_CONNECTOR = 4,
-		// Hollow type
-		HOLLOW_CONNECTOR = 0,
-		// Rim type
-		ARCH_CONNECTOR = 0,
-		RING_CONNECTOR = 1
-	};
-	
-}*/
+
 class MeshConnector
 {
 private:

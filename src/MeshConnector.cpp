@@ -33,7 +33,7 @@ const char SVG_LINE[] = 	"<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\
 							"style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n";
 const char SVG_TEXT[] = 	"\t<text x=\"%lf\" y=\"%lf\" fill=\"green\" " \
 							"transform=\"rotate(%lf %lf,%lf)\" " \
-							"style=\"font-size:24;stroke:green;stroke-width:0.1;fill:none;\" >" \
+							"style=\"font-size:3;stroke:green;stroke-width:0.1;fill:none;\" >" \
 							"%s</text>\n";
 const char SVG_ARCH[] = 	"<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
@@ -58,7 +58,7 @@ void printText(FILE* file, double x, double y, double angle, const QString &text
 // Text:	left-bottom corner as orginal position
 //			rotation without position means rotating around origin point.
 // Rim/Ring: 
-// 
+//			
 //////////////////////////////////////////////////////////////////////////
 
 MeshConnector::MeshConnector()
@@ -160,8 +160,8 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 						printPinholes.push_back(v1 + dirPin / 3.0);
 
 						printTextPos.push_back(v1 + dirPin * 0.5);
-						printTextRot.push_back(atan2(dirPin.y(), dirPin.x()));
-						printTextIfo.push_back(QString::number(curHE->next->v->refid));
+						printTextRot.push_back(Radian2Degree(atan2(dirPin.y(), dirPin.x())));
+						printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->next->v->refid));
 					}
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
 					curHE = curHE->next;

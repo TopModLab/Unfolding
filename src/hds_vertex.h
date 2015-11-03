@@ -16,7 +16,7 @@ private:
 public:
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
-	void setRefId(int id) { refid = id << 2 + 00; }
+	void setRefId(int id) { refid = (id << 2) + HDS_Common::FROM_VERTEX; }
 
 	HDS_Vertex();
 	HDS_Vertex(const QVector3D &pos, int idx = -1, int refid = 0);

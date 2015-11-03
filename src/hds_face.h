@@ -17,7 +17,7 @@ private:
 public:
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
-	void setRefId(int id) { refid = id << 2 + 10; }
+	void setRefId(int id) { refid = (id << 2) + HDS_Common::FROM_FACE; }
 
 	HDS_Face();
 	~HDS_Face();

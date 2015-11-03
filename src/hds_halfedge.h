@@ -23,7 +23,7 @@ public:
 
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
-	void setRefId(int id) { refid = id << 2 +01; }
+	void setRefId(int id) { refid = (id << 2) + HDS_Common::FROM_EDGE; }
 
 	HDS_HalfEdge();
 	~HDS_HalfEdge();
