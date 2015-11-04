@@ -29,7 +29,9 @@ enum class ConnectorConf
 	LENGTH,
 	// Regular
 		// Gear
-		GEAR_COUNT
+		GEAR_COUNT,
+	// Hollow
+	PINHOLESIZE
 };
 
 struct EnumClassHash
@@ -81,6 +83,10 @@ private:
 	static void exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
 		const confMap& conf,
 		int cn_t = ARCH_CONNECTOR);
+
+private:
+	/*static double pinholesize;
+	static double he_scale;*/
 };
 
 #endif
