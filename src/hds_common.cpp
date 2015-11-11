@@ -12,16 +12,16 @@ QString HDS_Common::ref_ID2String(int refid)
 	switch (newrid)
 	{
 	case ORIGIN:
-		ret = "OR-";
+		ret = "R";
 		break;
 	case FROM_VERTEX:
-		ret = "V-";
+		ret = "V";
 		break;
 	case FROM_EDGE:
-		ret = "E-";
+		ret = "E";
 		break;
 	case FROM_FACE:
-		ret = "F-";
+		ret = "F";
 		break;
 	default:
 		break;
