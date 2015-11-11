@@ -74,6 +74,9 @@ private:
 	static void exportHollowPiece(mesh_t* unfolded_mesh, const char* filename,
 		const confMap& conf,
 		int cn_t = HOLLOW_CONNECTOR);
+	static void exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filename,
+		const confMap& conf,
+		int cn_t = HOLLOW_CONNECTOR);
 	static void exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 		const confMap& conf,
 		int cn_t = HOLLOW_CONNECTOR);
@@ -83,6 +86,8 @@ private:
 	static void exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
 		const confMap& conf,
 		int cn_t = ARCH_CONNECTOR);
+
+	static void writeToSVG(const char* filename);
 
 private:
 	/*static double pinholesize;
