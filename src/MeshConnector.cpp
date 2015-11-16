@@ -27,13 +27,13 @@
 
 const char SVG_HEAD[] =		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
 							"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">\n";
-const char SVG_CIRCLE[] = 	"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"1.0\" " \
+const char SVG_CIRCLE[] = 	"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
 							"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n";
 const char SVG_LINE[] = 	"<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
-							"style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n";
+							"style=\"fill:none;stroke:%s;stroke-width:0.1\" />\n";
 const char SVG_TEXT[] = 	"\t<text x=\"%lf\" y=\"%lf\" fill=\"green\" " \
 							"transform=\"rotate(%lf %lf,%lf)\" " \
-							"style=\"font-size:3;stroke:green;stroke-width:0.1;fill:none;\" >" \
+							"style=\"font-size:10;stroke:magenta;stroke-width:0.1;fill:none;\" >" \
 							"%s</text>\n";
 const char SVG_ARCH[] = 	"<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
@@ -47,6 +47,7 @@ const char SVG_ARCH[] = 	"<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A r r, 0, 1, 1, p4x p4y " \
 							"Z\" />");
 							*/
+
 void printText(FILE* file, double x, double y, double angle, const QString &text)
 {
 	fprintf(file, SVG_TEXT, x, y, angle, x, y, text.toUtf8().data());
@@ -93,8 +94,10 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	double he_offset(10);
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
-	double len_conn = conf.find(ConnectorConf::LENGTH)->second; 
-	
+	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	double scale = MeshHollower::flapSize;
+
 	double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
@@ -117,6 +120,9 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		vector<double> printTextRot;
 		vector<QString> printTextIfo;
 
+		vector<QVector2D> printEtchEdges;
+		unordered_set<he_t*> visitedEtchEdges;
+
 		// Group current piece
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
 		for (auto fid : piece)
@@ -129,63 +135,76 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 				vector<QVector2D> connCorners;
 				do
 				{
-					// Find flipped corner
-					if (!curHE->flip->f->isBridger &&
-						!curHE->next->flip->f->isBridger)// &&
-						//!curHE->next->next->flip->f->isBridger)
-					{
-						QVector2D Pc = curHE->flip->f->center().toVector2D() ;
-
-						QVector2D v0 = curHE->v->pos.toVector2D();
-						QVector2D v1 = curHE->next->v->pos.toVector2D();
-						QVector2D v2 = curHE->next->next->v->pos.toVector2D();
-						
-						QVector2D d1 = v0 - v1;
-						QVector2D d2 = v2 - v1;
-
-						double len_1 = d1.length();
-						double len_2 = d2.length();
-						
-						QVector2D dirPin;
-						if (len_1 < len_2)
-						{
-							dirPin = d1 + len_1 * d2.normalized();
-						}
-						else
-						{
-							dirPin = d2 + len_2 * d1.normalized();
-						}
-
-						printPinholes.push_back(v1 + dirPin * 2.0 / 3.0);
-						printPinholes.push_back(v1 + dirPin / 3.0);
-
-						printTextPos.push_back(v1 + dirPin * 0.5);
-						printTextRot.push_back(Radian2Degree(atan2(dirPin.y(), dirPin.x())));
-						printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->next->v->refid));
-					}
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
 					curHE = curHE->next;
 				} while (curHE != he);
 			}
+			else if (!curFace->isBridger)
+			{
+				// Add pinholes
+				vector<he_t*> cutedges;
+				he_t* refedge;
+
+				do
+				{
+					if (!curHE->isCutEdge)
+					{
+						refedge = curHE;
+					}
+					else if (curHE->prev->isCutEdge)
+					{
+						cutedges.push_back(curHE);
+					}
+					curHE = curHE->next;
+				} while (curHE != he);
+				for (auto cut_he : cutedges)
+				{
+					vert_t* targetV;
+					vert_t* targetNextV;
+					if (cut_he->next == refedge)
+					{
+						targetV = refedge->v;
+						targetNextV = refedge->flip->v;
+					}
+					else
+					{
+						targetV = refedge->flip->v;
+						targetNextV = refedge->v;
+					}
+					QVector3D targPos = targetV->pos * (1 - scale) + targetNextV->pos * scale;
+					QVector2D startPos = cut_he->v->pos.toVector2D();
+					QVector2D dirPin = targPos.toVector2D() - startPos;
+					printPinholes.push_back(startPos + dirPin / 3.0);
+					printPinholes.push_back(startPos + dirPin * 2.0 / 3.0);
+
+					// Add labels for pinholes
+					printTextPos.push_back(printPinholes.back());
+					printTextRot.push_back(Radian2Degree(atan2(dirPin.y(), dirPin.x())));
+					printTextIfo.push_back(HDS_Common::ref_ID2String(cut_he->v->refid));
+				}
+				// Add labels for face
+				QVector2D faceDir = (refedge->v->pos - refedge->flip->v->pos).toVector2D();
+				printTextPos.push_back(curFace->center().toVector2D());
+				printTextRot.push_back(Radian2Degree(atan2(faceDir.y(), faceDir.x())));
+				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
+
+			}// Etch layer
 			else
 			{
-				fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
 				// Write points of each edge
 				do
 				{
-					fprintf(SVG_File, "%f,%f ",
-						curHE->v->pos.x() * he_scale,
-						curHE->v->pos.y() * he_scale);
+					if (!curHE->isCutEdge
+						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
+					{
+						printEtchEdges.push_back(curHE->v->pos.toVector2D());
+						printEtchEdges.push_back(curHE->next->v->pos.toVector2D());
+						visitedEtchEdges.insert(curHE);
+						visitedEtchEdges.insert(curHE->flip);
+					}
 					curHE = curHE->next;
 				} while (curHE != he);
-				// Close face loop
-				fprintf(SVG_File,
-					"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.1\" />\n",
-					curHE->v->pos.x() * he_scale,
-					curHE->v->pos.y() * he_scale);
-				curHE = curHE->next;
 			}
-
 		}
 
 		/************************************************************************/
@@ -202,11 +221,10 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		/************************************************************************/
 		/* Write out circles                                                    */
 		/************************************************************************/
-		for (auto circlepos : printPinholes)
+		for (auto pinpos : printPinholes)
 		{
-			fprintf(SVG_File, "\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"0.5\" " \
-				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
-				printCircleID++, circlepos.x() * he_scale, circlepos.y() * he_scale);
+			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
+				pinpos.x() * he_scale, pinpos.y() * he_scale, pinholesize);
 		}
 
 		/************************************************************************/
@@ -220,8 +238,240 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 				printBorderEdgePts[isec].y() * he_scale);
 		}
 		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
+		/************************************************************************/
+		/* Write out edge for etch                                               */
+		/************************************************************************/
+		for (int isec = 0; isec < printEtchEdges.size(); isec += 2)
+		{
+			fprintf(SVG_File, SVG_LINE, isec / 2,
+				printEtchEdges[isec].x() * he_scale, printEtchEdges[isec].y() * he_scale,
+				printEtchEdges[isec + 1].x() * he_scale, printEtchEdges[isec + 1].y() * he_scale,
+				"yellow");
+		}
 		/*fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
 		printBorderEdgePts[0].x(), printBorderEdgePts[0].y());*/
+		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+	}
+	/************************************************************************/
+	/* End of SVG File End                                                  */
+	/************************************************************************/
+	fprintf(SVG_File, "</svg>");
+	fclose(SVG_File);
+	printf("SVG file %s saved successfully!\n", filename);
+}
+
+void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filename, const confMap& conf, int cn_t /*= HOLLOW_CONNECTOR*/)
+{
+	if (unfolded_mesh == nullptr)
+	{
+		//assert();
+		return;
+	}
+	//ConnectorType cn_t = SIMPLE_CONNECTOR;
+	FILE *SVG_File;
+	errno_t err = fopen_s(&SVG_File, filename, "w");
+	if (err)
+	{
+		printf("Can't write to file %s!\n", filename);
+		return;
+	}
+
+	/************************************************************************/
+	/* Scalors                                                              */
+	/************************************************************************/
+	double he_offset(10);
+	double he_scale = conf.find(ConnectorConf::SCALE)->second;
+	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
+	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	double scale = MeshHollower::flapSize;
+	double shift = (MeshHollower::shiftAmount + 1) * 0.5;
+
+	double circle_offset = 3;
+	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
+
+	//SVG file head
+	// define the size of export graph
+	fprintf(SVG_File, SVG_HEAD,
+		static_cast<int>(size_vec.x() * he_scale),
+		static_cast<int>(size_vec.y() * he_scale));
+
+	int printFaceID(0), printCircleID(0);
+
+
+	for (auto piece : unfolded_mesh->pieceSet)
+	{
+		vector<face_t *> cutfaces;
+
+		vector<QVector2D> printBorderEdgePts;//Edges on the boundary
+		vector<QVector2D> printEdgePtsCarves;
+		vector<QVector2D> printPinholes;
+
+		vector<QVector2D> printTextPos;
+		vector<double> printTextRot;
+		vector<QString> printTextIfo;
+
+		vector<QVector2D> printEtchEdges;
+		unordered_set<he_t*> visitedEtchEdges;
+
+		// Group current piece
+		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
+		for (auto fid : piece)
+		{
+			face_t *curFace = unfolded_mesh->faceMap[fid];
+			auto he = curFace->he;
+			auto curHE = he;
+			// Cut layer
+			if (curFace->isCutFace)
+			{
+				vector<QVector2D> connCorners;
+				do
+				{
+					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
+					curHE = curHE->next;
+				} while (curHE != he);
+			}
+			// Pinholes
+			else if (!curFace->isBridger)
+			{
+				// Add pinholes
+				vector<he_t*> cutedges;
+				he_t* refedge;
+
+				
+				vector<QVector3D> flapPos;
+				int offset = 0;
+				do
+				{
+					if (!curHE->isCutEdge)
+					{
+						offset = flapPos.size();
+					}
+					
+					flapPos.push_back(curHE->v->pos);
+					
+					curHE = curHE->next;
+				} while (curHE != he);
+
+				// Pinhole on main flap edge
+				printPinholes.push_back(
+					0.25 * (flapPos[0] + flapPos[1] + flapPos[4] + flapPos[5]).toVector2D());
+
+				// Pinhole on extended flaps
+				switch (flapPos.size())
+				{
+				case 6:
+				{
+					/*********************/
+					/*             /|    */
+					/*     _______|*|    */
+					/*    /_________|    */
+					/*********************/
+					// Add pinholes
+					printPinholes.push_back(
+						0.25 * (flapPos[1] + flapPos[2] + flapPos[3] + flapPos[4]).toVector2D());
+					break;
+				}
+				case 8:
+					/*********************/
+					/*     /|      /|    */
+					/*    |*|_____|*|    */
+					/*    |_________|    */
+					/*********************/
+					if (shift > 0.5)
+					{
+						printPinholes.push_back(
+							0.5 * (flapPos[1] + (flapPos[2] - flapPos[1]) * 0.5 / shift
+							+ flapPos[4] + (flapPos[3] - flapPos[4]) * 0.5 / shift).toVector2D());
+					}
+					else
+					{
+						printPinholes.push_back(
+							0.5 * (flapPos[5] + (flapPos[6] - flapPos[5]) * 0.5 / (1 - shift)
+							+ flapPos[0] + (flapPos[7] - flapPos[0]) * 0.5 / (1 - shift)).toVector2D());
+					}
+					
+					
+					break;
+				default:
+					break;
+				}
+
+				// Add labels for pinholes
+				QVector2D dir = (flapPos[1] - flapPos[0]).toVector2D();
+				printTextPos.push_back(flapPos[0].toVector2D());
+				printTextRot.push_back(Radian2Degree(atan2(dir.y(), dir.x())));
+				printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->v->refid));
+				printTextPos.push_back(flapPos[1].toVector2D());
+				printTextRot.push_back(Radian2Degree(-atan2(dir.y(), dir.x())));
+				printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->next->v->refid));
+
+				// add face label
+				printTextPos.push_back(0.5 * (flapPos[0] + flapPos[1]).toVector2D());
+				printTextRot.push_back(Radian2Degree(atan2(dir.y(), dir.x())));
+				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
+			}
+			// Etch layer
+			else
+			{
+				// Write points of each edge
+				do
+				{
+					if (!curHE->isCutEdge
+						&& visitedEtchEdges.find(curHE)== visitedEtchEdges.end())
+					{
+						printEtchEdges.push_back(curHE->v->pos.toVector2D());
+						printEtchEdges.push_back(curHE->next->v->pos.toVector2D());
+						visitedEtchEdges.insert(curHE);
+						visitedEtchEdges.insert(curHE->flip);
+					}
+					curHE = curHE->next;
+				} while (curHE != he);
+			}
+		}
+
+		/************************************************************************/
+		/* Print Text                                                           */
+		/************************************************************************/
+		for (int i = 0; i < printTextPos.size(); i++)
+		{
+			auto pos = printTextPos[i];
+			auto rot = printTextRot[i];
+			auto ifo = printTextIfo[i];
+			printText(SVG_File, pos.x() * he_scale, pos.y() * he_scale, rot, ifo);
+
+		}
+		/************************************************************************/
+		/* Write out pinholes                                                   */
+		/************************************************************************/
+		for (auto pinpos : printPinholes)
+		{
+			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
+				pinpos.x() * he_scale, pinpos.y() * he_scale, pinholesize);
+		}
+		/************************************************************************/
+		/* Write out edge for cut                                               */
+		/************************************************************************/
+		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
+		for (int isec = 0; isec < printBorderEdgePts.size(); isec++)
+		{
+			fprintf(SVG_File, "%f,%f ",
+				printBorderEdgePts[isec].x() * he_scale,
+				printBorderEdgePts[isec].y() * he_scale);
+		}
+		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
+		/************************************************************************/
+		/* Write out edge for etch                                               */
+		/************************************************************************/
+		for (int isec = 0; isec < printEtchEdges.size(); isec+=2)
+		{
+			fprintf(SVG_File, SVG_LINE, isec / 2,
+				printEtchEdges[isec].x() * he_scale, printEtchEdges[isec].y() * he_scale,
+				printEtchEdges[isec + 1].x() * he_scale, printEtchEdges[isec + 1].y() * he_scale,
+				"yellow");
+		}
+
+		// End of group
 		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
 	}
 	/************************************************************************/
@@ -255,6 +505,8 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
+
 
 	double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
@@ -274,6 +526,9 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 		vector<QVector2D> printEdgePtsCarves;
 		vector<QVector2D> printPinholes;
 
+		vector<QVector2D> printEtchEdges;
+		unordered_set<he_t*> visitedEtchEdges;
+
 		// Group current piece
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
 		for (auto fid : piece)
@@ -281,6 +536,7 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 			face_t *curFace = unfolded_mesh->faceMap[fid];
 			auto he = curFace->he;
 			auto curHE = he;
+			// Cut layer
 			if (curFace->isCutFace)
 			{
 				vector<QVector2D> connCorners;
@@ -290,41 +546,40 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 					curHE = curHE->next;
 				} while (curHE != he);
 			}
+			else if (!curFace->isBridger)
+			{
+				QVector2D centerPt = curFace->center().toVector2D();
+				do
+				{
+					printPinholes.push_back((curHE->v->pos.toVector2D() + centerPt) * 0.5);
+					curHE = curHE->next;
+				} while (curHE != he);
+			}
+			// Etch layer
 			else
 			{
-				if (!curFace->isBridger)
-				{
-					QVector2D centerPt = curFace->center().toVector2D();
-					do
-					{
-						printPinholes.push_back((curHE->v->pos.toVector2D() + centerPt) * 0.5);
-						curHE = curHE->next;
-					} while (curHE != he);
-				}
-				fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
 				// Write points of each edge
 				do
 				{
-					fprintf(SVG_File, "%f,%f ",
-						curHE->v->pos.x() * he_scale,
-						curHE->v->pos.y() * he_scale);
+					if (!curHE->isCutEdge
+						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
+					{
+						printEtchEdges.push_back(curHE->v->pos.toVector2D());
+						printEtchEdges.push_back(curHE->next->v->pos.toVector2D());
+						visitedEtchEdges.insert(curHE);
+						visitedEtchEdges.insert(curHE->flip);
+					}
 					curHE = curHE->next;
 				} while (curHE != he);
-				// Close face loop
-				fprintf(SVG_File,
-					"%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.1\" />\n",
-					curHE->v->pos.x() * he_scale,
-					curHE->v->pos.y() * he_scale);
-				curHE = curHE->next;
 			}
-
 		}
 		/************************************************************************/
 		/* Write out circles                                                    */
 		/************************************************************************/
 		for (auto circlepos : printPinholes)
 		{
-			fprintf(SVG_File, SVG_CIRCLE, printCircleID++, circlepos.x() * he_scale, circlepos.y() * he_scale);
+			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
+				circlepos.x() * he_scale, circlepos.y() * he_scale, pinholesize);
 		}
 
 		/************************************************************************/
@@ -338,9 +593,18 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 				printBorderEdgePts[isec].y() * he_scale);
 		}
 		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
-		/*fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
-		printBorderEdgePts[0].x(), printBorderEdgePts[0].y());*/
-		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+		/************************************************************************/
+		/* Write out edge for etch                                               */
+		/************************************************************************/
+		for (int isec = 0; isec < printEtchEdges.size(); isec += 2)
+		{
+			fprintf(SVG_File, SVG_LINE, isec / 2,
+				printEtchEdges[isec].x() * he_scale, printEtchEdges[isec].y() * he_scale,
+				printEtchEdges[isec + 1].x() * he_scale, printEtchEdges[isec + 1].y() * he_scale,
+				"yellow");
+		}
+		// End of group
+		fprintf(SVG_File, "</g>\n");
 	}
 	/************************************************************************/
 	/* End of SVG File End                                                  */
@@ -735,6 +999,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
 
 	double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
@@ -820,7 +1085,8 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 		/************************************************************************/
 		for (auto pinpos : printPinholes)
 		{
-			fprintf(SVG_File, SVG_CIRCLE, printPinholeID++, pinpos.x(), pinpos.y());
+			fprintf(SVG_File, SVG_CIRCLE, printPinholeID++, 1.0,
+				pinpos.x(), pinpos.y());
 		}
 
 		/************************************************************************/
@@ -851,7 +1117,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 				SVG_LINE,
 				printFaceID++,
 				printRimPts[1].x(), printRimPts[1].y(),
-				printRimPts[2].x(), printRimPts[2].y());
+				printRimPts[2].x(), printRimPts[2].y(), "blue");
 			break;
 		default:
 			break;
@@ -886,6 +1152,10 @@ void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 		break;
 	case HDS_Mesh::HOLLOWED_PROC:
 		exportHollowPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		break;
+	case HDS_Mesh::HOLLOWED_MF_PROC:
+		// new proc
+		exportHollowMFPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
 		break;
 	case HDS_Mesh::BINDED_PROC:
 		exportBindPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
