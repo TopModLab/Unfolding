@@ -158,7 +158,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	QVector3D v2 = startHE->flip->v->pos;
 
 	//calculate the center of flap face(quad)
-	QVector3D center = (v0 + v3 + v1 + v2)/4;
+	QVector3D center = he_f->center();
 
 	QVector3D v1_flap, v2_flap;
 	if (type == 0){
