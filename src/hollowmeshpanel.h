@@ -25,6 +25,10 @@ signals:
 	void sig_setBridger(bool);
 
 public slots:
+	void slot_setbridgerLabel(int);
+	void slot_setflapLabel(int);
+	void slot_setshiftLabel(int);
+
 	void slot_saved();
 	void slot_restrainSliders(int);
 

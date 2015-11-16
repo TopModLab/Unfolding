@@ -9,6 +9,10 @@ HollowMeshPanel::HollowMeshPanel(QWidget *parent) :
 	setWindowTitle(tr("Hollow Mesh Panel"));
 	ui->shift->hide();
 
+	ui->bridgerSizeLabel->setText(QString::number((float)ui->bridgerSizeSlider->value()/ui->bridgerSizeSlider->maximum()));
+	ui->flapSizeLabel->setText(QString::number((float)ui->flapSizeSlider->value()/ui->flapSizeSlider->maximum()));
+	ui->shiftLabel->setText(QString::number((float)ui->shiftSlider->value()/ui->shiftSlider->maximum()));
+
 	QButtonGroup *flapTypeGroup = new QButtonGroup(this);
 	flapTypeGroup->addButton(ui->oneFlapButton,0);
 	flapTypeGroup->addButton(ui->multFlapButon, 1);
@@ -18,6 +22,11 @@ HollowMeshPanel::HollowMeshPanel(QWidget *parent) :
 	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(slot_saved()));
 	connect(ui->okButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
 	connect(ui->bridgerPanelButton, SIGNAL(clicked(bool)), this, SIGNAL(sig_setBridger(bool)));
+
+	connect(ui->bridgerSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setbridgerLabel(int)));
+	connect(ui->flapSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setflapLabel(int)));
+	connect(ui->shiftSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setshiftLabel(int)));
+
 }
 
 HollowMeshPanel::~HollowMeshPanel()
@@ -33,6 +42,21 @@ void HollowMeshPanel::slot_restrainSliders(int button)
 	else {
 		ui->shift->show();
 	}
+}
+
+void HollowMeshPanel::slot_setbridgerLabel(int value)
+{
+	ui->bridgerSizeLabel->setText(QString::number((float)value/ui->bridgerSizeSlider->maximum()));
+}
+
+void HollowMeshPanel::slot_setflapLabel(int value)
+{
+	ui->flapSizeLabel->setText(QString::number((float)value/ui->flapSizeSlider->maximum()));
+}
+
+void HollowMeshPanel::slot_setshiftLabel(int value)
+{
+	ui->shiftLabel->setText(QString::number((float)value/ui->shiftSlider->maximum()));
 }
 
 void HollowMeshPanel::slot_saved()

@@ -121,6 +121,7 @@ protected:
 	friend class MeshSmoother;
 	friend class MeshExtender;
 	friend class MeshHollower;
+	friend class MeshRimFace;
 	friend class MeshBinder;
 	friend class MeshIterator;
 	friend class MeshConnector;
