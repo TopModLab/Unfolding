@@ -21,12 +21,14 @@
 
 #include "Graph.hpp"
 
-enum class ConnectorConf
+enum ConnectorConf: int
 {
 	// General
 	SCALE = 0,
 	WIDTH,
 	LENGTH,
+	LABELED,
+	LABEL_TEXT,
 	// Regular
 		// Gear
 		GEAR_COUNT,
@@ -43,8 +45,21 @@ struct EnumClassHash
 	}
 };
 
-typedef std::unordered_map<ConnectorConf, double, EnumClassHash > confMap;
+typedef std::unordered_map<ConnectorConf, double, EnumClassHash> confMap;
 
+struct TextLabel
+{
+	int id;
+	QVector2D pos;
+	double rot;
+	//QString ifo;
+	bool operator == (const TextLabel &rhs) { return id == rhs.id; }
+	TextLabel(int refid, const QVector2D &p, const QVector2D &dir/*, const QString &ifo*/)
+		: id(refid), pos(p)
+	{
+		rot = Radian2Degree(atan2(dir.y(), dir.x()));
+	}
+};
 class MeshConnector
 {
 private:
