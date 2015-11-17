@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>238</width>
+    <width>239</width>
     <height>261</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="okButton">
    <property name="geometry">
     <rect>
-     <x>140</x>
+     <x>150</x>
      <y>220</y>
      <width>75</width>
      <height>23</height>
@@ -31,7 +31,7 @@
     <rect>
      <x>20</x>
      <y>140</y>
-     <width>191</width>
+     <width>201</width>
      <height>31</height>
     </rect>
    </property>
@@ -72,6 +72,31 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="flapSizeLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>25</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>25</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="horizontalLayoutWidget_2">
@@ -79,7 +104,7 @@
     <rect>
      <x>20</x>
      <y>100</y>
-     <width>191</width>
+     <width>201</width>
      <height>31</height>
     </rect>
    </property>
@@ -101,7 +126,7 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>11</width>
+        <width>26</width>
         <height>20</height>
        </size>
       </property>
@@ -120,6 +145,31 @@
       </property>
       <property name="invertedAppearance">
        <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="bridgerSizeLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>25</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>25</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
       </property>
      </widget>
     </item>
@@ -157,7 +207,7 @@
   <widget class="QPushButton" name="multFlapButon">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>140</x>
      <y>20</y>
      <width>80</width>
      <height>70</height>
@@ -185,7 +235,7 @@
     <rect>
      <x>20</x>
      <y>180</y>
-     <width>191</width>
+     <width>211</width>
      <height>31</height>
     </rect>
    </property>
@@ -194,7 +244,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>191</width>
+      <width>201</width>
       <height>31</height>
      </rect>
     </property>
@@ -230,11 +280,45 @@
        <property name="maximum">
         <number>50</number>
        </property>
+       <property name="singleStep">
+        <number>25</number>
+       </property>
+       <property name="pageStep">
+        <number>25</number>
+       </property>
        <property name="value">
         <number>50</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::NoTicks</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="shiftLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
        </property>
       </widget>
      </item>
