@@ -119,6 +119,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		vector<QVector2D> printTextPos;
 		vector<double> printTextRot;
 		vector<QString> printTextIfo;
+		unordered_map<int, QVector2D> printTextRecord;
 
 		vector<QVector2D> printEtchEdges;
 		unordered_set<he_t*> visitedEtchEdges;
@@ -178,16 +179,27 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 					printPinholes.push_back(startPos + dirPin * 2.0 / 3.0);
 
 					// Add labels for pinholes
-					printTextPos.push_back(printPinholes.back());
-					printTextRot.push_back(Radian2Degree(atan2(dirPin.y(), dirPin.x())));
-					printTextIfo.push_back(HDS_Common::ref_ID2String(cut_he->v->refid));
+					auto res = printTextRecord.find(cut_he->v->refid);
+					if (res != printTextRecord.end())
+					{
+						QVector2D midPos = (res->second + startPos + dirPin * 0.5) * 0.5;
+						QVector2D midDir = midPos - res->second;
+						printTextPos.push_back(midPos);
+						printTextRot.push_back(Radian2Degree(atan2(midDir.y(), midDir.x())));
+						printTextIfo.push_back(HDS_Common::ref_ID2String(res->first));
+						printTextRecord.erase(res);
+					}
+					else
+					{
+						printTextRecord.insert(make_pair(cut_he->v->refid, startPos + dirPin * 0.5));
+					}
 				}
 				// Add labels for face
 				QVector2D faceDir = (refedge->v->pos - refedge->flip->v->pos).toVector2D();
 				printTextPos.push_back(curFace->center().toVector2D());
 				printTextRot.push_back(Radian2Degree(atan2(faceDir.y(), faceDir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
-
+				
 			}// Etch layer
 			else
 			{
@@ -286,6 +298,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
 	double scale = MeshHollower::flapSize;
 	double shift = (MeshHollower::shiftAmount + 1) * 0.5;
+	int pinnum = shift > 0.8 ? 2 : 1;
 
 	double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
@@ -310,6 +323,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 		vector<QVector2D> printTextPos;
 		vector<double> printTextRot;
 		vector<QString> printTextIfo;
+		unordered_map<int, QVector2D> printTextRecord;
 
 		vector<QVector2D> printEtchEdges;
 		unordered_set<he_t*> visitedEtchEdges;
@@ -339,7 +353,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 				he_t* refedge;
 
 				
-				vector<QVector3D> flapPos;
+				vector<QVector2D> flapPos;
 				int offset = 0;
 				do
 				{
@@ -348,14 +362,16 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 						offset = flapPos.size();
 					}
 					
-					flapPos.push_back(curHE->v->pos);
+					flapPos.push_back(curHE->v->pos.toVector2D());
 					
 					curHE = curHE->next;
 				} while (curHE != he);
 
 				// Pinhole on main flap edge
-				printPinholes.push_back(
-					0.25 * (flapPos[0] + flapPos[1] + flapPos[4] + flapPos[5]).toVector2D());
+				auto p0 = (flapPos[0] + flapPos[5]) * 0.5;
+				auto p1 = (flapPos[1] + flapPos[4]) * 0.5;
+				printPinholes.push_back((p0 + p1 * 2.0) / 3.0);
+				printPinholes.push_back((p0 * 2.0 + p1) / 3.0);
 
 				// Pinhole on extended flaps
 				switch (flapPos.size())
@@ -368,46 +384,93 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 					/*    /_________|    */
 					/*********************/
 					// Add pinholes
-					printPinholes.push_back(
-						0.25 * (flapPos[1] + flapPos[2] + flapPos[3] + flapPos[4]).toVector2D());
+					//printPinholes.push_back(
+					//	0.25 * (flapPos[1] + flapPos[2] + flapPos[3] + flapPos[4]).toVector2D());
+					auto d1 = (flapPos[2] + flapPos[3]) * 0.5 - p1;
+					printPinholes.push_back(p1 + d1 * 2.0 / 3.0);
+					printPinholes.push_back(p1 + d1 / 3.0);
 					break;
 				}
 				case 8:
+				{
 					/*********************/
 					/*     /|      /|    */
 					/*    |*|_____|*|    */
 					/*    |_________|    */
 					/*********************/
-					if (shift > 0.5)
+
+					auto d0 = ((flapPos[6] + flapPos[7]) * 0.5 - p0) / (3.0 * (1 - shift));
+					auto d1 = ((flapPos[2] + flapPos[3]) * 0.5 - p1) / (3.0 * shift);
+
+					if (shift > 0.7)
 					{
-						printPinholes.push_back(
-							0.5 * (flapPos[1] + (flapPos[2] - flapPos[1]) * 0.5 / shift
-							+ flapPos[4] + (flapPos[3] - flapPos[4]) * 0.5 / shift).toVector2D());
+						for (int i = 1; i < pinnum + 1; i++)
+						{
+							printPinholes.push_back(p1 + d1 * i);
+						}
+					}
+					else if (shift < 0.4)
+					{
+						for (int i = 1; i < pinnum + 1; i++)
+						{
+							printPinholes.push_back(p0 + d0 * i);
+						}
 					}
 					else
 					{
-						printPinholes.push_back(
-							0.5 * (flapPos[5] + (flapPos[6] - flapPos[5]) * 0.5 / (1 - shift)
-							+ flapPos[0] + (flapPos[7] - flapPos[0]) * 0.5 / (1 - shift)).toVector2D());
+						printPinholes.push_back(p0 + d0);
+						printPinholes.push_back(p1 + d1);
 					}
-					
-					
 					break;
+				}
 				default:
 					break;
 				}
 
 				// Add labels for pinholes
-				QVector2D dir = (flapPos[1] - flapPos[0]).toVector2D();
-				printTextPos.push_back(flapPos[0].toVector2D());
+				
+				/*printTextPos.push_back(flapPos[0]);
 				printTextRot.push_back(Radian2Degree(atan2(dir.y(), dir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->v->refid));
-				printTextPos.push_back(flapPos[1].toVector2D());
+				printTextPos.push_back(flapPos[1]);
 				printTextRot.push_back(Radian2Degree(-atan2(dir.y(), dir.x())));
-				printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->next->v->refid));
+				printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->next->v->refid));*/
+
+				// Add labels for pinholes
+				// Label for v0
+				auto res = printTextRecord.find(curHE->v->refid);
+				if (res != printTextRecord.end())
+				{
+					QVector2D midPos = (res->second + p0) * 0.5;
+					QVector2D midDir = midPos - res->second;
+					printTextPos.push_back(midPos);
+					printTextRot.push_back(Radian2Degree(atan2(midDir.y(), midDir.x())));
+					printTextIfo.push_back(HDS_Common::ref_ID2String(res->first));
+					printTextRecord.erase(res);
+				}
+				else
+				{
+					printTextRecord.insert(make_pair(curHE->v->refid, p0));
+				}
+				// Label for v1
+				res = printTextRecord.find(curHE->next->v->refid);
+				if (res != printTextRecord.end())
+				{
+					QVector2D midPos = (res->second + p1) * 0.5;
+					QVector2D midDir = midPos - res->second;
+					printTextPos.push_back(midPos);
+					printTextRot.push_back(Radian2Degree(atan2(midDir.y(), midDir.x())));
+					printTextIfo.push_back(HDS_Common::ref_ID2String(res->first));
+					printTextRecord.erase(res);
+				}
+				else
+				{
+					printTextRecord.insert(make_pair(curHE->next->v->refid, p1));
+				}
 
 				// add face label
-				printTextPos.push_back(0.5 * (flapPos[0] + flapPos[1]).toVector2D());
+				QVector2D dir = flapPos[0] - flapPos[1];
+				printTextPos.push_back(0.5 * (flapPos[0] + flapPos[1]));
 				printTextRot.push_back(Radian2Degree(atan2(dir.y(), dir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
 			}
