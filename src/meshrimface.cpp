@@ -15,8 +15,17 @@ void MeshRimFace::rimMesh(HDS_Mesh *mesh)
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
 
-	for(auto v: mesh->verts()) {
+	unordered_set<vert_t*> old_verts = thismesh->verts();
+
+	thismesh->releaseMesh();
+	HDS_Vertex::resetIndex();
+	HDS_HalfEdge::resetIndex();
+	HDS_Face::resetIndex();
+
+	for(auto v: old_verts) {
 		face_t* cutFace = new face_t;
+		cutFace->index = HDS_Face::assignIndex();
+		cutFace->isCutFace = true;
 
 		for (auto he: mesh->incidentEdges(v)) {
 			vert_t* v0 = he->flip->prev->v;
@@ -35,6 +44,14 @@ void MeshRimFace::rimMesh(HDS_Mesh *mesh)
 			v10_inner->refid = v->refid;
 			v10_outer->refid = v1->refid;
 
+			vector<vert_t*> vertices;
+			vertices.push_back(v12_inner);
+			vertices.push_back(v10_inner);
+			vertices.push_back(v10_outer);
+			vertices.push_back(v12_outer);
+
+			HDS_Face* newFace = createFace(vertices, cutFace);
+			newFace->refid = he->refid;
 
 
 		}
@@ -48,30 +65,28 @@ HDS_Face* MeshRimFace::createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFac
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
 
+
 	face_t * newFace = new face_t;
 	//newFace->index = HDS_Face::assignIndex();
+	vertices.push_back(vertices.front());//form a loop
 
 	auto preV = vertices.front();
-	for (int i = 1; i < vertices.size() - 1; i++)
+	for (int i = 1; i < vertices.size(); i++)
 	{
 		auto& curV = vertices[i];
-		vertices_new.push_back(curV);
+		if (i != vertices.size()-1)
+			vertices_new.push_back(curV);
 		he_t* newHE = thismesh->insertEdge(preV, curV);
+		if(newFace->he == nullptr)
+			newFace->he = newHE;
+		if(cutFace->he == nullptr)
+			cutFace->he = newHE->flip;
 		newHE->f = newFace;
 		newHE->flip->f = cutFace;
 		newHE->setCutEdge(true);
 		hes_new.push_back(newHE);
-		hes_new.push_back(newHE->flip);
 		preV = curV;
 	}
-
-	//link last edge of the face
-	he_t* lastHE = thismesh->insertEdge(preV, vertices.front());
-	lastHE->f = newFace;
-	lastHE->flip->f = cutFace;
-	lastHE->setCutEdge(true);
-	hes_new.push_back(lastHE);
-	hes_new.push_back(lastHE->flip);
 
 	return newFace;
 }
