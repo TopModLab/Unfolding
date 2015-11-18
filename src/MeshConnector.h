@@ -33,9 +33,15 @@ enum ConnectorConf: int
 		// Gear
 		GEAR_COUNT,
 	// Hollow
+	PINHOLE_UNIT,
 	PINHOLESIZE
 };
-
+enum class UNIT_TYPE : int
+{
+	MILIMITER,
+	INCH,
+	POINT
+};
 struct EnumClassHash
 {
 	template <typename T>
@@ -60,6 +66,38 @@ struct TextLabel
 		rot = Radian2Degree(atan2(dir.y(), dir.x()));
 	}
 };
+
+// Unit conversion
+inline double MM2Pt(double mm)
+{
+	return mm * 72.0 / 25.4;
+}
+inline double Inch2Pt(double inch)
+{
+	return inch * 72.0;
+}
+inline double ConvertToPt(int src_type, double len)
+{
+	switch (src_type)
+	{
+	case UNIT_TYPE::MILIMITER:
+		return MM2Pt(len);
+	case UNIT_TYPE::INCH:
+		return Inch2Pt(len);
+	case UNIT_TYPE::POINT:
+		return len;
+	default:
+		return len;
+	}
+}
+inline double Pt2MM(double pt)
+{
+	return pt * 25.4 / 72.0;
+}
+inline double Pt2Inch(double pt)
+{
+	return pt / 72.0;
+}
 class MeshConnector
 {
 private:

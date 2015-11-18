@@ -29,13 +29,13 @@ const char SVG_HEAD[] =		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"
 							"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">\n";
 const char SVG_CIRCLE[] = 	"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
 							"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n";
-const char SVG_LINE[] = 	"<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
+const char SVG_LINE[] = 	"\t<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
 							"style=\"fill:none;stroke:%s;stroke-width:0.1\" />\n";
 const char SVG_TEXT[] = 	"\t<text x=\"%lf\" y=\"%lf\" fill=\"green\" " \
 							"transform=\"rotate(%lf %lf,%lf)\" " \
 							"style=\"font-size:10;stroke:magenta;stroke-width:0.1;fill:none;\" >" \
 							"%s</text>\n";
-const char SVG_ARCH[] = 	"<path id=\"Rim%d\" d=\"M %lf %lf " \
+const char SVG_ARCH[] = 	"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
 							"L %lf %lf " \
 							"A %lf %lf, 0, 1, 0, %lf %lf " \
@@ -95,7 +95,9 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
-	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	int unit_type = static_cast<int>(conf.find(ConnectorConf::PINHOLE_UNIT)->second);
+	double pin_radius = ConvertToPt(unit_type,
+		conf.find(ConnectorConf::PINHOLESIZE)->second) * 0.5;
 	double scale = MeshHollower::flapSize;
 
 	double circle_offset = 3;
@@ -172,11 +174,19 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 						targetV = refedge->flip->v;
 						targetNextV = refedge->v;
 					}
-					QVector3D targPos = targetV->pos * (1 - scale) + targetNextV->pos * scale;
+					QVector2D targPos = (targetV->pos * (1 - scale)
+						+ targetNextV->pos * scale).toVector2D();
 					QVector2D startPos = cut_he->v->pos.toVector2D();
-					QVector2D dirPin = targPos.toVector2D() - startPos;
+					QVector2D dirPin = targPos - startPos;
+
+					int pin_seg = min(2, static_cast<int>(
+						dirPin.length() * he_scale / pin_radius / 4)) + 1;
+					for (int pin_i = 1; pin_i < pin_seg; pin_i++)
+					{
+						printPinholes.push_back(startPos + dirPin * pin_i / pin_seg);
+					}/*
 					printPinholes.push_back(startPos + dirPin / 3.0);
-					printPinholes.push_back(startPos + dirPin * 2.0 / 3.0);
+					printPinholes.push_back(startPos + dirPin * 2.0 / 3.0);*/
 
 					// Add labels for pinholes
 					auto res = printTextRecord.find(cut_he->v->refid);
@@ -236,7 +246,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		for (auto pinpos : printPinholes)
 		{
 			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
-				pinpos.x() * he_scale, pinpos.y() * he_scale, pinholesize);
+				pinpos.x() * he_scale, pinpos.y() * he_scale, pin_radius);
 		}
 
 		/************************************************************************/
@@ -295,7 +305,9 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
-	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	int unit_type = static_cast<int>(conf.find(ConnectorConf::PINHOLE_UNIT)->second);
+	double pin_radius = ConvertToPt(unit_type,
+		conf.find(ConnectorConf::PINHOLESIZE)->second) * 0.5;
 	double scale = MeshHollower::flapSize;
 	double shift = (MeshHollower::shiftAmount + 1) * 0.5;
 	int pinnum = shift > 0.8 ? 2 : 1;
@@ -510,7 +522,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 		for (auto pinpos : printPinholes)
 		{
 			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
-				pinpos.x() * he_scale, pinpos.y() * he_scale, pinholesize);
+				pinpos.x() * he_scale, pinpos.y() * he_scale, pin_radius);
 		}
 		/************************************************************************/
 		/* Write out edge for cut                                               */
@@ -568,7 +580,7 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
-	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	double pin_radius = conf.find(ConnectorConf::PINHOLESIZE)->second;
 
 
 	double circle_offset = 3;
@@ -642,7 +654,7 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 		for (auto circlepos : printPinholes)
 		{
 			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
-				circlepos.x() * he_scale, circlepos.y() * he_scale, pinholesize);
+				circlepos.x() * he_scale, circlepos.y() * he_scale, pin_radius);
 		}
 
 		/************************************************************************/
@@ -1062,7 +1074,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
-	double pinholesize = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	double pin_radius = conf.find(ConnectorConf::PINHOLESIZE)->second;
 
 	double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();

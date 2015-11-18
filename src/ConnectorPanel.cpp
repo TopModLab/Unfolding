@@ -63,6 +63,7 @@ confMap ConnectorPanel::getConfiguration() const
 	ret.insert(make_pair(ConnectorConf::WIDTH, ui->width_val->value()));
 	ret.insert(make_pair(ConnectorConf::LENGTH, ui->length_val->value()));
 
+	ret.insert(make_pair(ConnectorConf::PINHOLE_UNIT, (double)ui->pinholeunit_type->currentIndex()));
 	ret.insert(make_pair(ConnectorConf::PINHOLESIZE, ui->pinholesize_val->value()));
 
 	return ret;
@@ -81,6 +82,9 @@ void ConnectorPanel::initConnectorType()
 		ui->connector_type->addItem("Advanced Saw");
 		break;
 	case HDS_Mesh::HOLLOWED_PROC:
+	case HDS_Mesh::HOLLOWED_MF_PROC:
+		ui->pinholeunit_label->setDisabled(false);
+		ui->pinholeunit_type->setDisabled(false);
 		ui->pinholesize_label->setDisabled(false);
 		ui->pinholesize_val->setDisabled(false);
 		ui->connector_type->addItem("Holes");
