@@ -45,7 +45,7 @@ public:
 	vector<QVector3D> getScaledCorners();
 	void scaleDown();
 	double getScalingFactor(){ return scalingFactor; }
-	
+
 	//bounding box related, should only work on cut face
 	//void update_bbox();
 

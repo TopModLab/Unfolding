@@ -9,7 +9,7 @@ bool MeshExtender::isHollow = false;
 
 vector<HDS_Vertex*> MeshExtender::addBridger(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Face* cutFace)
 {
-	//new a Bridger object
+	//new Bridger object
 	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2);
 	//add all internal edges and vertices to mesh
 	vector<HDS_HalfEdge*> hes = Bridger->hes;
@@ -17,6 +17,7 @@ vector<HDS_Vertex*> MeshExtender::addBridger(HDS_Mesh* thismesh, HDS_HalfEdge* h
 		for (auto he : hes) {
 			thismesh->addHalfEdge(he);
 		}
+
 	}
 
 	hes.insert(hes.begin(),he1);

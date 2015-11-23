@@ -135,15 +135,96 @@ void HDS_Face::setScaleFactor(double factor)
 	scalingFactor = factor;
 }
 
+//from http://paulbourke.net/geometry/pointlineplane/lineline.c
+/*
+   Calculate the line segment PaPb that is the shortest route between
+   two lines P1P2 and P3P4. Calculate also the values of mua and mub where
+	  Pa = P1 + mua (P2 - P1)
+	  Pb = P3 + mub (P4 - P3)
+   Return FALSE if no solution exists.
+*/
+void LineLineIntersect(
+   QVector3D p1,QVector3D p2,QVector3D p3,QVector3D p4,QVector3D *pa)
+{
+	//QVector3D *pb;
+   QVector3D p13,p43,p21;
+   double d1343,d4321,d1321,d4343,d2121;
+   double numer,denom;
+//   double EPS = 0.0001;
+
+   p13 = p1 - p3;
+   p43 = p4 - p3;
+   p21 = p2 - p1;
+
+//   if (fabsf(p43.x) < EPS && fabsf(p43.y) < EPS && fabsf(p43.z) < EPS)
+//	  return(false);
+//   if (fabsf(p21.x) < EPS && fabsf(p21.y) < EPS && fabsf(p21.z) < EPS)
+//	  return(false);
+
+   d1343 = QVector3D::dotProduct(p13, p43);
+   d4321 = QVector3D::dotProduct(p43, p21);
+   d1321 = QVector3D::dotProduct(p13, p21);
+   d4343 = QVector3D::dotProduct(p43, p43);
+   d2121 = QVector3D::dotProduct(p21, p21);
+
+   denom = d2121 * d4343 - d4321 * d4321;
+//   if (fabsf(denom) < EPS)
+//	  return(false);
+   numer = d1343 * d4321 - d1321 * d4343;
+
+   double mua = numer / denom;
+   //double mub = (d1343 + d4321 * (mua)) / d4343;
+   *pa = p1 + mua * p21;
+   //*pb = p3 + mub * p43;
+}
+
 QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 {
+	// v1_p ---------- v0
+	//      |        |
+	//      |    f   |
+	//      |        |
+	//      |        |
+	// v2_  ---------- v1_n
+	//    n/p
+
 	/*QVector3D c = center();
 	QVector3D vec_cv = v->pos - c;
 	return c + scalingFactor * vec_cv;*/
-	return scalingFactor * v->pos
-		+ (1 - scalingFactor) * center();
+
+	//scale down corner proportionally along edges
+	QVector3D v0 = v->pos;
+
+	//find half edge from v0 to v1_n
+	HDS_HalfEdge* curHe = he;
+	do {
+		if (curHe->v == v) {
+			break;
+		}
+		curHe = curHe->next;
+	} while( curHe != he );
+
+	QVector3D v1_n = curHe->next->v->pos;
+	QVector3D v2_n = curHe->next->next->v->pos;
+	QVector3D v1_p = curHe->prev->v->pos;
+	QVector3D v2_p = curHe->prev->prev->v->pos;
+
+
+	QVector3D v01_n = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_n;
+	QVector3D v12_p = (1 - scalingFactor/2)* v1_p + scalingFactor/2 *v2_p;
+
+	QVector3D v01_p = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_p;
+	QVector3D v12_n = (1 - scalingFactor/2)* v1_n + scalingFactor/2 *v2_n;
+
+	//get intersection point
+	QVector3D v0_scaled;
+	LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
+	cout<<v0_scaled.x()<<v0_scaled.y()<<v0_scaled.z()<<endl;
+	return v0_scaled;
 
 }
+
+
 
 vector<QVector3D> HDS_Face::getScaledCorners()
 {
@@ -154,6 +235,7 @@ vector<QVector3D> HDS_Face::getScaledCorners()
 		auto vertices = corners();
 		for (auto v : vertices) {
 			scaledCorners.insert(scaledCorners.end(), scaleCorner(v));
+			cout<<"here3"<<endl;
 		}
 	} else {
 		//scale down non-planar face
@@ -189,7 +271,7 @@ void HDS_Face::checkPlanar()
 
 	for(int i = 3; i < vertices.size(); i++) {
 		float dot = QVector3D::dotProduct(normal, vertices[i]->pos - vertices[0]->pos);
-		if (abs(dot) > 0.3){
+		if (fabsf(dot) > 0.3){
 			isPlanar = false;
 			break;
 		}

@@ -108,10 +108,6 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 }
 
 
-/////recursive function on bezier curve
-//vector<QVector3D> HDS_Bridger::calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2, int iteration)
-//{
-//	cout<<"bezier curve recursion, iter = "<<iteration<<endl;
 //	///bezier curve calculator
 //	///
 //	///           _________p0'
@@ -122,41 +118,20 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 //	///
 // ///
 // ///
-//	vector<QVector3D> pos;
 
-//	iteration++;
-//	QVector3D p01_new = p0;
-//	QVector3D p11_new = ( p0 + p1 )/2.0;
-//	QVector3D p21_new = (p0 + 2.0*p1 + p2)/4.0;
 
-//	QVector3D p02_new = p21;
-//	QVector3D p12_new = ( p1 + p2 )/2.0;
-//	QVector3D p22_new = p2;
-
-//	if (iteration == nSamples - 2 ) {
-//		pos.push_back(p11_new);
-//		pos.push_back(p12_new);
-//	}else {
-//		vector<QVector3D> r_pos;
-//		pos = calculateBezierCurve(p01_new, p11_new, p21_new, iteration);
-//		r_pos = calculateBezierCurve(p02_new, p12_new, p22_new, iteration);
-//		pos.insert( pos.end(), r_pos.begin(), r_pos.end() );
-//	}
-//	return pos;
-//}
-
-vector<QVector3D> HDS_Bridger::calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2)
+vector<QVector3D> HDS_Bridger::calculateBezierCurve(QVector3D p1, QVector3D p0, QVector3D p2)
 {
 	vector<QVector3D> pos;
 	if (shape == 1)
 	{
-		pos.push_back(p1);
+		pos.push_back(p0);
 	}else {
 
 		for( float i = 1.0/(float)nSamples ; i < 1 ; i += 1.0/(float)nSamples )
 		{
-			QVector3D pa = getPt( p0 , p1 , i );
-			QVector3D pb = getPt( p1 , p2 , i );
+			QVector3D pa = getPt( p1 , p0 , i );
+			QVector3D pb = getPt( p0 , p2 , i );
 
 			QVector3D p = getPt( pa , pb , i );
 			pos.push_back(p);
