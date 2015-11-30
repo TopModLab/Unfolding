@@ -65,7 +65,13 @@ confMap ConnectorPanel::getConfiguration() const
 
 	ret.insert(make_pair(ConnectorConf::PINHOLE_UNIT, (double)ui->pinholeunit_type->currentIndex()));
 	ret.insert(make_pair(ConnectorConf::PINHOLESIZE, ui->pinholesize_val->value()));
+	ret.insert(make_pair(ConnectorConf::PINHOLECOUNT_TYPE,
+		(double)ui->pinholecount_type->currentIndex()));
 
+	ret.insert(make_pair(ConnectorConf::SCORE_TYPE, (double)ui->score_type->currentIndex()));
+	ret.insert(make_pair(ConnectorConf::DASH_LEN, ui->scoredash_len->value()));
+	ret.insert(make_pair(ConnectorConf::DASH_GAP, ui->scoredash_gap->value()));
+	ret.insert(make_pair(ConnectorConf::DASH_UNIT, (double)ui->scoredash_unit->currentIndex()));
 	return ret;
 }
 
@@ -83,7 +89,7 @@ void ConnectorPanel::initConnectorType()
 		break;
 	case HDS_Mesh::HOLLOWED_PROC:
 	case HDS_Mesh::HOLLOWED_MF_PROC:
-		ui->pinholeunit_label->setDisabled(false);
+		//ui->pinholeunit_label->setDisabled(false);
 		ui->pinholeunit_type->setDisabled(false);
 		ui->pinholesize_label->setDisabled(false);
 		ui->pinholesize_val->setDisabled(false);

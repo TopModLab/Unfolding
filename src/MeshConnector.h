@@ -34,7 +34,12 @@ enum ConnectorConf: int
 		GEAR_COUNT,
 	// Hollow
 	PINHOLE_UNIT,
-	PINHOLESIZE
+	PINHOLESIZE,
+	PINHOLECOUNT_TYPE,
+	SCORE_TYPE,
+		DASH_LEN,
+		DASH_GAP,
+		DASH_UNIT
 };
 enum class UNIT_TYPE : int
 {
@@ -141,6 +146,9 @@ private:
 		int cn_t = ARCH_CONNECTOR);
 
 	static void writeToSVG(const char* filename);
+
+	static void writeCutLayer(FILE* SVG_File, const vector<QVector2D> &cut, int cuttype = 0, int id = 0);
+	static void wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch);
 
 private:
 	/*static double pinholesize;

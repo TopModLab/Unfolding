@@ -159,7 +159,35 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
 		unordered_set<HDS_Vertex *> verts;
+		/************************************************************************/
+		/* Calculate Piece Orientation                                          */
+		/************************************************************************/
+		bool checkedOrientation = false;
+		QVector3D newOrigin, newX, newY;
+		for (auto fid : piece)
+		{
+			auto face = unfolded_mesh->faceMap[fid];
+			if (!face->isCutFace)
+			{
+				auto he = face->he;
+				auto curHE = he;
+				do
+				{
+					if (!curHE->isCutEdge)
+					{
+						break;
+					}
+					curHE = curHE->next;
+				} while (curHE != he);
+				newY = (curHE->next->v->pos - curHE->v->pos).normalized();
+				newX = QVector3D(newY.y(), -newY.x(), 0);
+				newOrigin = curHE->v->pos;
+				break;
+			}
+		}
+
 		BBox3 curBound;
+		// generate bounding box
 		for (auto fid : piece)
 		{
 			auto cur_verts = unfolded_mesh->faceMap[fid]->corners();
@@ -172,6 +200,10 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 				}
 			}
 		}
+		
+		/************************************************************************/
+		/* Assembling Offset                                                    */
+		/************************************************************************/
 		bound_shift = QVector3D(bound->pMax.x() + 0.1, bound->pMin.y(), 0) - curBound.pMin;
 		if (unfolded_mesh->processType == HDS_Mesh::RIMMED_PROC)
 		{
@@ -181,7 +213,12 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		curBound.pMax += bound_shift;
 		for (auto vert : verts)
 		{
-			vert->pos += bound_shift;
+			// Apply Orientation to all vertices
+			auto& pos = vert->pos;
+			pos -= newOrigin;
+			pos = QVector3D(QVector3D::dotProduct(pos, newX),
+				QVector3D::dotProduct(pos, newY), 0)
+				+ newOrigin + bound_shift;
 		}
 		bound->Union(curBound);
 	}

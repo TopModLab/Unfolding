@@ -24,18 +24,19 @@
 #include <vtkVariantArray.h>
 #endif
 
-
-const char SVG_HEAD[] =		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
+typedef const char cstchar;
+cstchar SVG_HEAD[] =		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
 							"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">\n";
-const char SVG_CIRCLE[] = 	"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
-							"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n";
-const char SVG_LINE[] = 	"\t<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
+cstchar SVG_CIRCLE[] =		"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
+							"style=\"stroke:magenta;stroke-width:0.1;fill:none\" />\n";
+cstchar SVG_LINE[] =		"\t<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
 							"style=\"fill:none;stroke:%s;stroke-width:0.1\" />\n";
-const char SVG_TEXT[] = 	"\t<text x=\"%lf\" y=\"%lf\" fill=\"green\" " \
-							"transform=\"rotate(%lf %lf,%lf)\" " \
-							"style=\"font-size:10;stroke:magenta;stroke-width:0.1;fill:none;\" >" \
+cstchar SVG_DASHARRAY[] =	"\t<path stroke-dasharray=\"%f, %f\" id=\"Dash%d\" d=\"M%f %f L%f %f\" " \
+							"style=\"fill:none;stroke:blue;stroke-width:0.1\" />";
+cstchar SVG_TEXT[] =		"\t<text x=\"%lf\" y=\"%lf\" transform=\"rotate(%lf %lf,%lf)\" " \
+							"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;\" >" \
 							"%s</text>\n";
-const char SVG_ARCH[] = 	"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
+cstchar SVG_ARCH[] =		"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
 							"L %lf %lf " \
 							"A %lf %lf, 0, 1, 0, %lf %lf " \
@@ -95,7 +96,23 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	double he_scale = conf.find(ConnectorConf::SCALE)->second;
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+	double uncut_len = ConvertToPt((int)UNIT_TYPE::INCH, 0.1);
 	int unit_type = static_cast<int>(conf.find(ConnectorConf::PINHOLE_UNIT)->second);
+	int pinholecount_type = static_cast<int>(conf.find(ConnectorConf::PINHOLECOUNT_TYPE)->second);
+	int score_type = static_cast<int>(conf.find(ConnectorConf::SCORE_TYPE)->second);
+	cstchar* score_text;
+	if (score_type == 0)
+	{
+		score_text = SVG_LINE;
+	}
+	else
+	{
+		double score_len = conf.find(ConnectorConf::DASH_LEN)->second;
+		double score_gap = conf.find(ConnectorConf::DASH_GAP)->second;
+		sscanf_s(score_text, SVG_DASHARRAY, score_len, score_gap);
+	}
+	
+	//cout << "Score text is: " << score_text << endl;
 	double pin_radius = ConvertToPt(unit_type,
 		conf.find(ConnectorConf::PINHOLESIZE)->second) * 0.5;
 	double scale = MeshHollower::flapSize;
@@ -106,10 +123,11 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	//SVG file head
 	// define the size of export graph
 	fprintf(SVG_File, SVG_HEAD,
-		static_cast<int>(size_vec.x() * he_scale),
-		static_cast<int>(size_vec.y() * he_scale));
+		static_cast<int>(size_vec.x() * he_scale) + 50,
+		static_cast<int>(size_vec.y() * he_scale) + 50);
 
 	int printFaceID(0), printCircleID(0);
+	// Go through each piece
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
 		vector<face_t *> cutfaces;
@@ -123,6 +141,8 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		vector<QString> printTextIfo;
 		unordered_map<int, QVector2D> printTextRecord;
 
+		vector<QVector2D> printOrientLabel;
+
 		vector<QVector2D> printEtchEdges;
 		unordered_set<he_t*> visitedEtchEdges;
 
@@ -133,21 +153,40 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 			face_t *curFace = unfolded_mesh->faceMap[fid];
 			auto he = curFace->he;
 			auto curHE = he;
+			// Cut layer
 			if (curFace->isCutFace)
 			{
 				vector<QVector2D> connCorners;
 				do
 				{
-					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
+					printBorderEdgePts.push_back(curHE->v->pos.toVector2D() * he_scale);
 					curHE = curHE->next;
 				} while (curHE != he);
 			}
-			else if (!curFace->isBridger)
+			// Etch layer
+			else if (curFace->isBridger)
+			{
+				// Write points of each edge
+				do
+				{
+					if (!curHE->isCutEdge
+						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
+					{
+						printEtchEdges.push_back(curHE->v->pos.toVector2D() * he_scale);
+						printEtchEdges.push_back(curHE->next->v->pos.toVector2D() * he_scale);
+						visitedEtchEdges.insert(curHE);
+						visitedEtchEdges.insert(curHE->flip);
+					}
+					curHE = curHE->next;
+				} while (curHE != he);
+			}
+			else
 			{
 				// Add pinholes
 				vector<he_t*> cutedges;
 				he_t* refedge;
-
+				// Find ref edge, which is the boundary of shared face
+				// Find cut edge, which refers to conner of the flap
 				do
 				{
 					if (!curHE->isCutEdge)
@@ -174,8 +213,9 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 						targetV = refedge->flip->v;
 						targetNextV = refedge->v;
 					}
-					QVector2D targPos = (targetV->pos * (1 - scale)
-						+ targetNextV->pos * scale).toVector2D();
+					QVector2D targetVPos = targetV->pos.toVector2D();
+					QVector2D targPos = targetVPos * (1 - scale)
+						+ targetNextV->pos.toVector2D() * scale;
 					QVector2D startPos = cut_he->v->pos.toVector2D();
 					QVector2D dirPin = targPos - startPos;
 
@@ -183,8 +223,30 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 						dirPin.length() * he_scale / pin_radius / 4)) + 1;
 					for (int pin_i = 1; pin_i < pin_seg; pin_i++)
 					{
-						printPinholes.push_back(startPos + dirPin * pin_i / pin_seg);
-					}/*
+						printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
+					}
+					
+
+					// Add orientation label
+					if (!cut_he->next->isCutEdge)
+					{
+						printOrientLabel.push_back(targPos * he_scale);
+					}
+					// If 4 pinholes
+					if (pinholecount_type == 1)
+					{
+						targPos += startPos - targetVPos;
+						startPos = targetVPos;
+						dirPin = targPos - startPos;
+
+						pin_seg = min(2, static_cast<int>(
+							dirPin.length() * he_scale / pin_radius / 4)) + 1;
+						for (int pin_i = 1; pin_i < pin_seg; pin_i++)
+						{
+							printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
+						}
+					}
+					/*
 					printPinholes.push_back(startPos + dirPin / 3.0);
 					printPinholes.push_back(startPos + dirPin * 2.0 / 3.0);*/
 
@@ -194,7 +256,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 					{
 						QVector2D midPos = (res->second + startPos + dirPin * 0.5) * 0.5;
 						QVector2D midDir = midPos - res->second;
-						printTextPos.push_back(midPos);
+						printTextPos.push_back(midPos * he_scale);
 						printTextRot.push_back(Radian2Degree(atan2(midDir.y(), midDir.x())));
 						printTextIfo.push_back(HDS_Common::ref_ID2String(res->first));
 						printTextRecord.erase(res);
@@ -206,26 +268,10 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 				}
 				// Add labels for face
 				QVector2D faceDir = (refedge->v->pos - refedge->flip->v->pos).toVector2D();
-				printTextPos.push_back(curFace->center().toVector2D());
+				printTextPos.push_back(curFace->center().toVector2D() * he_scale);
 				printTextRot.push_back(Radian2Degree(atan2(faceDir.y(), faceDir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
 				
-			}// Etch layer
-			else
-			{
-				// Write points of each edge
-				do
-				{
-					if (!curHE->isCutEdge
-						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
-					{
-						printEtchEdges.push_back(curHE->v->pos.toVector2D());
-						printEtchEdges.push_back(curHE->next->v->pos.toVector2D());
-						visitedEtchEdges.insert(curHE);
-						visitedEtchEdges.insert(curHE->flip);
-					}
-					curHE = curHE->next;
-				} while (curHE != he);
 			}
 		}
 
@@ -237,7 +283,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 			auto pos = printTextPos[i];
 			auto rot = printTextRot[i];
 			auto ifo = printTextIfo[i];
-			printText(SVG_File, pos.x() * he_scale, pos.y() * he_scale, rot, ifo);
+			printText(SVG_File, pos.x(), pos.y(), rot, ifo);
 			
 		}
 		/************************************************************************/
@@ -246,33 +292,40 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		for (auto pinpos : printPinholes)
 		{
 			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
-				pinpos.x() * he_scale, pinpos.y() * he_scale, pin_radius);
+				pinpos.x(), pinpos.y(), pin_radius);
+		}
+		/************************************************************************/
+		/* Print Orientation Label                                              */
+		/************************************************************************/
+		for (auto labpos : printOrientLabel)
+		{
+			fprintf(SVG_File, "\t<text x=\"%lf\" y=\"%lf\" " \
+				"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;\" >" \
+				"%s</text>\n", labpos.x(), labpos.y(), "-");
 		}
 
 		/************************************************************************/
 		/* Write out edge for cut                                               */
 		/************************************************************************/
-		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
-		for (int isec = 0; isec < printBorderEdgePts.size(); isec++)
+		// To open polyline
+		if (true)// if cut as open polyline
 		{
-			fprintf(SVG_File, "%f,%f ",
-				printBorderEdgePts[isec].x() * he_scale,
-				printBorderEdgePts[isec].y() * he_scale);
+			auto startpos = printBorderEdgePts.front();
+			auto endpos = printBorderEdgePts.back();
+			auto lastDir = startpos - endpos;
+			endpos += lastDir * (1 - uncut_len / lastDir.length());
+
+			printBorderEdgePts.push_back(endpos);
+			printEtchEdges.push_back(endpos);
+			printEtchEdges.push_back(startpos);
 		}
-		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
+		// Else if cut as polygon
+		// Do nothing
+		writeCutLayer(SVG_File, printBorderEdgePts, 1, printFaceID++);
 		/************************************************************************/
 		/* Write out edge for etch                                               */
 		/************************************************************************/
-		for (int isec = 0; isec < printEtchEdges.size(); isec += 2)
-		{
-			fprintf(SVG_File, SVG_LINE, isec / 2,
-				printEtchEdges[isec].x() * he_scale, printEtchEdges[isec].y() * he_scale,
-				printEtchEdges[isec + 1].x() * he_scale, printEtchEdges[isec + 1].y() * he_scale,
-				"yellow");
-		}
-		/*fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
-		printBorderEdgePts[0].x(), printBorderEdgePts[0].y());*/
-		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+		wrtieEtchLayer(SVG_File, printEtchEdges);
 	}
 	/************************************************************************/
 	/* End of SVG File End                                                  */
@@ -1055,11 +1108,6 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
 	const confMap& conf, int cn_t)
 {
-	assert(unfolded_mesh != nullptr);
-	/*if (unfolded_mesh == nullptr)
-	{
-		return;
-	}*/
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
 	if (err)// Unable to save to disk
@@ -1211,6 +1259,39 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 	cout << "SVG file saved successfully!" << endl;
 }
 
+void MeshConnector::writeCutLayer(FILE* SVG_File, const vector<QVector2D> &cut,
+	int cuttype, int id)
+{
+	switch (cuttype)
+	{
+	case 0: // To closed polygon
+		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", id);
+	case 1: // To open polyline
+		fprintf(SVG_File, "\t<polyline id=\"%d\" points=\"", id);
+	default:
+		break;
+	}
+
+	for (int isec = 0; isec < cut.size(); isec++)
+	{
+		fprintf(SVG_File, "%f,%f ", cut[isec].x(), cut[isec].y());
+	}
+	
+	fprintf(SVG_File, "\" style=\"fill:none;stroke:cyan;stroke-width:0.8\" />\n");
+}
+
+void MeshConnector::wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch)
+{
+	for (int isec = 0; isec < etch.size(); isec += 2)
+	{
+		fprintf(SVG_File, SVG_LINE, isec / 2,
+			etch[isec].x(), etch[isec].y(),
+			etch[isec + 1].x(), etch[isec + 1].y(),
+			"yellow");
+	}
+	fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+}
+
 void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 {
 	ConnectorPanel *connPanel = new ConnectorPanel(unfolded_mesh->processType);
@@ -1220,6 +1301,13 @@ void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 	//double scale = connPanel->getScale();
 	int cn_t = connPanel->getConnectorType();
 	auto conf = connPanel->getConfiguration();
+
+	if (unfolded_mesh == nullptr)
+	{
+		//assert();
+		return;
+	}
+
 	switch (unfolded_mesh->processType)
 	{
 	case HDS_Mesh::REGULAR_PROC:
