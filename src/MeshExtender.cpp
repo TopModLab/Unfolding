@@ -263,7 +263,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 				//warning. to be tested
 				flap_he->refid = twin_he->refid;
-				flap_he->flip->refid = twin_he->refid;
+				flap_he_flip->refid = twin_he->refid;
 
 				flap_he->index = HDS_HalfEdge::assignIndex();
 				flap_he_flip->index = HDS_HalfEdge::assignIndex();

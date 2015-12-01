@@ -110,7 +110,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	{
 		double score_len = conf.find(ConnectorConf::DASH_LEN)->second;
 		double score_gap = conf.find(ConnectorConf::DASH_GAP)->second;
-		sscanf_s(score_text, SVG_DASHARRAY, score_len, score_gap);
+		//sscanf_s(score_text, SVG_DASHARRAY, score_len, score_gap);
 	}
 	
 	//cout << "Score text is: " << score_text << endl;

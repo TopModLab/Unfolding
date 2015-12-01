@@ -86,11 +86,11 @@ inline double ConvertToPt(int src_type, double len)
 {
 	switch (src_type)
 	{
-	case UNIT_TYPE::MILIMITER:
+	case (int)UNIT_TYPE::MILIMITER:
 		return MM2Pt(len);
-	case UNIT_TYPE::INCH:
+	case (int)UNIT_TYPE::INCH:
 		return Inch2Pt(len);
-	case UNIT_TYPE::POINT:
+	case (int)UNIT_TYPE::POINT:
 		return len;
 	default:
 		return len;
