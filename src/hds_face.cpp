@@ -212,7 +212,6 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 	QVector3D v1_p = curHe->prev->v->pos;
 	QVector3D v2_p = curHe->prev->prev->v->pos;
 
-
 	QVector3D v01_n = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_n;
 	QVector3D v12_p = (1 - scalingFactor/2)* v1_p + scalingFactor/2 *v2_p;
 

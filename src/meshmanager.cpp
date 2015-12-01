@@ -534,6 +534,11 @@ void MeshManager::rimMesh(double rimSize)
 	selectedEdges.clear();
 }
 
+void MeshManager::setBindMesh()
+{
+	setHollowMesh(1,2,0);
+}
+
 void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 {
 	MeshHollower::setOriMesh(hds_mesh.data());

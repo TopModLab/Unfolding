@@ -118,6 +118,8 @@ public:
 	void mapToExtendedMesh();
 	void unfoldMesh(bool isExtended);
 	void smoothMesh();
+
+	void setBindMesh();
 	void setHollowMesh(double fsize, int type, double shift);
 	void extendMesh(int meshType, map<QString, double> config);
 	void rimMesh(double rimSize = 0.0);

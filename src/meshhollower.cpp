@@ -35,10 +35,6 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		f->setScaleFactor(HDS_Bridger::getScale());
 	}
 
-//	for (auto f : old_faces) {
-//		thismesh->deleteFace(f);
-//	}
-
 
 	thismesh->heSet.clear();
 	thismesh->vertSet.clear();
@@ -257,12 +253,14 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	}
 	case 2://bind
 	{
+		cout<<"binding..."<<endl;
 		thismesh->processType = HDS_Mesh::BINDED_PROC;
 		auto curHE = originalHE->next;
 		do
 		{
 			HDS_Vertex* newV = new HDS_Vertex;
 			newV->pos = he_f->scaleCorner(curHE->flip->v);
+			cout<<"new v :"<<newV->pos<<endl;
 			newV->refid = curHE->flip->v->refid;
 			vertices.push_back(newV);
 
