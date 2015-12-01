@@ -11,7 +11,7 @@ class MeshHollower
 public:
 	MeshHollower(){}
     static void hollowMesh(HDS_Mesh * mesh, double newFlapSize, int type, double shift);
-
+	static void setOriMesh(HDS_Mesh* originalMesh);
 private:
 	static HDS_Face* addFlapFace(int type, HDS_HalfEdge* orginalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace);
 	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFace);
@@ -23,6 +23,6 @@ private:
 	static vector<HDS_Vertex*> vertices_new;
 	static vector<HDS_HalfEdge*> hes_new;
 	static HDS_Mesh* thismesh;
-
+	static HDS_Mesh* ori_mesh;
 };
 

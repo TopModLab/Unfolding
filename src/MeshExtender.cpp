@@ -6,11 +6,17 @@
 bool MeshExtender::hasBridgeEdge = false;
 bool MeshExtender::hasCutEdge = false;
 bool MeshExtender::isHollow = false;
+HDS_Mesh* MeshExtender::ori_mesh;
 
-vector<HDS_Vertex*> MeshExtender::addBridger(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Face* cutFace)
+void MeshExtender::setOriMesh(HDS_Mesh* mesh)
+{
+	ori_mesh = mesh;
+}
+
+vector<HDS_Vertex*> MeshExtender::addBridger(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2, HDS_Face* cutFace)
 {
 	//new Bridger object
-	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2);
+	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, v1, v2);
 	//add all internal edges and vertices to mesh
 	vector<HDS_HalfEdge*> hes = Bridger->hes;
 	if (!Bridger->hes.empty()) {
@@ -68,6 +74,7 @@ void MeshExtender::scaleFaces(HDS_Mesh* mesh)
 			//build new corners
 			vert_t* v_new = new vert_t(*face->corners()[i]);
 			v_new->pos = face->getScaledCorners()[i];
+			v_new->refid = face->corners()[i]->refid;
 			//find incident half edge
 			vert_t * vs = face->corners()[i];
 			vert_t * ve = i < numOfCorners-1? face->corners()[i+1] : face->corners()[0];
@@ -76,6 +83,8 @@ void MeshExtender::scaleFaces(HDS_Mesh* mesh)
 			//record old cut edges
 			v_new->he = old_edge;
 			v_new->index = HDS_Vertex::assignIndex();
+			cout<<v_new->index<<"  refid: "<<(v_new->refid>>2)<<endl;
+
 			if (old_edge->flip->f->isCutFace) {
 				v_new->he->f = old_edge->flip->f;
 			}
@@ -146,8 +155,12 @@ void MeshExtender::scaleFaces(HDS_Mesh* mesh)
 			curHE->flip->next = prevHE->flip;
 		}
 		}
+
+
 		//link corners to edges
 		for (int i = 0; i < numOfCorners; i++) {
+			edges_new[fidx][i]->refid = corners_new[fidx][i]->he->refid;
+			edges_new[fidx][i]->flip->refid = corners_new[fidx][i]->he->refid;
 			corners_new[fidx][i]->he = edges_new[fidx][i];
 		}
 		//link to current face
@@ -183,7 +196,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
 
+	unordered_map<int, vert_t*> ori_map = ori_mesh->vertMap;
 	scaleFaces(mesh);
+
+
 	vector<vert_t*> verts_new;
 
 
@@ -197,6 +213,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				HDS_HalfEdge* h1 = v->he;
 				HDS_HalfEdge* h2 = v->bridgeTwin->he;
 				HDS_HalfEdge *he1, *he2;
+
 				he1 = h1->f == nullptr? h1:h1->flip;
 				he2 = h2->f == nullptr? h2:h2->flip;
 				HDS_Face* cutFace;
@@ -209,7 +226,17 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 						break;
 					}
 				}while (curHE != h1);
-				vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, cutFace);
+
+				cout<<"v1_ori: "<<((he1->v->refid)>>2)<<endl;
+				cout<<"v2_ori: "<<((he2->v->refid)>>2)<<endl;
+
+				cout<<ori_map.size();
+				HDS_Vertex* v1_ori = ori_map[(he1->v->refid)>>2];
+				HDS_Vertex* v2_ori = ori_map[(he2->v->refid)>>2];
+				cout<<"v1_ori at "<<v1_ori->pos<<endl;
+				cout<<"v2_ori at "<<v2_ori->index<<" "<<v2_ori->pos<<endl;
+
+				vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, v1_ori, v2_ori, cutFace);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 				visited.insert(v->bridgeTwin);
@@ -220,6 +247,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	}
 
 	if (hasCutEdge) {
+
 		for(auto v: mesh->vertSet) {
 			if(v->flapTwin != nullptr){
 
@@ -232,6 +260,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				he_t* twin_he = v->flapTwin->he;
 				he_t* flap_he = new he_t;
 				he_t* flap_he_flip = new he_t;
+
+				//warning. to be tested
+				flap_he->refid = twin_he->refid;
+				flap_he->flip->refid = twin_he->refid;
 
 				flap_he->index = HDS_HalfEdge::assignIndex();
 				flap_he_flip->index = HDS_HalfEdge::assignIndex();
@@ -252,6 +284,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				flap_vs->pos = twin_he->v->pos;
 				flap_ve->pos = twin_he->flip->v->pos;
 
+				//warning. assign refid, to be tested
+				flap_vs->refid = twin_he->v->refid;
+				flap_ve->refid = twin_he->flip->v->refid;
+
 				flap_vs->index = HDS_Vertex::assignIndex();
 				flap_ve->index = HDS_Vertex::assignIndex();
 
@@ -271,7 +307,11 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				twin_he->setCutEdge(false);
 
 				//bridge v->he and new he
-				vector<HDS_Vertex*> verts = addBridger(mesh, he1, flap_he_flip, he1->f);
+				HDS_Vertex* v1_ori = ori_map[(he1->v->refid)>>2];
+				HDS_Vertex* v2_ori = ori_map[(he1->flip->v->refid)>>2];
+				cout<<"v1_ori: "<<((he1->v->refid)>>2)<<endl;
+				cout<<"v2_ori: "<<((he1->flip->v->refid)>>2)<<endl;
+				vector<HDS_Vertex*> verts = addBridger(mesh, he1, flap_he_flip, v1_ori, v2_ori, he1->f);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 			}

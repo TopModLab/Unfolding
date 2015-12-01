@@ -6,9 +6,13 @@ double MeshHollower::flapSize = 0.2;//[0 >> 1]
 double MeshHollower::shiftAmount = 0;//[-1 >> 1]
 
 HDS_Mesh* MeshHollower::thismesh = nullptr;
+HDS_Mesh* MeshHollower::ori_mesh = nullptr;
 vector<HDS_Vertex*> MeshHollower::vertices_new;
 vector<HDS_HalfEdge*> MeshHollower::hes_new;
-
+void MeshHollower::setOriMesh(HDS_Mesh* mesh)
+{
+	ori_mesh = mesh;
+}
 void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 {
 	/*ignore cut edges*/
@@ -20,6 +24,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
 
+	unordered_map <int, vert_t*> ori_map = ori_mesh->vertMap;
 	unordered_set<he_t*> old_edges;
 	for (auto he: thismesh->heSet) {
 		if (old_edges.find(he->flip) == old_edges.end())
@@ -91,6 +96,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		hes_new.push_back(he1);
 		hes_new.push_back(he2);
 
+
 		//set edge cut face
 		face_t * cutFace = new face_t;
 		cutFace->index = HDS_Face::assignIndex();
@@ -105,7 +111,11 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		//add bridger
 		he1->f = he_f;//pass original face to addBridger function
 
-		vector<vert_t*> verts = MeshExtender::addBridger(thismesh, he1->flip, he2->flip, cutFace);
+		//get original vertices
+		HDS_Vertex* v1 = ori_map[(he1->flip->v->refid)>>2];
+		HDS_Vertex* v2 = ori_map[(he2->flip->v->refid)>>2];
+
+		vector<vert_t*> verts = MeshExtender::addBridger(thismesh, he1->flip, he2->flip, v1, v2, cutFace);
 		vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
 		he1->f = cutFace;
 

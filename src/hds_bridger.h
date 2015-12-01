@@ -18,7 +18,7 @@ public:
 
 	~HDS_Bridger();
 
-	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef);
+	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, HDS_Vertex* v1, HDS_Vertex* v2);
 
 	HDS_Bridger(const HDS_Bridger &other);
 	HDS_Bridger operator=(const HDS_Bridger &other);
@@ -29,7 +29,7 @@ public:
 	vector<HDS_Vertex*> verts; //corresponding vertices pointer
 
 	//HDS_Bridger* flapTwin; //points to its twin Bridger created in a cut event
-	void setOriginalPositions();
+	void setOriginalPositions(HDS_Vertex* v1, HDS_Vertex* v2);
 
 	int index;
 	bool isFlap; //if original he is cutted, Bridger becomes flap

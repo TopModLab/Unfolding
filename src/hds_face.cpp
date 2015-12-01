@@ -133,6 +133,7 @@ QVector3D HDS_Face::computeNormal()
 void HDS_Face::setScaleFactor(double factor)
 {
 	scalingFactor = factor;
+	cout<<"scale:"<<scalingFactor<<endl;
 }
 
 //from http://paulbourke.net/geometry/pointlineplane/lineline.c
@@ -188,12 +189,14 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 	// v2_  ---------- v1_n
 	//    n/p
 
+	//scale down based on center point
 	/*QVector3D c = center();
 	QVector3D vec_cv = v->pos - c;
 	return c + scalingFactor * vec_cv;*/
 
 	//scale down corner proportionally along edges
 	QVector3D v0 = v->pos;
+
 
 	//find half edge from v0 to v1_n
 	HDS_HalfEdge* curHe = he;
@@ -219,7 +222,6 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 	//get intersection point
 	QVector3D v0_scaled;
 	LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
-	cout<<v0_scaled.x()<<v0_scaled.y()<<v0_scaled.z()<<endl;
 	return v0_scaled;
 
 }
@@ -235,7 +237,6 @@ vector<QVector3D> HDS_Face::getScaledCorners()
 		auto vertices = corners();
 		for (auto v : vertices) {
 			scaledCorners.insert(scaledCorners.end(), scaleCorner(v));
-			cout<<"here3"<<endl;
 		}
 	} else {
 		//scale down non-planar face

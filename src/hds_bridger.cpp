@@ -3,7 +3,7 @@
 size_t HDS_Bridger::uid = 0;
 
 int HDS_Bridger::shape = 0;
-double HDS_Bridger::scale = 0.8;
+double HDS_Bridger::scale = 0.2;
 double HDS_Bridger::curv = 0.5;
 int HDS_Bridger::nSamples = 3;
 double HDS_Bridger::cp = 0;
@@ -25,19 +25,25 @@ void HDS_Bridger::setScale(double size)
 	scale = size;
 }
 
-void HDS_Bridger::setOriginalPositions()
+void HDS_Bridger::setOriginalPositions(HDS_Vertex* v1, HDS_Vertex* v2)
 {
-	QVector3D corner1, corner0, center, mid;
-	//find corner1 pos that corresponds to he->v
-	center = he->flip->f->center();
-	corner1 = center + (he->v->pos - center)/scale;
-	//find corner0 pos that corresponds to he->flip->v
-	corner0 = center + (he->flip->v->pos - center)/scale;
-	//get mid position
-	mid = (corner1 + corner0) /2.0;
-	//calculate p00 p01
-	p01 = mid + scale * (corner1 - mid);
-	p00 = mid + scale * (corner0 - mid);
+	//get p00 and p01 based on corners
+//	QVector3D corner1, corner0, center, mid;
+//	//find corner1 pos that corresponds to he->v
+//	center = he->flip->f->center();
+//	corner1 = center + (he->v->pos - center)/scale;
+//	//find corner0 pos that corresponds to he->flip->v
+//	corner0 = center + (he->flip->v->pos - center)/scale;
+//	//get mid position
+//	mid = (corner1 + corner0) /2.0;
+//	//calculate p00 p01
+//	p01 = mid + scale * (corner1 - mid);
+//	p00 = mid + scale * (corner0 - mid);
+
+	//get p00 and p01 based on scaling of edges
+	p01 = (1 - scale/2)* v1->pos + scale/2 *v2->pos;
+	p00 = (1 - scale/2)* v2->pos + scale/2 *v1->pos;
+
 
 	p10 = he->flip->v->pos;
 	p11 = he->v->pos;
@@ -50,12 +56,12 @@ void HDS_Bridger::setOriginalPositions()
 	}
 }
 
-HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef)
+HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, HDS_Vertex* v1, HDS_Vertex* v2)
 {
 
 	this->he = he;
 	this->hef = hef;
-	setOriginalPositions();
+	setOriginalPositions(v1, v2);
 
 
 	if (shape != 2) { // not flat

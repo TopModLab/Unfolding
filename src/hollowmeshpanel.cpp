@@ -73,7 +73,7 @@ double HollowMeshPanel::getFlapSize()
 }
 double HollowMeshPanel::getBridgerSize()
 {
-	return 1.0 -(double)bridgerSize / (double)ui->bridgerSizeSlider->maximum();
+	return (double)bridgerSize / (double)ui->bridgerSizeSlider->maximum();
 }
 
 double HollowMeshPanel::getShift()

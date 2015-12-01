@@ -471,7 +471,7 @@ bool MeshManager::saveMeshes()
 void MeshManager::extendMesh(int meshType, map<QString, double> config)
 {
 	HDS_Bridger::setBridger(config);
-
+	MeshExtender::setOriMesh(hds_mesh.data());
 	switch(meshType){
 	case 0://original
 		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
@@ -536,6 +536,8 @@ void MeshManager::rimMesh(double rimSize)
 
 void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 {
+	MeshHollower::setOriMesh(hds_mesh.data());
+
 	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
 	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize, type, shift);
 	extended_cutted_mesh->updateSortedFaces();
