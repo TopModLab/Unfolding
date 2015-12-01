@@ -310,7 +310,5 @@ HDS_Face* MeshHollower::createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFa
 		preV = curV;
 	}
 
-
-
 	return newFace;
 }

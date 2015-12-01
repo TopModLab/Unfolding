@@ -8,8 +8,8 @@ int HDS_Common::assignRef_ID(int id, int type)
 QString HDS_Common::ref_ID2String(int refid)
 {
 	QString ret;
-	int newrid = refid & 3;
-	switch (newrid)
+	int type = refid & 3;
+	switch (type)
 	{
 	case ORIGIN:
 		ret = "R";
@@ -26,5 +26,6 @@ QString HDS_Common::ref_ID2String(int refid)
 	default:
 		break;
 	}
-	return ret.append(QString::number(refid >> 2));
+	//return ret.append(QString::number(refid >> 2));
+	return QString::number(refid >> 2);
 }
