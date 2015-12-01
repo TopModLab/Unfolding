@@ -36,6 +36,7 @@ enum ConnectorConf: int
 	PINHOLE_UNIT,
 	PINHOLESIZE,
 	PINHOLECOUNT_TYPE,
+	ETCHSEG,
 	SCORE_TYPE,
 		DASH_LEN,
 		DASH_GAP,
@@ -148,7 +149,7 @@ private:
 	static void writeToSVG(const char* filename);
 
 	static void writeCutLayer(FILE* SVG_File, const vector<QVector2D> &cut, int cuttype = 0, int id = 0);
-	static void wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch);
+	static void wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch, int seg = 0);
 
 private:
 	/*static double pinholesize;

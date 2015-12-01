@@ -30,12 +30,12 @@ cstchar SVG_HEAD[] =		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\
 cstchar SVG_CIRCLE[] =		"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
 							"style=\"stroke:magenta;stroke-width:0.1;fill:none\" />\n";
 cstchar SVG_LINE[] =		"\t<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
-							"style=\"fill:none;stroke:%s;stroke-width:0.1\" />\n";
+							"style=\"fill:none;stroke:%s;stroke-width:0.8\" />\n";
 cstchar SVG_DASHARRAY[] =	"\t<path stroke-dasharray=\"%f, %f\" id=\"Dash%d\" d=\"M%f %f L%f %f\" " \
-							"style=\"fill:none;stroke:blue;stroke-width:0.1\" />";
+							"style=\"fill:none;stroke:blue;stroke-width:0.8\" />";
 cstchar SVG_TEXT[] =		"\t<text x=\"%lf\" y=\"%lf\" transform=\"rotate(%lf %lf,%lf)\" " \
-							"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;\" >" \
-							"%s</text>\n";
+							"style=\"font-size:10;stroke:blue;stroke-width:0.8;fill:none;" \
+							"text-anchor:middle;alignment-baseline:middle\" >%s</text>\n";
 cstchar SVG_ARCH[] =		"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
 							"L %lf %lf " \
@@ -97,6 +97,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
 	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
 	double uncut_len = ConvertToPt((int)UNIT_TYPE::INCH, 0.1);
+	int segCount = conf.find(ConnectorConf::ETCHSEG)->second;
 	int unit_type = static_cast<int>(conf.find(ConnectorConf::PINHOLE_UNIT)->second);
 	int pinholecount_type = static_cast<int>(conf.find(ConnectorConf::PINHOLECOUNT_TYPE)->second);
 	int score_type = static_cast<int>(conf.find(ConnectorConf::SCORE_TYPE)->second);
@@ -230,7 +231,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 					// Add orientation label
 					if (!cut_he->next->isCutEdge)
 					{
-						printOrientLabel.push_back(targPos * he_scale);
+						printOrientLabel.push_back((startPos + dirPin * 0.5) * he_scale);
 					}
 					// If 4 pinholes
 					if (pinholecount_type == 1)
@@ -300,8 +301,9 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		for (auto labpos : printOrientLabel)
 		{
 			fprintf(SVG_File, "\t<text x=\"%lf\" y=\"%lf\" " \
-				"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;\" >" \
-				"%s</text>\n", labpos.x(), labpos.y(), "-");
+				"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;" \
+				"text-anchor:middle;alignment-baseline:middle\" >-</text>\n",
+				labpos.x(), labpos.y());
 		}
 
 		/************************************************************************/
@@ -316,8 +318,8 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 			endpos += lastDir * (1 - uncut_len / lastDir.length());
 
 			printBorderEdgePts.push_back(endpos);
-			printEtchEdges.push_back(endpos);
-			printEtchEdges.push_back(startpos);
+			//printEtchEdges.push_back(endpos);
+			//printEtchEdges.push_back(startpos);
 		}
 		// Else if cut as polygon
 		// Do nothing
@@ -325,7 +327,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		/************************************************************************/
 		/* Write out edge for etch                                               */
 		/************************************************************************/
-		wrtieEtchLayer(SVG_File, printEtchEdges);
+		wrtieEtchLayer(SVG_File, printEtchEdges, segCount);
 	}
 	/************************************************************************/
 	/* End of SVG File End                                                  */
@@ -1267,6 +1269,10 @@ void MeshConnector::writeCutLayer(FILE* SVG_File, const vector<QVector2D> &cut,
 	case 0: // To closed polygon
 		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", id);
 	case 1: // To open polyline
+		fprintf(SVG_File, SVG_LINE, id,
+			cut.back().x(), cut.back().y(),
+			cut.front().x(), cut.front().y(),
+			"yellow");
 		fprintf(SVG_File, "\t<polyline id=\"%d\" points=\"", id);
 	default:
 		break;
@@ -1280,14 +1286,24 @@ void MeshConnector::writeCutLayer(FILE* SVG_File, const vector<QVector2D> &cut,
 	fprintf(SVG_File, "\" style=\"fill:none;stroke:cyan;stroke-width:0.8\" />\n");
 }
 
-void MeshConnector::wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch)
+void MeshConnector::wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch, int seg)
 {
+	double halfSegLen = ConvertToPt((int)UNIT_TYPE::INCH, 0.02);
 	for (int isec = 0; isec < etch.size(); isec += 2)
 	{
-		fprintf(SVG_File, SVG_LINE, isec / 2,
-			etch[isec].x(), etch[isec].y(),
-			etch[isec + 1].x(), etch[isec + 1].y(),
-			"yellow");
+		for (int iseg = 0; iseg <= seg; iseg++)
+		{
+			double offset = (iseg * 2 - seg) * halfSegLen;
+			fprintf(SVG_File, SVG_LINE, isec / 2,
+				etch[isec].x() + offset, etch[isec].y(),
+				etch[isec + 1].x() + offset, etch[isec + 1].y(),
+				"yellow");
+			/*fprintf(SVG_File, SVG_LINE, isec / 2,
+				etch[isec].x(), etch[isec].y(),
+				etch[isec + 1].x(), etch[isec + 1].y(),
+				"yellow");*/
+		}
+		
 	}
 	fprintf(SVG_File, "</g>\n");//set a new group for inner lines
 }

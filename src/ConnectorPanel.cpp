@@ -68,6 +68,7 @@ confMap ConnectorPanel::getConfiguration() const
 	ret.insert(make_pair(ConnectorConf::PINHOLECOUNT_TYPE,
 		(double)ui->pinholecount_type->currentIndex()));
 
+	ret.insert(make_pair(ConnectorConf::ETCHSEG, (double)ui->etchseg_val->value()));
 	ret.insert(make_pair(ConnectorConf::SCORE_TYPE, (double)ui->score_type->currentIndex()));
 	ret.insert(make_pair(ConnectorConf::DASH_LEN, ui->scoredash_len->value()));
 	ret.insert(make_pair(ConnectorConf::DASH_GAP, ui->scoredash_gap->value()));
