@@ -158,16 +158,22 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
-		unordered_set<HDS_Vertex *> verts;
+		vector<HDS_Vertex *> verts;
 		/************************************************************************/
 		/* Calculate Piece Orientation                                          */
 		/************************************************************************/
 		bool checkedOrientation = false;
+		
 		QVector3D newOrigin, newX, newY;
 		for (auto fid : piece)
 		{
 			auto face = unfolded_mesh->faceMap[fid];
-			if (!face->isCutFace)
+			if (face->isCutFace)
+			{
+				verts = face->corners();
+			}
+			// inside faces
+			else if (!checkedOrientation)
 			{
 				auto he = face->he;
 				auto curHE = he;
@@ -182,25 +188,25 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 				newY = (curHE->next->v->pos - curHE->v->pos).normalized();
 				newX = QVector3D(newY.y(), -newY.x(), 0);
 				newOrigin = curHE->v->pos;
-				break;
+				checkedOrientation = true;
 			}
 		}
-
-		BBox3 curBound;
-		// generate bounding box
-		for (auto fid : piece)
+		// Apply orientation
+		for (auto vert : verts)
 		{
-			auto cur_verts = unfolded_mesh->faceMap[fid]->corners();
-			for (auto vert : cur_verts)
-			{
-				if (verts.find(vert) == verts.end())
-				{
-					curBound.Union(vert->pos);
-					verts.insert(vert);
-				}
-			}
+			// Apply Orientation to all vertices
+			auto& pos = vert->pos;
+			pos -= newOrigin;
+			pos = QVector3D(QVector3D::dotProduct(pos, newX),
+				QVector3D::dotProduct(pos, newY), 0)
+				+ newOrigin;
 		}
-		
+		// calculate bouding for current piece
+		BBox3 curBound;
+		for (auto vert : verts)
+		{
+			curBound.Union(vert->pos);
+		}
 		/************************************************************************/
 		/* Assembling Offset                                                    */
 		/************************************************************************/
@@ -214,11 +220,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		for (auto vert : verts)
 		{
 			// Apply Orientation to all vertices
-			auto& pos = vert->pos;
-			pos -= newOrigin;
-			pos = QVector3D(QVector3D::dotProduct(pos, newX),
-				QVector3D::dotProduct(pos, newY), 0)
-				+ newOrigin + bound_shift;
+			vert->pos += bound_shift;
 		}
 		bound->Union(curBound);
 	}
