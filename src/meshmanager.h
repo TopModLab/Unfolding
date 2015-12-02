@@ -123,6 +123,7 @@ public:
 	void setHollowMesh(double fsize, int type, double shift);
 	void extendMesh(int meshType, map<QString, double> config);
 	void rimMesh(double rimSize = 0.0);
+	void set3DRimMesh();
 
 	// Export as SVG files
     void exportXMLFile();

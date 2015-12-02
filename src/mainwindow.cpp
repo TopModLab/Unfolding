@@ -366,12 +366,19 @@ void MainWindow::createActions()
 		connect(bindingAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerBindingMesh(bool)));
 		actionsMap["bind"] = bindingAct;
 		
-		QAction *rimfaceAct = new QAction(QIcon(":/icons/rimface.png"), tr("Rim faces"), this);
+		QAction *rimfaceAct = new QAction(QIcon(":/icons/rimface.png"), tr("Rim faces 2D"), this);
 		rimfaceAct->setStatusTip(tr("Rim Faces"));
 		rimfaceAct->setCheckable(true);
 		rimfaceAct->setChecked(false);
 		connect(rimfaceAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerRimmedMesh(bool)));
 		actionsMap["rimface"] = rimfaceAct;
+
+		QAction *rimface3DAct = new QAction(QIcon(":/icons/rimface_3d.png"), tr("Rim faces 3D"), this);
+		rimface3DAct->setStatusTip(tr("Rim Faces"));
+		rimface3DAct->setCheckable(true);
+		rimface3DAct->setChecked(false);
+		connect(rimface3DAct, SIGNAL(toggled(bool)), this, SLOT(slot_triggerRimmed3DMesh(bool)));
+		actionsMap["rimface3d"] = rimface3DAct;
 
 		//cut with popup submenu
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
@@ -388,7 +395,6 @@ void MainWindow::createActions()
 		unfoldAct->setChecked(false);
 		connect(unfoldAct, SIGNAL(toggled(bool)), this, SLOT(slot_unfoldMesh(bool)));
 		actionsMap["mesh unfold"] = unfoldAct;
-
 
 
 		QAction *colormapAct = new QAction(QIcon(":/icons/colormap.png"), tr("Colormap"), this);
@@ -527,6 +533,7 @@ void MainWindow::createToolBar()
 		ui->mainToolBar->addAction(actionsMap["hollow"]);
 		ui->mainToolBar->addAction(actionsMap["bind"]);
 		ui->mainToolBar->addAction(actionsMap["rimface"]);
+		ui->mainToolBar->addAction(actionsMap["rimface3d"]);
 
 		ui->mainToolBar->addSeparator();
 		ui->mainToolBar->addAction(actionsMap["mesh cut"]);
@@ -741,6 +748,30 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 		isExtended = false;*/
 	}
 }
+
+void MainWindow::slot_triggerRimmed3DMesh(bool checked)
+{
+	if (checked)
+	{
+		if (curMesh == Original)
+		{
+			MeshManager::getInstance()->set3DRimMesh();
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
+			meshStack.push(Extended);
+			updateCurrentMesh();
+			isExtended = true;
+
+		}
+	}
+	else
+	{
+		/*viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+		meshStack.pop();
+		updateCurrentMesh();
+		isExtended = false;*/
+	}
+}
+
 void MainWindow::slot_hollowMesh()
 {
 	HDS_Bridger::setScale(hmpanel->getBridgerSize());
