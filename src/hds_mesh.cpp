@@ -664,25 +664,7 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v
 	}while (curHE != he);
 	return nullptr;
 }
-void HDS_Mesh::linkToCutFace(HDS_Mesh::he_t* he, HDS_Mesh::face_t* face)
-{
 
-	//if there's a corresponding cut face
-	if ( face != nullptr ) {
-		he->f = face;
-		face->he = he;
-	} else {
-		cout<<"no cut face found"<<endl;
-		//if non found, set a new cut face
-		face_t * cutFace = new face_t;
-		cutFace->index = HDS_Face::assignIndex();
-		cutFace->isCutFace = true;
-		cutFace->he = he;
-		he->f = cutFace;
-		addFace(cutFace);
-
-	}
-}
 
 HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, HDS_Mesh::face_t* cutFace)
 {
@@ -739,7 +721,10 @@ HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, 
 		he_new->f = bridgeFace;
 
 		//link to corresponding cut face
-		linkToCutFace(he_new_flip, cutFace);
+        //linkToCutFace(he_new_flip, cutFace);
+        he_new_flip->f = cutFace;
+        cutFace->he = he_new_flip;
+
 		he_new->setCutEdge(true);
 
 		if (i == 0) {
