@@ -9,6 +9,11 @@
 
 class HDS_Bridger
 {
+
+    typedef HDS_Face face_t;
+    typedef HDS_HalfEdge he_t;
+    typedef HDS_Vertex vert_t;
+
 private:
 	static size_t uid;
 
@@ -24,23 +29,26 @@ public:
 	HDS_Bridger operator=(const HDS_Bridger &other);
 
 
-	vector<HDS_Face*> faces; //corresponding faces pointer
-	vector<HDS_HalfEdge*> hes; //corresponding half edges pointer
-	vector<HDS_Vertex*> verts; //corresponding vertices pointer
+    vector<face_t*> faces; //corresponding faces pointer
+    vector<he_t*> hes; //corresponding half edges pointer
+    vector<vert_t*> verts; //corresponding vertices pointer
 
 	//HDS_Bridger* flapTwin; //points to its twin Bridger created in a cut event
-	void setOriginalPositions(HDS_Vertex* v1, HDS_Vertex* v2);
-
+    void createBridge();
+    void setOriginalPositions(HDS_Vertex* v1, HDS_Vertex* v2);
+    face_t* bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Face* CutFace);
 	int index;
 	bool isFlap; //if original he is cutted, Bridger becomes flap
 
 	//config Bridger
+    void setCutFace(face_t* cutFace);
 	static void setBridger(std::map<QString, double> config);
 	static void setScale(double scale);
 
 	static double getScale(){return scale;}
 
 private:
+    HDS_Face* cutFace;
 	HDS_HalfEdge* he; //original corresponding he before adding Bridger
 	HDS_HalfEdge* hef;
 	QVector3D p00;

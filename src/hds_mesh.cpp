@@ -666,107 +666,7 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v
 }
 
 
-HDS_Mesh::face_t * HDS_Mesh::bridging(HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2, HDS_Mesh::face_t* cutFace)
-{
-	//get 4 vertices from h1 h2
-	HDS_Vertex* v1s, *v1e, *v2s, *v2e;
-	v1s = he1->v;
-	v1e = he1->flip->v;
-	v2s = he2->v;
-	v2e = he2->flip->v;
 
-
-	//build new face
-	face_t * bridgeFace = new face_t;
-
-	//link he1 and he2 to face
-	he1->f = bridgeFace;
-	he2->f = bridgeFace;
-
-//	//insert two cut edges
-//	he_t* he_v1e_v2s = insertEdge(v1e, v2s);
-//	he_t* he_v2e_v1s = insertEdge(v2e, v1s);
-
-//	he_v1e_v2s->index = HDS_HalfEdge::assignIndex();
-//	he_v1e_v2s->flip->index = HDS_HalfEdge::assignIndex();
-//	he_v2e_v1s->index = HDS_HalfEdge::assignIndex();
-//	he_v2e_v1s->flip->index = HDS_HalfEdge::assignIndex();
-
-//	//connect new half edges to face
-//	bridgeFace->he = he_v1e_v2s;
-
-//	he_v1e_v2s->f = bridgeFace;
-//	he_v2e_v1s->f = bridgeFace;
-
-//	linkToCutFace(he_v1e_v2s->flip, cutFace);
-//	linkToCutFace(he_v2e_v1s->flip, cutFace);
-//	he_v1e_v2s->setCutEdge(true);
-//	he_v2e_v1s->setCutEdge(true);
-
-
-//	addHalfEdge(he_v1e_v2s);
-//	addHalfEdge(he_v1e_v2s->flip);
-//	addHalfEdge(he_v2e_v1s);
-//	addHalfEdge(he_v2e_v1s->flip);
-
-
-	HDS_HalfEdge* nextHE, * prevHE;
-	//build 4 new half edges to connect original 4 vertices
-	for (int i = 0; i < 2; i++){
-		he_t* he_new = new he_t;
-		he_t *he_new_flip = new he_t;
-		he_new->index = HDS_HalfEdge::assignIndex();
-		he_new_flip->index = HDS_HalfEdge::assignIndex();
-		he_new->setFlip(he_new_flip);
-		he_new->f = bridgeFace;
-
-		//link to corresponding cut face
-        //linkToCutFace(he_new_flip, cutFace);
-        he_new_flip->f = cutFace;
-        cutFace->he = he_new_flip;
-
-		he_new->setCutEdge(true);
-
-		if (i == 0) {
-			//first edge (he_ v1e_v2s)
-			nextHE = he2;
-			prevHE = he1;
-			he_new->v = v1e;
-			he_new_flip->v = v2s;
-
-			//connect new half edges to face
-			bridgeFace->he = he_new;
-		}else {
-			//second edge (he_ v2e_v1s)
-			nextHE = he1;
-			prevHE = he2;
-			he_new->v = v2e;
-			he_new_flip->v = v1s;
-		}
-
-		//connect edge loop
-		he_new_flip->next = prevHE->next;
-		prevHE->next->prev = he_new_flip;
-		he_new_flip->prev = nextHE->prev;
-		nextHE->prev->next = he_new_flip;
-
-		prevHE->next = he_new;
-		nextHE->prev = he_new;
-		he_new->prev = prevHE;
-		he_new->next = nextHE;
-
-
-		heSet.insert(he_new);
-		heSet.insert(he_new_flip);
-
-		heMap.insert(make_pair(he_new->index, he_new));
-		heMap.insert(make_pair(he_new_flip->index, he_new_flip));
-
-	}
-
-	return bridgeFace;
-
-}
 
 HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
 {
@@ -796,17 +696,18 @@ HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2
 		prevHE = v1->he->flip;
 		he1_flip->next = nextHE;
 		nextHE->prev = he1_flip;
+        he1->prev = prevHE;
 		prevHE->next = he1;
-		he1->prev = prevHE;
 	}
 	if(!v2_isNew) {
 		he_t* prevHE, *nextHE;
 		nextHE = v2->he;
 		prevHE = v2->he->prev;
-		nextHE->prev = he1;
 		he1->next = nextHE;
-		prevHE->next = he1_flip;
-		he1_flip->prev = prevHE;
+        nextHE->prev = he1;
+        he1_flip->prev = prevHE;
+        prevHE->next = he1_flip;
+
 	}
 	return he1;
 }

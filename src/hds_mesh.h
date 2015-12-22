@@ -93,7 +93,6 @@ public:
 	he_t* incidentEdge(face_t *f1, face_t *f2);
 	he_t* incidentEdge(vert_t *v1, vert_t *v2);
 
-	face_t * bridging(he_t* h1, he_t* h2, face_t* cutFace); //create a bridge between two boundary half edges
 	he_t* insertEdge(vert_t* v1, vert_t* v2);
 
 	template <typename T>

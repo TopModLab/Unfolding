@@ -18,34 +18,26 @@ vector<HDS_Vertex*> MeshExtender::addBridger(HDS_Mesh* thismesh, HDS_HalfEdge* h
 
 	//new Bridger object
 	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, v1, v2);
-	//add all internal edges and vertices to mesh
+    Bridger->setCutFace(cutFace);
+    Bridger->createBridge();
+    //add all internal edges and vertices to mesh
 	vector<HDS_HalfEdge*> hes = Bridger->hes;
 	if (!Bridger->hes.empty()) {
 		for (auto he : hes) {
+            he->index = HDS_HalfEdge::assignIndex();
 			thismesh->addHalfEdge(he);
 		}
 
 	}
+    for (auto f: Bridger->faces) {
+        f->index = HDS_Face::assignIndex();
+        thismesh->addFace(f);
+    }
 
-	hes.insert(hes.begin(),he1);
-	hes.push_back(he2);
-	for (auto he = hes.begin(); he != hes.end(); he+=2) {
-		if (he != prev(hes.end())) {
-			auto he_next = next(he);
-			//bridge each pair of edges
-			//get bridge faces, set to Bridger->faces
-			HDS_Face* bridgeFace = thismesh->bridging(*he, *he_next, cutFace);
-			//fix face
-			bridgeFace->index = HDS_Face::assignIndex();
-			bridgeFace->isCutFace = false;
-			bridgeFace->isBridger = true;
-			//add face to mesh
-			thismesh->addFace(bridgeFace);
+    for (auto v: Bridger->verts) {
+        v->index = HDS_Vertex::assignIndex();
+    }
 
-			Bridger->faces.push_back(bridgeFace);
-
-		}
-	}
 	return Bridger->verts;
 
 }
@@ -239,7 +231,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				HDS_Vertex* v1_ori = ori_map[(he1->v->refid)>>2];
 				HDS_Vertex* v2_ori = ori_map[(he2->v->refid)>>2];
 
-				vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, v1_ori, v2_ori, cutFace);
+
+                vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, v1_ori, v2_ori, cutFace);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 				visited.insert(v->bridgeTwin);
