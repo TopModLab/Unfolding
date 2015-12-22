@@ -20,6 +20,7 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 	thismesh = mesh;
 	shiftAmount = shift;
 
+
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
