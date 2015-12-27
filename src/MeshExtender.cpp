@@ -162,52 +162,53 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 		}else {
 			/// for all cut-edge edges, create flaps
-//			he_t* twin_he = he->bridgeTwin;
-//			vert_t* flap_vs = new vert_t;
-//			vert_t* flap_ve = new vert_t;
-//			flap_vs->pos = twin_he->v->pos;
-//			flap_ve->pos = twin_he->flip->v->pos;
+/*
+			he_t* twin_he = he->bridgeTwin;
+			vert_t* flap_vs = new vert_t;
+			vert_t* flap_ve = new vert_t;
+			flap_vs->pos = twin_he->v->pos;
+			flap_ve->pos = twin_he->flip->v->pos;
 
-//			//warning. assign refid, to be tested
-//			flap_vs->refid = twin_he->v->refid;
-//			flap_ve->refid = twin_he->flip->v->refid;
+			//warning. assign refid, to be tested
+			flap_vs->refid = twin_he->v->refid;
+			flap_ve->refid = twin_he->flip->v->refid;
 
-//			verts_new.push_back(flap_vs);
-//			verts_new.push_back(flap_ve);
+			verts_new.push_back(flap_vs);
+			verts_new.push_back(flap_ve);
 
-//			he_t* flap_he = HDS_Mesh::insertEdge(flap_vs, flap_ve);
-//			flap_he->setCutEdge(true);
-//			flap_he->f = twin_he->f;
-//			flap_he->flip->f = twin_he->f;
-//			flap_he->refid = twin_he->refid;
-//			hes_new.push_back(flap_he);
+			he_t* flap_he = HDS_Mesh::insertEdge(flap_vs, flap_ve);
+			flap_he->setCutEdge(true);
+			flap_he->f = twin_he->f;
+			flap_he->flip->f = twin_he->f;
+			flap_he->refid = twin_he->refid;
+			hes_new.push_back(flap_he);
 
-//			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
-//			HDS_Vertex* v2_ori = ori_map[(flap_he->v->refid)>>2];
+			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
+			HDS_Vertex* v2_ori = ori_map[(flap_he->v->refid)>>2];
 
 
-//			vert_t* twin_flap_vs = new vert_t;
-//			vert_t* twin_flap_ve = new vert_t;
-//			twin_flap_vs->pos = he->v->pos;
-//			twin_flap_ve->pos = he->flip->v->pos;
+			vert_t* twin_flap_vs = new vert_t;
+			vert_t* twin_flap_ve = new vert_t;
+			twin_flap_vs->pos = he->v->pos;
+			twin_flap_ve->pos = he->flip->v->pos;
 
-//			//warning. assign refid, to be tested
-//			twin_flap_vs->refid = he->v->refid;
-//			twin_flap_ve->refid = he->flip->v->refid;
+			//warning. assign refid, to be tested
+			twin_flap_vs->refid = he->v->refid;
+			twin_flap_ve->refid = he->flip->v->refid;
 
-//			verts_new.push_back(twin_flap_vs);
-//			verts_new.push_back(twin_flap_ve);
+			verts_new.push_back(twin_flap_vs);
+			verts_new.push_back(twin_flap_ve);
 
-//			he_t* twin_flap_he = HDS_Mesh::insertEdge(twin_flap_vs, twin_flap_ve);
-//			twin_flap_he->setCutEdge(true);
-//			twin_flap_he->f = he->f;
-//			twin_flap_he->flip->f = he->f;
+			he_t* twin_flap_he = HDS_Mesh::insertEdge(twin_flap_vs, twin_flap_ve);
+			twin_flap_he->setCutEdge(true);
+			twin_flap_he->f = he->f;
+			twin_flap_he->flip->f = he->f;
 
-//			twin_flap_he->refid = he->refid;
-//			hes_new.push_back(twin_flap_he);
+			twin_flap_he->refid = he->refid;
+			hes_new.push_back(twin_flap_he);
 
-//			addBridger(he, flap_he, v1_ori, v2_ori);
-//			addBridger(twin_he, twin_flap_he, v2_ori, v1_ori);
+			addBridger(he, flap_he, v1_ori, v2_ori);
+			addBridger(twin_he, twin_flap_he, v2_ori, v1_ori);*/
 
 		}
 
@@ -250,6 +251,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		//cout << v->index << ": " << (*v) << endl;
 	}
 
+	cur_mesh->updatePieceSet();
 
 	cout<<"extend succeed............."<<endl;
 	return true;
