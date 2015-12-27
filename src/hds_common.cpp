@@ -29,3 +29,5 @@ QString HDS_Common::ref_ID2String(int refid)
 	//return ret.append(QString::number(refid >> 2));
 	return QString::number(refid >> 2);
 }
+
+

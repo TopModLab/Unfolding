@@ -3,194 +3,266 @@
 
 #include "utils.hpp"
 #include "mathutils.hpp"
-bool MeshExtender::hasBridgeEdge = false;
-bool MeshExtender::hasCutEdge = false;
+
 bool MeshExtender::isHollow = false;
+
 HDS_Mesh* MeshExtender::ori_mesh;
+HDS_Mesh* MeshExtender::cur_mesh;
+
+vector<HDS_HalfEdge*> MeshExtender::hes_new;
+vector<HDS_Vertex*> MeshExtender::verts_new;
+vector<HDS_Face*> MeshExtender::faces_new;
+
 
 void MeshExtender::setOriMesh(HDS_Mesh* mesh)
 {
 	ori_mesh = mesh;
 }
 
-vector<HDS_Vertex*> MeshExtender::addBridger(HDS_Mesh* thismesh, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2, HDS_Face* cutFace)
+void MeshExtender::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2)
 {
 
 	//new Bridger object
 	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, v1, v2);
-    Bridger->setCutFace(cutFace);
-    Bridger->createBridge();
-    //add all internal edges and vertices to mesh
-	vector<HDS_HalfEdge*> hes = Bridger->hes;
-	if (!Bridger->hes.empty()) {
-		for (auto he : hes) {
-            he->index = HDS_HalfEdge::assignIndex();
-			thismesh->addHalfEdge(he);
-		}
+	Bridger->setCutFace(he1->f, he2->f);
+	Bridger->createBridge();
 
-	}
-    for (auto f: Bridger->faces) {
-        f->index = HDS_Face::assignIndex();
-        thismesh->addFace(f);
-    }
-
-    for (auto v: Bridger->verts) {
-        v->index = HDS_Vertex::assignIndex();
-    }
-
-	return Bridger->verts;
+	hes_new.insert( hes_new.end(), Bridger->hes.begin(), Bridger->hes.end());
+	faces_new.insert( faces_new.end(), Bridger->faces.begin(), Bridger->faces.end());
+	verts_new.insert( verts_new.end(), Bridger->verts.begin(), Bridger->verts.end() );
 
 }
-void MeshExtender::scaleFaces(HDS_Mesh* mesh)
+
+void MeshExtender::scaleFaces()
 {
-	typedef HDS_HalfEdge he_t;
-	typedef HDS_Vertex vert_t;
+	for (auto f: cur_mesh->faces()) {
+		if (!f->isCutFace){
+			f->setScaleFactor(HDS_Bridger::getScale());
+			int numOfCorners = f->corners().size();
+			vector<vert_t*> vertices;
+			for (int i = 0; i < numOfCorners; i++) {
+				vert_t* v_new = new vert_t;
+				v_new->pos = f->getScaledCorners()[i];
+				v_new->refid = f->corners()[i]->refid;
+				vertices.push_back(v_new);
+				verts_new.push_back(v_new);
+			}
 
-	set<int> oldFaces;
-	for (auto &f : mesh->faceSet) {
-		if (f->isCutFace) continue;
-		else oldFaces.insert(f->index);
+			face_t* newFace = createFace(vertices);
+			newFace->refid = f->refid;
+			newFace->isCutFace = false;
+			newFace->isBridger = false;
+			faces_new.push_back(newFace);
+
+			//assign half edge's refid
+			//get current face's edges
+			he_t* newHE = newFace->he;
+			he_t* curHE = f->he;
+
+			do {
+				newHE->refid = curHE->refid;
+				newHE->flip->refid = curHE->flip->refid;
+				newHE->setCutEdge(curHE->isCutEdge);
+				if (newHE->isCutEdge)
+					newHE->flip->f = curHE->flip->f;
+				newHE = newHE->next;
+				curHE = curHE->next;
+			}while(newHE!= newFace->he);
+		}
 	}
-	cout << "number of old faces = " << oldFaces.size() << endl;
-	vector<vector<vert_t*> > corners_new(oldFaces.size());
-	vector<vert_t*> corners_tmp;
-	vector<vector<he_t*> > edges_new(oldFaces.size());
-	HDS_Vertex::resetIndex();
-	HDS_HalfEdge::resetIndex();
+}
 
-	for (auto fidx : oldFaces) {
-		auto face = mesh->faceMap[fidx];
-		// update each face with the scaling factor
-		face->setScaleFactor(HDS_Bridger::getScale());
-		int numOfCorners = face->corners().size();
-		for (int i = 0; i < numOfCorners; i++) {
-			//build new corners
-			vert_t* v_new = new vert_t(*face->corners()[i]);
-			v_new->pos = face->getScaledCorners()[i];
-			v_new->refid = face->corners()[i]->refid;
-			//find incident half edge
-			vert_t * vs = face->corners()[i];
-			vert_t * ve = i < numOfCorners-1? face->corners()[i+1] : face->corners()[0];
-			he_t* old_edge = mesh->incidentEdge(vs, ve);
+HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices)
+{
 
-			//record old cut edges
-            v_new->he = old_edge;
-			v_new->index = HDS_Vertex::assignIndex();
-			cout<<v_new->index<<"  refid: "<<(v_new->refid>>2)<<endl;
 
-            if (old_edge->flip->f->isCutFace) {
-                v_new->he->f = old_edge->flip->f;
-            }
-			corners_new[fidx].push_back(v_new);
-			corners_tmp.push_back(v_new);
+	face_t * newFace = new face_t();
+	vertices.push_back(vertices.front());//form a loop
+
+	auto preV = vertices.front();
+	for (int i = 1; i < vertices.size(); i++)
+	{
+		auto& curV = vertices[i];
+		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
+		if(newFace->he == nullptr)
+			newFace->he = newHE;
+		newHE->f = newFace;
+		hes_new.push_back(newHE);
+		preV = curV;
+	}
+
+	return newFace;
+}
+
+
+
+bool MeshExtender::extendMesh(HDS_Mesh *mesh)
+{
+	cur_mesh = mesh;
+	unordered_map<int, vert_t*> ori_map = ori_mesh->vertMap;
+	scaleFaces();
+
+	//get bridge pairs
+	unordered_map<int, he_t*> refidMap;
+	for (auto he: hes_new) {
+		if (refidMap.find(he->refid) == refidMap.end())
+			refidMap.insert(make_pair(he->refid, he));
+		else {
+			he->flip->setBridgeTwin(refidMap[he->refid]->flip);
+
 		}
 	}
 
+	for (auto f: cur_mesh->faces()) {
+		if(f->isCutFace){
+			faces_new.push_back(f);
+			cout<<"old cut faces:"<<f->index<<endl;
+		}
 
-    for (auto v1 : corners_tmp) {
-        for (auto v2 : corners_tmp) {
-			if (v1->index != v2->index) {
-                if(v1->he->index == v2->he->flip->index) {
-					//non cut edge
-					v1->bridgeTwin = v2;
-					hasBridgeEdge = true;
-					cout<<"non cut edge twin pair vertices:"<<v1->index<<" and "<<v2->index<<endl;
+	}
 
-                }else if (v1->he->flip->cutTwin != nullptr && v2->he->flip->cutTwin != nullptr) {
-                    if (v1->he->flip->index == v2->he->flip->cutTwin->index){
-						//cut edge, duplicate edge
-						v1->flapTwin = v2;
-						hasCutEdge = true;
-						cout<<"cut edge twin pair vertices:"<<v1->index<<" and "<<v2->index<<endl;
+	//assign flip s face
+	for (auto& he_inner: hes_new){
+		he_t* he = he_inner->flip;
 
-					}
+		if (he->f == nullptr){
+
+
+			//find nearest cut face, if not found set a new one
+			he_t* curHE = he;
+			do {
+				curHE = curHE->bridgeTwin->next;
+				if (curHE->f != nullptr) {
+					cout<<"cut face: "<<curHE->f->index<<endl;
+					he->f = curHE->f;
+					break;
 				}
+			}while (curHE != he);
+
+			if (he->f == nullptr) {
+				face_t* cutFace = new face_t;
+				cutFace->isCutFace = true;
+				he->f = cutFace;
+				cutFace->he = he;
+				cout<<"new cut face"<<endl;
+				faces_new.push_back(cutFace);
 			}
 		}
 	}
 
 
-	for (auto fidx : oldFaces) {
-		auto face = mesh->faceMap[fidx];
-		int numOfCorners = face->corners().size();
-		for (int i = 0; i < numOfCorners; i++) {
-			//build new edges, check if it's cut edge or not
-			he_t* he_new = new he_t;
-			he_t* hef_new = new he_t;
-			he_new->index = HDS_HalfEdge::assignIndex();
-			hef_new->index = HDS_HalfEdge::assignIndex();
+	for (auto& heMap: refidMap) {
+		he_t* he = heMap.second->flip;
+		if (!he->isCutEdge){
+			///for all non-cut-edge edges, create bridge faces
 
-			he_new->setFlip(hef_new);
-            he_new->f = face;
-            he_new->setCutEdge(corners_new[fidx][i]->he->isCutEdge);
-            if (he_new->isCutEdge) {
-                hef_new->f = corners_new[fidx][i]->he->f;
-            }
-			edges_new[fidx].push_back(he_new);
-		}
+			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
+			HDS_Vertex* v2_ori = ori_map[(he->bridgeTwin->v->refid)>>2];
+			addBridger(he, he->bridgeTwin, v1_ori, v2_ori);
 
+		}else {
+			/// for all cut-edge edges, create flaps
+//			he_t* twin_he = he->bridgeTwin;
+//			vert_t* flap_vs = new vert_t;
+//			vert_t* flap_ve = new vert_t;
+//			flap_vs->pos = twin_he->v->pos;
+//			flap_ve->pos = twin_he->flip->v->pos;
 
-		//set half edge's vertices
-		for (int i = 0; i < numOfCorners; i++) {
-			he_t* curHE = edges_new[fidx][i];
-			curHE->flip->v = i < edges_new[fidx].size()-1? corners_new[fidx][i+1] : corners_new[fidx][0];
-			curHE->v = corners_new[fidx][i];
-		}
-		if (!isHollow){
-		//link edge loop
-		for (int i = 0; i < numOfCorners; i++) {
-			he_t* curHE = edges_new[fidx][i];
-			he_t* prevHE = i > 0? edges_new[fidx][i-1] : edges_new[fidx][edges_new[fidx].size()-1];
-			he_t* nextHE = i < edges_new[fidx].size()-1? edges_new[fidx][i+1] : edges_new[fidx][0];
-			curHE->prev = prevHE;
-			curHE->next = nextHE;
-			curHE->flip->prev = nextHE->flip;
-			curHE->flip->next = prevHE->flip;
-		}
-		}
+//			//warning. assign refid, to be tested
+//			flap_vs->refid = twin_he->v->refid;
+//			flap_ve->refid = twin_he->flip->v->refid;
+
+//			verts_new.push_back(flap_vs);
+//			verts_new.push_back(flap_ve);
+
+//			he_t* flap_he = HDS_Mesh::insertEdge(flap_vs, flap_ve);
+//			flap_he->setCutEdge(true);
+//			flap_he->f = twin_he->f;
+//			flap_he->flip->f = twin_he->f;
+//			flap_he->refid = twin_he->refid;
+//			hes_new.push_back(flap_he);
+
+//			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
+//			HDS_Vertex* v2_ori = ori_map[(flap_he->v->refid)>>2];
 
 
-		//link corners to edges
-		for (int i = 0; i < numOfCorners; i++) {
-            edges_new[fidx][i]->refid = corners_new[fidx][i]->he->refid;
-            edges_new[fidx][i]->flip->refid = corners_new[fidx][i]->he->refid;
-            corners_new[fidx][i]->he = edges_new[fidx][i];
+//			vert_t* twin_flap_vs = new vert_t;
+//			vert_t* twin_flap_ve = new vert_t;
+//			twin_flap_vs->pos = he->v->pos;
+//			twin_flap_ve->pos = he->flip->v->pos;
+
+//			//warning. assign refid, to be tested
+//			twin_flap_vs->refid = he->v->refid;
+//			twin_flap_ve->refid = he->flip->v->refid;
+
+//			verts_new.push_back(twin_flap_vs);
+//			verts_new.push_back(twin_flap_ve);
+
+//			he_t* twin_flap_he = HDS_Mesh::insertEdge(twin_flap_vs, twin_flap_ve);
+//			twin_flap_he->setCutEdge(true);
+//			twin_flap_he->f = he->f;
+//			twin_flap_he->flip->f = he->f;
+
+//			twin_flap_he->refid = he->refid;
+//			hes_new.push_back(twin_flap_he);
+
+//			addBridger(he, flap_he, v1_ori, v2_ori);
+//			addBridger(twin_he, twin_flap_he, v2_ori, v1_ori);
+
 		}
-		//link to current face
-		face->he = edges_new[fidx][0];
+
 	}
 
-	//clean all old vertices/edges
-	mesh->vertSet.clear();
-	mesh->vertMap.clear();
-	mesh->heSet.clear();
-	mesh->heMap.clear();
+	cur_mesh->heSet.clear();
+	cur_mesh->vertSet.clear();
+	cur_mesh->faceSet.clear();
+	cur_mesh->heMap.clear();
+	cur_mesh->vertMap.clear();
+	cur_mesh->faceMap.clear();
 
-	//add vertices, edges to mesh
-	for (auto fidx: oldFaces) {
-		auto face = mesh->faceMap[fidx];
-		int numOfCorners = face->corners().size();
+	HDS_Vertex::resetIndex();
+	HDS_HalfEdge::resetIndex();
+	HDS_Face::resetIndex();
 
-		for (int i = 0; i < numOfCorners; i++) {
-			vert_t* vertex = corners_new[fidx][i];
-			he_t* he = edges_new[fidx][i];
-			he_t* hef = he->flip;
-			mesh->addVertex(vertex);
-			mesh->addHalfEdge(he);
-			mesh->addHalfEdge(hef);
-
-		}
+	for (auto f: faces_new) {
+		f->index = HDS_Face::assignIndex();
+		cur_mesh->addFace(f);
 	}
+
+	//add new vertices and edges
+	for (auto v: verts_new) {
+		v->index = HDS_Vertex::assignIndex();
+		cur_mesh->addVertex(v);
+	}
+	for (auto he: hes_new) {
+		he->index = HDS_HalfEdge::assignIndex();
+		he->flip->index = HDS_HalfEdge::assignIndex();
+		cur_mesh->addHalfEdge(he);
+		cur_mesh->addHalfEdge(he->flip);
+
+	}
+
+	cur_mesh->validate();
+	/// update the curvature of each vertex
+	for (auto &v : mesh->vertSet) {
+		v->computeNormal();
+		v->computeCurvature();
+		//cout << v->index << ": " << (*v) << endl;
+	}
+
+
+	cout<<"extend succeed............."<<endl;
+	return true;
+
 }
 
+/*
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
 
-	typedef HDS_HalfEdge he_t;
-	typedef HDS_Vertex vert_t;
-
+	cur_mesh = mesh;
 	unordered_map<int, vert_t*> ori_map = ori_mesh->vertMap;
-	scaleFaces(mesh);
+	scaleFaces();
 
 
 	vector<vert_t*> verts_new;
@@ -219,20 +291,20 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 						break;
 					}
 				}while (curHE != h1);
-                if (cutFace == nullptr) {
-                    cutFace = new HDS_Face;
-                    cutFace->index = HDS_Face::assignIndex();
-                    cutFace->isCutFace = true;
-                    mesh->addFace(cutFace);
+				if (cutFace == nullptr) {
+					cutFace = new HDS_Face;
+					cutFace->index = HDS_Face::assignIndex();
+					cutFace->isCutFace = true;
+					mesh->addFace(cutFace);
 
-                }
+				}
 
 
 				HDS_Vertex* v1_ori = ori_map[(he1->v->refid)>>2];
 				HDS_Vertex* v2_ori = ori_map[(he2->v->refid)>>2];
 
 
-                vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, v1_ori, v2_ori, cutFace);
+				vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, v1_ori, v2_ori, cutFace);
 				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
 
 				visited.insert(v->bridgeTwin);
@@ -329,4 +401,4 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	cout<<"extend succeed............."<<endl;
 	return true;
 }
-
+*/

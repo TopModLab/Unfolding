@@ -76,8 +76,8 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		vertices_new.push_back(he2_v2);
 
 		//new edge pair based on new vertex position
-		he_t* he1 = thismesh->insertEdge(he1_v1, he1_v2);
-		he_t* he2 = thismesh->insertEdge(he2_v2, he2_v1);
+		he_t* he1 = HDS_Mesh::insertEdge(he1_v1, he1_v2);
+		he_t* he2 = HDS_Mesh::insertEdge(he2_v2, he2_v1);
 
 		// Assign refid for edges
 		// *	      *
@@ -112,8 +112,8 @@ void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, doub
 		HDS_Vertex* v1 = ori_map[(he1->flip->v->refid)>>2];
 		HDS_Vertex* v2 = ori_map[(he2->flip->v->refid)>>2];
 
-		vector<vert_t*> verts = MeshExtender::addBridger(thismesh, he1->flip, he2->flip, v1, v2, cutFace);
-		vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
+		MeshExtender::addBridger(he1->flip, he2->flip, v1, v2);
+		//vertices_new.insert( vertices_new.end(), verts.begin(), verts.end() );
 		he1->f = cutFace;
 
 		if (flapSize < 0.01)
@@ -301,7 +301,7 @@ HDS_Face* MeshHollower::createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFa
 		auto& curV = vertices[i];
 		if(i != vertices.size() - 1)
 			vertices_new.push_back(curV);
-		he_t* newHE = thismesh->insertEdge(preV, curV);
+		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
 		newHE->f = newFace;
 		newHE->flip->f = cutFace;
 		newHE->setCutEdge(true);
