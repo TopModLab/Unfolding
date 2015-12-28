@@ -73,12 +73,13 @@ public:
 	void flipShowVertices();
 	void flipShowNormals();
 
-	const unordered_set<he_t*>& halfedges() const { return heSet; }
-	unordered_set<he_t*>& halfedges() { return heSet; }
-	const unordered_set<face_t*>& faces() const { return faceSet; }
-	unordered_set<face_t*>& faces() { return faceSet; }
-	const unordered_set<vert_t*>& verts() const { return vertSet; }
-	unordered_set<vert_t*>& verts() { return vertSet; }
+	 unordered_set<he_t*>& halfedges()  { return heSet; }
+	 unordered_set<face_t*>& faces()  { return faceSet; }
+	 unordered_set<vert_t*>& verts()  { return vertSet; }
+
+	 unordered_map<int, he_t*>& halfedgesMap()  { return heMap; }
+	 unordered_map<int, face_t*>& facesMap()  { return faceMap; }
+	 unordered_map<int, vert_t*>& vertsMap()  { return vertMap; }
 
 	void addHalfEdge(he_t*);
 	void addVertex(vert_t*);
@@ -105,6 +106,8 @@ public:
 
 	void save(const string &filename);
 
+	void setProcessType(int type){processType = type;}
+
 private:
 	bool validateVertex(vert_t *v);
 	bool validateFace(face_t *f);
@@ -118,9 +121,7 @@ protected:
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
 	friend class MeshExtender;
-	friend class MeshHollower;
 	friend class MeshRimFace;
-	friend class MeshBinder;
 	friend class MeshIterator;
 	friend class MeshConnector;
 private:

@@ -71,12 +71,13 @@ void MeshExtender::scaleFaces()
 	}
 }
 
-HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices)
+HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace)
 {
 
 
 	face_t * newFace = new face_t();
-	vertices.push_back(vertices.front());//form a loop
+	if (HDS_Mesh::incidentEdge(vertices.front(), vertices.back()) == nullptr)
+		vertices.push_back(vertices.front());//form a loop
 
 	auto preV = vertices.front();
 	for (int i = 1; i < vertices.size(); i++)
@@ -86,6 +87,10 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices)
 		if(newFace->he == nullptr)
 			newFace->he = newHE;
 		newHE->f = newFace;
+		if (cutFace != nullptr){
+			newHE->flip->f = cutFace;
+			newHE->setCutEdge(true);
+		}
 		hes_new.push_back(newHE);
 		preV = curV;
 	}
