@@ -13,18 +13,31 @@ class HDS_Vertex;
 class MeshExtender
 {
 public:
+	typedef HDS_HalfEdge he_t;
+	typedef HDS_Vertex vert_t;
+	typedef HDS_Face face_t;
+
 	MeshExtender(){}
 	static bool extendMesh(HDS_Mesh *mesh);
-	static vector<HDS_Vertex*> addBridger(HDS_Mesh*, HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2, HDS_Face* cutFace);
-	static void scaleFaces(HDS_Mesh* mesh);
-	static void setOriMesh(HDS_Mesh* mesh);
+
+	static void setOriMesh(HDS_Mesh* hds_mesh);
 protected:
 
 	friend class MeshHollower;
-private:
+
+	static void updateNewMesh();
+
+	static void addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2);
+	static void scaleFaces();
+	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, face_t* cutFace = nullptr);
+
+
+	static HDS_Mesh* cur_mesh;
 	static HDS_Mesh* ori_mesh;
-	static bool hasCutEdge;
-	static bool hasBridgeEdge;
-	static bool isHollow;
+
+	static vector<he_t*> hes_new;
+	static vector<vert_t*> verts_new;
+	static vector<face_t*> faces_new;
+
 };
 

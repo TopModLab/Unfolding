@@ -76,7 +76,7 @@ HDS_Face* MeshRimFace::createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFac
 		auto& curV = vertices[i];
 		if (i != vertices.size()-1)
 			vertices_new.push_back(curV);
-		he_t* newHE = thismesh->insertEdge(preV, curV);
+		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
 		if(newFace->he == nullptr)
 			newFace->he = newHE;
 		if(cutFace->he == nullptr)

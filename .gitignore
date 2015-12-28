@@ -49,3 +49,4 @@ visual_studio/*.suo
 #Backup files
 *.bak
 /fbo.png
+*.binary

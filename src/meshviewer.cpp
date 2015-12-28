@@ -162,21 +162,16 @@ void MeshViewer::slot_selectTwinPair()
 	case SelectEdge:
 		if (!heMesh->getSelectedHalfEdges().empty()) {
 			for (auto he :heMesh->getSelectedHalfEdges()) {
-				if (he->cutTwin != nullptr)
+				if (he->cutTwin != nullptr){
 					he->cutTwin->setPicked(true);
-				else if (he->flip->cutTwin != nullptr)
+				} else if (he->flip->cutTwin != nullptr){
 					he->flip->cutTwin->setPicked(true);
+
+				}
 			}
 		}
 		break;
-	case SelectVertex:
-		if (!heMesh->getSelectedVertices().empty()) {
-			for (auto v :heMesh->getSelectedVertices()) {
-				if (v->bridgeTwin != nullptr)
-					v->bridgeTwin->setPicked(true);
-			}
-		}
-		break;
+
 	default:
 		break;
 	}
@@ -617,8 +612,15 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 		cout << "selected element " << selectedElementIdx << endl;
 		if (selectedElementIdx >= 0) {
 			//for testing
+			if (interactionState == SelectEdge){
 			cout<< "select edge's face index: "<<heMesh->heMap[selectedElementIdx]->f->index<<endl;
 			cout<< "select edge flip's face index: "<<heMesh->heMap[selectedElementIdx]->flip->f->index<<endl;
+			}
+			if (interactionState == SelectFace) {
+				cout<<"select face is cut face? "<<heMesh->faceMap[selectedElementIdx]->isCutFace<<endl;
+				cout<<"select face is bridge? "<<heMesh->faceMap[selectedElementIdx]->isBridger<<endl;
+
+			}
 			selectedElementsIdxQueue.push(selectedElementIdx);
 
 			switch (selectionMode) {

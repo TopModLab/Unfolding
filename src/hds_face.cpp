@@ -133,7 +133,6 @@ QVector3D HDS_Face::computeNormal()
 void HDS_Face::setScaleFactor(double factor)
 {
 	scalingFactor = factor;
-	cout<<"scale:"<<scalingFactor<<endl;
 }
 
 //from http://paulbourke.net/geometry/pointlineplane/lineline.c

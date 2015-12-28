@@ -73,12 +73,13 @@ public:
 	void flipShowVertices();
 	void flipShowNormals();
 
-	const unordered_set<he_t*>& halfedges() const { return heSet; }
-	unordered_set<he_t*>& halfedges() { return heSet; }
-	const unordered_set<face_t*>& faces() const { return faceSet; }
-	unordered_set<face_t*>& faces() { return faceSet; }
-	const unordered_set<vert_t*>& verts() const { return vertSet; }
-	unordered_set<vert_t*>& verts() { return vertSet; }
+	 unordered_set<he_t*>& halfedges()  { return heSet; }
+	 unordered_set<face_t*>& faces()  { return faceSet; }
+	 unordered_set<vert_t*>& verts()  { return vertSet; }
+
+	 unordered_map<int, he_t*>& halfedgesMap()  { return heMap; }
+	 unordered_map<int, face_t*>& facesMap()  { return faceMap; }
+	 unordered_map<int, vert_t*>& vertsMap()  { return vertMap; }
 
 	void addHalfEdge(he_t*);
 	void addVertex(vert_t*);
@@ -86,14 +87,14 @@ public:
 	void deleteFace(face_t*);
 	void deleteHalfEdge(he_t*);
 
-	vector<face_t *> incidentFaces(vert_t *v);
-	vector<he_t *> incidentEdges(vert_t *v);
-	vector<face_t *> incidentFaces(face_t *f);
+    static vector<face_t *> incidentFaces(vert_t *v);
+    static vector<he_t *> incidentEdges(vert_t *v);
+    static vector<face_t *> incidentFaces(face_t *f);
 
-	he_t* incidentEdge(face_t *f1, face_t *f2);
-	he_t* incidentEdge(vert_t *v1, vert_t *v2);
+    static he_t* incidentEdge(face_t *f1, face_t *f2);
+    static he_t* incidentEdge(vert_t *v1, vert_t *v2);
 
-	he_t* insertEdge(vert_t* v1, vert_t* v2);
+	static he_t* insertEdge(vert_t* v1, vert_t* v2, he_t* he1 = nullptr, he_t* he2 = nullptr);
 
 	template <typename T>
 	void flipSelectionState(int idx, unordered_map<int, T> &m);
@@ -104,6 +105,8 @@ public:
 	void validate();
 
 	void save(const string &filename);
+
+	void setProcessType(int type){processType = type;}
 
 private:
 	bool validateVertex(vert_t *v);
@@ -118,9 +121,7 @@ protected:
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
 	friend class MeshExtender;
-	friend class MeshHollower;
 	friend class MeshRimFace;
-	friend class MeshBinder;
 	friend class MeshIterator;
 	friend class MeshConnector;
 private:

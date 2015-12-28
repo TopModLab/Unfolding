@@ -79,9 +79,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	for( auto &v : vertSet ) {
 		auto v_ref = other.vertMap.at(v->index);
 		v->he = heMap.at(v_ref->he->index);
-
-		if (v_ref->bridgeTwin != nullptr)
-			v->bridgeTwin = vertMap.at(v_ref->bridgeTwin->index);
 	}
 
 	// Copy piece set information
@@ -273,9 +270,9 @@ void HDS_Mesh::releaseMesh() {
 }
 
 void HDS_Mesh::setMesh(
-	const vector<HDS_Face *> &faces,
-	const vector<HDS_Vertex *> &verts,
-	const vector<HDS_HalfEdge *> &hes)
+		const vector<HDS_Face *> &faces,
+		const vector<HDS_Vertex *> &verts,
+		const vector<HDS_HalfEdge *> &hes)
 {
 	releaseMesh();
 
@@ -668,48 +665,59 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v
 
 
 
-HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2)
+HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2, HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
 {
 	bool v1_isNew = false, v2_isNew = false;
 
 	if (v1->he == nullptr) v1_isNew = true;
 	if (v2->he == nullptr) v2_isNew = true;
 
-	he_t* he1 = new he_t;
-	he_t* he1_flip = new he_t;
-	he1->setFlip(he1_flip);
+	he_t* he = new he_t;
+	he_t* he_flip = new he_t;
+	he->setFlip(he_flip);
 
 	//link edge and vertices
-	he1->v = v1;
-	he1_flip->v = v2;
-	if (v1_isNew ) v1->he = he1;
-	if (v2_isNew) v2->he = he1_flip;
-		//link edge loop
-		he1->next = he1_flip;
-		he1->prev = he1_flip;
-		he1_flip->next = he1;
-		he1_flip->prev = he1;
+	he->v = v1;
+	he_flip->v = v2;
+	if (v1_isNew) v1->he = he;
+	if (v2_isNew) v2->he = he_flip;
+
+	//link edge loop
+	he->next = he_flip;
+	he->prev = he_flip;
+	he_flip->next = he;
+	he_flip->prev = he;
 
 	if(!v1_isNew) {
 		he_t* prevHE, *nextHE;
-		nextHE = v1->he->flip->next;
-		prevHE = v1->he->flip;
-		he1_flip->next = nextHE;
-		nextHE->prev = he1_flip;
-        he1->prev = prevHE;
-		prevHE->next = he1;
+		if (he1 != nullptr){
+			nextHE = he1->next;
+			prevHE = he1;
+		}else{
+			nextHE = v1->he->flip->next;
+			prevHE = v1->he->flip;
+		}
+		he_flip->next = nextHE;
+		nextHE->prev = he_flip;
+		he->prev = prevHE;
+		prevHE->next = he;
 	}
 	if(!v2_isNew) {
 		he_t* prevHE, *nextHE;
+		if (he2 != nullptr) {
+			nextHE = he2;
+			prevHE = he2->prev;
+		}else {
 		nextHE = v2->he;
 		prevHE = v2->he->prev;
-		he1->next = nextHE;
-        nextHE->prev = he1;
-        he1_flip->prev = prevHE;
-        prevHE->next = he1_flip;
+		}
+		he->next = nextHE;
+		nextHE->prev = he;
+		he_flip->prev = prevHE;
+		prevHE->next = he_flip;
 
 	}
-	return he1;
+	return he;
 }
 
 void HDS_Mesh::drawVertexIndices()
