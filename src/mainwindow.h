@@ -70,6 +70,7 @@ private slots:
 	void slot_triggerExtendMesh(bool);
 	void slot_triggerHollowMesh(bool);
 	void slot_triggerRimmedMesh(bool);
+	void slot_triggerRimmed3DMesh(bool);
 	void slot_triggerBindingMesh(bool);
 
 	void slot_setBridger();
