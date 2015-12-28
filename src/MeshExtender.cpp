@@ -4,7 +4,6 @@
 #include "utils.hpp"
 #include "mathutils.hpp"
 
-bool MeshExtender::isHollow = false;
 
 HDS_Mesh* MeshExtender::ori_mesh;
 HDS_Mesh* MeshExtender::cur_mesh;
@@ -162,7 +161,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 		}else {
 			/// for all cut-edge edges, create flaps
-/*
+
 			he_t* twin_he = he->bridgeTwin;
 			vert_t* flap_vs = new vert_t;
 			vert_t* flap_ve = new vert_t;
@@ -208,12 +207,21 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			hes_new.push_back(twin_flap_he);
 
 			addBridger(he, flap_he, v1_ori, v2_ori);
-			addBridger(twin_he, twin_flap_he, v2_ori, v1_ori);*/
+			addBridger(twin_he, twin_flap_he, v2_ori, v1_ori);
 
 		}
 
 	}
 
+	updateNewMesh();
+
+	cout<<"extend succeed............."<<endl;
+	return true;
+
+}
+
+void MeshExtender::updateNewMesh()
+{
 	cur_mesh->heSet.clear();
 	cur_mesh->vertSet.clear();
 	cur_mesh->faceSet.clear();
@@ -243,164 +251,12 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 	}
 
-	cur_mesh->validate();
 	/// update the curvature of each vertex
-	for (auto &v : mesh->vertSet) {
+	for (auto &v : cur_mesh->vertSet) {
 		v->computeNormal();
 		v->computeCurvature();
 		//cout << v->index << ": " << (*v) << endl;
 	}
 
 	cur_mesh->updatePieceSet();
-
-	cout<<"extend succeed............."<<endl;
-	return true;
-
 }
-
-/*
-bool MeshExtender::extendMesh(HDS_Mesh *mesh)
-{
-
-	cur_mesh = mesh;
-	unordered_map<int, vert_t*> ori_map = ori_mesh->vertMap;
-	scaleFaces();
-
-
-	vector<vert_t*> verts_new;
-
-
-	//add bridges
-	unordered_set<HDS_Vertex*> visited;
-	if (hasBridgeEdge) {
-		for(auto v: mesh->vertSet) {
-			if (v->bridgeTwin != nullptr && visited.find(v) == visited.end()) {
-				///for all non-cut-edge edges, create bridge faces
-				//get half edges that are "hidden", no face assigned
-				HDS_HalfEdge* h1 = v->he;
-				HDS_HalfEdge* h2 = v->bridgeTwin->he;
-				HDS_HalfEdge *he1, *he2;
-
-				he1 = h1->f == nullptr? h1:h1->flip;
-				he2 = h2->f == nullptr? h2:h2->flip;
-				HDS_Face* cutFace;
-				//find nearest cut face, if not found set to nullptr
-				HDS_HalfEdge* curHE = h1;
-				do {
-					curHE = curHE->v->bridgeTwin->he->prev;
-					if (curHE->isCutEdge) {
-						cutFace = curHE->flip->f;
-						break;
-					}
-				}while (curHE != h1);
-				if (cutFace == nullptr) {
-					cutFace = new HDS_Face;
-					cutFace->index = HDS_Face::assignIndex();
-					cutFace->isCutFace = true;
-					mesh->addFace(cutFace);
-
-				}
-
-
-				HDS_Vertex* v1_ori = ori_map[(he1->v->refid)>>2];
-				HDS_Vertex* v2_ori = ori_map[(he2->v->refid)>>2];
-
-
-				vector<HDS_Vertex*> verts = addBridger(mesh, he1, he2, v1_ori, v2_ori, cutFace);
-				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
-
-				visited.insert(v->bridgeTwin);
-
-
-			}
-		}
-	}
-
-	if (hasCutEdge) {
-
-		for(auto v: mesh->vertSet) {
-			if(v->flapTwin != nullptr){
-
-				/// for all cut-edge edges, create flaps
-				//get v->he boundary
-				HDS_HalfEdge* he1;
-				he1 = (v->he->f->isCutFace)? v->he:v->he->flip;
-				//duplicate v->flapTwin->he as new he
-
-				he_t* twin_he = v->flapTwin->he;
-				he_t* flap_he = new he_t;
-				he_t* flap_he_flip = new he_t;
-
-				//warning. to be tested
-				flap_he->refid = twin_he->refid;
-				flap_he_flip->refid = twin_he->refid;
-
-				flap_he->index = HDS_HalfEdge::assignIndex();
-				flap_he_flip->index = HDS_HalfEdge::assignIndex();
-
-				flap_he->setFlip(flap_he_flip);
-				flap_he->setCutEdge(true);
-
-				//connect edge loop
-				flap_he->prev = flap_he_flip;
-				flap_he->next = flap_he_flip;
-				flap_he_flip->prev = flap_he;
-				flap_he_flip->next = flap_he;
-
-				flap_he->f = he1->f;
-
-				vert_t* flap_vs = new vert_t;
-				vert_t* flap_ve = new vert_t;
-				flap_vs->pos = twin_he->v->pos;
-				flap_ve->pos = twin_he->flip->v->pos;
-
-				//warning. assign refid, to be tested
-				flap_vs->refid = twin_he->v->refid;
-				flap_ve->refid = twin_he->flip->v->refid;
-
-				flap_vs->index = HDS_Vertex::assignIndex();
-				flap_ve->index = HDS_Vertex::assignIndex();
-
-				flap_vs->he = flap_he;
-				flap_ve->he = flap_he_flip;
-				flap_he->v = flap_vs;
-				flap_he_flip->v = flap_ve;
-				cout<<"new flap vertices vs: "<<flap_vs->index<<" ve: "<<flap_ve->index
-				   <<" based on original flap pair: "<<v->index<<" and "<<v->flapTwin->index<<endl;
-
-				//add edges
-				verts_new.push_back(flap_vs);
-				verts_new.push_back(flap_ve);
-
-				mesh->addHalfEdge(flap_he);
-				mesh->addHalfEdge(flap_he_flip);
-				twin_he->setCutEdge(false);
-
-				//bridge v->he and new he
-				HDS_Vertex* v1_ori = ori_map[(he1->v->refid)>>2];
-				HDS_Vertex* v2_ori = ori_map[(he1->flip->v->refid)>>2];
-				vector<HDS_Vertex*> verts = addBridger(mesh, he1, flap_he_flip, v1_ori, v2_ori, he1->f);
-				verts_new.insert( verts_new.end(), verts.begin(), verts.end() );
-
-			}
-
-		}
-
-	}
-	//add new vertices
-	for (auto v: verts_new) {
-		mesh->addVertex(v);
-	}
-
-	/// update the curvature of each vertex
-	for (auto &v : mesh->vertSet) {
-		v->computeNormal();
-		v->computeCurvature();
-		//cout << v->index << ": " << (*v) << endl;
-	}
-
-
-	cout<<"extend succeed............."<<endl;
-	return true;
-}
-*/

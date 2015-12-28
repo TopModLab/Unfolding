@@ -25,7 +25,6 @@ protected:
 
 	friend class MeshHollower;
 
-	static void deleteOldMesh();
 	static void updateNewMesh();
 
 	static void addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2);
@@ -40,7 +39,5 @@ protected:
 	static vector<vert_t*> verts_new;
 	static vector<face_t*> faces_new;
 
-private:
-	static bool isHollow;
 };
 

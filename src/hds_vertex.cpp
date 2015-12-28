@@ -14,8 +14,6 @@ HDS_Vertex::HDS_Vertex()
 	refid = 0;
 	colorVal = 0;
 	he = nullptr;
-	bridgeTwin = nullptr;
-	flapTwin = nullptr;
 }
 
 HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
@@ -26,8 +24,6 @@ HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
 	/*index = -1;
 	refid = 0;*/
 	he = nullptr;
-	bridgeTwin = nullptr;
-	flapTwin = nullptr;
 
 }
 
@@ -41,8 +37,6 @@ HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
 	curvature = v.curvature;
 	colorVal = v.colorVal;
 	he = nullptr;
-	bridgeTwin = nullptr;
-	flapTwin = nullptr;
 	rtype = v.rtype;
 	morseFunctionVal = v.morseFunctionVal;
 }

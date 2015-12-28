@@ -189,57 +189,6 @@ HDS_Face * HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 	hes.push_back(he_v1e_v2s);
 	hes.push_back(he_v2e_v1s);
 
-
-//		HDS_HalfEdge* nextHE, * prevHE;
-//		//build 4 new half edges to connect original 4 vertices
-//		for (int i = 0; i < 2; i++){
-//			he_t* he_new = new he_t;
-//			he_t *he_new_flip = new he_t;
-//			//he_new->index = HDS_HalfEdge::assignIndex();
-//			//he_new_flip->index = HDS_HalfEdge::assignIndex();
-//			he_new->setFlip(he_new_flip);
-//			he_new->f = bridgeFace;
-
-//			//link to corresponding cut face
-//			//linkToCutFace(he_new_flip, cutFace);
-//			he_new_flip->f = cutFace1;
-//			cutFace1->he = he_new_flip;
-
-//			he_new->setCutEdge(true);
-
-//			if (i == 0) {
-//				//first edge (he_ v1e_v2s)
-//				nextHE = he2;
-//				prevHE = he1;
-//				he_new->v = v1e;
-//				he_new_flip->v = v2s;
-
-//				//connect new half edges to face
-//				bridgeFace->he = he_new;
-//			}else {
-//				//second edge (he_ v2e_v1s)
-//				nextHE = he1;
-//				prevHE = he2;
-//				he_new->v = v2e;
-//				he_new_flip->v = v1s;
-//			}
-
-//			//connect edge loop
-//			he_new_flip->next = prevHE->next;
-//			prevHE->next->prev = he_new_flip;
-//			he_new_flip->prev = nextHE->prev;
-//			nextHE->prev->next = he_new_flip;
-
-//			prevHE->next = he_new;
-//			nextHE->prev = he_new;
-//			he_new->prev = prevHE;
-//			he_new->next = nextHE;
-
-
-//		   hes.push_back(he_new);
-//		   //hes.push_back(he_new_flip);
-//		}
-
 	return bridgeFace;
 
 }

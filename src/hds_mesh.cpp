@@ -79,9 +79,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	for( auto &v : vertSet ) {
 		auto v_ref = other.vertMap.at(v->index);
 		v->he = heMap.at(v_ref->he->index);
-
-		if (v_ref->bridgeTwin != nullptr)
-			v->bridgeTwin = vertMap.at(v_ref->bridgeTwin->index);
 	}
 
 	// Copy piece set information
