@@ -246,31 +246,3 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 
 	return newFace;
 }
-
-//vertPos: [new verts..]
-
-
-//HDS_Face* MeshHollower::createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFace)
-//{
-//	typedef HDS_HalfEdge he_t;
-//	typedef HDS_Vertex vert_t;
-//	typedef HDS_Face face_t;
-
-//	face_t * newFace = new face_t;
-//	//newFace->index = HDS_Face::assignIndex();
-//	//newFace->refid = cutFace->refid;
-
-//	auto preV = vertices.front();
-//	for (int i = 1; i < vertices.size(); i++)
-//	{
-//		auto& curV = vertices[i];
-//		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
-//		newHE->f = newFace;
-//		newHE->flip->f = cutFace;
-//		newHE->setCutEdge(true);
-//		hes_new.push_back(newHE);
-//		preV = curV;
-//	}
-
-//	return newFace;
-//}

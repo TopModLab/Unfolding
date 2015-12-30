@@ -652,6 +652,8 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::face_t *f1, HDS_Mesh::face_t *f
 HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v2)
 {
 	if(v1 == v2) return nullptr;
+	if(v1->he == nullptr || v2->he == nullptr) return nullptr;
+
 	he_t * he = v1->he;
 	he_t * curHE = he;
 	do {

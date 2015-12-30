@@ -132,11 +132,31 @@ void MainWindow::createActions()
 		connect(closeAct, SIGNAL(triggered()), this, SLOT(slot_closeFile()));
 		actionsMap["close"] = closeAct;
 
+		QAction *saveAct = new QAction(QIcon(":/icons/save.png"), tr("Save"), this);
+		saveAct->setShortcuts(QKeySequence::Save);
+		saveAct->setStatusTip(tr("Save a file"));
+		connect(saveAct, SIGNAL(triggered()), this, SLOT(slot_saveFile()));
+		actionsMap["save"] = saveAct;
+
+
+
 		//Edit Menu
-		QAction *resetAct = new QAction(tr("Reset"), this);
+		QAction *resetAct = new QAction(QIcon(":/icons/reset.png"), tr("Reset mesh"), this);
 		resetAct->setStatusTip(tr("Reset"));
 		connect(resetAct, SIGNAL(triggered()), this, SLOT(slot_reset()));
 		actionsMap["reset"] = resetAct;
+
+		QAction *undoAct = new QAction(QIcon(":/icons/undo.png"), tr("Undo last operation"), this);
+		undoAct->setStatusTip(tr("Undo last mesh operation"));
+		undoAct->setCheckable(false);
+		connect(undoAct, SIGNAL(triggered()), this, SLOT(slot_undo()));
+		actionsMap["mesh undo"] = undoAct;
+
+		QAction *redoAct = new QAction(QIcon(":/icons/redo.png"), tr("Redo last operation"), this);
+		redoAct->setStatusTip(tr("Redo last mesh operation"));
+		redoAct->setCheckable(false);
+		connect(redoAct, SIGNAL(triggered()), this, SLOT(slot_redo()));
+		actionsMap["mesh redo"] = redoAct;
 
 		//selection menu
 
@@ -302,17 +322,7 @@ void MainWindow::createActions()
 
 		//main menu bar
 
-		QAction *saveAct = new QAction(QIcon(":/icons/save.png"), tr("Save"), this);
-		saveAct->setShortcuts(QKeySequence::Save);
-		saveAct->setStatusTip(tr("Save a file"));
-		connect(saveAct, SIGNAL(triggered()), this, SLOT(slot_saveFile()));
-		actionsMap["save"] = saveAct;
 
-		QAction *undoAct = new QAction(QIcon(":/icons/undo.png"), tr("Undo last operation"), this);
-		undoAct->setStatusTip(tr("Undo last mesh operation"));
-		undoAct->setCheckable(false);
-		connect(undoAct, SIGNAL(triggered()), this, SLOT(slot_undo()));
-		actionsMap["mesh undo"] = undoAct;
 
 
 		QAction *camAct = new QAction(QIcon(":/icons/select.png"), tr("Camera Operation"), this);
@@ -431,6 +441,8 @@ void MainWindow::createMenus()
 
 		QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
 		editMenu->addAction(actionsMap["mesh undo"]);
+		editMenu->addAction(actionsMap["mesh redo"]);
+		editMenu->addAction(actionsMap["reset"]);
 
 		QMenu *selectionMenu = ui->menuBar->addMenu(tr("&Selection"));
 		selectionMenu->addAction(actionsMap["select all"]);
@@ -506,6 +518,12 @@ void MainWindow::createToolBar()
 		ui->mainToolBar->addAction(actionsMap["export"]);
 		ui->mainToolBar->addSeparator();
 
+		ui->mainToolBar->addAction(actionsMap["reset"]);
+		ui->mainToolBar->addAction(actionsMap["mesh undo"]);
+		ui->mainToolBar->addAction(actionsMap["mesh redo"]);
+
+		ui->mainToolBar->addSeparator();
+
 		QActionGroup *selectGroup = new QActionGroup(ui->mainToolBar);
 		selectGroup->addAction(actionsMap["camera"]);
 		selectGroup->addAction(actionsMap["face select"]);
@@ -517,8 +535,6 @@ void MainWindow::createToolBar()
 		//unfoldGroup->addAction(actionsMap["mesh unfold"]);
 		//unfoldGroup->addAction(actionsMap["mesh fold"]);
 
-		ui->mainToolBar->addAction(actionsMap["mesh undo"]);
-		ui->mainToolBar->addSeparator();
 
 		ui->mainToolBar->addAction(actionsMap["camera"]);
 

@@ -29,5 +29,6 @@
         <file>icons/unfold.png</file>
         <file>icons/vertex.png</file>
         <file>icons/rimface_3d.png</file>
+        <file>icons/reset.png</file>
     </qresource>
 </RCC>
