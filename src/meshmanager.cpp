@@ -64,6 +64,8 @@ bool MeshManager::loadOBJFile(const string& filename) {
 		extended_mesh.reset();
 		unfolded_mesh.reset();
 		smoothed_mesh.reset();
+		extended_cutted_mesh.reset();
+		extended_unfolded_mesh.reset();
 
 		/// save the half edge mesh out to a temporary file
 		hds_mesh->save("temp.obj");
