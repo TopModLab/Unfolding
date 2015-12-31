@@ -358,7 +358,6 @@ void display(int num)
 
 void HDS_Mesh::draw(ColorMap cmap)
 {
-	QGLWidget  aaa;
 	if( showFace )
 	{
 		GLfloat face_mat_diffuse[4] = {0.75, 0.75, 0.75, 1};
@@ -367,7 +366,6 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 
 		/// traverse the mesh and render every single face
-		MeshViewer dd;
 		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
 		{
 			face_t* f = (*fit);
