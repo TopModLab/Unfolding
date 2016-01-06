@@ -35,11 +35,7 @@ void MainWindow::initialization()
 	isExtended = false;
 
 	QString curPath = QDir::currentPath();
-#ifdef _MSC_VER
-	QString filename = curPath + "/../meshes/cube.obj";
-#else
 	QString filename = curPath + "/meshes/cube.obj";
-#endif // #ifdef _MSC_VER
 	if (MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()))) {
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 		meshStack.push((CurrentMesh)Original);
@@ -598,7 +594,7 @@ void MainWindow::createStateMachine()
 void MainWindow::slot_newFile()
 {
 
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "../meshes", tr("OBJ files(*.obj)")); //later added
+	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)")); //later added
 	if (filename != NULL) {
 		cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
 		MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
