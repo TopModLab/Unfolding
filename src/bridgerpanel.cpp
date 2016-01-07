@@ -37,8 +37,14 @@ BridgerPanel::~BridgerPanel()
 
 void BridgerPanel::setSaveMode(bool isExtend)
 {
-	if (isExtend)
+	//reset old signal emissions on buttonBox
+	ui->buttonBox->disconnect(SIGNAL(accepted()));
+	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(slot_saved()));
+
+
+	if (isExtend){
 		connect(ui->buttonBox, SIGNAL(accepted()), this, SIGNAL(sig_save2extend()));
+	}
 	else
 		connect(ui->buttonBox, SIGNAL(accepted()), this, SIGNAL(sig_saved()));
 

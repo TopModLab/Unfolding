@@ -7,6 +7,7 @@ double MeshHollower::shiftAmount = 0;//[-1 >> 1]
 
 void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 {
+	initiate();
 	flapSize = newFlapSize;//Flap size needed in export function
 	cur_mesh = mesh;
 	shiftAmount = shift;

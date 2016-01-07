@@ -102,10 +102,10 @@ bool MainWindow::connectComponents()
 	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
 
 	connect(hmpanel, SIGNAL(sig_saved()), this, SLOT(slot_hollowMesh()));
-	connect(hmpanel, SIGNAL(sig_setBridger(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
+	connect(hmpanel, SIGNAL(sig_setBridger()), this, SLOT(slot_triggerExtendMesh()));
 
 	connect(bmpanel, SIGNAL(sig_saved()), this, SLOT(slot_bindingMesh()));
-	connect(bmpanel, SIGNAL(sig_setBridger(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
+	connect(bmpanel, SIGNAL(sig_setBridger()), this, SLOT(slot_triggerExtendMesh()));
 
 	return true;
 }
@@ -359,7 +359,7 @@ void MainWindow::createActions()
 		extendAct->setStatusTip(tr("Extend mesh"));
 		extendAct->setCheckable(false);
 		extendAct->setChecked(false);
-		connect(extendAct, SIGNAL(triggered(bool)), this, SLOT(slot_triggerExtendMesh(bool)));
+		connect(extendAct, SIGNAL(triggered()), this, SLOT(slot_triggerExtendMesh()));
 		actionsMap["extend"] = extendAct;
 
 		QAction *hollowAct = new QAction(QIcon(":/icons/HollowSphere.png"), tr("Generate Hollow Mesh"), this);
@@ -603,11 +603,7 @@ void MainWindow::slot_newFile()
 #if USE_REEB_GRAPH
 		viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
-		//slot_reset();
-		while(!meshStack.empty()) meshStack.pop();
-		meshStack.push(Original);
-		updateCurrentMesh();
-		cout<<"new mesh loaded..."<<endl;
+	slot_reset();
 
 	}
 }
@@ -675,11 +671,11 @@ void MainWindow::slot_unfoldMesh(bool checked) {
 
 		}
 	}else {
-		slot_undo();
+		//slot_undo();
 	}
 }
 
-void MainWindow::slot_triggerExtendMesh(bool checked)
+void MainWindow::slot_triggerExtendMesh()
 {
 
 	//if (checked) {
@@ -817,6 +813,7 @@ void MainWindow::slot_setBridger()
 
 void MainWindow::slot_extendMesh()
 {
+	cout<<"curMesh mode: 0 original 3 unfolded"<<curMesh<<endl;
 	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
 	if(curMesh == Original)
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
@@ -951,12 +948,18 @@ void MainWindow::slot_undo()
 
 void MainWindow::slot_reset()
 {
+	//load current mesh
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
+
+	//reset actions
 	actionsMap["mesh unfold"]->setChecked(false);
 	actionsMap["extend"]->setChecked(false);
 	actionsMap["hollow"]->setChecked(false);
 
+	//reset mesh
 	MeshManager::getInstance()->resetMesh();
+
+	//reset state stack
 	while (!meshStack.empty())
 	{
 		meshStack.pop();

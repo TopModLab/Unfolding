@@ -67,7 +67,7 @@ private slots:
 	void slot_updateViewerColormap();
 
 	void slot_smoothMesh();
-	void slot_triggerExtendMesh(bool);
+	void slot_triggerExtendMesh();
 	void slot_triggerHollowMesh(bool);
 	void slot_triggerRimmedMesh(bool);
 	void slot_triggerRimmed3DMesh(bool);
@@ -108,7 +108,7 @@ private:
 	stack<CurrentMesh> meshStack;
 	bool isExtended;
 
-	void updateCurrentMesh(){curMesh = meshStack.top();}
+	void updateCurrentMesh(){curMesh = meshStack.top(); cout<<"current mesh mode:::"<<curMesh<<endl;}
 
 private:
 	Ui::MainWindow *ui;

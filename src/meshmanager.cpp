@@ -457,6 +457,7 @@ void MeshManager::smoothMesh()
 
 void MeshManager::resetMesh()
 {
+	//extended_mesh->releaseMesh();
 	extended_mesh.reset();
 	cutted_mesh.reset();
 	unfolded_mesh.reset();
