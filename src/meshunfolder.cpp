@@ -150,9 +150,12 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
 
 void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 {
-	*unfolded_mesh->bound = BBox3(0);
+	delete unfolded_mesh->bound;
+	unfolded_mesh->bound = new BBox3(0);
 	auto& bound = unfolded_mesh->bound;
 
+	int row_len_limit = static_cast<int>(sqrt(unfolded_mesh->pieceSet.size()));
+	int cur_row_count = 0;
 	QVector3D piece_offset;
 	BBox3 global_bound(0);
 
@@ -208,10 +211,12 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 			curBound.Union(vert->pos);
 		}
 		// if current row is too long, move to second row
-		if (global_bound.pMax.x() - global_bound.pMin.x() > 10)
+		cur_row_count++;
+		if (cur_row_count >= row_len_limit)
 		{
 			global_bound = BBox3(QVector3D(global_bound.pMin.x(), global_bound.pMax.y(), 0));
 			piece_offset = global_bound.pMin - curBound.pMin;
+			cur_row_count = 0;
 		}
 		else// keep panning from original bound
 		{
