@@ -19,7 +19,7 @@ public:
 
 signals:
 	void sig_saved();
-	void sig_setBridger(bool);
+	void sig_setBridger();
 
 public slots:
 	void slot_saved();

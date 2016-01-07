@@ -12,6 +12,12 @@ vector<HDS_HalfEdge*> MeshExtender::hes_new;
 vector<HDS_Vertex*> MeshExtender::verts_new;
 vector<HDS_Face*> MeshExtender::faces_new;
 
+void MeshExtender::initiate()
+{
+	hes_new.clear();
+	verts_new.clear();
+	faces_new.clear();
+}
 
 void MeshExtender::setOriMesh(HDS_Mesh* mesh)
 {
@@ -76,8 +82,9 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 
 
 	face_t * newFace = new face_t();
-	if (HDS_Mesh::incidentEdge(vertices.front(), vertices.back()) == nullptr)
+	if (HDS_Mesh::incidentEdge(vertices.front(), vertices.back()) == nullptr) {
 		vertices.push_back(vertices.front());//form a loop
+	}
 
 	auto preV = vertices.front();
 	for (int i = 1; i < vertices.size(); i++)
@@ -102,6 +109,7 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
+	initiate();
 	cur_mesh = mesh;
 	unordered_map<int, vert_t*> ori_map = ori_mesh->vertMap;
 	scaleFaces();
@@ -120,7 +128,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	for (auto f: cur_mesh->faces()) {
 		if(f->isCutFace){
 			faces_new.push_back(f);
-			cout<<"old cut faces:"<<f->index<<endl;
 		}
 
 	}
@@ -137,7 +144,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			do {
 				curHE = curHE->bridgeTwin->next;
 				if (curHE->f != nullptr) {
-					cout<<"cut face: "<<curHE->f->index<<endl;
 					he->f = curHE->f;
 					break;
 				}
@@ -148,7 +154,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 				cutFace->isCutFace = true;
 				he->f = cutFace;
 				cutFace->he = he;
-				cout<<"new cut face"<<endl;
 				faces_new.push_back(cutFace);
 			}
 		}

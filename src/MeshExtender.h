@@ -25,10 +25,11 @@ protected:
 
 	friend class MeshHollower;
 
+	static void initiate();
 	static void updateNewMesh();
+	static void scaleFaces();
 
 	static void addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2);
-	static void scaleFaces();
 	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, face_t* cutFace = nullptr);
 
 
