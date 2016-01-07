@@ -50,3 +50,4 @@ visual_studio/*.suo
 *.bak
 /fbo.png
 *.binary
+*.db

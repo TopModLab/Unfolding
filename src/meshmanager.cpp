@@ -540,10 +540,10 @@ void MeshManager::rimMesh(double rimSize)
 
 void MeshManager::set3DRimMesh()
 {
-	MeshRimFace::setOriMesh(hds_mesh.data());
+	//MeshRimFace::setOriMesh(hds_mesh.data());
 
 	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-	MeshRimFace::rimMesh3D(extended_cutted_mesh.data());
+	//MeshRimFace::rimMesh3D(extended_cutted_mesh.data());
 	extended_cutted_mesh->updateSortedFaces();
 
 }
