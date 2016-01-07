@@ -35,7 +35,7 @@ void MainWindow::initialization()
 	isExtended = false;
 
 	QString curPath = QDir::currentPath();
-	QString filename = curPath+"/meshes/cube.obj";
+	QString filename = curPath + "/meshes/cube.obj";
 	if (MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()))) {
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getHalfEdgeMesh());
 		meshStack.push((CurrentMesh)Original);
@@ -594,7 +594,7 @@ void MainWindow::createStateMachine()
 void MainWindow::slot_newFile()
 {
 
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "../meshes", tr("OBJ files(*.obj)")); //later added
+	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)")); //later added
 	if (filename != NULL) {
 		cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
 		MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
@@ -721,6 +721,7 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 //		updateCurrentMesh();
 //		isExtended = false;
 //	}
+	actionsMap["hollow"]->setChecked(false);
 }
 
 void MainWindow::slot_triggerBindingMesh(bool checked)
@@ -737,6 +738,7 @@ void MainWindow::slot_triggerBindingMesh(bool checked)
 //		updateCurrentMesh();
 //		isExtended = false;
 //	}
+	actionsMap["bind"]->setChecked(false);
 }
 
 void MainWindow::slot_triggerRimmedMesh(bool checked)
@@ -760,6 +762,7 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 //		updateCurrentMesh();
 //		isExtended = false;*/
 //	}
+	actionsMap["rimface"]->setChecked(false);
 }
 
 void MainWindow::slot_triggerRimmed3DMesh(bool checked)
@@ -783,10 +786,12 @@ void MainWindow::slot_triggerRimmed3DMesh(bool checked)
 //		updateCurrentMesh();
 //		isExtended = false;*/
 //	}
+	actionsMap["rimface3d"]->setChecked(false);
 }
 
 void MainWindow::slot_hollowMesh()
 {
+	actionsMap["hollow"]->setChecked(true);
 	HDS_Bridger::setScale(hmpanel->getBridgerSize());
 	MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize(), hmpanel->getType(), hmpanel->getShift());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
@@ -797,6 +802,7 @@ void MainWindow::slot_hollowMesh()
 
 void MainWindow::slot_bindingMesh()
 {
+	actionsMap["bind"]->setChecked(true);
 	HDS_Bridger::setScale(bmpanel->getBridgerSize());
 	MeshManager::getInstance()->setBindMesh();
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedCuttedMesh());
@@ -813,7 +819,8 @@ void MainWindow::slot_setBridger()
 
 void MainWindow::slot_extendMesh()
 {
-	cout<<"curMesh mode: 0 original 3 unfolded"<<curMesh<<endl;
+
+	actionsMap["exted"]->setChecked(true);
 	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
 	if(curMesh == Original)
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
