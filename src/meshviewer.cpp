@@ -1033,8 +1033,8 @@ void MeshViewer::drawMeshToFBO() {
 
 	fbo->release();
 
-	QImage img = toQImage(&(selectionBuffer[0]), width(), height());
-	img.save("fbo.png");
+	//QImage img = toQImage(&(selectionBuffer[0]), width(), height());
+	//img.save("fbo.png");
 }
 
 void MeshViewer::drawSelectionBox() {
