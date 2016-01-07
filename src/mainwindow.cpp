@@ -820,7 +820,7 @@ void MainWindow::slot_setBridger()
 void MainWindow::slot_extendMesh()
 {
 
-	actionsMap["exted"]->setChecked(true);
+	actionsMap["extend"]->setChecked(true);
 	MeshManager::getInstance()->extendMesh((int)curMesh, conpanel->getConfigValues());
 	if(curMesh == Original)
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getExtendedMesh());
