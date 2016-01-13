@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QStateMachine>
 
 #include "meshviewer.h"
 #include "../extras/colormap_editor/colormapeditor.h"
@@ -36,7 +35,6 @@ protected:
 	void createToolBar();
 	void createDock();
 	void createStatusBar();
-	void createStateMachine();
 
 private slots:
 	void slot_newFile();
@@ -53,6 +51,7 @@ private slots:
 	void slot_toggleNormals();
 
 	void slot_undo();
+	void slot_redo();
 	void slot_reset();
 
 	void slot_toggleCameraOperation();
@@ -122,12 +121,7 @@ private:
 	BindingMeshPanel *bmpanel;
 
 private:
-	QStateMachine S_machine;
-	QState *original;
-	QState *extended;
-	QState *cutted;
-	QState *hollowed;
-	QState *unfolded;
+
 
 };
 

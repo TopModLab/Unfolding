@@ -59,7 +59,8 @@ SOURCES += src/main.cpp\
     src/bindingmeshpanel.cpp \
     src/ConnectorPanel.cpp \
     src/MeshConnector.cpp \
-    src/meshrimface.cpp
+    src/meshrimface.cpp \
+    src/OperationStack.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_common.h \
@@ -107,7 +108,8 @@ HEADERS  += src/mainwindow.h \
     src/bindingmeshpanel.h \
     src/ConnectorPanel.h \
     src/MeshConnector.h \
-    src/meshrimface.h
+    src/meshrimface.h \
+    src/OperationStack.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \

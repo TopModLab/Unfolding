@@ -58,14 +58,8 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 		/// build a half edge mesh here
 		//hds_mesh->printMesh("original");
-		hds_mesh.reset(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
-
-		cutted_mesh.reset();
-		extended_mesh.reset();
-		unfolded_mesh.reset();
-		smoothed_mesh.reset();
-		extended_cutted_mesh.reset();
-		extended_unfolded_mesh.reset();
+		operationStack->push(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
+		HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 
 		/// save the half edge mesh out to a temporary file
 		hds_mesh->save("temp.obj");
@@ -121,7 +115,7 @@ bool MeshManager::loadOBJFile(const string& filename) {
 			cout << "SVGs computed." << endl;
 
 			//set the graph for discrete geodesics computer
-			dis_gcomp.reset(new DiscreteGeoComputer(getHalfEdgeMesh()));
+			dis_gcomp.reset(new DiscreteGeoComputer(hds_mesh));
 			cout<<"dis gcomp set."<<endl;
 		}
 		else {
@@ -278,21 +272,16 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	return thismesh;
 }
 
-void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
+void MeshManager::cutMeshWithSelectedEdges()
 {
-	//restrain unwanted redrawing in the middle of cutting operation
-	if (extended_mesh != nullptr)
-		extended_mesh->clearSortedFaces();
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	QScopedPointer<HDS_Mesh> ref_mesh;
-	if (!isExtended)
-		ref_mesh.reset(new HDS_Mesh(*hds_mesh));
-	else {
-		ref_mesh.reset(new HDS_Mesh(*extended_mesh));
-	}
+		ref_mesh.reset(new HDS_Mesh(*inMesh));
 
-	cout << "validating reference mesh" << endl;
-	ref_mesh->validate();
+
+	//cout << "validating reference mesh" << endl;
+	//ref_mesh->validate();
 
 	/// cut the mesh using the selected edges
 	set<int> selectedEdges;
@@ -315,18 +304,14 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 	//cout << "Number of selected edges = " << selectedEdges.size() << endl;
 
 	bool isUnfoldable = false;
+	HDS_Mesh* outMesh = ref_mesh.take();
+
 	while( !isUnfoldable )
 	{
 		bool cutSucceeded;
-		if (!isExtended) {
-			/// make a copy of the mesh with selected edges
-			cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
-			cutSucceeded = MeshCutter::cutMeshUsingEdges(cutted_mesh.data(), selectedEdges);
-		}else {
-			/// make a copy of the mesh with selected edges
-			extended_cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
-			cutSucceeded = MeshCutter::cutMeshUsingEdges(extended_cutted_mesh.data(), selectedEdges);
-		}
+
+		cutSucceeded = MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges);
+
 		if( cutSucceeded )
 		{
 			/// cutting performed successfully
@@ -348,72 +333,63 @@ void MeshManager::cutMeshWithSelectedEdges(bool isExtended)
 		/// discard the selected edges now
 		selectedEdges.clear();
 	}
-
-	//	for (auto f : cutted_mesh->faces())
-	//	{
-	//		if (f->isCutFace)
-	//		{
-	//			cout << "Face " << f->index << " is cutface" << endl;
-	//		}
-	//	}
+	operationStack->push(outMesh);
 	cout << ".........................." << endl;
 }
 
-void MeshManager::mapToExtendedMesh()
+//void MeshManager::mapToExtendedMesh()
+//{
+//	QScopedPointer<HDS_Mesh> ref_mesh;
+//	QScopedPointer<HDS_Mesh> des_mesh;
+//	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+//	des_mesh.reset(new HDS_Mesh(*extended_mesh));
+
+
+
+//	//mark out all cut edges
+
+//	//get cut edges in cutted mesh
+//	set<int> cutEdges;
+//	for(auto he : ref_mesh->halfedges()) {
+//		if (he->isCutEdge) {
+//			if( cutEdges.find(he->index) == cutEdges.end() )
+//			{
+//				cutEdges.insert(he->index);
+//			}
+//		}
+//	}
+
+//	//find original cut edges in extended mesh and mark out its face
+//	for(auto f : des_mesh->faces()) {
+//		if (f->isHole) {
+//			HDS_HalfEdge* edge = f->he;
+//			do {
+//				//edge->setPicked(true);
+//				edge->setCutEdge(true);
+//				edge = edge->next;
+//			}while(edge != f->he);
+//		}
+
+//		if (f->isBridger) {
+//			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
+//				f->he->setPicked(true);
+
+//			}
+//		}
+//	}
+
+//	extended_mesh.reset(new HDS_Mesh(*des_mesh));
+
+//}
+
+void MeshManager::unfoldMesh()
 {
-	QScopedPointer<HDS_Mesh> ref_mesh;
-	QScopedPointer<HDS_Mesh> des_mesh;
-	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-	des_mesh.reset(new HDS_Mesh(*extended_mesh));
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
-
-
-	//mark out all cut edges
-
-	//get cut edges in cutted mesh
-	set<int> cutEdges;
-	for(auto he : ref_mesh->halfedges()) {
-		if (he->isCutEdge) {
-			if( cutEdges.find(he->index) == cutEdges.end() )
-			{
-				cutEdges.insert(he->index);
-			}
-		}
-	}
-
-	//find original cut edges in extended mesh and mark out its face
-	for(auto f : des_mesh->faces()) {
-		if (f->isHole) {
-			HDS_HalfEdge* edge = f->he;
-			do {
-				//edge->setPicked(true);
-				edge->setCutEdge(true);
-				edge = edge->next;
-			}while(edge != f->he);
-		}
-
-		if (f->isBridger) {
-			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
-				f->he->setPicked(true);
-
-			}
-		}
-	}
-
-	extended_mesh.reset(new HDS_Mesh(*des_mesh));
-
-}
-
-void MeshManager::unfoldMesh(bool isExtended)
-{
 	QScopedPointer<HDS_Mesh> ref_mesh;
 
-	if (!isExtended) {
-		ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-	}
-	else {
-		ref_mesh.reset(new HDS_Mesh(*extended_cutted_mesh));
-	}
+
+	ref_mesh.reset(new HDS_Mesh(*inMesh));
 	ref_mesh->validate();
 	cout << "unfolded mesh set" << endl;
 
@@ -428,11 +404,12 @@ void MeshManager::unfoldMesh(bool isExtended)
 			}
 		}
 	}
-	unfolded_mesh.reset(new HDS_Mesh(*ref_mesh));
+	HDS_Mesh* outMesh = new HDS_Mesh(*ref_mesh);
 
-	if (MeshUnfolder::unfold(unfolded_mesh.data(), ref_mesh.take(), selectedFaces)) {
+	if (MeshUnfolder::unfold(outMesh, ref_mesh.take(), selectedFaces)) {
 		/// unfolded successfully
-		unfolded_mesh->printInfo("unfolded mesh:");
+		outMesh->printInfo("unfolded mesh:");
+		operationStack->push(outMesh);
 		//unfolded_mesh->printMesh("unfolded mesh:");
 	}
 	else {
@@ -442,12 +419,15 @@ void MeshManager::unfoldMesh(bool isExtended)
 
 }
 
+/* legacy code, not sure what it's doing,
+ * so didnt put the smoothed_mesh in operationStack*/
 void MeshManager::smoothMesh()
 {
 	if( smoothed_mesh.isNull() )
 	{
+		HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 		cout<<"smoothmesh@@@"<<endl;
-		smoothed_mesh.reset(new HDS_Mesh(*hds_mesh));
+		smoothed_mesh.reset(new HDS_Mesh(*inMesh));
 	}
 
 	//MeshSmoother::smoothMesh(smoothed_mesh.data());
@@ -455,15 +435,6 @@ void MeshManager::smoothMesh()
 	MeshSmoother::smoothMesh_Laplacian(smoothed_mesh.data());
 }
 
-void MeshManager::resetMesh()
-{
-	//extended_mesh->releaseMesh();
-	extended_mesh.reset();
-	cutted_mesh.reset();
-	unfolded_mesh.reset();
-	extended_cutted_mesh.reset();
-	extended_unfolded_mesh.reset();
-}
 
 bool MeshManager::saveMeshes()
 {
@@ -472,42 +443,31 @@ bool MeshManager::saveMeshes()
 }
 
 
-void MeshManager::extendMesh(int meshType, map<QString, double> config)
+void MeshManager::extendMesh(map<QString, double> config)
 {
+
 	HDS_Bridger::setBridger(config);
-	MeshExtender::setOriMesh(hds_mesh.data());
-	switch(meshType){
-	case 0://original
-		extended_mesh.reset(new HDS_Mesh(*hds_mesh));
-		MeshExtender::extendMesh(extended_mesh.data());
-		//update sorted faces
-		extended_mesh->updateSortedFaces();
-		break;
+	MeshExtender::setOriMesh(operationStack->getOriMesh());
 
-	case 2://cutted
-		extended_cutted_mesh.reset(new HDS_Mesh(*cutted_mesh));
-		MeshExtender::extendMesh(extended_cutted_mesh.data());
-		//update sorted faces
-		extended_cutted_mesh->updateSortedFaces();
-		break;
-	case 3://unfolded
-		extended_unfolded_mesh.reset(new HDS_Mesh(*unfolded_mesh));
-		MeshExtender::extendMesh(extended_unfolded_mesh.data());
-		//update sorted faces
-		extended_unfolded_mesh->updateSortedFaces();
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
-		break;
-	}
+	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
+	MeshExtender::extendMesh(outMesh);
+	//update sorted faces
+	outMesh->updateSortedFaces();
+	operationStack->push(outMesh);
 
 }
 
 void MeshManager::rimMesh(double rimSize)
 {
-	if (extended_mesh != nullptr)
-		extended_mesh->clearSortedFaces();
+//	if (extended_mesh != nullptr)
+//		extended_mesh->clearSortedFaces();
+
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	QScopedPointer<HDS_Mesh> ref_mesh;
-	ref_mesh.reset(new HDS_Mesh(*hds_mesh));
+	ref_mesh.reset(new HDS_Mesh(*inMesh));
 
 	// Select all edges to cut all faces
 	set<int> selectedEdges;
@@ -522,16 +482,16 @@ void MeshManager::rimMesh(double rimSize)
 
 	bool rimSucceeded;
 	/// make a copy of the mesh with selected edges
-	cutted_mesh.reset(new HDS_Mesh(*ref_mesh));
-	rimSucceeded = MeshCutter::cutMeshUsingEdges(
-		cutted_mesh.data(), selectedEdges);
+	HDS_Mesh* outMesh = new HDS_Mesh(*ref_mesh);
+	rimSucceeded = MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges);
 
 	if (rimSucceeded)
 	{
 		//cutted_mesh->isHollowed
-		cutted_mesh->processType = HDS_Mesh::RIMMED_PROC;
+		outMesh->processType = HDS_Mesh::RIMMED_PROC;
 		/// cutting performed successfully
 		cout << "Rimming succeed!" << endl;
+		operationStack->push(outMesh);
 	}
 
 	/// discard the selected edges now
@@ -541,11 +501,12 @@ void MeshManager::rimMesh(double rimSize)
 void MeshManager::set3DRimMesh()
 {
 	//MeshRimFace::setOriMesh(hds_mesh.data());
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
-	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-	//MeshRimFace::rimMesh3D(extended_cutted_mesh.data());
-	extended_cutted_mesh->updateSortedFaces();
-
+	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
+	//MeshRimFace::rimMesh3D(outMesh);
+	outMesh->updateSortedFaces();
+	operationStack->push(outMesh);
 }
 
 void MeshManager::setBindMesh()
@@ -555,11 +516,14 @@ void MeshManager::setBindMesh()
 
 void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 {
-	MeshHollower::setOriMesh(hds_mesh.data());
+	MeshHollower::setOriMesh(operationStack->getOriMesh());
 
-	extended_cutted_mesh.reset(new HDS_Mesh(*hds_mesh));
-	MeshHollower::hollowMesh(extended_cutted_mesh.data(), flapSize, type, shift);
-	extended_cutted_mesh->updateSortedFaces();
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
+
+	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
+	MeshHollower::hollowMesh(outMesh, flapSize, type, shift);
+	outMesh->updateSortedFaces();
+	operationStack->push(outMesh);
 
 }
 
@@ -567,7 +531,8 @@ void MeshManager::exportXMLFile()
 {
 	if (true)// No connector generated
 	{
-		MeshConnector::generateConnector(unfolded_mesh.data());
+		HDS_Mesh* unfolded_mesh = operationStack->getUnfoldedMesh();
+		MeshConnector::generateConnector(unfolded_mesh);
 	}
 	
 }
@@ -601,10 +566,11 @@ void MeshManager::colorMeshByGeoDistance(int vidx)
 		return newval;
 	};
 #if 1
+
 	auto dists = gcomp->distanceTo(vidx);
 	int niters = 100;
 	for (int i = 0; i < niters; ++i)
-		dists = laplacianSmoother(dists, hds_mesh.data());
+		dists = laplacianSmoother(dists, operationStack->getOriMesh());
 #else
 	auto Q = MeshIterator::BFS(hds_mesh.data(), vidx);
 	vector<double> dists(hds_mesh->verts().size());
@@ -628,7 +594,7 @@ void MeshManager::colorMeshByGeoDistance(int vidx)
 		x -= 0.5;
 		//cout << x << endl;
 	});
-	hds_mesh->colorVertices(dists);
+	operationStack->getOriMesh()->colorVertices(dists);
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ratio)
@@ -640,7 +606,7 @@ void MeshManager::colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ra
 		x -= 0.5;
 		//cout << x << endl;
 	});
-	hds_mesh->colorVertices(dists);
+	operationStack->getOriMesh()->colorVertices(dists);
 }
 
 #if USE_REEB_GRAPH
@@ -744,6 +710,8 @@ vector<double> MeshManager::getInterpolatedZValue(int lev0, int lev1, double alp
 	auto m0 = hds_mesh_smoothed[lev0];
 	auto m1 = hds_mesh_smoothed[lev1];
 
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+
 	auto dist0 = vector<double>(hds_mesh->verts().size());
 	auto dist1 = vector<double>(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {
@@ -759,6 +727,8 @@ vector<double> MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, 
 {
 	auto m0 = hds_mesh_smoothed[lev0];
 	auto m1 = hds_mesh_smoothed[lev1];
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 
 	auto dist0 = vector<double>(hds_mesh->verts().size());
 	auto dist1 = vector<double>(hds_mesh->verts().size());
@@ -776,6 +746,7 @@ vector<double> MeshManager::getInterpolatedCurvature(int lev0, int lev1, double 
 	auto m0 = hds_mesh_smoothed[lev0];
 	auto m1 = hds_mesh_smoothed[lev1];
 
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 	auto dist0 = vector<double>(hds_mesh->verts().size());
 	auto dist1 = vector<double>(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {

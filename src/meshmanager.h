@@ -11,6 +11,7 @@
 #include <QProgressDialog>
 
 #include "meshloader.h"
+#include "OperationStack.h"
 
 #include "hds_mesh.h"
 #include "hds_face.h"
@@ -45,34 +46,13 @@ public:
 		return instance;
 	}
 
-	HDS_Mesh* getHalfEdgeMesh() {
-		return hds_mesh.data();
+	OperationStack* getMeshStack() {
+		return operationStack;
 	}
-
 	HDS_Mesh* getSmoothedMesh() {
 		return smoothed_mesh.data();
 	}
 
-	HDS_Mesh* getCuttedMesh() {
-		return cutted_mesh.data();
-	}
-	HDS_Mesh* getExtendedCuttedMesh() {
-		return extended_cutted_mesh.data();
-	}
-
-	HDS_Mesh* getUnfoldedMesh()
-	{
-		return unfolded_mesh.data();
-	}
-
-	HDS_Mesh* getExtendedUnfoldedMesh() {
-		return extended_unfolded_mesh.data();
-	}
-
-
-	HDS_Mesh* getExtendedMesh() {
-		return extended_mesh.data();
-	}
 
 #if USE_REEB_GRAPH
 	void updateReebGraph(const vector<double> &fvals = vector<double>());
@@ -102,7 +82,7 @@ protected:
 	}
 
 private:
-	MeshManager() {}
+	MeshManager() {operationStack = new OperationStack;}
 	MeshManager(const MeshManager &) = delete;
 	MeshManager& operator=(const MeshManager &) = delete;
 
@@ -112,35 +92,33 @@ private:
 	friend class MeshConnector;
 
 public:
+
 	bool loadOBJFile(const string& filename);
 	HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
-	void cutMeshWithSelectedEdges(bool isExtended);
-	void mapToExtendedMesh();
-	void unfoldMesh(bool isExtended);
+	void cutMeshWithSelectedEdges();
+	//void mapToExtendedMesh();
+	void unfoldMesh();
 	void smoothMesh();
 
 	void setBindMesh();
 	void setHollowMesh(double fsize, int type, double shift);
-	void extendMesh(int meshType, map<QString, double> config);
+	void extendMesh(map<QString, double> config);
 	void rimMesh(double rimSize = 0.0);
 	void set3DRimMesh();
 
 	// Export as SVG files
     void exportXMLFile();
 
-	void resetMesh();
-
+	void setCurrentOpFlag(OperationStack::Flag curFlag){operationStack->setCurrentFlag(curFlag);}
 private:
 	typedef HDS_Mesh mesh_t;
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Face face_t;
 	typedef HDS_Vertex vert_t;
 
-	QScopedPointer<HDS_Mesh> hds_mesh,
-		extended_mesh, smoothed_mesh,
-		cutted_mesh, extended_cutted_mesh,
-		unfolded_mesh, extended_unfolded_mesh,
-		rimmed_mesh;
+	OperationStack* operationStack;
+
+	QScopedPointer<HDS_Mesh> smoothed_mesh;
 	QScopedPointer<GeodesicComputer> gcomp;
 	QScopedPointer<DiscreteGeoComputer> dis_gcomp;
 
