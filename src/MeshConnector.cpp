@@ -221,28 +221,30 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 					QVector2D startPos = cut_he->v->pos.toVector2D();
 					QVector2D dirPin = targPos - startPos;
 
-					int pin_seg = min(2, static_cast<int>(
-						dirPin.length() * he_scale / pin_radius / 4)) + 1;
-					for (int pin_i = 1; pin_i < pin_seg; pin_i++)
+					int pin_seg = max(3, min(2, static_cast<int>(
+						dirPin.length() * he_scale / pin_radius / 4)) + 1);
+					if (pin_seg > 1)
 					{
-						printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
+						for (int pin_i = 1; pin_i < pin_seg; pin_i++)
+						{
+							printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
+						}
 					}
 					
-
 					// Add orientation label
 					if (!cut_he->next->isCutEdge)
 					{
 						printOrientLabel.push_back((startPos + dirPin * 0.5) * he_scale);
 					}
 					// If 4 pinholes
-					if (pinholecount_type == 1)
+					if (pinholecount_type == 1 || pin_seg < 2)
 					{
 						targPos += startPos - targetVPos;
 						startPos = targetVPos;
 						dirPin = targPos - startPos;
 
-						pin_seg = min(2, static_cast<int>(
-							dirPin.length() * he_scale / pin_radius / 4)) + 1;
+						pin_seg = max(3, min(2, static_cast<int>(
+							dirPin.length() * he_scale / pin_radius / 4)) + 1);
 						for (int pin_i = 1; pin_i < pin_seg; pin_i++)
 						{
 							printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);

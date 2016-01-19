@@ -152,9 +152,12 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 {
 	delete unfolded_mesh->bound;
 	unfolded_mesh->bound = new BBox3(0);
-	auto bound = unfolded_mesh->bound;
+	auto& bound = unfolded_mesh->bound;
 
-	QVector3D bound_shift;
+	int row_len_limit = static_cast<int>(sqrt(unfolded_mesh->pieceSet.size()));
+	int cur_row_count = 0;
+	QVector3D piece_offset;
+	BBox3 global_bound(0);
 
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
@@ -207,21 +210,33 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		{
 			curBound.Union(vert->pos);
 		}
+		// if current row is too long, move to second row
+		cur_row_count++;
+		if (cur_row_count >= row_len_limit)
+		{
+			global_bound = BBox3(QVector3D(global_bound.pMin.x(), global_bound.pMax.y(), 0));
+			piece_offset = global_bound.pMin - curBound.pMin;
+			cur_row_count = 0;
+		}
+		else// keep panning from original bound
+		{
+			piece_offset = QVector3D(global_bound.pMax.x(), global_bound.pMin.y(), 0) - curBound.pMin;
+		}
 		/************************************************************************/
 		/* Assembling Offset                                                    */
 		/************************************************************************/
-		bound_shift = QVector3D(bound->pMax.x() + 0.1, bound->pMin.y(), 0) - curBound.pMin;
 		if (unfolded_mesh->processType == HDS_Mesh::RIMMED_PROC)
 		{
-			bound_shift *= 1.5;
+			piece_offset *= 1.5;
 		}
-		curBound.pMin += bound_shift;
-		curBound.pMax += bound_shift;
+		curBound.pMin += piece_offset;
+		curBound.pMax += piece_offset;
 		for (auto vert : verts)
 		{
 			// Apply Orientation to all vertices
-			vert->pos += bound_shift;
+			vert->pos += piece_offset;
 		}
+		global_bound.Union(curBound);
 		bound->Union(curBound);
 	}
 }

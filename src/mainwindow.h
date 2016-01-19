@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QStateMachine>
 
 #include "meshviewer.h"
 #include "../extras/colormap_editor/colormapeditor.h"
@@ -36,7 +35,6 @@ protected:
 	void createToolBar();
 	void createDock();
 	void createStatusBar();
-	void createStateMachine();
 
 private slots:
 	void slot_newFile();
@@ -53,6 +51,7 @@ private slots:
 	void slot_toggleNormals();
 
 	void slot_undo();
+	void slot_redo();
 	void slot_reset();
 
 	void slot_toggleCameraOperation();
@@ -67,9 +66,10 @@ private slots:
 	void slot_updateViewerColormap();
 
 	void slot_smoothMesh();
-	void slot_triggerExtendMesh(bool);
+	void slot_triggerExtendMesh();
 	void slot_triggerHollowMesh(bool);
 	void slot_triggerRimmedMesh(bool);
+	void slot_triggerRimmed3DMesh(bool);
 	void slot_triggerBindingMesh(bool);
 
 	void slot_setBridger();
@@ -107,7 +107,7 @@ private:
 	stack<CurrentMesh> meshStack;
 	bool isExtended;
 
-	void updateCurrentMesh(){curMesh = meshStack.top();}
+	void updateCurrentMesh(){curMesh = meshStack.top(); cout<<"current mesh mode:::"<<curMesh<<endl;}
 
 private:
 	Ui::MainWindow *ui;
@@ -121,12 +121,7 @@ private:
 	BindingMeshPanel *bmpanel;
 
 private:
-	QStateMachine S_machine;
-	QState *original;
-	QState *extended;
-	QState *cutted;
-	QState *hollowed;
-	QState *unfolded;
+
 
 };
 

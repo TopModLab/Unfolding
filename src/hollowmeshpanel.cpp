@@ -21,7 +21,7 @@ HollowMeshPanel::HollowMeshPanel(QWidget *parent) :
 	connect(flapTypeGroup, SIGNAL(buttonClicked(int)), this, SLOT(slot_restrainSliders(int)));
 	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(slot_saved()));
 	connect(ui->okButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
-	connect(ui->bridgerPanelButton, SIGNAL(clicked(bool)), this, SIGNAL(sig_setBridger(bool)));
+	connect(ui->bridgerPanelButton, SIGNAL(clicked()), this, SIGNAL(sig_setBridger()));
 
 	connect(ui->bridgerSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setbridgerLabel(int)));
 	connect(ui->flapSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setflapLabel(int)));

@@ -1,25 +1,25 @@
 <RCC>
     <qresource prefix="/">
-		<file>icons/bezier.png</file>
-		<file>icons/bind.png</file>
+        <file>icons/bezier.png</file>
+        <file>icons/bind.png</file>
         <file>icons/cl.png</file>
-		<file>icons/close.png</file>
+        <file>icons/close.png</file>
         <file>icons/colormap.png</file>
         <file>icons/cp.png</file>
-		<file>icons/cube.png</file>
+        <file>icons/cube.png</file>
         <file>icons/cut.png</file>
         <file>icons/edge.png</file>
         <file>icons/export.png</file>
         <file>icons/extend.png</file>
         <file>icons/face.png</file>
-		<file>icons/flat.png</file>
-		<file>icons/fold.png</file>
+        <file>icons/flat.png</file>
+        <file>icons/fold.png</file>
         <file>icons/hollow_multFlap.png</file>
         <file>icons/hollow_oneFlap.png</file>
         <file>icons/HollowSphere.png</file>
-		<file>icons/move.png</file>
+        <file>icons/move.png</file>
         <file>icons/open.png</file>
-		<file>icons/original.png</file>
+        <file>icons/original.png</file>
         <file>icons/redo.png</file>
         <file>icons/rimface.png</file>
         <file>icons/save.png</file>
@@ -28,5 +28,7 @@
         <file>icons/undo.png</file>
         <file>icons/unfold.png</file>
         <file>icons/vertex.png</file>
+        <file>icons/rimface_3d.png</file>
+        <file>icons/reset.png</file>
     </qresource>
 </RCC>
