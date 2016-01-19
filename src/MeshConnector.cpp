@@ -34,8 +34,9 @@ cstchar SVG_LINE[] =		"\t<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"
 cstchar SVG_DASHARRAY[] =	"\t<path stroke-dasharray=\"%f, %f\" id=\"Dash%d\" d=\"M%f %f L%f %f\" " \
 							"style=\"fill:none;stroke:blue;stroke-width:0.8\" />";
 cstchar SVG_TEXT[] =		"\t<text x=\"%lf\" y=\"%lf\" transform=\"rotate(%lf %lf,%lf)\" " \
-							"style=\"font-size:10;stroke:blue;stroke-width:0.8;fill:none;" \
-							"text-anchor:middle;alignment-baseline:middle\" >%s</text>\n";
+							"style=\"font-size:10;font-family:'1CamBamStick8-normal';"\
+							"stroke:blue;stroke-width:0.8;fill:none;" \
+							"text-anchor:middle;alignment-baseline:middle;\" >%s</text>\n";
 cstchar SVG_ARCH[] =		"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
 							"L %lf %lf " \
