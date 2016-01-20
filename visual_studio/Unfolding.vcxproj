@@ -276,6 +276,7 @@
     <ClCompile Include="..\src\bindingmeshpanel.cpp" />
     <ClCompile Include="..\src\bridgerpanel.cpp" />
     <ClCompile Include="..\src\bridgerpanelviewer.cpp" />
+    <ClCompile Include="..\src\Camera.cpp" />
     <ClCompile Include="..\src\ConnectorPanel.cpp" />
     <ClCompile Include="..\src\GeodesicComputer.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp" />
@@ -308,6 +309,7 @@
     <ClCompile Include="..\src\meshviewer.cpp" />
     <ClCompile Include="..\src\morsesmalecomplex.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp" />
+    <ClCompile Include="..\src\OperationStack.cpp" />
     <ClCompile Include="..\src\stringutils.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp" />
     <ClCompile Include="..\src\unionfind.cpp" />
@@ -427,8 +429,11 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CONSOLE -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL "-I$(SolutionDir)..\src" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I.\debug"</Command>
     </CustomBuild>
+    <ClInclude Include="..\src\Camera.h" />
     <ClInclude Include="..\src\hds_common.h" />
     <ClInclude Include="..\src\MeshConnector.h" />
+    <ClInclude Include="..\src\OperationStack.h" />
+    <ClInclude Include="..\src\ViewerState.h" />
     <ClInclude Include="GeneratedFiles\ui_bindingmeshpanel.h" />
     <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h" />
     <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h" />

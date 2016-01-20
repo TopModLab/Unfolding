@@ -11,6 +11,7 @@
 #endif
 static const double Pi = 3.14159265358979323846;
 static const double PI2 = Pi * 2.0;
+static const double M_HALFPI = Pi * 0.5;
 
 
 template <typename T>
@@ -63,12 +64,12 @@ T interpolate(double c, T c1, T c2, T c3) {
 }
 
 template <typename T>
-inline T Radian2Degree(T radian)
+inline T RadianToDegree(T radian)
 {
 	return radian * 180.0 / M_PI;
 }
 template <typename T>
-inline T Degree2Radian(T degree)
+inline T DegreeToRadian(T degree)
 {
 	return degree * M_PI / 180.0;
 }

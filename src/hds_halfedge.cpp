@@ -3,7 +3,7 @@
 size_t HDS_HalfEdge::uid = 0;
 
 HDS_HalfEdge::HDS_HalfEdge()
-	: status(DEFAULT)
+	: flag(DEFAULT)
 {
 	isPicked = false;
 	isCutEdge = false;
@@ -18,13 +18,20 @@ HDS_HalfEdge::HDS_HalfEdge()
 	cutTwin = nullptr;
 }
 
+int HDS_HalfEdge::getFlag() const
+{
+	return (isPicked & PICKED)
+		| (isCutEdge & CUTEDGE)
+		| (isExtended & EXTENDED);
+}
+
 HDS_HalfEdge::~HDS_HalfEdge()
 {
 
 }
 
 HDS_HalfEdge::HDS_HalfEdge(const HDS_HalfEdge &other)
-	: status(other.status)
+	: flag(other.flag)
 	, index(other.index), refid(other.refid)
 {
 	isPicked = other.isPicked;

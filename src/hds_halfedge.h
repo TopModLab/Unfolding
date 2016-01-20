@@ -13,12 +13,12 @@ private:
 	static size_t uid;
 
 public:
-	enum EDGE_STATUS
+	enum EDGE_FLAG
 	{
-		DEFAULT = 0,
-		PICKED = 1,
-		CUTEDGE = 1 << 1,
-		EXTENDED = 1 << 2
+		DEFAULT		= 0,
+		PICKED		= 1 << 1,
+		CUTEDGE		= 1 << 1,
+		EXTENDED	= 1 << 2
 	};
 
 	static void resetIndex() { uid = 0; }
@@ -36,6 +36,8 @@ public:
 	void setFlip(HDS_HalfEdge* thef) {flip = thef; thef->flip = this;}
 	void setBridgeTwin(HDS_HalfEdge* he) {bridgeTwin = he; he->bridgeTwin = this;}
 
+	int getFlag() const;
+public:
 	HDS_Face *f;
 	HDS_Vertex *v;
 	HDS_HalfEdge *prev, *next, *flip;
@@ -49,7 +51,7 @@ public:
 	bool isPicked;
 	bool isCutEdge;
 	bool isExtended;//From hollower
-	int status;
+	int flag;
 };
 
 #endif // HDS_EDGE_H

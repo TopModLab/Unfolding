@@ -250,6 +250,16 @@ void HDS_Face::scaleDown()
 		n++;
 	}
 }
+
+int HDS_Face::getFlag() const
+{
+	return (isPicked & PICKED)
+		| (isCutFace & CUTFACE)
+		| (isHole & HOLE)
+		| (isBridger & BRIDGER)
+		| (isPlanar & PLANAR);
+}
+
 /*
 void HDS_Face::update_bbox()
 {

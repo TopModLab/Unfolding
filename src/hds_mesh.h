@@ -43,9 +43,8 @@ public:
 	void updateSortedFaces();
 	void clearSortedFaces();
 
-	//////////////////////////////////////////////////////////////////////////
-	void updatePieceSet();
-	//////////////////////////////////////////////////////////////////////////
+	void updatePieceSet();	/* Find linked faces and store in pieceSet */
+	
 	void printInfo(const string &msg = "");
 	void printMesh(const string &msg = "");
 	void releaseMesh();
@@ -64,6 +63,9 @@ public:
 
 	void colorVertices(const vector<double> &val);
 
+	/************************************************************************/
+	/* Legacy Drawing Functions                                             */
+	/************************************************************************/
 	void draw(ColorMap cmap);
 	void drawFaceIndices();
 	void drawVertexIndices();
@@ -72,6 +74,14 @@ public:
 	void flipShowFaces();
 	void flipShowVertices();
 	void flipShowNormals();
+	/************************************************************************/
+	/* Modern Rendering Functions                                           */
+	/************************************************************************/
+	void exportVBO(vector<float>* vtx_array,
+		vector<uint>* fib_array, vector<uint>* fid_array,
+		vector<uint>* fflag_array,
+		vector<uint>* heib_array, vector<uint>* heid_array,
+		vector<uint>* heflag_array) const;
 
 	 unordered_set<he_t*>& halfedges()  { return heSet; }
 	 unordered_set<face_t*>& faces()  { return faceSet; }

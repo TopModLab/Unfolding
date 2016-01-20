@@ -69,7 +69,7 @@ struct TextLabel
 	TextLabel(int refid, const QVector2D &p, const QVector2D &dir/*, const QString &ifo*/)
 		: id(refid), pos(p)
 	{
-		rot = Radian2Degree(atan2(dir.y(), dir.x()));
+		rot = RadianToDegree(atan2(dir.y(), dir.x()));
 	}
 };
 

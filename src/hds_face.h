@@ -27,9 +27,9 @@ public:
 
 	void setPicked(bool v) { isPicked = v; }
 
-	/// Find all directly connected faces
+	// Find all directly connected faces
 	set<HDS_Face *> connectedFaces();
-	/// Find all linked faces in current partiction
+	// Find all linked faces in current partiction
 	set<HDS_Face *> linkedFaces();
 
 	QVector3D center() const;
@@ -46,20 +46,32 @@ public:
 	void scaleDown();
 	double getScalingFactor(){ return scalingFactor; }
 
+	int getFlag() const;
 	//bounding box related, should only work on cut face
 	//void update_bbox();
-
+public:
+	enum FACE_FLAG
+	{
+		DEFAULT		= 0,
+		PICKED		= 1 << 1,
+		CUTFACE		= 1 << 2,
+		HOLE		= 1 << 3,
+		BRIDGER		= 1 << 4,
+		PLANAR		= 1 << 5
+	};
 	QVector3D n;
 	HDS_HalfEdge *he;
 
 	int index;
 	int refid;
+
+	// Flags
 	bool isPicked;
 	bool isCutFace; //invisible face between cut edges
 	bool isHole;
 	bool isBridger;
-
 	bool isPlanar;
+
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	double scalingFactor;
 	vector<QVector3D> scaledCorners;

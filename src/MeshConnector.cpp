@@ -261,7 +261,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 						QVector2D midPos = (res->second + startPos + dirPin * 0.5) * 0.5;
 						QVector2D midDir = midPos - res->second;
 						printTextPos.push_back(midPos * he_scale);
-						printTextRot.push_back(Radian2Degree(atan2(midDir.y(), midDir.x())));
+						printTextRot.push_back(RadianToDegree(atan2(midDir.y(), midDir.x())));
 						printTextIfo.push_back(HDS_Common::ref_ID2String(res->first));
 						printTextRecord.erase(res);
 					}
@@ -273,7 +273,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 				// Add labels for face
 				QVector2D faceDir = (refedge->v->pos - refedge->flip->v->pos).toVector2D();
 				printTextPos.push_back(curFace->center().toVector2D() * he_scale);
-				printTextRot.push_back(Radian2Degree(atan2(faceDir.y(), faceDir.x())));
+				printTextRot.push_back(RadianToDegree(atan2(faceDir.y(), faceDir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
 				
 			}
@@ -514,7 +514,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 					QVector2D midPos = (res->second + p0) * 0.5;
 					QVector2D midDir = midPos - res->second;
 					printTextPos.push_back(midPos);
-					printTextRot.push_back(Radian2Degree(atan2(midDir.y(), midDir.x())));
+					printTextRot.push_back(RadianToDegree(atan2(midDir.y(), midDir.x())));
 					printTextIfo.push_back(HDS_Common::ref_ID2String(res->first));
 					printTextRecord.erase(res);
 				}
@@ -529,7 +529,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 					QVector2D midPos = (res->second + p1) * 0.5;
 					QVector2D midDir = midPos - res->second;
 					printTextPos.push_back(midPos);
-					printTextRot.push_back(Radian2Degree(atan2(midDir.y(), midDir.x())));
+					printTextRot.push_back(RadianToDegree(atan2(midDir.y(), midDir.x())));
 					printTextIfo.push_back(HDS_Common::ref_ID2String(res->first));
 					printTextRecord.erase(res);
 				}
@@ -541,7 +541,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 				// add face label
 				QVector2D dir = flapPos[0] - flapPos[1];
 				printTextPos.push_back(0.5 * (flapPos[0] + flapPos[1]));
-				printTextRot.push_back(Radian2Degree(atan2(dir.y(), dir.x())));
+				printTextRot.push_back(RadianToDegree(atan2(dir.y(), dir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
 			}
 			// Etch layer
@@ -1038,7 +1038,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 
 			// add text
 			printTextPos.push_back(Pn - n * wid_conn * 0.6);
-			printTextRot.push_back(Radian2Degree(atan2(T.y(), T.x())));
+			printTextRot.push_back(RadianToDegree(atan2(T.y(), T.x())));
 			printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->refid));
 
 			printEdgePts.push_back(Pnext);

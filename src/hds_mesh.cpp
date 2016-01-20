@@ -560,7 +560,160 @@ void HDS_Mesh::flipShowVertices()
 {
 	showVert = !showVert;
 }
-void HDS_Mesh:: flipShowNormals()
+
+void HDS_Mesh::exportVBO(vector<float>* vtx_array,
+	vector<uint>* fib_array, vector<uint>* fid_array, vector<uint>* fflag_array,
+	vector<uint>* heib_array, vector<uint>* heid_array, vector<uint>* heflag_array) const
+{
+	// vertex object buffer
+	if (vtx_array != nullptr)
+	{
+		vtx_array->clear();
+		vtx_array->reserve(vertSet.size());
+		for (int i = 0; i < vertMap.size(); i++)
+		{
+			auto vert = vertMap.at(i);
+			auto& pos = vert->pos;
+			vtx_array->push_back(pos.x());
+			vtx_array->push_back(pos.y());
+			vtx_array->push_back(pos.z());
+		}
+	}
+	// face index buffer
+	auto inTriangle = [](const QVector3D& p, const QVector3D& v0, const QVector3D& v1, const QVector3D& v2)->bool {
+		auto area = QVector3D::crossProduct(v1 - v0, v2 - v0);
+		auto v1p = v1 - p;
+		auto v2p = v2 - p;
+		if (QVector3D::dotProduct(QVector3D::crossProduct(v1p, v2p), area) < 0)
+		{
+			return false;
+		}
+		auto v0p = v0 - p;
+		if (QVector3D::dotProduct(QVector3D::crossProduct(v2p, v0p), area) < 0)
+		{
+			return false;
+		}
+		if (QVector3D::dotProduct(QVector3D::crossProduct(v0p, v1p), area) < 0)
+		{
+			return false;
+		}
+		return true;
+	};
+	if (fib_array != nullptr)
+	{
+		// triangulated face index buffer
+		fib_array->clear();
+		fib_array->reserve(faceSet.size() * 3);
+		// original face idex, for query
+		fid_array->clear();
+		fid_array->reserve(faceSet.size() * 2);
+		fflag_array->clear();
+		fflag_array->reserve(faceSet.size() * 2);
+		for (auto face : faceSet)
+		{
+			if (face->isCutFace)
+			{
+				continue;
+			}
+			vector<uint> vid_array;
+			auto fid = static_cast<uint>(face->index);
+			auto flag = face->getFlag();
+			auto he = face->he;
+			auto curHE = he;
+			do
+			{
+				vid_array.push_back(curHE->v->index);
+				curHE = curHE->next;
+			} while (curHE != he);
+
+			// Operate differently depending on edge number
+			switch (vid_array.size())
+			{
+			case 3:
+			{
+				// Index buffer
+				fib_array->insert(fib_array->end(), vid_array.begin(), vid_array.end());
+				// face attribute
+				fid_array->push_back(fid);
+				fflag_array->push_back(flag);
+				break;
+			}
+			case 4:
+			{
+				// P3 in Triangle012
+				if (inTriangle(
+					vertMap.at(vid_array[3])->pos,
+					vertMap.at(vid_array[0])->pos,
+					vertMap.at(vid_array[1])->pos,
+					vertMap.at(vid_array[2])->pos))
+				{
+					// Index buffer 013
+					fib_array->insert(fib_array->end(),
+						vid_array.begin(), vid_array.begin() + 2);
+					fib_array->push_back(vid_array.back());
+					// face attribute
+					fid_array->push_back(fid);
+					fflag_array->push_back(flag);
+
+					// Index buffer 123
+					fib_array->insert(fib_array->end(),
+						vid_array.begin() + 1, vid_array.end());
+					// face attribute
+					fid_array->push_back(fid);
+					fflag_array->push_back(flag);
+				}
+				else// P3 outside Triangle012
+				{
+					// Index buffer 012
+					fib_array->insert(fib_array->end(),
+						vid_array.begin(), vid_array.begin() + 3);
+					// face attribute
+					fid_array->push_back(fid);
+					fflag_array->push_back(flag);
+
+					// Index buffer 230
+					fib_array->insert(fib_array->end(),
+						vid_array.begin() + 2, vid_array.end());
+					fib_array->push_back(vid_array.front());
+					// face attribute
+					fid_array->push_back(fid);
+					fflag_array->push_back(flag);
+				}
+			}
+			default: // n-gons
+				break;
+			}
+		}
+	}
+	if (heib_array != nullptr)
+	{
+		unordered_set<he_t*> visitiedHE;
+		visitiedHE.reserve(heSet.size());
+
+		int heNum = heSet.size() / 2;
+		heib_array->clear();
+		heib_array->reserve(heNum);
+		heflag_array->clear();
+		heflag_array->reserve(heNum);
+
+		for (auto he : heSet)
+		{
+			if (visitiedHE.find(he) == visitiedHE.end())
+			{
+				visitiedHE.insert(he);
+				visitiedHE.insert(he->flip);
+
+				heib_array->push_back(he->v->index);
+				heib_array->push_back(he->next->v->index);
+
+				heid_array->push_back(static_cast<uint>(he->index));
+				heflag_array->push_back(he->getFlag());
+			}
+		}
+	}
+}
+
+void HDS_Mesh::flipShowNormals()
 {
 	showNormals = !showNormals;
 }

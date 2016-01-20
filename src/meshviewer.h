@@ -11,10 +11,18 @@
 #include <QVector2D>
 #include <QGLFramebufferObject>
 
+// Modern OpenGL
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+typedef QOpenGLVertexArrayObject oglVAO;
+typedef QOpenGLBuffer oglBuffer;
 
 #include "hds_mesh.h"
 #include "colormap.h"
 #include "Graph.hpp"
+#include "ViewerState.h"
 #include "morsesmalecomplex.h"
 
 const QGLFormat qglformat_3d(
@@ -30,7 +38,9 @@ const QGLFormat qglformat_3d(
 	QGL::HasOverlay
 	);
 
+
 class MeshViewer : public QGLWidget, protected QGLFunctions
+	//, public QOpenGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 public:
@@ -86,67 +96,7 @@ public slots:
 	void slot_toggleCutLocusCutMode();
 
 private:
-	struct ViewerState {
-	ViewerState():zNear(1.0), zFar(7000.0), fov(45.0){
-		translation = QVector3D(0, 0, -5);
-		angularChange = 0;
-	}
-
-
-	void updateViewport(int w, int h) {
-		viewport.x = 0;
-		viewport.y = 0;
-		viewport.w = w;
-		viewport.h = h;
-
-		aspect = (qreal)w / (qreal)h;
-	}
-
-	void updateProjection() {
-		projection.setToIdentity();
-		projection.perspective(fov, aspect, zNear, zFar);
-	}
-
-	void updateModelView() {
-		QMatrix4x4 matrix;
-		matrix.translate(translation);
-		matrix.rotate(rotation);
-		modelview = matrix;
-	}
-
-	QMatrix4x4 projectionModelView() const {
-		return projection * modelview;
-	}
-
-	struct {
-		int x, y, w, h;
-	} viewport;
-
-	void print() {
-		qDebug() << "viewstate:";
-		qDebug() << viewport.x << ", " << viewport.y << ", " << viewport.w << ", " << viewport.h;
-/*     qDebug() << modelview;
-		qDebug() << projection;
-		qDebug() << rotationAxis;
-		qDebug() << angularChange;
-		qDebug() << rotation;
-		qDebug() << translation;
-		qDebug() << zNear << ", " << zFar << ", " << fov;
-		qDebug() << aspect;
-		*/
-	}
-
-	QMatrix4x4 modelview;
-	QMatrix4x4 projection;
-
-	QVector3D rotationAxis;
-	qreal angularChange;
-	QQuaternion rotation;
-	QVector3D translation;
-
-	qreal zNear, zFar, fov;
-	qreal aspect;
-	};
+	
 
 	ViewerState viewerState;
 
@@ -311,4 +261,43 @@ private:
 
 };
 
+class MeshViewerModern
+	: public QOpenGLWidget, protected QOpenGLFunctions
+{
+public:
+	MeshViewerModern(QWidget *parent = nullptr);
+	~MeshViewerModern();
+
+	void bindHalfEdgeMesh(HDS_Mesh *mesh);
+protected:
+	void initializeGL() Q_DECL_OVERRIDE;
+	void paintGL() Q_DECL_OVERRIDE;
+	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
+	void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
+
+private: // paint function
+	void initialVBO();
+	void bindVertexVBO();
+	void bindEdgesVAO();
+	void bindFaceVAO();
+private:
+	const HDS_Mesh *heMesh;   /// not own
+	float scale;
+
+	// VBOs and VAOs
+	oglBuffer vtx_vbo;
+	vector<GLfloat> vtx_array;
+
+	oglVAO face_vao;
+	oglBuffer face_ibo;
+	vector<GLuint> fib_array;
+	vector<GLuint> fid_array;
+	vector<GLuint> fflag_array;
+
+	oglVAO he_vao;
+	oglBuffer he_ibo;
+	vector<GLuint> heib_array;
+	vector<GLuint> heid_array;
+	vector<GLuint> heflag_array;
+};
 #endif // MESHVIEWER_H
