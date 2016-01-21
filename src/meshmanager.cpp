@@ -500,11 +500,11 @@ void MeshManager::rimMesh(double rimSize)
 
 void MeshManager::set3DRimMesh()
 {
-	//MeshRimFace::setOriMesh(hds_mesh.data());
+    MeshRimFace::setOriMesh(operationStack->getOriMesh());
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-	//MeshRimFace::rimMesh3D(outMesh);
+    MeshRimFace::rimMesh3D(outMesh);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 }

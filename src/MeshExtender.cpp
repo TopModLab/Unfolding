@@ -93,7 +93,10 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
 		if(newFace->he == nullptr)
 			newFace->he = newHE;
+        if (cutFace->he == nullptr)
+            cutFace->he = newHE->flip;
 		newHE->f = newFace;
+
 		if (cutFace != nullptr){
 			newHE->flip->f = cutFace;
 			newHE->setCutEdge(true);
@@ -267,6 +270,7 @@ void MeshExtender::updateNewMesh()
 		v->computeCurvature();
 		//cout << v->index << ": " << (*v) << endl;
 	}
+    cur_mesh->validate();
 
 	cur_mesh->updatePieceSet();
 }

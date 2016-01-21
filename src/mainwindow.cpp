@@ -696,7 +696,7 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 
 void MainWindow::slot_triggerRimmed3DMesh(bool checked)
 {
-	if (MeshManager::getInstance()->getMeshStack()->canCut)
+    if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
 		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 

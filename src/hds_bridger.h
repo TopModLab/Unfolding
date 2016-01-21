@@ -22,6 +22,7 @@ public:
 	~HDS_Bridger();
 
 	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, HDS_Vertex* v1, HDS_Vertex* v2);
+	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, QVector3D v1, QVector3D v2);
 
 	HDS_Bridger(const HDS_Bridger &other);
 	HDS_Bridger operator=(const HDS_Bridger &other);
@@ -33,7 +34,7 @@ public:
 
 	//HDS_Bridger* flapTwin; //points to its twin Bridger created in a cut event
 	void createBridge();
-	void setOriginalPositions(HDS_Vertex* v1, HDS_Vertex* v2);
+	void setBezierCurve();
 	face_t* bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2);
 
 	int index;
