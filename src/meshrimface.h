@@ -10,7 +10,7 @@ class MeshRimFace : public MeshExtender
 {
 public:
 	MeshRimFace();
-	static void rimMesh3D(HDS_Mesh *mesh);
+	static void rimMesh3D(HDS_Mesh *mesh, float planeWidth, float planeHeight);
 	~MeshRimFace();
 
 };

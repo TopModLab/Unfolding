@@ -104,7 +104,7 @@ public:
 	void setHollowMesh(double fsize, int type, double shift);
 	void extendMesh(map<QString, double> config);
 	void rimMesh(double rimSize = 0.0);
-	void set3DRimMesh();
+	void set3DRimMesh(float width, float height);
 
 	// Export as SVG files
     void exportXMLFile();

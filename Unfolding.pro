@@ -121,7 +121,6 @@ FORMS    += forms/mainwindow.ui \
     forms/hollowmeshpanel.ui \
     forms/bindingmeshpanel.ui \
     forms/ConnectorPanel.ui \
-    src/rimfacepanel.ui \
     forms/rimfacepanel.ui
 
 RESOURCES += \

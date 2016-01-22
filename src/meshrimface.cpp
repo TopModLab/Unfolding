@@ -2,19 +2,14 @@
 #include "MeshExtender.h"
 #include "common.h"
 
-void MeshRimFace::rimMesh3D(HDS_Mesh *mesh)
+void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHeight)
 {
+	cout<<planeWidthScale<<"   "<<planeHeight<<endl;
 	initiate();
 	cur_mesh = mesh;
-	float planeWidthScale = 0.1;
-	float planeHeight = 0.1;
 
 
-	unordered_set<vert_t*> old_verts = cur_mesh->verts();
-	unordered_map <int, vert_t*> ori_map = ori_mesh->vertMap;
-
-
-	for(auto v: old_verts) {
+	for(auto v: cur_mesh->verts()) {
 		///assign cut faces
 		face_t* cutFace = new face_t;
 		cutFace->isCutFace = true;
