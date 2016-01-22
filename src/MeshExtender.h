@@ -30,6 +30,8 @@ protected:
 	static void scaleFaces();
 
 	static void addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2);
+	static void addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, QVector3D v1, QVector3D v2);
+
 	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, face_t* cutFace = nullptr);
 
 

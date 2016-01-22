@@ -60,7 +60,8 @@ SOURCES += src/main.cpp\
     src/ConnectorPanel.cpp \
     src/MeshConnector.cpp \
     src/meshrimface.cpp \
-    src/OperationStack.cpp
+    src/OperationStack.cpp \
+    src/rimfacepanel.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_common.h \
@@ -109,7 +110,8 @@ HEADERS  += src/mainwindow.h \
     src/ConnectorPanel.h \
     src/MeshConnector.h \
     src/meshrimface.h \
-    src/OperationStack.h
+    src/OperationStack.h \
+    src/rimfacepanel.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
@@ -118,7 +120,9 @@ FORMS    += forms/mainwindow.ui \
 	forms/bridgerpanel.ui \
     forms/hollowmeshpanel.ui \
     forms/bindingmeshpanel.ui \
-    forms/ConnectorPanel.ui
+    forms/ConnectorPanel.ui \
+    src/rimfacepanel.ui \
+    forms/rimfacepanel.ui
 
 RESOURCES += \
     icons.qrc

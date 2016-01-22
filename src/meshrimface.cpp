@@ -6,8 +6,8 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh)
 {
 	initiate();
 	cur_mesh = mesh;
-	float planeWidthScale = 0.4;
-	float planeHeight = 0.5;
+	float planeWidthScale = 0.1;
+	float planeHeight = 0.1;
 
 
 	unordered_set<vert_t*> old_verts = cur_mesh->verts();
@@ -20,6 +20,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh)
 		cutFace->isCutFace = true;
 		faces_new.push_back(cutFace);
 		vector<face_t*> pieces;
+
 		for (auto he: mesh->incidentEdges(v)) {
 
 			///get planes on the edge
@@ -52,7 +53,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh)
 			vert_t* vn_i = new vert_t( planeHeight * v->pos + (1 - planeHeight) * vn_mid);
 			vert_t* vn_o = new vert_t(-planeHeight * v->pos + (1 + planeHeight) * vn_mid);
 			vert_t* vp_i = new vert_t( planeHeight * v->pos + (1 - planeHeight) * vp_mid);
-			vert_t* vp_o = new vert_t(-planeHeight * v->pos + (1 - planeHeight) * vp_mid);
+			vert_t* vp_o = new vert_t(-planeHeight * v->pos + (1 + planeHeight) * vp_mid);
 
 
 			vn_i->refid = v->refid;
@@ -61,10 +62,10 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh)
 			vp_o->refid = v1->refid;
 
 			vector<vert_t*> vertices;
+			vertices.push_back(vp_i);
 			vertices.push_back(vp_o);
 			vertices.push_back(vn_o);
 			vertices.push_back(vn_i);
-			vertices.push_back(vp_i);
 
 			verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
@@ -77,13 +78,41 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh)
 
 		for(int i = 0; i < pieces.size(); i++) {
 			face_t* curFace = pieces[i];
-			face_t* nextFace = pieces[(i == pieces.size()-1)? 0:i+1];
+			face_t* nextFace;
+			if(i < pieces.size() - 1)
+				nextFace = pieces[i+1];
+			else {
+				//duplicate pieces[0]
+				vector<vert_t*> vertices;
+				for (auto v: pieces[0]->corners()) {
+					vertices.push_back( new vert_t(v->pos));
+				}
+				nextFace = createFace(vertices, cutFace);
+				nextFace->refid = pieces[0]->refid;
+				faces_new.push_back(nextFace);
+				verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+			}
 
+			//get curFace he1
+			he_t* he1 = curFace->he;
+			//get nextFace he2
+			he_t* he2 = nextFace->he->next->next;
+			he1->setCutEdge(false);
+			he2->setCutEdge(false);
+
+			vector<vert_t*> curCorners = curFace->corners();
+			vector<vert_t*> nxtCorners = nextFace->corners();
+
+			QVector3D v1;
+			HDS_Face::LineLineIntersect(nxtCorners[0]->pos, nxtCorners[3]->pos, curCorners[3]->pos, curCorners[0]->pos, &v1);
+
+			QVector3D v2;
+			HDS_Face::LineLineIntersect(nxtCorners[1]->pos, nxtCorners[2]->pos, curCorners[2]->pos, curCorners[1]->pos, &v2);
+
+			addBridger(he2->flip, he1->flip, v1, v2);
 		}
 
 	}
-
-
 
 	updateNewMesh();
 }
