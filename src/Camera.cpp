@@ -37,6 +37,17 @@ void perspCamera::exportVBO(vector<float>* view, vector<float>* proj, vector<flo
 		//RasterToScreen.m.exportVBO(raster);
 	}
 }
+
+const float* perspCamera::oglViewMatrix() const
+{
+	return WorldToCamera.constData();
+}
+
+const float* perspCamera::oglProjectionMatrix() const
+{
+	return CameraToScreen.constData();
+}
+
 void perspCamera::zoom(Float x_val, Float y_val, Float z_val)
 {
 	QMatrix4x4 cam2w = CameraToWorld;// .getMat();

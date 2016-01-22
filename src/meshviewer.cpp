@@ -1,10 +1,10 @@
 #define NOMINMAX
 #include "meshmanager.h"
 #include <iostream>
-#include "meshviewer.h"
 #include "glutils.hpp"
 #include "mathutils.hpp"
 #include "utils.hpp"
+#include "meshviewer.h"
 #include "morsesmalecomplex.h"
 
 #include <QMouseEvent>
@@ -1669,96 +1669,3 @@ void MeshViewer::bindReebGraph(SimpleGraph *g)
 }
 
 //////////////////////////////////////////////////////////////////////////
-MeshViewerModern::MeshViewerModern(QWidget *parent)
-	: QOpenGLWidget(parent)
-{
-	// Set surface format for current widget
-	QSurfaceFormat format;
-	format.setDepthBufferSize(32);
-	format.setStencilBufferSize(8);
-	format.setSamples(16);
-	//format.setVersion(3, 2);
-	format.setProfile(QSurfaceFormat::CoreProfile);
-	this->setFormat(format);
-
-}
-
-MeshViewerModern::~MeshViewerModern()
-{
-}
-
-void MeshViewerModern::bindHalfEdgeMesh(HDS_Mesh *mesh)
-{
-	heMesh = mesh;
-	heMesh->exportVBO(&vtx_array,
-		&fib_array, &fid_array, &fflag_array,
-		&heib_array, &heid_array, &heflag_array);
-
-	update();
-}
-/*
-
-void MeshViewerModern::initializeGL()
-{
-	// OpenGL extention initialization
-	initializeOpenGLFunctions();
-
-	// Print OpenGL vertion
-	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-	const GLubyte* version = glGetString(GL_VERSION); // version as a string
-	printf("Renderer: %s\n", renderer);
-	printf("OpenGL version supported %s\n", version);
-
-	// Enable OpenGL features
-	glEnable(GL_MULTISAMPLE);
-	//glEnable(GL_LINE_SMOOTH);
-	//glEnable(GL_POLYGON_SMOOTH);
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST); // enable depth-testing
-	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glFrontFace(GL_CCW); // set counter-clock-wise vertex order to mean the front
-}
-
-void MeshViewerModern::initialVBO()
-{
-	vtx_vbo.destroy();
-	face_ibo.destroy();
-	he_ibo.destroy();
-
-	he_vao.destroy();
-	face_vao.destroy();
-	// OpenGL 4.3 Core Profile
-	//glDeleteVertexArrays(1, &he_vao);
-	//glDeleteVertexArrays(1, &face_vao);
-}
-
-void MeshViewerModern::bindVertexVBO()
-{
-	glGenBuffers(1, &vtx_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vtx_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vtx_array.size(), &vtx_array[0], GL_STATIC_DRAW);
-}
-
-void MeshViewerModern::bindEdgesVAO()
-{
-	
-	// Bind normal value as color
-	glGenBuffers(1, &char_elb);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, char_elb);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * char_idxs.size(), &char_idxs[0], GL_STATIC_DRAW);
-
-	// Bind VAO
-	glGenVertexArrays(1, &he_vao);
-	glBindVertexArray(he_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, char_pts_vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, char_elb);
-}
-
-void MeshViewerModern::bindFaceVAO()
-{
-
-}
-*/

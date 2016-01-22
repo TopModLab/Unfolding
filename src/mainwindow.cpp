@@ -47,7 +47,9 @@ void MainWindow::initialization()
 bool MainWindow::createComponents()
 {
 	try {
-		viewer = new MeshViewer(this);
+		//kkkkkkkkkkkkkkkkkkkkkkkkkkk
+		//viewer = new MeshViewer(this);
+		viewer = new MeshViewerModern(this);
 		ceditor = new ColormapEditor;
 		cppanel = new CriticalPointsPanel;
 		clpanel = new CutLocusPanel;
@@ -77,8 +79,9 @@ bool MainWindow::layoutComponents()
 bool MainWindow::connectComponents()
 {
 	connect(ceditor, SIGNAL(colorChanged()), this, SLOT(slot_updateViewerColormap()));
-	connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, SLOT(slot_updateMeshColorByGeoDistance(int)));
-	connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int, int, int, double)), this, SLOT(slot_updateMeshColorByGeoDistance(int, int, int, double)));
+	//kkkkkkkkkkkkkkkkkkkkkkkkkkk
+	/*connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, SLOT(slot_updateMeshColorByGeoDistance(int)));
+	connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int, int, int, double)), this, SLOT(slot_updateMeshColorByGeoDistance(int, int, int, double)));*/
 
 	connect(cppanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCriticalPointsMethod(int)));
 	connect(cppanel, SIGNAL(sig_smoothingTimesChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingTimes(int)));
@@ -163,13 +166,15 @@ void MainWindow::createActions()
 		QAction *selectAllAct = new QAction(tr("Select All"), this);
 		selectAllAct->setShortcut(QKeySequence::SelectAll);
 		selectAllAct->setStatusTip(tr("Select All"));
-		connect(selectAllAct, SIGNAL(triggered()), viewer, SLOT(slot_selectAll()));
+		//kkkkkkkkkkk
+		//connect(selectAllAct, SIGNAL(triggered()), viewer, SLOT(slot_selectAll()));
 		actionsMap["select all"] = selectAllAct;
 
 		QAction *selectInverseAct = new QAction(tr("Select Inverse"), this);
 		selectInverseAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
 		selectInverseAct->setStatusTip(tr("Select Inverse"));
-		connect(selectInverseAct, SIGNAL(triggered()), viewer, SLOT(slot_selectInverse()));
+		//kkkkkkkkkkk
+		//connect(selectInverseAct, SIGNAL(triggered()), viewer, SLOT(slot_selectInverse()));
 		actionsMap["select inverse"] = selectInverseAct;
 
 		QAction *selectMultipleAct = new QAction(tr("Select Multiple"), this);
@@ -180,49 +185,57 @@ void MainWindow::createActions()
 
 		QAction *selectCutEdgePairAct = new QAction(tr("Select Twin Pair"), this);
 		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected elements"));
-		connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectTwinPair()));
+		//kkkkkkkkkkk
+		//connect(selectCutEdgePairAct, SIGNAL(triggered()), viewer, SLOT(slot_selectTwinPair()));
 		actionsMap["select cut edge pair"] = selectCutEdgePairAct;
 
 		QAction *selectnextEdgeAct = new QAction(tr("Select Next Edge"), this);
 		selectnextEdgeAct->setStatusTip(tr("Select next half edge"));
-		connect(selectnextEdgeAct, SIGNAL(triggered()), viewer, SLOT(slot_selectNextEdge()));
+		//kkkkkkkkkkk
+		//connect(selectnextEdgeAct, SIGNAL(triggered()), viewer, SLOT(slot_selectNextEdge()));
 		actionsMap["select next edge"] = selectnextEdgeAct;
 
 		QAction *selectCPAct = new QAction(tr("Select Critical Points"), this);
 		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
 		selectCPAct->setStatusTip(tr("Select All Critical Points (turn into minimum points)"));
-		connect(selectCPAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCP()));
+		//kkkkkkkkkkk
+		//connect(selectCPAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCP()));
 		actionsMap["select cp"] = selectCPAct;
 
 		QAction *selectMSTEdgesAct = new QAction(tr("Select MST Edges"), this);
 		selectMSTEdgesAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
 		selectMSTEdgesAct->setStatusTip(tr("Select Minimal Spanning Tree based cuttable edges"));
-		connect(selectMSTEdgesAct, SIGNAL(triggered()), viewer, SLOT(slot_selectMSTEdges()));
+		//kkkkkkkkkkk
+		//connect(selectMSTEdgesAct, SIGNAL(triggered()), viewer, SLOT(slot_selectMSTEdges()));
 		actionsMap["select mst"] = selectMSTEdgesAct;
 
 
 		QAction *selectCCAct = new QAction(tr("Select Connected Component"), this);
 		selectCCAct->setShortcut(QKeySequence(Qt::Key_Asterisk));
 		selectCCAct->setStatusTip(tr("Select Connected Component"));
-		connect(selectCCAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCC()));
+		//kkkkkkkkkkk
+		//connect(selectCCAct, SIGNAL(triggered()), viewer, SLOT(slot_selectCC()));
 		actionsMap["select cc"] = selectCCAct;
 
 		QAction *selectGrowAct = new QAction(tr("Grow Selection"), this);
 		selectGrowAct->setShortcut(QKeySequence(Qt::Key_Equal));
 		selectGrowAct->setStatusTip(tr("Grow Selection"));
-		connect(selectGrowAct, SIGNAL(triggered()), viewer, SLOT(slot_selectGrow()));
+		//kkkkkkkkkkk
+		//connect(selectGrowAct, SIGNAL(triggered()), viewer, SLOT(slot_selectGrow()));
 		actionsMap["select grow"] = selectGrowAct;
 
 		QAction *selectShrinkAct = new QAction(tr("Shrink Selection"), this);
 		selectShrinkAct->setShortcut(QKeySequence(Qt::Key_Minus));
 		selectShrinkAct->setStatusTip(tr("Shrink Selection"));
-		connect(selectShrinkAct, SIGNAL(triggered()), viewer, SLOT(slot_selectShrink()));
+		//kkkkkkkkkkk
+		//connect(selectShrinkAct, SIGNAL(triggered()), viewer, SLOT(slot_selectShrink()));
 		actionsMap["select shrink"] = selectShrinkAct;
 
 		QAction *selectClearAct = new QAction(tr("Clear Selection"), this);
 		selectClearAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Backspace));
 		selectClearAct->setStatusTip(tr("Clear Selection"));
-		connect(selectClearAct, SIGNAL(triggered()), viewer, SLOT(slot_selectClear()));
+		//kkkkkkkkkkk
+		//connect(selectClearAct, SIGNAL(triggered()), viewer, SLOT(slot_selectClear()));
 		actionsMap["select clear"] = selectClearAct;
 
 
@@ -249,21 +262,24 @@ void MainWindow::createActions()
 		showVMinAct->setCheckable(true);
 		showVMinAct->setChecked(true);
 		showVMinAct->setStatusTip(tr("Show Minimums"));
-		connect(showVMinAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleMins()));
+		//kkkkkkkkkkk
+		//connect(showVMinAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleMins()));
 		actionsMap["show mins"] = showVMinAct;
 
 		QAction *showVMaxAct = new QAction(tr("Show Maxs"), this);
 		showVMaxAct->setCheckable(true);
 		showVMaxAct->setChecked(true);
 		showVMaxAct->setStatusTip(tr("Show Maximums"));
-		connect(showVMaxAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleMaxs()));
+		//kkkkkkkkkkk
+		//connect(showVMaxAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleMaxs()));
 		actionsMap["show maxs"] = showVMaxAct;
 
 		QAction *showVSaddlesAct = new QAction(tr("Show Saddles"), this);
 		showVSaddlesAct->setCheckable(true);
 		showVSaddlesAct->setChecked(true);
 		showVSaddlesAct->setStatusTip(tr("Show Saddles"));
-		connect(showVSaddlesAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleSaddles()));
+		//kkkkkkkkkkk
+		//connect(showVSaddlesAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleSaddles()));
 		actionsMap["show saddles"] = showVSaddlesAct;
 
 		//face
@@ -288,28 +304,32 @@ void MainWindow::createActions()
 		showIndexAct->setCheckable(true);
 		showIndexAct->setChecked(false);
 		showIndexAct->setStatusTip(tr("Show Vertex Index"));
-		connect(showIndexAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleText()));
+		//kkkkkkkkkkk
+		//connect(showIndexAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleText()));
 		actionsMap["show index"] = showIndexAct;
 
 		QAction *showLightingSmoothAct = new QAction(tr("Smooth Shading"), this);
 		showLightingSmoothAct->setCheckable(true);
 		showLightingSmoothAct->setChecked(false);
 		showLightingSmoothAct->setStatusTip(tr("Lighting set to smooth shading"));
-		connect(showLightingSmoothAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingSmooth()));
+		//kkkkkkkkkkk
+		//connect(showLightingSmoothAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingSmooth()));
 		actionsMap["lighting smooth"] = showLightingSmoothAct;
 
 		QAction *showLightingFlatAct = new QAction(tr("Flat Shading"), this);
 		showLightingFlatAct->setCheckable(true);
 		showLightingFlatAct->setChecked(false);
 		showLightingFlatAct->setStatusTip(tr("Lighting set to flat shading"));
-		connect(showLightingFlatAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingFlat()));
+		//kkkkkkkkkkk
+		//connect(showLightingFlatAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingFlat()));
 		actionsMap["lighting flat"] = showLightingFlatAct;
 
 		QAction *showLightingWireframeAct = new QAction(tr("Wireframe"), this);
 		showLightingWireframeAct->setCheckable(true);
 		showLightingWireframeAct->setChecked(true);
 		showLightingWireframeAct->setStatusTip(tr("Lighting set to wireframe"));
-		connect(showLightingWireframeAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingWireframe()));
+		//kkkkkkkkkkk
+		//connect(showLightingWireframeAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleLightingWireframe()));
 		actionsMap["lighting wireframe"] = showLightingWireframeAct;
 
 		QAction *showCPAct = new QAction(tr("Show &Critical Points"), this);
@@ -317,7 +337,8 @@ void MainWindow::createActions()
 		showCPAct->setCheckable(true);
 		showCPAct->setChecked(false);
 		showCPAct->setStatusTip(tr("Show Critical Points"));
-		connect(showCPAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleCriticalPoints()));
+		//kkkkkkkkkkk
+		//connect(showCPAct, SIGNAL(triggered()), viewer, SLOT(slot_toggleCriticalPoints()));
 		actionsMap["show CP"] = showCPAct;
 
 		//main menu bar
@@ -595,7 +616,7 @@ void MainWindow::slot_newFile()
 #if USE_REEB_GRAPH
 		viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
-
+		viewer->update();
 	}
 }
 
@@ -800,7 +821,8 @@ void MainWindow::slot_reset()
 
 void MainWindow::slot_selectMultiple()
 {
-	viewer->setSelectionMode(MeshViewer::multiple);
+	//kkkkkkkkkkk
+	//viewer->setSelectionMode(MeshViewer::multiple);
 }
 
 void MainWindow::slot_toggleEdges()
@@ -849,22 +871,26 @@ void MainWindow::slot_toggleNormals()
 
 void MainWindow::slot_toggleCameraOperation()
 {
-	viewer->setInteractionMode(MeshViewer::Camera);
+	//kkkkkkkkkkk
+	//viewer->setInteractionMode(MeshViewer::Camera);
 }
 
 void MainWindow::slot_toggleFaceSelection()
 {
-	viewer->setInteractionMode(MeshViewer::SelectFace);
+	//kkkkkkkkkkk
+	//viewer->setInteractionMode(MeshViewer::SelectFace);
 }
 
 void MainWindow::slot_toggleEdgeSelection()
 {
-	viewer->setInteractionMode(MeshViewer::SelectEdge);
+	//kkkkkkkkkkk
+	//viewer->setInteractionMode(MeshViewer::SelectEdge);
 }
 
 void MainWindow::slot_toggleVertexSelection()
 {
-	viewer->setInteractionMode(MeshViewer::SelectVertex);
+	//kkkkkkkkkkk
+	//viewer->setInteractionMode(MeshViewer::SelectVertex);
 }
 
 
@@ -876,19 +902,23 @@ void MainWindow::slot_triggerColormap() {
 
 void MainWindow::slot_triggerCriticalPoints() {
 	actionsMap["show CP"]->setChecked(true);
-	viewer->setCriticalPointsMethod(viewer->getCmode());
-	viewer->showCriticalPoints();
+	//kkkkkkkkkkk
+	//viewer->setCriticalPointsMethod(viewer->getCmode());
+	//viewer->showCriticalPoints();
 	viewer->update();
 	cppanel->show();
 }
 
 void MainWindow::slot_triggerCutLocusPanel() {
 	actionsMap["show CP"]->setChecked(clpanel->isMinMaxChecked());
-	viewer->setCutLocusMethod(viewer->getLmode());
+
+	//kkkkkkkkkkk
+	//viewer->setCutLocusMethod(viewer->getLmode());
 	if (clpanel->isMinMaxChecked()) {
-		viewer->showCutLocusPoints();
+		//kkkkkkkkkkk
+		//viewer->showCutLocusPoints();
 	}
-	viewer->showCutLocusCut();
+	//viewer->showCutLocusCut();
 	viewer->update();
 	clpanel->show();
 }
@@ -900,7 +930,8 @@ void MainWindow::slot_disableclp() {
 
 void MainWindow::slot_updateViewerColormap()
 {
-	viewer->setCurvatureColormap(ceditor->getColormap());
+	//kkkkkkkkkkk
+	//viewer->setCurvatureColormap(ceditor->getColormap());
 }
 
 void MainWindow::slot_updateMeshColorByGeoDistance(int vidx) {
@@ -922,25 +953,29 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
-	viewer->setCriticalPointsMethod(midx);
+	//kkkkkkkkkkk
+	//viewer->setCriticalPointsMethod(midx);
 	viewer->update();
 }
 
 void MainWindow::slot_updateCriticalPointsSmoothingTimes(int times) {
-	viewer->setCriticalPointsSmoothingTimes(times);
+	//kkkkkkkkkkk
+	//viewer->setCriticalPointsSmoothingTimes(times);
 	viewer->update();
 }
 
 void MainWindow::slot_updateCriticalPointsSmoothingType(int t) {
 	cout << "Smoothing type = " << t << endl;
-	viewer->setCriticalPointsSmoothingType(t);
+	//kkkkkkkkkkk
+	//viewer->setCriticalPointsSmoothingType(t);
 
 	viewer->update();
 }
 
 void MainWindow::slot_updateCutLocusMethod(int midx)
 {
-	viewer->setCutLocusMethod(midx);
+	//kkkkkkkkkkk
+	//viewer->setCutLocusMethod(midx);
 	viewer->update();
 
 }

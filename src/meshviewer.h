@@ -1,24 +1,18 @@
 #ifndef MESHVIEWER_H
 #define MESHVIEWER_H
 
-#include "common.h"
-
+#include "GL/glew.h"
+// Legacy OpenGL
 #include <QGLWidget>
 #include <QGLFunctions>
 #include <QGLFormat>
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QVector2D>
+
 #include <QGLFramebufferObject>
 
-// Modern OpenGL
-#include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
-typedef QOpenGLVertexArrayObject oglVAO;
-typedef QOpenGLBuffer oglBuffer;
-
+#include "common.h"
 #include "hds_mesh.h"
 #include "colormap.h"
 #include "Graph.hpp"
@@ -261,43 +255,5 @@ private:
 
 };
 
-class MeshViewerModern
-	: public QOpenGLWidget, protected QOpenGLFunctions
-{
-public:
-	MeshViewerModern(QWidget *parent = nullptr);
-	~MeshViewerModern();
 
-	void bindHalfEdgeMesh(HDS_Mesh *mesh);
-protected:
-	void initializeGL() Q_DECL_OVERRIDE;
-	void paintGL() Q_DECL_OVERRIDE;
-	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
-	void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
-
-private: // paint function
-	void initialVBO();
-	void bindVertexVBO();
-	void bindEdgesVAO();
-	void bindFaceVAO();
-private:
-	const HDS_Mesh *heMesh;   /// not own
-	float scale;
-
-	// VBOs and VAOs
-	oglBuffer vtx_vbo;
-	vector<GLfloat> vtx_array;
-
-	oglVAO face_vao;
-	oglBuffer face_ibo;
-	vector<GLuint> fib_array;
-	vector<GLuint> fid_array;
-	vector<GLuint> fflag_array;
-
-	oglVAO he_vao;
-	oglBuffer he_ibo;
-	vector<GLuint> heib_array;
-	vector<GLuint> heid_array;
-	vector<GLuint> heflag_array;
-};
 #endif // MESHVIEWER_H

@@ -19,7 +19,7 @@ typedef double Float;
 class perspCamera
 {
 public:
-	perspCamera(const QVector3D& eyePos, const QVector3D& targetPos, const QVector3D& upVec);
+	perspCamera(const QVector3D& eyePos = QVector3D(0, 0, 0), const QVector3D& targetPos = QVector3D(0, 0, 1), const QVector3D& upVec = QVector3D(0, 1, 0));
 	~perspCamera(){};
 
 	void setResolution(int resX, int resY);
@@ -35,6 +35,9 @@ public:
 	void rotate(Float x_rot = 0, Float y_rot = 0, Float z_rot = 0);
 	void resizeViewport(Float aspr = 1.0);
 	void exportVBO(vector<float>* view = nullptr, vector<float>* proj = nullptr, vector<float>* raster = nullptr) const;
+
+	const float* oglViewMatrix() const;
+	const float* oglProjectionMatrix() const;
 
 	QMatrix4x4 CameraToWorld, WorldToCamera, CameraToScreen, RasterToScreen;
 	//Transform CameraToWorld;

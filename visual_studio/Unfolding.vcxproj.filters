@@ -88,6 +88,9 @@
     <Filter Include="Shader Files">
       <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{4ed32ef1-702e-4f56-890e-02c49cffd53d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
@@ -280,6 +283,15 @@
       <Filter>Source Files\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\src\OperationStack.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MeshViewerModern.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MeshViewerModern.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshViewerModern.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -487,6 +499,9 @@
     <CustomBuild Include="..\forms\ConnectorPanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\src\MeshViewerModern.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\icons\cl.png">
@@ -533,6 +548,15 @@
     </None>
     <None Include="..\icons\vertex.png">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\shaders\frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\geom.glsl">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

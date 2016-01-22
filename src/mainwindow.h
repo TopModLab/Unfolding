@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "meshviewer.h"
+#include "MeshViewerModern.h"
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
@@ -112,7 +113,8 @@ private:
 private:
 	Ui::MainWindow *ui;
 	QMap<QString, QAction*> actionsMap;
-	MeshViewer *viewer;
+	//MeshViewer *viewer;
+	MeshViewerModern *viewer;
 	ColormapEditor *ceditor;
 	CriticalPointsPanel *cppanel;
 	CutLocusPanel *clpanel;
