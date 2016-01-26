@@ -7,7 +7,8 @@
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QVector2D>
-
+#include <QEvent>
+#include <QMouseEvent>
 // Modern OpenGL
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -75,7 +76,14 @@ protected:
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
 	void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
 
+	//void keyPressEvent(QKeyEvent *e);
+	//void keyReleaseEvent(QKeyEvent *e);
+	void mousePressEvent(QMouseEvent *e);
+	void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+	//void mouseReleaseEvent(QMouseEvent *e);
+	//void wheelEvent(QWheelEvent* e);
 private: // paint function
+	void resetCamera();
 	void bind();
 	void initialVBO();
 	void bindVertexVBO();
@@ -84,7 +92,9 @@ private: // paint function
 
 	void initShader();
 private:
-	perspCamera cam;
+	perspCamera view_cam;
+	int m_lastMousePos[2];
+
 	const HDS_Mesh* heMesh;   /// not own
 	bool mesh_changed;
 	float scale;
@@ -110,5 +120,5 @@ private:
 	vector<GLuint> heid_array;// he id, for querying
 	vector<GLuint> heflag_array;// he flag data
 
-	oglShaderP m_shader;
+	oglShaderP face_solid_shader, edge_solid_shader;
 };

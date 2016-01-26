@@ -3,6 +3,8 @@
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
+uniform mat4 proj_matrix;
+
 out vec3 normal;
 out vec3 pos;
 
@@ -19,15 +21,15 @@ void main()
 
 	
 	// Send the triangle along with the edge distances
-	gl_Position = p0;
+	gl_Position = proj_matrix * p0;
 	pos = p0.xyz;
 	EmitVertex();
 
-	gl_Position = p1;
+	gl_Position = proj_matrix * p1;
 	pos = p1.xyz;
 	EmitVertex();
 
-	gl_Position = p2;
+	gl_Position = proj_matrix * p2;
 	pos = p2.xyz;
 	EmitVertex();
 	

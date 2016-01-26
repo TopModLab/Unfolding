@@ -1,11 +1,14 @@
 #include "Camera.h"
 
 perspCamera::perspCamera(const QVector3D& eyePos, const QVector3D& targetPos,
-	const QVector3D& upVec)
+	const QVector3D& upVec, Float verticalAngle, Float aspectRatio,
+	Float nearPlane, Float farPlane)
 	: target(targetPos)
 {
-	CameraToWorld.lookAt(eyePos, target, upVec);
-	CameraToScreen.perspective(90, 1.6, 0.001, 100);
+	WorldToCamera.lookAt(eyePos, targetPos, upVec);
+	CameraToWorld = WorldToCamera.inverted();
+	CameraToScreen.perspective(verticalAngle, aspectRatio, nearPlane, farPlane);
+	//setPerspective(verticalAngle, aspectRatio, nearPlane, farPlane);
 }
 
 QVector3D perspCamera::getTarget() const
@@ -13,29 +16,16 @@ QVector3D perspCamera::getTarget() const
 	return target;
 }
 
-void perspCamera::exportVBO(vector<float>* view, vector<float>* proj, vector<float>* raster) const
+void perspCamera::lookAt(const QVector3D& eyePos,
+	const QVector3D& targetPos, const QVector3D& upVec)
 {
-	if (view != nullptr)
-	{
-		delete view;
-		auto w2c_data = WorldToCamera.data();
-		view = new vector<float>(w2c_data, w2c_data + 16);
-		//WorldToCamera.mInv.exportVBO(view);
-	}
-	if (proj != nullptr)
-	{
-		delete proj;
-		auto c2s = CameraToScreen.data();
-		proj = new vector<float>(c2s, c2s + 16);
-		//CameraToScreen.m.exportVBO(proj);
-	}
-	if (raster != nullptr)
-	{
-		delete raster;
-		auto r2s = RasterToScreen.data();
-		raster = new vector<float>(r2s, r2s + 16);
-		//RasterToScreen.m.exportVBO(raster);
-	}
+	//
+}
+
+void perspCamera::setPerspective(Float verticalAngle, Float aspectRatio,
+	Float nearPlane, Float farPlane)
+{
+	//
 }
 
 const float* perspCamera::oglViewMatrix() const
@@ -58,6 +48,7 @@ void perspCamera::zoom(Float x_val, Float y_val, Float z_val)
 	cam2w.translate(x_val, y_val, z_val);
 
 	CameraToWorld = cam2w;
+	WorldToCamera = CameraToWorld.inverted();
 }
 
 void perspCamera::rotate(Float x_rot, Float y_rot, Float z_rot)
@@ -74,19 +65,21 @@ void perspCamera::rotate(Float x_rot, Float y_rot, Float z_rot)
 	Float old_theta = asin(vt.y() / vt_len);
 	Float theta = old_theta + DegreeToRadian(x_rot) * upCoef;
 	
-	if ((old_theta < M_HALFPI && theta > M_HALFPI) || (old_theta > -M_HALFPI && theta < -M_HALFPI))
+	if ((old_theta < M_HALFPI && theta > M_HALFPI)
+		|| (old_theta > -M_HALFPI && theta < -M_HALFPI))
 	{
 		upCoef *= -1;
 	}
 	QVector3D newVt(sin(phi) * cos(theta), sin(theta), cos(phi) * cos(theta));
-	CameraToWorld.setToIdentity();
-	CameraToWorld.lookAt(target + newVt * vt_len, target, QVector3D(0, upCoef, 0));
+	WorldToCamera.setToIdentity();
+	WorldToCamera.lookAt(target + newVt * vt_len,
+						target, QVector3D(0, upCoef, 0));
+	CameraToWorld = WorldToCamera.inverted();
 }
 
 void perspCamera::resizeViewport(Float aspr)
 {
-	QMatrix4x4 newProj= CameraToScreen;
-	newProj(0, 0) = -newProj(1, 1) / aspr;
-	CameraToScreen = newProj;
-	
+	//QMatrix4x4 newProj= CameraToScreen;
+	CameraToScreen(0, 0) = -CameraToScreen(1, 1) / aspr;
+	//CameraToScreen = newProj;
 }

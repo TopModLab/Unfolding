@@ -549,13 +549,19 @@
     <None Include="..\icons\vertex.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\shaders\frag.glsl">
+    <None Include="..\shaders\edge_fs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\shaders\vert.glsl">
+    <None Include="..\shaders\edge_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\shaders\geom.glsl">
+    <None Include="..\shaders\face_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\face_gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\face_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

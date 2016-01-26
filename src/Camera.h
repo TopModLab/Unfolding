@@ -19,29 +19,31 @@ typedef double Float;
 class perspCamera
 {
 public:
-	perspCamera(const QVector3D& eyePos = QVector3D(0, 0, 0), const QVector3D& targetPos = QVector3D(0, 0, 1), const QVector3D& upVec = QVector3D(0, 1, 0));
+	perspCamera(const QVector3D& eyePos = QVector3D(0, 0, 0),
+		const QVector3D& targetPos = QVector3D(0, 0, 1),
+		const QVector3D& upVec = QVector3D(0, 1, 0),
+		Float verticalAngle = 90, Float aspectRatio = 1.67,
+		Float nearPlane = 0.01, Float farPlane = 100);
 	~perspCamera(){};
-
-	void setResolution(int resX, int resY);
-	void setSample(int aaSample);
-	void setFocLen(Float fl);
 
 	QVector3D getTarget() const;
 
+	void lookAt(const QVector3D& eyePos = QVector3D(0, 0, 0),
+		const QVector3D& targetPos = QVector3D(0, 0, 1),
+		const QVector3D& upVec = QVector3D(0, 1, 0));
+	void setPerspective(Float verticalAngle = 180, Float aspectRatio = 1.67,
+		Float nearPlane = 0.1, Float farPlane = 100);
 	void updateProjection(const QMatrix4x4 &perspMat);
 	void updateCamToWorld(const QMatrix4x4 &cam2wMat);
 
 	void zoom(Float x_val = 0, Float y_val = 0, Float z_val = 0);
 	void rotate(Float x_rot = 0, Float y_rot = 0, Float z_rot = 0);
 	void resizeViewport(Float aspr = 1.0);
-	void exportVBO(vector<float>* view = nullptr, vector<float>* proj = nullptr, vector<float>* raster = nullptr) const;
-
+	
 	const float* oglViewMatrix() const;
 	const float* oglProjectionMatrix() const;
 
 	QMatrix4x4 CameraToWorld, WorldToCamera, CameraToScreen, RasterToScreen;
-	//Transform CameraToWorld;
-	//Transform CameraToScreen, RasterToScreen;
 protected:
 	QVector3D pos, target;
 

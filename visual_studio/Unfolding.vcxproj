@@ -1016,9 +1016,11 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="..\shaders\frag.glsl" />
-    <None Include="..\shaders\geom.glsl" />
-    <None Include="..\shaders\vert.glsl" />
+    <None Include="..\shaders\edge_fs.glsl" />
+    <None Include="..\shaders\edge_vs.glsl" />
+    <None Include="..\shaders\face_fs.glsl" />
+    <None Include="..\shaders\face_gs.glsl" />
+    <None Include="..\shaders\face_vs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

@@ -1,10 +1,12 @@
 #include "MeshViewerModern.h"
 
+
 MeshViewerModern::MeshViewerModern(QWidget *parent)
 	: QOpenGLWidget(parent)
 	, vtx_vbo(oglBuffer::Type::VertexBuffer)
 	, he_ibo(oglBuffer::Type::IndexBuffer)
 	, face_ibo(oglBuffer::Type::IndexBuffer)
+	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0))
 {
 	// Set surface format for current widget
 	QSurfaceFormat format;
@@ -14,7 +16,6 @@ MeshViewerModern::MeshViewerModern(QWidget *parent)
 	format.setVersion(3, 2);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
-
 }
 
 MeshViewerModern::~MeshViewerModern()
@@ -27,27 +28,27 @@ void MeshViewerModern::bindHalfEdgeMesh(HDS_Mesh *mesh)
 	heMesh = mesh;
 	mesh_changed = true;
 	
-
 	update();
 }
 
 
 void MeshViewerModern::initializeGL()
 {
-	// OpenGL extention initialization
+	// OpenGL extension initialization
 	initializeOpenGLFunctions();
 
-	// Print OpenGL vertion
+	// Print OpenGL version
 	cout << "Renderer: " << glGetString(GL_RENDERER) << endl; 
 	cout << "OpenGL version supported " << glGetString(GL_VERSION) << endl;
 	initShader();
-
+	
 	// Enable OpenGL features
 	glEnable(GL_MULTISAMPLE);
 	//glEnable(GL_LINE_SMOOTH);
 	//glEnable(GL_POLYGON_SMOOTH);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST); // enable depth-testing
+	glDepthFunc(GL_LEQUAL);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glFrontFace(GL_CCW); // set counter-clock-wise vertex order to mean the front
@@ -131,19 +132,23 @@ void MeshViewerModern::bindFaceVAO()
 }
 void MeshViewerModern::initShader()
 {
-	m_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/vert.glsl");
-	m_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/frag.glsl");
-	m_shader.addShaderFromSourceFile(oglShader::Geometry, "shaders/geom.glsl");
-	m_shader.link();
+	face_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/face_vs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/face_fs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Geometry, "shaders/face_gs.glsl");
+	face_solid_shader.link();
 	//m_shader.bind();
-	cout << "Shader log:\n" << m_shader.log().constData();
+	//cout << "Shader log:\n" << m_shader.log().constData();
+
+	//////////////////////////////////////////////////////////////////////////
+	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/edge_vs.glsl");
+	edge_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/edge_fs.glsl");
 }
 
 void MeshViewerModern::paintGL()
 {
 	makeCurrent();
 	// Clear background and color buffer
-	glClearColor(0.2, 0.2, 0.2, 1.0);
+	glClearColor(0.6, 0.6, 0.6, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//glCullFace(GL_BACK); // cull back face
@@ -155,22 +160,73 @@ void MeshViewerModern::paintGL()
 	}
 	face_vao.bind();
 	// use shader
-	m_shader.bind();
+	face_solid_shader.bind();
+	
+	face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
+	face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 	glDrawElements(GL_TRIANGLES, fib_array.size(), GL_UNSIGNED_INT, 0);
 
-	/*he_vao.bind();
+
+	//glLineWidth(2.0);
+	he_vao.bind();
 	// use shader
-	glDrawElements(GL_TRIANGLES, heib_array.size(), GL_UNSIGNED_INT, 0);*/
+	edge_solid_shader.bind();
+	edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
+	edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+	glDrawElements(GL_LINES, heib_array.size(), GL_UNSIGNED_INT, 0);
 
 	he_vao.release();
+	edge_solid_shader.release();
 }
 
 void MeshViewerModern::resizeGL(int w, int h)
 {
-
+	view_cam.resizeViewport(w / static_cast<double>(h));
 }
 
 void MeshViewerModern::paintEvent(QPaintEvent *e)
 {
 	paintGL();
+}
+
+void MeshViewerModern::mousePressEvent(QMouseEvent* e)
+{
+	m_lastMousePos[0] = e->x();
+	m_lastMousePos[1] = e->y();
+}
+
+void MeshViewerModern::mouseMoveEvent(QMouseEvent* e)
+{
+	
+	int dx = e->x() - m_lastMousePos[0];
+	int dy = e->y() - m_lastMousePos[1];
+
+	if ((e->buttons() == Qt::LeftButton) && (e->modifiers() == Qt::AltModifier))
+	{
+		view_cam.rotate(dy * 0.25, dx * 0.25, 0.0);
+		update();
+	}
+	else if ((e->buttons() == Qt::RightButton) && (e->modifiers() == Qt::AltModifier))
+	{
+		if (dx != e->x() && dy != e->y())
+		{
+			view_cam.zoom(0.0, 0.0, -dx * 0.05);
+			update();
+		}
+	}
+	else if ((e->buttons() == Qt::MidButton) && (e->modifiers() == Qt::AltModifier))
+	{
+		if (dx != e->x() && dy != e->y())
+		{
+			view_cam.zoom(dx * 0.05, dy * 0.05, 0.0);
+			update();
+		}
+	}
+	else
+	{
+		QOpenGLWidget::mouseMoveEvent(e);
+	}
+
+	m_lastMousePos[0] = e->x();
+	m_lastMousePos[1] = e->y();
 }

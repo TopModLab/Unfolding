@@ -19,4 +19,5 @@ void main()
 
 	// final colour
 	frag_color = vec4(Id, 1.0);
+	//frag_color = vec4(1,0,0, 1.0);
 }
