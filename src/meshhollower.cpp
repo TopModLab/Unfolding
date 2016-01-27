@@ -5,7 +5,8 @@ double MeshHollower::flapSize = 0.2;//[0 >> 1]
 double MeshHollower::shiftAmount = 0;//[-1 >> 1]
 
 
-void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
+void MeshHollower::
+hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 {
 	initiate();
     cur_mesh = mesh;

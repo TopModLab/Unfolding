@@ -122,7 +122,29 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 	return newFace;
 }
 
+HDS_Face* MeshExtender::duplicateFace(face_t* face, face_t* cutFace)
+{
+	vector<vert_t*> vertices;
+	for (auto v: face->corners()) {
+		vertices.push_back( new vert_t(v->pos));
+	}
+	face_t* newFace = createFace(vertices, cutFace);
+	newFace->refid = face->refid;
+	faces_new.push_back(newFace);
+	verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+	return newFace;
+}
 
+void MeshExtender::assignCutFace(face_t* face, face_t* cutFace)
+{
+	he_t* curHE = face->he;
+	do {
+		if (cutFace->he == nullptr)
+			cutFace->he = curHE->flip;
+		curHE->flip->f = cutFace;
+	}while(curHE != face->he);
+
+}
 
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {

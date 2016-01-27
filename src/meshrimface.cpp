@@ -2,12 +2,14 @@
 #include "MeshExtender.h"
 #include "common.h"
 
+#define PI 3.14159265358
+
 void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHeight)
 {
-	cout<<planeWidthScale<<"   "<<planeHeight<<endl;
 	initiate();
 	cur_mesh = mesh;
 
+	unordered_map <int, he_t*> ori_map = ori_mesh->halfedgesMap();
 
 	for(auto v: cur_mesh->verts()) {
 		///assign cut faces
@@ -69,23 +71,47 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 			faces_new.push_back(newFace);
 			pieces.push_back(newFace);
 		}
-		///connect planes
+		///connect pieces
+
+		float angleSum = 0;
 
 		for(int i = 0; i < pieces.size(); i++) {
 			face_t* curFace = pieces[i];
 			face_t* nextFace;
+
+			//check for negative curvature vertices,
+			//if angleSum exceeds 360 degree,
+			//cut it, duplicate current piece and start a new cutFace
+			if (angleSum > 1.6* PI) {
+				cutFace = new face_t;
+				cutFace->isCutFace = true;
+				faces_new.push_back(cutFace);
+				curFace = duplicateFace(pieces[i], cutFace);
+
+				angleSum = 0;
+			}
+
+			//when it comes to final piece, duplicate it
 			if(i < pieces.size() - 1)
 				nextFace = pieces[i+1];
 			else {
 				//duplicate pieces[0]
-				vector<vert_t*> vertices;
-				for (auto v: pieces[0]->corners()) {
-					vertices.push_back( new vert_t(v->pos));
-				}
-				nextFace = createFace(vertices, cutFace);
-				nextFace->refid = pieces[0]->refid;
-				faces_new.push_back(nextFace);
-				verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+				nextFace = duplicateFace(pieces[0], cutFace);
+			}
+
+			//calculate angle between pieces' original he
+			he_t* curHE = ori_map[(curFace->refid)>>2];
+			he_t* nxtHE = ori_map[(nextFace->refid)>>2];
+			QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
+			QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
+			double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
+			double angle = acos (param);
+			angleSum += angle;
+
+			//update nextFace 's cutFace
+			if (nextFace->he->flip->f != cutFace) {
+				cout<<"assigning new cut face....."<<endl;
+				assignCutFace(nextFace, cutFace);
 			}
 
 			//get curFace he1
@@ -108,7 +134,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 		}
 
 	}
-
+	//cur_mesh->processType = HDS_Mesh::RIMMED_PROC;
 	updateNewMesh();
 }
 
