@@ -9,6 +9,7 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 #include <QProgressDialog>
+#include <QTime>
 
 #include "meshloader.h"
 #include "OperationStack.h"

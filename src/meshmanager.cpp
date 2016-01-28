@@ -44,10 +44,16 @@ bool MeshManager::loadOBJFile(const string& filename) {
 #endif
 
 	OBJLoader loader;
-
+#ifdef _DEBUG
+	QTime clock;
+	clock.start();
+#endif
 	if( loader.load(filename) ) {
 		cout << "file " << filename << " loaded." << endl;
-
+#ifdef _DEBUG
+		qDebug("Load OBJLoader Took %d ms In Total.", clock.elapsed());
+		clock.restart();
+#endif
 		QProgressDialog* loadingProgress;
 		loadingProgress = new QProgressDialog("Loading the object...", "", 0, 100);
 		loadingProgress->setWindowModality(Qt::WindowModal);
@@ -60,11 +66,15 @@ bool MeshManager::loadOBJFile(const string& filename) {
 		//hds_mesh->printMesh("original");
 		operationStack->push(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
 		HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-
+#ifdef _DEBUG
+		qDebug("Clear Operation Takes %d ms In Total.", clock.elapsed());
+		clock.restart();
+#endif
 		/// save the half edge mesh out to a temporary file
-		hds_mesh->save("temp.obj");
+		//kkkkkkkkkkkkkkkkkkkkkkk
+		//hds_mesh->save("temp.obj");
 		loadingProgress->setValue(30);
-
+		///*
 		/// preprocess the mesh with smoothing
 		const int nsmooth = 10;
 		QScopedPointer<HDS_Mesh> tmp_mesh;
@@ -98,8 +108,12 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 		}
 		cout << "smoothed meshes computed finished." << endl;
+		
 		loadingProgress->setValue(80);
-
+#ifdef _DEBUG
+		qDebug("Smoothing Mesh Takes %d ms In Total.", clock.elapsed());
+		clock.restart();
+#endif
 		/// initialize the sparse graph
 		if(hds_mesh->verts().size()>10){                         //later added;
 			gcomp.reset(new GeodesicComputer(filename));
@@ -123,6 +137,11 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 			return true;
 		}
+		//*/
+#ifdef _DEBUG
+		qDebug("Sparsing Graph Takes %d ms In Total.", clock.elapsed());
+		clock.restart();
+#endif
 		loadingProgress->setValue(100);
 
 

@@ -294,6 +294,18 @@
     <ClCompile Include="..\src\MeshViewerModern.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_rimfacepanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_rimfacepanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rimfacepanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\meshrimface.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -449,6 +461,12 @@
     <ClInclude Include="..\src\ViewerState.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_rimfacepanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\meshrimface.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
@@ -500,6 +518,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\MeshViewerModern.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\rimfacepanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\rimfacepanel.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
   </ItemGroup>

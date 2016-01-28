@@ -616,6 +616,10 @@ void MainWindow::slot_newFile()
 		MeshManager::getInstance()->getMeshStack()->clear();
 		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Original);
 		cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
+#ifdef _DEBUG
+		qDebug("Clear ObjectStack Takes %d ms In Total.", clock.elapsed());
+		clock.restart();
+#endif
 		MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
 		
 		//kkkkkkkk

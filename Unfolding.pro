@@ -61,7 +61,9 @@ SOURCES += src/main.cpp\
     src/MeshConnector.cpp \
     src/meshrimface.cpp \
     src/OperationStack.cpp \
-    src/rimfacepanel.cpp
+    src/rimfacepanel.cpp \
+    src/Camera.cpp \
+    src/MeshViewerModern.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_common.h \
@@ -111,7 +113,10 @@ HEADERS  += src/mainwindow.h \
     src/MeshConnector.h \
     src/meshrimface.h \
     src/OperationStack.h \
-    src/rimfacepanel.h
+    src/rimfacepanel.h \
+    src/Camera.h \
+    src/MeshViewerModern.h \
+    src/ViewerState.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
@@ -129,3 +134,10 @@ RESOURCES += \
 OTHER_FILES +=
 LIBS += -glut32
 LIBS += -Lc:\glut
+
+DISTFILES += \
+    shaders/edge_fs.glsl \
+    shaders/edge_vs.glsl \
+    shaders/face_fs.glsl \
+    shaders/face_gs.glsl \
+    shaders/face_vs.glsl
