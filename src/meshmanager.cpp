@@ -498,13 +498,13 @@ void MeshManager::rimMesh(double rimSize)
 	selectedEdges.clear();
 }
 
-void MeshManager::set3DRimMesh()
+void MeshManager::set3DRimMesh(float w, float h)
 {
-	//MeshRimFace::setOriMesh(hds_mesh.data());
+    MeshRimFace::setOriMesh(operationStack->getOriMesh());
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-	//MeshRimFace::rimMesh3D(outMesh);
+	MeshRimFace::rimMesh3D(outMesh, w, h);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 }

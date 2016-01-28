@@ -5,7 +5,7 @@ size_t HDS_Bridger::uid = 0;
 int HDS_Bridger::shape = 0;
 double HDS_Bridger::scale = 0.2;
 double HDS_Bridger::curv = 0.5;
-int HDS_Bridger::nSamples = 3;
+int HDS_Bridger::nSamples = 4;
 double HDS_Bridger::cp = 0;
 int HDS_Bridger::opening = 0;
 
@@ -30,26 +30,9 @@ void HDS_Bridger::setCutFace(face_t* face1, face_t* face2)
 	cutFace1 = face1;
 	cutFace2 = face2;
 }
-void HDS_Bridger::setOriginalPositions(HDS_Vertex* v1, HDS_Vertex* v2)
+
+void HDS_Bridger::setBezierCurve()
 {
-	//get p00 and p01 based on corners
-	//	QVector3D corner1, corner0, center, mid;
-	//	//find corner1 pos that corresponds to he->v
-	//	center = he->flip->f->center();
-	//	corner1 = center + (he->v->pos - center)/scale;
-	//	//find corner0 pos that corresponds to he->flip->v
-	//	corner0 = center + (he->flip->v->pos - center)/scale;
-	//	//get mid position
-	//	mid = (corner1 + corner0) /2.0;
-	//	//calculate p00 p01
-	//	p01 = mid + scale * (corner1 - mid);
-	//	p00 = mid + scale * (corner0 - mid);
-
-	//get p00 and p01 based on scaling of edges
-	p01 = (1 - scale/2)* v1->pos + scale/2 *v2->pos;
-	p00 = (1 - scale/2)* v2->pos + scale/2 *v1->pos;
-
-
 	p10 = he->flip->v->pos;
 	p11 = he->v->pos;
 	p20 = hef->v->pos;
@@ -61,12 +44,24 @@ void HDS_Bridger::setOriginalPositions(HDS_Vertex* v1, HDS_Vertex* v2)
 	}
 }
 
+//used when input is vertices that needs to be scaled down
 HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, HDS_Vertex* v1, HDS_Vertex* v2)
+{
+	QVector3D p0, p1;
+	p0 = (1 - scale/2)* v1->pos + scale/2 *v2->pos;
+	p1 = (1 - scale/2)* v2->pos + scale/2 *v1->pos;
+	HDS_Bridger(he, hef, p0, p1);
+}
+
+//pure bezier curve constructor
+HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, QVector3D v1, QVector3D v2)
 {
 
 	this->he = he;
 	this->hef = hef;
-	setOriginalPositions(v1, v2);
+	p01 = v1;
+	p00 = v2;
+	setBezierCurve();
 
 }
 

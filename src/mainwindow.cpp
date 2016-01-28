@@ -56,6 +56,7 @@ bool MainWindow::createComponents()
 		conpanel = new BridgerPanel;
 		hmpanel = new HollowMeshPanel;
 		bmpanel = new BindingMeshPanel;
+		rmpanel = new RimFacePanel;
 
 		createActions();
 		createMenus();
@@ -104,14 +105,14 @@ bool MainWindow::connectComponents()
 	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_setBridger()));
 	connect(conpanel, SIGNAL(sig_save2extend()), this, SLOT(slot_extendMesh()));
 
-	connect(conpanel, SIGNAL(sig_canceled()), this, SLOT(slot_cancelExtendMesh()));
-
 	connect(hmpanel, SIGNAL(sig_saved()), this, SLOT(slot_hollowMesh()));
 	connect(hmpanel, SIGNAL(sig_setBridger()), this, SLOT(slot_triggerExtendMesh()));
 
 	connect(bmpanel, SIGNAL(sig_saved()), this, SLOT(slot_bindingMesh()));
 	connect(bmpanel, SIGNAL(sig_setBridger()), this, SLOT(slot_triggerExtendMesh()));
 
+	connect(rmpanel, SIGNAL(sig_saved()), this, SLOT(slot_rimmed3DMesh()));
+	connect(rmpanel, SIGNAL(sig_setBridger()), this, SLOT(slot_triggerExtendMesh()));
 	return true;
 }
 
@@ -410,7 +411,7 @@ void MainWindow::createActions()
 		rimface3DAct->setStatusTip(tr("Rim Faces"));
 		rimface3DAct->setCheckable(false);
 		rimface3DAct->setChecked(false);
-		connect(rimface3DAct, SIGNAL(triggered(bool)), this, SLOT(slot_triggerRimmed3DMesh(bool)));
+		connect(rimface3DAct, SIGNAL(triggered()), this, SLOT(slot_triggerRimmed3DMesh()));
 		actionsMap["rimface3d"] = rimface3DAct;
 
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
@@ -730,23 +731,28 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 	actionsMap["rimface"]->setChecked(false);
 }
 
-void MainWindow::slot_triggerRimmed3DMesh(bool checked)
+void MainWindow::slot_triggerRimmed3DMesh()
 {
-	if (MeshManager::getInstance()->getMeshStack()->canCut)
+    if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
-		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
-
-		MeshManager::getInstance()->set3DRimMesh();
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		rmpanel->show();
+		rmpanel->activateWindow();
 
 	}
 
 	actionsMap["rimface3d"]->setChecked(false);
 }
 
+void MainWindow::slot_rimmed3DMesh()
+{
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
+
+	MeshManager::getInstance()->set3DRimMesh(rmpanel->getW(), rmpanel->getH());
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+}
+
 void MainWindow::slot_hollowMesh()
 {
-	actionsMap["hollow"]->setChecked(true);
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Hollowed);
 
 	HDS_Bridger::setScale(hmpanel->getBridgerSize());
@@ -773,16 +779,11 @@ void MainWindow::slot_setBridger()
 void MainWindow::slot_extendMesh()
 {
 
-	actionsMap["extend"]->setChecked(true);
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Extended);
 
 	MeshManager::getInstance()->extendMesh(conpanel->getConfigValues());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
-}
-void MainWindow::slot_cancelExtendMesh()
-{
-	actionsMap["extend"]->setChecked(false);
 }
 
 void MainWindow::slot_rimMesh()

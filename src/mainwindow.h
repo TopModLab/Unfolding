@@ -11,6 +11,7 @@
 #include "bridgerpanel.h"
 #include "hollowmeshpanel.h"
 #include "bindingmeshpanel.h"
+#include "rimfacepanel.h"
 
 namespace Ui {
 class MainWindow;
@@ -70,14 +71,15 @@ private slots:
 	void slot_triggerExtendMesh();
 	void slot_triggerHollowMesh(bool);
 	void slot_triggerRimmedMesh(bool);
-	void slot_triggerRimmed3DMesh(bool);
+	void slot_triggerRimmed3DMesh();
 	void slot_triggerBindingMesh(bool);
 
 	void slot_setBridger();
 	void slot_extendMesh();
 	void slot_hollowMesh();
 	void slot_bindingMesh();
-	void slot_cancelExtendMesh();
+	void slot_rimmed3DMesh();
+
 	void slot_rimMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
@@ -121,6 +123,7 @@ private:
 	BridgerPanel *conpanel;
 	HollowMeshPanel *hmpanel;
 	BindingMeshPanel *bmpanel;
+	RimFacePanel *rmpanel;
 
 private:
 

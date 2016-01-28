@@ -5,17 +5,14 @@ double MeshHollower::flapSize = 0.2;//[0 >> 1]
 double MeshHollower::shiftAmount = 0;//[-1 >> 1]
 
 
-void MeshHollower::hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
+void MeshHollower::
+hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 {
 	initiate();
+    cur_mesh = mesh;
+
 	flapSize = newFlapSize;//Flap size needed in export function
-	cur_mesh = mesh;
 	shiftAmount = shift;
-
-
-//	typedef HDS_HalfEdge he_t;
-//	typedef HDS_Vertex vert_t;
-//	typedef HDS_Face face_t;
 
 	unordered_map <int, vert_t*> ori_map = ori_mesh->vertsMap();
 	unordered_set<he_t*> old_edges;

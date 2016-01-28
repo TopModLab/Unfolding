@@ -2,25 +2,17 @@
 #define MESHRIMFACE_H
 
 #include "common.h"
-#include "hds_bridger.h"
-#include "hds_mesh.h"
+#include "MeshExtender.h"
 
 class MeshExtender;
 
-class MeshRimFace
+class MeshRimFace : public MeshExtender
 {
 public:
 	MeshRimFace();
-	static void rimMesh3D(HDS_Mesh *mesh);
-	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, HDS_Face* cutFace);
-	static void setOriMesh(HDS_Mesh* mesh);
+	static void rimMesh3D(HDS_Mesh *mesh, float planeWidth, float planeHeight);
 	~MeshRimFace();
 
-private:
-	static HDS_Mesh* ori_mesh;
-	static HDS_Mesh* thismesh;
-	static vector<HDS_Vertex*> vertices_new;
-	static vector<HDS_HalfEdge*> hes_new;
 };
 
 #endif // MESHRIMFACE_H

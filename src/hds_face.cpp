@@ -41,6 +41,8 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 	//bound = nullptr;
 }
 
+
+
 HDS_Face HDS_Face::operator=(const HDS_Face &other)
 {
 	throw "Not implemented.";
@@ -143,7 +145,7 @@ void HDS_Face::setScaleFactor(double factor)
 	  Pb = P3 + mub (P4 - P3)
    Return FALSE if no solution exists.
 */
-void LineLineIntersect(
+void HDS_Face::LineLineIntersect(
    QVector3D p1,QVector3D p2,QVector3D p3,QVector3D p4,QVector3D *pa)
 {
 	//QVector3D *pb;
@@ -219,7 +221,7 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 
 	//get intersection point
 	QVector3D v0_scaled;
-	LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
+	HDS_Face::LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
 	return v0_scaled;
 
 }
