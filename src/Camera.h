@@ -33,8 +33,8 @@ public:
 		const QVector3D& upVec = QVector3D(0, 1, 0));
 	void setPerspective(Float verticalAngle = 180, Float aspectRatio = 1.67,
 		Float nearPlane = 0.1, Float farPlane = 100);
-	void updateProjection(const QMatrix4x4 &perspMat);
-	void updateCamToWorld(const QMatrix4x4 &cam2wMat);
+	//void updateProjection(const QMatrix4x4 &perspMat);
+	//void updateCamToWorld(const QMatrix4x4 &cam2wMat);
 
 	void zoom(Float x_val = 0, Float y_val = 0, Float z_val = 0);
 	void rotate(Float x_rot = 0, Float y_rot = 0, Float z_rot = 0);

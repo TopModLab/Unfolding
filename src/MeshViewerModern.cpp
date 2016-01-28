@@ -12,7 +12,7 @@ MeshViewerModern::MeshViewerModern(QWidget *parent)
 	QSurfaceFormat format;
 	format.setDepthBufferSize(32);
 	format.setStencilBufferSize(8);
-	format.setSamples(16);
+//	format.setSamples(16);
 	format.setVersion(3, 2);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
@@ -52,6 +52,7 @@ void MeshViewerModern::initializeGL()
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glFrontFace(GL_CCW); // set counter-clock-wise vertex order to mean the front
+//	glEnable(GL_CULL_FACE);
 }
 
 
@@ -151,9 +152,10 @@ void MeshViewerModern::paintGL()
 	glClearColor(0.6, 0.6, 0.6, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glCullFace(GL_BACK); // cull back face
+	/*glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK); // cull back face*/
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+//	glDisable(GL_MULTISAMPLE);
 	if (mesh_changed)
 	{
 		bind();
@@ -166,10 +168,12 @@ void MeshViewerModern::paintGL()
 	face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 	glDrawElements(GL_TRIANGLES, fib_array.size(), GL_UNSIGNED_INT, 0);
 
-
 	//glLineWidth(2.0);
+//	glDisable(GL_MULTISAMPLE);
+//	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_CULL_FACE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	he_vao.bind();
-	// use shader
 	edge_solid_shader.bind();
 	edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 	edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);

@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
+#include <QTime>
 #include "meshviewer.h"
 #include "MeshViewerModern.h"
 #include "../extras/colormap_editor/colormapeditor.h"

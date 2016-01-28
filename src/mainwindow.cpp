@@ -87,7 +87,8 @@ bool MainWindow::connectComponents()
 	connect(cppanel, SIGNAL(sig_smoothingTimesChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingTimes(int)));
 	connect(cppanel, SIGNAL(sig_smoothingTypeChanged(int)), this, SLOT(slot_updateCriticalPointsSmoothingType(int)));
 
-	connect(cppanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disablecpp()));
+	//kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+	/*connect(cppanel, SIGNAL(closedSignal()), viewer, SLOT(slot_disablecpp()));
 
 	connect(clpanel, SIGNAL(sig_methodChanged(int)), this, SLOT(slot_updateCutLocusMethod(int)));
 
@@ -97,6 +98,7 @@ bool MainWindow::connectComponents()
 	connect(clpanel, SIGNAL(sig_displayMinMax(int)), viewer, SLOT(slot_toggleCutLocusPoints(int)));
 
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, SLOT(slot_disableclp()));
+	*/
 	connect(clpanel, SIGNAL(sig_closedSignal()), this, SLOT(slot_disableclp()));
 
 	connect(conpanel, SIGNAL(sig_saved()), this, SLOT(slot_setBridger()));
@@ -488,7 +490,7 @@ void MainWindow::createMenus()
 		//		displayVertexMenu->addAction(actionsMap["show mins"]);
 		//		displayVertexMenu->addAction(actionsMap["show maxs"]);
 		//		displayVertexMenu->addAction(actionsMap["show saddles"]);
-
+		/*
 		displayMenu->addAction(actionsMap["show vertices"]);
 
 		displayMenu->addAction(actionsMap["show edges"]);
@@ -511,7 +513,7 @@ void MainWindow::createMenus()
 		displayMenu->addSeparator();
 		displayMenu->addAction(actionsMap["show CP"]);
 
-
+*/
 
 		//editMenu->addAction(actionsMap["erase"]);//later added
 	}
@@ -606,17 +608,30 @@ void MainWindow::slot_newFile()
 
 	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)")); //later added
 	if (filename != NULL) {
-
+#ifdef _DEBUG
+		QTime clock;
+		clock.start();
+#endif
 		MeshManager::getInstance()->getMeshStack()->clear();
 		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Original);
 		cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
 		MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
+		
+		//kkkkkkkk
+#ifdef _DEBUG
+		qDebug("Loading Object Takes %d ms In Total.", clock.elapsed());
+		clock.restart();
+#endif
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
-
+		
 #if USE_REEB_GRAPH
 		viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
+
 		viewer->update();
+#ifdef _DEBUG
+		qDebug("Render New Object Takes %d ms In Total.", clock.elapsed());
+#endif
 	}
 }
 
@@ -742,15 +757,11 @@ void MainWindow::slot_hollowMesh()
 
 void MainWindow::slot_bindingMesh()
 {
-	actionsMap["bind"]->setChecked(true);
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Binded);
 
 	HDS_Bridger::setScale(bmpanel->getBridgerSize());
 	MeshManager::getInstance()->setBindMesh();
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
-//	meshStack.push(Extended);
-//	updateCurrentMesh();
-//	isExtended = true;
 }
 
 void MainWindow::slot_setBridger()
