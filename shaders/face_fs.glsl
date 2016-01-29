@@ -6,7 +6,6 @@ uniform vec3 Kd = vec3(0.6, 0.8, 1);
 uniform vec3 La = vec3(0, 0, 0);
 uniform vec3 light_pos = vec3(0.0, 1.0, 0);
 
-
 out vec4 frag_color; // final colour of surface
 
 void main()
@@ -19,5 +18,4 @@ void main()
 
 	// final colour
 	frag_color = vec4(Id, 1.0);
-	//frag_color = vec4(1,0,0, 1.0);
 }

@@ -140,4 +140,6 @@ DISTFILES += \
     shaders/edge_vs.glsl \
     shaders/face_fs.glsl \
     shaders/face_gs.glsl \
-    shaders/face_vs.glsl
+    shaders/face_vs.glsl \
+    shaders/grid_gs.glsl \
+    shaders/grid_vs.glsl

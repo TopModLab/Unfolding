@@ -5,7 +5,6 @@
 #include <QtOpenGL/QGLFunctions>
 #include <QtGui/QVector3D>
 */
-#include "GL/glew.h"
 #include <QGLFunctions>
 #include <QVector3D>
 

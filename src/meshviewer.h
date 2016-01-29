@@ -1,7 +1,6 @@
 #ifndef MESHVIEWER_H
 #define MESHVIEWER_H
 
-#include "GL/glew.h"
 // Legacy OpenGL
 #include <QGLWidget>
 #include <QGLFunctions>

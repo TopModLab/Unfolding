@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "GL/glew.h"
 #include "glutils.hpp"
 // Legacy OpenGL
 #include <QGLFormat>
@@ -16,6 +15,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include <QOpenGLFramebufferObject>
 #include "common.h"
 #include "hds_mesh.h"
 #include "Camera.h"
@@ -27,14 +27,22 @@ typedef QOpenGLShader				oglShader;
 typedef QOpenGLShaderProgram		oglShaderP;
 typedef QOpenGLVertexArrayObject	oglVAO;
 typedef QOpenGLBuffer				oglBuffer;
+typedef QOpenGLFramebufferObject	oglFBO;
+
+struct MouseState {
+	MouseState() : isPressed(false), x(0), y(0){}
+	QVector2D m_Pos;
+	int x, y;
+	bool isPressed;
+};
 
 class MeshViewerModern
 	: public QOpenGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 public:
-	MeshViewerModern(QWidget *parent = nullptr);
-	~MeshViewerModern();
+	explicit MeshViewerModern(QWidget *parent = nullptr);
+	virtual ~MeshViewerModern();
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	//kkkkkkkkkk
@@ -76,7 +84,7 @@ protected:
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
 	void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
 
-	//void keyPressEvent(QKeyEvent *e);
+	void keyPressEvent(QKeyEvent *e);
 	//void keyReleaseEvent(QKeyEvent *e);
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
@@ -90,10 +98,51 @@ private: // paint function
 	void bindEdgesVAO();
 	void bindFaceVAO();
 
+	void bindGrid();
+	void drawGrid();
 	void initShader();
-private:
+
+private://interaction ie selection
+	QScopedPointer<oglFBO> fbo;
+	void initializeFBO();
+	void drawMeshToFBO();
+	enum InteractionState {
+		Camera = 0,
+		Camera_Translation,
+		Camera_Zoom,
+		SelectVertex,
+		SelectFace,
+		SelectEdge
+	};
+	InteractionState m_interactionState;
+
+	enum DataTypeMark
+	{
+		NULL_MARK	= 0,
+		VERTEX_MARK	= 1,
+		EDGE_MARK	= 2,
+		FACE_MARK	= 3
+	};
+	union SelectionID{
+		size_t vertexID;
+		size_t faceID;
+		size_t edgeID;
+	} selectionID;
+
+private://viewer status
 	perspCamera view_cam;
-	int m_lastMousePos[2];
+	MouseState mouseState;
+public:
+
+private://Mesh Data
+	oglBuffer grid_vtx_vbo;
+	oglBuffer grid_clr_vbo;
+	oglBuffer grid_ibo;
+	oglVAO grid_vao;
+	vector<GLfloat> grid_vtx_array;
+	vector<GLfloat> grid_clr_array;
+	vector<GLushort> grid_idx_array;
+//	vector<GLfloat>
 
 	const HDS_Mesh* heMesh;   /// not own
 	bool mesh_changed;
@@ -120,5 +169,6 @@ private:
 	vector<GLuint> heid_array;// he id, for querying
 	vector<GLuint> heflag_array;// he flag data
 
+	oglShaderP grid_shader;
 	oglShaderP face_solid_shader, edge_solid_shader;
 };
