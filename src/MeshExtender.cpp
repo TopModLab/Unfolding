@@ -103,18 +103,23 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 	auto preV = vertices.front();
 	for (int i = 1; i < vertices.size(); i++)
 	{
+
 		auto& curV = vertices[i];
 		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
-		if(newFace->he == nullptr)
-			newFace->he = newHE;
-		if (cutFace->he == nullptr)
-			cutFace->he = newHE->flip;
-		newHE->f = newFace;
 
 		if (cutFace != nullptr){
 			newHE->flip->f = cutFace;
 			newHE->setCutEdge(true);
+			if (cutFace->he == nullptr)
+				cutFace->he = newHE->flip;
 		}
+
+		if(newFace->he == nullptr)
+			newFace->he = newHE;
+
+		newHE->f = newFace;
+
+
 		hes_new.push_back(newHE);
 		preV = curV;
 	}
