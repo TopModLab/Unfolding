@@ -24,19 +24,16 @@ void MeshExtender::setOriMesh(HDS_Mesh* mesh)
 	ori_mesh = mesh;
 }
 
-void MeshExtender::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2)
+pair <QVector3D, QVector3D> MeshExtender::scaleBridgerEdge(he_t* he, double scale)
 {
-
-	//new Bridger object
-	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, v1, v2);
-	Bridger->setCutFace(he1->f, he2->f);
-	Bridger->createBridge();
-
-	hes_new.insert( hes_new.end(), Bridger->hes.begin(), Bridger->hes.end());
-	faces_new.insert( faces_new.end(), Bridger->faces.begin(), Bridger->faces.end());
-	verts_new.insert( verts_new.end(), Bridger->verts.begin(), Bridger->verts.end() );
-
+	pair <QVector3D, QVector3D> vpair;
+	QVector3D v1 = he->v->pos;
+	QVector3D v2 = he->flip->v->pos;
+	vpair.first = (1 - scale/2)* v1 + scale/2 *v2;
+	vpair.second = (1 - scale/2)* v2 + scale/2 *v1;
+	return vpair;
 }
+
 
 void MeshExtender::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, QVector3D v1, QVector3D v2)
 {
@@ -155,7 +152,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
 	initiate();
 	cur_mesh = mesh;
-	unordered_map<int, vert_t*> ori_map = ori_mesh->vertMap;
+	unordered_map<int, he_t*> ori_hemap = ori_mesh->heMap;
+
 	scaleFaces();
 
 	//get bridge pairs
@@ -209,9 +207,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		if (!he->isCutEdge){
 			///for all non-cut-edge edges, create bridge faces
 
-			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
-			HDS_Vertex* v2_ori = ori_map[(he->bridgeTwin->v->refid)>>2];
-			addBridger(he, he->bridgeTwin, v1_ori, v2_ori);
+			he_t* he_ori = ori_hemap[(he->refid)>>2];
+			pair <QVector3D, QVector3D> vpair = scaleBridgerEdge(he_ori, HDS_Bridger::getScale());
+			addBridger(he, he->bridgeTwin, vpair.first, vpair.second);
 
 		}else {
 			/// for all cut-edge edges, create flaps
@@ -236,8 +234,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			flap_he->refid = twin_he->refid;
 			hes_new.push_back(flap_he);
 
-			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
-			HDS_Vertex* v2_ori = ori_map[(flap_he->v->refid)>>2];
+			he_t* he_ori = ori_hemap[(he->refid)>>2];
+			pair <QVector3D, QVector3D> vpair = scaleBridgerEdge(he_ori, HDS_Bridger::getScale());
 
 
 			vert_t* twin_flap_vs = new vert_t;
@@ -260,8 +258,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			twin_flap_he->refid = he->refid;
 			hes_new.push_back(twin_flap_he);
 
-			addBridger(he, flap_he, v1_ori, v2_ori);
-			addBridger(twin_he, twin_flap_he, v2_ori, v1_ori);
+			addBridger(he, flap_he, vpair.first, vpair.second);
+			addBridger(twin_he, twin_flap_he, vpair.second, vpair.first);
 
 		}
 

@@ -29,8 +29,12 @@ protected:
 	static void updateNewMesh();
 	static void scaleFaces();
 
-	static void addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, HDS_Vertex* v1, HDS_Vertex* v2);
+	//quadratic bezier curve based bridger
 	static void addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, QVector3D v1, QVector3D v2);
+	//cubic bezier curve based bridger
+
+	static pair <QVector3D, QVector3D> scaleBridgerEdge(he_t* he, double scale);
+
 
 	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, face_t* cutFace = nullptr);
 	static HDS_Face* duplicateFace(face_t* face, face_t* cutFace);

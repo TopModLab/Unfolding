@@ -44,15 +44,6 @@ void HDS_Bridger::setBezierCurve()
 	}
 }
 
-//used when input is vertices that needs to be scaled down
-HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, HDS_Vertex* v1, HDS_Vertex* v2)
-{
-	p01 = (1 - scale/2)* v1->pos + scale/2 *v2->pos;
-	p00 = (1 - scale/2)* v2->pos + scale/2 *v1->pos;
-	this->he = he;
-	this->hef = hef;
-	setBezierCurve();
-}
 
 //pure bezier curve constructor
 HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, QVector3D v1, QVector3D v2)

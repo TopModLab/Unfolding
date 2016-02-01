@@ -21,7 +21,6 @@ public:
 
 	~HDS_Bridger();
 
-	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, HDS_Vertex* v1, HDS_Vertex* v2);
 	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, QVector3D v1, QVector3D v2);
 
 	HDS_Bridger(const HDS_Bridger &other);
