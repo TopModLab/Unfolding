@@ -24,23 +24,26 @@ void MeshExtender::setOriMesh(HDS_Mesh* mesh)
 	ori_mesh = mesh;
 }
 
-pair <QVector3D, QVector3D> MeshExtender::scaleBridgerEdge(he_t* he, double scale)
+vector <QVector3D> MeshExtender::scaleBridgerEdge(he_t* he, double scale)
 {
-	pair <QVector3D, QVector3D> vpair;
+	vector <QVector3D> vpair;
 	QVector3D v1 = he->v->pos;
 	QVector3D v2 = he->flip->v->pos;
-	vpair.first = (1 - scale/2)* v1 + scale/2 *v2;
-	vpair.second = (1 - scale/2)* v2 + scale/2 *v1;
+	vpair.push_back( (1 - scale/2)* v1 + scale/2 *v2 );
+	vpair.push_back( (1 - scale/2)* v2 + scale/2 *v1 );
 	return vpair;
 }
 
-
-void MeshExtender::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, QVector3D v1, QVector3D v2)
+void MeshExtender::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, vector<QVector3D> vpos)
 {
-
-	//new Bridger object
-	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, v1, v2);
+	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, vpos);
 	Bridger->setCutFace(he1->f, he2->f);
+	createBridger(Bridger);
+}
+
+void MeshExtender::createBridger(HDS_Bridger* Bridger)
+{
+	//new Bridger object
 	Bridger->createBridge();
 
 	hes_new.insert( hes_new.end(), Bridger->hes.begin(), Bridger->hes.end());
@@ -137,6 +140,21 @@ HDS_Face* MeshExtender::duplicateFace(face_t* face, face_t* cutFace)
 	return newFace;
 }
 
+HDS_HalfEdge* MeshExtender::duplicateEdge(he_t* edge)
+{
+
+	vert_t* vs = new vert_t(edge->v->pos);
+	vert_t* ve = new vert_t(edge->flip->v->pos);
+	verts_new.push_back(vs);
+	verts_new.push_back(ve);
+	he_t* newEdge = HDS_Mesh::insertEdge(vs, ve);
+	hes_new.push_back(newEdge);
+
+	edge->setCutEdge(true);
+	newEdge->setCutEdge(true);
+	return newEdge;
+}
+
 void MeshExtender::assignCutFace(face_t* face, face_t* cutFace)
 {
 	he_t* curHE = face->he;
@@ -208,8 +226,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			///for all non-cut-edge edges, create bridge faces
 
 			he_t* he_ori = ori_hemap[(he->refid)>>2];
-			pair <QVector3D, QVector3D> vpair = scaleBridgerEdge(he_ori, HDS_Bridger::getScale());
-			addBridger(he, he->bridgeTwin, vpair.first, vpair.second);
+			vector <QVector3D> vpair = scaleBridgerEdge(he_ori, HDS_Bridger::getScale());
+			addBridger(he, he->bridgeTwin, vpair);
 
 		}else {
 			/// for all cut-edge edges, create flaps
@@ -235,7 +253,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			hes_new.push_back(flap_he);
 
 			he_t* he_ori = ori_hemap[(he->refid)>>2];
-			pair <QVector3D, QVector3D> vpair = scaleBridgerEdge(he_ori, HDS_Bridger::getScale());
+			vector <QVector3D> vpair = scaleBridgerEdge(he_ori, HDS_Bridger::getScale());
 
 
 			vert_t* twin_flap_vs = new vert_t;
@@ -258,8 +276,11 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			twin_flap_he->refid = he->refid;
 			hes_new.push_back(twin_flap_he);
 
-			addBridger(he, flap_he, vpair.first, vpair.second);
-			addBridger(twin_he, twin_flap_he, vpair.second, vpair.first);
+			addBridger(he, flap_he, vpair);
+			vector<QVector3D> vpair_reverse(2);
+			vpair_reverse.push_back(vpair[1]);
+			vpair_reverse.push_back(vpair[0]);
+			addBridger(twin_he, twin_flap_he, vpair_reverse);
 
 		}
 
@@ -302,6 +323,7 @@ void MeshExtender::updateNewMesh()
 		cur_mesh->addHalfEdge(he->flip);
 
 	}
+	cur_mesh->validate();
 
 	/// update the curvature of each vertex
 	for (auto &v : cur_mesh->vertSet) {
@@ -309,6 +331,5 @@ void MeshExtender::updateNewMesh()
 		v->computeCurvature();
 		//cout << v->index << ": " << (*v) << endl;
 	}
-	cur_mesh->validate();
 	cur_mesh->updatePieceSet();
 }

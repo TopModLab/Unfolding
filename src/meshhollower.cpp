@@ -87,10 +87,10 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 		faces_new.push_back(cutFace);
 
 
-		pair <QVector3D, QVector3D> vpair = scaleBridgerEdge(he->flip, HDS_Bridger::getScale());
+		vector <QVector3D> vpair = scaleBridgerEdge(he->flip, HDS_Bridger::getScale());
 
 		//add bridger
-		addBridger(he1->flip, he2->flip, vpair.first, vpair.second);
+		addBridger(he1->flip, he2->flip, vpair);
 
 		if (flapSize < 0.01)
 		{

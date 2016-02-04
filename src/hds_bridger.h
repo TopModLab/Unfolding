@@ -21,7 +21,7 @@ public:
 
 	~HDS_Bridger();
 
-	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, QVector3D v1, QVector3D v2);
+	HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, vector<QVector3D> controlPoints);
 
 	HDS_Bridger(const HDS_Bridger &other);
 	HDS_Bridger operator=(const HDS_Bridger &other);
@@ -50,14 +50,13 @@ private:
 	HDS_Face* cutFace1, *cutFace2;
 	HDS_HalfEdge* he; //original corresponding he before adding Bridger
 	HDS_HalfEdge* hef;
-	QVector3D p00;
-	QVector3D p01;
-	QVector3D p10, p11, p20, p21;
+
 	vector<QVector3D> bezierPos_front, bezierPos_back;
 
 private:
 
-	vector<QVector3D> calculateBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2);
+	vector<QVector3D> quadraticBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2);
+	vector<QVector3D> cubicBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3);
 
 private:
 	static int shape;

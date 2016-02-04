@@ -8,6 +8,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 {
 	initiate();
 	cur_mesh = mesh;
+	bool isCubic = true;
 
 	unordered_map <int, he_t*> ori_map = ori_mesh->halfedgesMap();
 
@@ -17,6 +18,9 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 		cutFace->isCutFace = true;
 		faces_new.push_back(cutFace);
 		vector<face_t*> pieces;
+		vector<he_t*> control_edges;
+		vector<QVector3D> control_points_n;
+		vector<QVector3D> control_points_p;
 
 		for (auto he: mesh->incidentEdges(v)) {
 
@@ -47,90 +51,161 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 			QVector3D vn_mid = v_mid + scale_wn * cross;
 			QVector3D vp_mid = v_mid - scale_wp * cross;
 
-			vert_t* vn_i = new vert_t( planeHeight * v->pos + (1 - planeHeight) * vn_mid);
-			vert_t* vn_o = new vert_t(-planeHeight * v->pos + (1 + planeHeight) * vn_mid);
-			vert_t* vp_i = new vert_t( planeHeight * v->pos + (1 - planeHeight) * vp_mid);
-			vert_t* vp_o = new vert_t(-planeHeight * v->pos + (1 + planeHeight) * vp_mid);
+			QVector3D vn_i_pos = ( planeHeight * v->pos + (1 - planeHeight) * vn_mid);
+			QVector3D vn_o_pos = (-planeHeight * v->pos + (1 + planeHeight) * vn_mid);
+			QVector3D vp_i_pos = ( planeHeight * v->pos + (1 - planeHeight) * vp_mid);
+			QVector3D vp_o_pos = (-planeHeight * v->pos + (1 + planeHeight) * vp_mid);
+
+			if (!isCubic) {
+				vert_t* vn_i = new vert_t(vn_i_pos);
+				vert_t* vn_o = new vert_t(vn_o_pos);
+				vert_t* vp_i = new vert_t(vp_i_pos);
+				vert_t* vp_o = new vert_t(vp_o_pos);
+
+				vn_i->refid = v->refid;
+				vn_o->refid = v1->refid;
+				vp_i->refid = v->refid;
+				vp_o->refid = v1->refid;
+
+				vector<vert_t*> vertices;
+				vertices.push_back(vp_i);
+				vertices.push_back(vp_o);
+				vertices.push_back(vn_o);
+				vertices.push_back(vn_i);
+
+				verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+
+				face_t* newFace = createFace(vertices, cutFace);
+				newFace->refid = he->refid;
+				faces_new.push_back(newFace);
+				pieces.push_back(newFace);
+
+			}else {
+				control_points_n.push_back(vn_i_pos);
+				control_points_n.push_back(vn_o_pos);
+				control_points_p.push_back(vp_i_pos);
+				control_points_p.push_back(vp_o_pos);
+
+				vert_t* vmid_i = new vert_t( planeHeight * v->pos + (1 - planeHeight) * v_mid);
+				vert_t* vmid_o = new vert_t(-planeHeight * v->pos + (1 + planeHeight) * v_mid);
+				verts_new.push_back(vmid_i);
+				verts_new.push_back(vmid_o);
+				he_t* he_mid = HDS_Mesh::insertEdge(vmid_i, vmid_o);
+				he_mid->refid = he->refid;
+				hes_new.push_back(he_mid);
+				control_edges.push_back(he_mid);
 
 
-			vn_i->refid = v->refid;
-			vn_o->refid = v1->refid;
-			vp_i->refid = v->refid;
-			vp_o->refid = v1->refid;
-
-			vector<vert_t*> vertices;
-			vertices.push_back(vp_i);
-			vertices.push_back(vp_o);
-			vertices.push_back(vn_o);
-			vertices.push_back(vn_i);
-
-			verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
-
-			face_t* newFace = createFace(vertices, cutFace);
-			newFace->refid = he->refid;
-			faces_new.push_back(newFace);
-			pieces.push_back(newFace);
+			}
 		}
 		///connect pieces
 
 		float angleSum = 0;
 
-		for(int i = 0; i < pieces.size(); i++) {
-			face_t* curFace = pieces[i];
-			face_t* nextFace;
+		if (!isCubic){
+			for(int i = 0; i < pieces.size(); i++) {
+				face_t* curFace = pieces[i];
+				face_t* nextFace;
 
-			//check for negative curvature vertices,
-			//if angleSum exceeds 360 degree,
-			//cut it, duplicate current piece and start a new cutFace
-			if (angleSum > 1.6* PI) {
-				cutFace = new face_t;
-				cutFace->isCutFace = true;
-				faces_new.push_back(cutFace);
-				curFace = duplicateFace(pieces[i], cutFace);
+				//check for negative curvature vertices,
+				//if angleSum exceeds 360 degree,
+				//cut it, duplicate current piece and start a new cutFace
+				if (angleSum > 1.6* PI) {
+					cutFace = new face_t;
+					cutFace->isCutFace = true;
+					faces_new.push_back(cutFace);
+					curFace = duplicateFace(pieces[i], cutFace);
 
-				angleSum = 0;
+					angleSum = 0;
+				}
+
+				//when it comes to final piece, duplicate it
+				if(i < pieces.size() - 1)
+					nextFace = pieces[i+1];
+				else {
+					//duplicate pieces[0]
+					nextFace = duplicateFace(pieces[0], cutFace);
+				}
+
+				//calculate angle between pieces' original he
+				he_t* curHE = ori_map[(curFace->refid)>>2];
+				he_t* nxtHE = ori_map[(nextFace->refid)>>2];
+				QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
+				QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
+				double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
+				double angle = acos (param);
+				angleSum += angle;
+
+				//update nextFace 's cutFace
+				if (nextFace->he->flip->f != cutFace) {
+					cout<<"assigning new cut face....."<<endl;
+					assignCutFace(nextFace, cutFace);
+				}
+
+				//get curFace he1
+				he_t* he1 = curFace->he;
+				//get nextFace he2
+				he_t* he2 = nextFace->he->next->next;
+				he1->setCutEdge(false);
+				he2->setCutEdge(false);
+
+				vector<vert_t*> curCorners = curFace->corners();
+				vector<vert_t*> nxtCorners = nextFace->corners();
+
+				QVector3D v1;
+				HDS_Face::LineLineIntersect(nxtCorners[0]->pos, nxtCorners[3]->pos, curCorners[3]->pos, curCorners[0]->pos, &v1);
+
+				QVector3D v2;
+				HDS_Face::LineLineIntersect(nxtCorners[1]->pos, nxtCorners[2]->pos, curCorners[2]->pos, curCorners[1]->pos, &v2);
+				vector<QVector3D> vpos;
+				vpos.push_back(v1);
+				vpos.push_back(v2);
+				addBridger(he2->flip, he1->flip, vpos);
 			}
+		}else {
+			control_points_n.push_back(control_points_n[0]);
+			control_points_n.push_back(control_points_n[1]);
+			control_points_n.erase(control_points_n.begin(), control_points_n.begin()+2);
 
-			//when it comes to final piece, duplicate it
-			if(i < pieces.size() - 1)
-				nextFace = pieces[i+1];
-			else {
-				//duplicate pieces[0]
-				nextFace = duplicateFace(pieces[0], cutFace);
+			for (int index = 0; index < control_edges.size(); index++) {
+				he_t* curEdge = control_edges[index];
+				he_t* nxtEdge;
+
+				if (angleSum > 1.6* PI) {
+					cutFace = new face_t;
+					cutFace->isCutFace = true;
+					faces_new.push_back(cutFace);
+					curEdge = duplicateEdge(curEdge);
+
+					angleSum = 0;
+				}
+
+				if (index < control_edges.size() - 1)
+					nxtEdge = control_edges[index+1];
+				else {
+					nxtEdge = duplicateEdge(control_edges[0]);
+				}
+
+				//calculate angle between pieces' original he
+				he_t* curHE = ori_map[(curEdge->refid)>>2];
+				he_t* nxtHE = ori_map[(nxtEdge->refid)>>2];
+				QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
+				QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
+				double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
+				double angle = acos (param);
+				angleSum += angle;
+
+				vector<QVector3D> vpos;
+				vpos = {control_points_p[2*index+1], control_points_p[2*index],
+						control_points_n[2*index+1], control_points_n[2*index]};
+
+				curEdge->f = cutFace;
+				curEdge->flip->f = cutFace;
+				nxtEdge->f = cutFace;
+				nxtEdge->flip->f = cutFace;
+				addBridger(curEdge->flip, nxtEdge, vpos);
+
 			}
-
-			//calculate angle between pieces' original he
-			he_t* curHE = ori_map[(curFace->refid)>>2];
-			he_t* nxtHE = ori_map[(nextFace->refid)>>2];
-			QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
-			QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
-			double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
-			double angle = acos (param);
-			angleSum += angle;
-
-			//update nextFace 's cutFace
-			if (nextFace->he->flip->f != cutFace) {
-				cout<<"assigning new cut face....."<<endl;
-				assignCutFace(nextFace, cutFace);
-			}
-
-			//get curFace he1
-			he_t* he1 = curFace->he;
-			//get nextFace he2
-			he_t* he2 = nextFace->he->next->next;
-			he1->setCutEdge(false);
-			he2->setCutEdge(false);
-
-			vector<vert_t*> curCorners = curFace->corners();
-			vector<vert_t*> nxtCorners = nextFace->corners();
-
-			QVector3D v1;
-			HDS_Face::LineLineIntersect(nxtCorners[0]->pos, nxtCorners[3]->pos, curCorners[3]->pos, curCorners[0]->pos, &v1);
-
-			QVector3D v2;
-			HDS_Face::LineLineIntersect(nxtCorners[1]->pos, nxtCorners[2]->pos, curCorners[2]->pos, curCorners[1]->pos, &v2);
-
-			addBridger(he2->flip, he1->flip, v1, v2);
 		}
 
 	}
