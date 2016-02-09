@@ -3,8 +3,8 @@
 #include <QVector3D>
 #include <QVector2D>
 
-struct ViewerState {
-	ViewerState() :zNear(1.0), zFar(7000.0), fov(45.0){
+struct CameraLegacy {
+	CameraLegacy() :zNear(1.0), zFar(7000.0), fov(45.0){
 		translation = QVector3D(0, 0, -5);
 		angularChange = 0;
 	}

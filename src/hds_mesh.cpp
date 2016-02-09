@@ -2,7 +2,7 @@
 #include "glutils.hpp"
 #include "mathutils.hpp"
 #include "utils.hpp"
-#include "meshviewer.h"
+//#include "meshviewer.h"
 #include <GL/glu.h>
 #include<iostream>
 using namespace std;
@@ -355,9 +355,9 @@ void display(int num)
 	num=0;
 
 }
-
 void HDS_Mesh::draw(ColorMap cmap)
 {
+#ifdef OPENGL_LEGACY
 	if( showFace )
 	{
 		GLfloat face_mat_diffuse[4] = {0.75, 0.75, 0.75, 1};
@@ -506,10 +506,62 @@ void HDS_Mesh::draw(ColorMap cmap)
 			glPopMatrix();
 		}
 	}
+#endif
+}
+
+void HDS_Mesh::drawVertexIndices()
+{
+#ifdef OPENGL_LEGACY
+	glColor4f(0, 0, 1, 1);
+	GLfloat line_mat_diffuse[4] = {1, 0, 0, 1};
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
+
+	// render the boundaires
+	for(auto vit=vertSet.begin();vit!=vertSet.end();vit++)
+	{
+		vert_t* v = (*vit);
+		glPushMatrix();
+		glTranslatef(v->x(), v->y(), v->z());
+#if 0
+		glutSolidSphere(0.125, 16, 16);
+#else
+		glPointSize(15.0);
+
+		float r, g, b;
+		encodeIndex<float>(v->index, r, g, b);
+		glColor4f(r, g, b, 1.0);
+
+		glBegin(GL_POINTS);
+		glVertex3f(0, 0, 0);
+		glEnd();
+#endif
+		glPopMatrix();
+	}
+#endif
+}
+
+void HDS_Mesh::drawEdgeIndices()
+{
+#ifdef OPENGL_LEGACY
+	for(auto eit=heSet.begin();eit!=heSet.end();eit++)
+	{
+		he_t* e = (*eit);
+		he_t* en = e->next;
+
+		// draw only odd index half edges
+		if( e->index & 0x1 ) continue;
+
+		float r, g, b;
+		encodeIndex<float>(e->index, r, g, b);
+		glLineWidth(2.0);
+		GLUtils::drawLine(e->v->pos, en->v->pos, QColor::fromRgbF(r, g, b));
+	}
+#endif
 }
 
 void HDS_Mesh::drawFaceIndices()
 {
+#ifdef OPENGL_LEGACY
 	for(auto &f : faceSet) {
 		float r, g, b;
 		encodeIndex<float>(f->index, r, g, b);
@@ -527,23 +579,7 @@ void HDS_Mesh::drawFaceIndices()
 		}while( curHe != he );
 		glEnd();
 	}
-}
-
-void HDS_Mesh::drawEdgeIndices()
-{
-	for(auto eit=heSet.begin();eit!=heSet.end();eit++)
-	{
-		he_t* e = (*eit);
-		he_t* en = e->next;
-
-		// draw only odd index half edges
-		if( e->index & 0x1 ) continue;
-
-		float r, g, b;
-		encodeIndex<float>(e->index, r, g, b);
-		glLineWidth(2.0);
-		GLUtils::drawLine(e->v->pos, en->v->pos, QColor::fromRgbF(r, g, b));
-	}
+#endif
 }
 
 void HDS_Mesh::flipShowEdges()
@@ -559,6 +595,11 @@ void HDS_Mesh::flipShowFaces()
 void HDS_Mesh::flipShowVertices()
 {
 	showVert = !showVert;
+}
+
+void HDS_Mesh::flipShowNormals()
+{
+	showNormals = !showNormals;
 }
 
 void HDS_Mesh::exportVBO(vector<float>* vtx_array,
@@ -713,11 +754,6 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 	}
 }
 
-void HDS_Mesh::flipShowNormals()
-{
-	showNormals = !showNormals;
-}
-
 void HDS_Mesh::addHalfEdge(he_t* he)
 {
 	heSet.insert(he);
@@ -815,9 +851,6 @@ HDS_Mesh::he_t* HDS_Mesh::incidentEdge(HDS_Mesh::vert_t *v1, HDS_Mesh::vert_t *v
 	return nullptr;
 }
 
-
-
-
 HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2, HDS_Mesh::he_t* he1, HDS_Mesh::he_t* he2)
 {
 	bool v1_isNew = false, v2_isNew = false;
@@ -871,35 +904,6 @@ HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2
 
 	}
 	return he;
-}
-
-void HDS_Mesh::drawVertexIndices()
-{
-	glColor4f(0, 0, 1, 1);
-	GLfloat line_mat_diffuse[4] = {1, 0, 0, 1};
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
-
-	// render the boundaires
-	for(auto vit=vertSet.begin();vit!=vertSet.end();vit++)
-	{
-		vert_t* v = (*vit);
-		glPushMatrix();
-		glTranslatef(v->x(), v->y(), v->z());
-#if 0
-		glutSolidSphere(0.125, 16, 16);
-#else
-		glPointSize(15.0);
-
-		float r, g, b;
-		encodeIndex<float>(v->index, r, g, b);
-		glColor4f(r, g, b, 1.0);
-
-		glBegin(GL_POINTS);
-		glVertex3f(0, 0, 0);
-		glEnd();
-#endif
-		glPopMatrix();
-	}
 }
 
 template <typename T>

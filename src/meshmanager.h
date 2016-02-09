@@ -90,6 +90,7 @@ private:
 	static MeshManager* instance;
 
 	friend class MeshViewer;
+	friend class MeshViewerModern;
 	friend class MeshConnector;
 
 public:

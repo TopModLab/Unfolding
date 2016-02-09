@@ -3,8 +3,18 @@
 
 #include <QMainWindow>
 #include <QTime>
+
+#ifndef OPENGL_LEGACY
+#define OPENGL_LEGACY
+
+#ifdef OPENGL_LEGACY
 #include "meshviewer.h"
+using viewer_t = MeshViewer;
+#else
 #include "MeshViewerModern.h"
+using viewer_t = MeshViewerModern;
+#endif
+#endif
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
@@ -115,8 +125,8 @@ private:
 private:
 	Ui::MainWindow *ui;
 	QMap<QString, QAction*> actionsMap;
-	//MeshViewer *viewer;
-	MeshViewerModern *viewer;
+
+	viewer_t *viewer;
 	ColormapEditor *ceditor;
 	CriticalPointsPanel *cppanel;
 	CutLocusPanel *clpanel;

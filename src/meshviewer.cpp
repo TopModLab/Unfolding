@@ -1,7 +1,10 @@
 #define NOMINMAX
+
+
+
 #include "meshmanager.h"
 #include <iostream>
-#include "glutils.hpp"
+//#include "glutils.hpp"
 #include "mathutils.hpp"
 #include "utils.hpp"
 #include "meshviewer.h"
@@ -16,7 +19,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
 {
 	interactionState = SelectVertex;
 	selectionMode = single;
-	viewerState.updateModelView();
+	view_cam.updateModelView();
 	heMesh = nullptr;
 	colormap = ColorMap::getDefaultColorMap();
 
@@ -68,12 +71,12 @@ void MeshViewer::setCurvatureColormap(ColorMap cmap)
 bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 {
 	bool isInvertible;
-	QMatrix4x4 proj_modelview_inv = viewerState.projectionModelView().inverted(&isInvertible);//not understood
+	QMatrix4x4 proj_modelview_inv = view_cam.projectionModelView().inverted(&isInvertible);//not understood
 	if (isInvertible)
 	{
 		QVector3D pos_camera;
-		pos_camera.setX((pos_screen.x() - (float)viewerState.viewport.x) / (float)viewerState.viewport.w*2.0 - 1.0);
-		pos_camera.setY((pos_screen.y() - (float)viewerState.viewport.y) / (float)viewerState.viewport.h*2.0 - 1.0);
+		pos_camera.setX((pos_screen.x() - (float)view_cam.viewport.x) / (float)view_cam.viewport.w*2.0 - 1.0);
+		pos_camera.setY((pos_screen.y() - (float)view_cam.viewport.y) / (float)view_cam.viewport.h*2.0 - 1.0);
 		pos_camera.setZ(2.0*pos_camera.z() - 1.0);
 		pos_world = (proj_modelview_inv*QVector4D(pos_camera, 1.0f)).toVector3DAffine();
 
@@ -409,7 +412,7 @@ int MeshViewer::getSelectedElementIndex(const QPoint &p)
 
 	return maxIdx;
 }
-
+/*
 void MeshViewer::computeGlobalSelectionBox()
 {
 	/// get GL state
@@ -431,21 +434,20 @@ void MeshViewer::computeGlobalSelectionBox()
 	//qDebug()<<sbox.gcorners[0];
 	DD = gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global, sbox.corner_global + 1, sbox.corner_global + 2);//The new position of the mouse
 	//qDebug()<<sbox.corner_global[0]<<sbox.corner_global[1]<<sbox.corner_global[2];
-	/*
-	cout<<"DD"<<endl<<DD<<endl;
-	cout<<&sbox.corner_global<<endl;
-	cout<<&sbox.corner_global+1<<endl;
-	cout<<&sbox.corner_global+2<<endl;
-	*/
+	
+	//cout<<"DD"<<endl<<DD<<endl;
+	//cout<<&sbox.corner_global<<endl;
+	//cout<<&sbox.corner_global+1<<endl;
+	//cout<<&sbox.corner_global+2<<endl;
+	
 	winX = sbox.corner_win[0];
 	winY = sbox.corner_win[3];
 	QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[1]);
 	//qDebug()<<sbox.gcorners[1];
 	ED = gluUnProject(winX, winY, 0.0001, m_GLmodelview, m_GLprojection, m_GLviewport, sbox.corner_global + 3, sbox.corner_global + 4, sbox.corner_global + 5);//The new position of the mouse
 	//qDebug()<<sbox.corner_global[3]<<sbox.corner_global[4]<<sbox.corner_global[5];
-	/*
-	cout<<"ED"<<endl<<ED<<endl;
-	*/
+	//cout<<"ED"<<endl<<ED<<endl;
+	
 	winX = sbox.corner_win[2];
 	winY = sbox.corner_win[3];
 	QtUnProject(QVector3D(winX, winY, 0.001), sbox.gcorners[2]);
@@ -461,7 +463,7 @@ void MeshViewer::computeGlobalSelectionBox()
 	//qDebug() << sbox.corner_global[9] << sbox.corner_global[10]<< sbox.corner_global[11];
 	// cout<<"EF"<<endl<<EF<<endl;
 }
-
+*/
 void MeshViewer::mousePressEvent(QMouseEvent *e)
 {
 	mouseState.isPressed = true;
@@ -492,11 +494,11 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 	case SelectEdge:
 	case SelectVertex: {
 		sbox.corner_win[0] = e->x();
-		sbox.corner_win[1] = viewerState.viewport.h - e->y();
+		sbox.corner_win[1] = view_cam.viewport.h - e->y();
 		/*
 	cout<<"e->x(win[0])"<<endl<<e->x()<<endl;
 	cout<<"e->y(win[1])"<<endl<<e->y()<<endl;
-	viewerState.print();
+	view_cam.print();
 	*/
 		break;
 	}
@@ -511,11 +513,11 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 			QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
 
 			if ((e->modifiers() & Qt::ShiftModifier)) {      //press "shift" key
-				viewerState.translation += QVector3D(diff.x() / 100.0, -diff.y() / 100.0, 0.0);
+				view_cam.translation += QVector3D(diff.x() / 100.0, -diff.y() / 100.0, 0.0);
 			}
 			else if (e->modifiers() & Qt::ControlModifier)   //press "crl" key
 			{
-				viewerState.translation += QVector3D(0.0, 0.0, diff.x() / 100.0 - diff.y() / 100.0);
+				view_cam.translation += QVector3D(0.0, 0.0, diff.x() / 100.0 - diff.y() / 100.0);
 			}
 
 			else{
@@ -525,13 +527,13 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 				// Accelerate angular speed relative to the length of the mouse sweep
 				qreal acc = diff.length() / 4.0;
 				// Calculate new rotation axis as weighted sum
-				viewerState.rotationAxis = (viewerState.rotationAxis * viewerState.angularChange + n * acc).normalized();
+				view_cam.rotationAxis = (view_cam.rotationAxis * view_cam.angularChange + n * acc).normalized();
 				// Change rotation angle
-				viewerState.angularChange = acc;
+				view_cam.angularChange = acc;
 
-				viewerState.rotation = QQuaternion::fromAxisAndAngle(viewerState.rotationAxis, viewerState.angularChange) * viewerState.rotation;
+				view_cam.rotation = QQuaternion::fromAxisAndAngle(view_cam.rotationAxis, view_cam.angularChange) * view_cam.rotation;
 			}
-			viewerState.updateModelView();
+			view_cam.updateModelView();
 			mouseState.prev_pos = QVector2D(e->pos());
 
 		}
@@ -542,8 +544,8 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 	case Camera_Translation:
 		if (e->buttons() & Qt::LeftButton) {
 			QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
-			viewerState.translation += QVector3D(diff.x() / 100.0, -diff.y() / 100.0, 0.0);
-			viewerState.updateModelView();
+			view_cam.translation += QVector3D(diff.x() / 100.0, -diff.y() / 100.0, 0.0);
+			view_cam.updateModelView();
 			mouseState.prev_pos = QVector2D(e->pos());
 		}
 		updateGL();
@@ -551,8 +553,8 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 	case Camera_Zoom:
 		if (e->buttons() & Qt::LeftButton) {
 			QVector2D diff = QVector2D(e->pos()) - mouseState.prev_pos;
-			viewerState.translation += QVector3D(0.0, 0.0, diff.x() / 100.0 - diff.y() / 100.0);
-			viewerState.updateModelView();
+			view_cam.translation += QVector3D(0.0, 0.0, diff.x() / 100.0 - diff.y() / 100.0);
+			view_cam.updateModelView();
 			mouseState.prev_pos = QVector2D(e->pos());
 		}
 		updateGL();
@@ -564,13 +566,10 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 		if (mouseState.isPressed) {
 			isSelecting = true;
 			sbox.corner_win[2] = e->x();
-			sbox.corner_win[3] = viewerState.viewport.h - e->y();
-			/*
-		cout<<"e->x(win[2])"<<endl<<e->x()<<endl;
-		cout<<"e->y(win[3])"<<endl<<e->y()<<endl;
-		viewerState.print();
-		*/
-			computeGlobalSelectionBox();
+			sbox.corner_win[3] = view_cam.viewport.h - e->y();
+
+			//kkkkkkkkkkkkkkkk
+			//computeGlobalSelectionBox();
 		}
 		else {
 			isSelecting = false;
@@ -598,13 +597,10 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 	case SelectEdge:
 	case SelectVertex: {
 		sbox.corner_win[2] = e->x();
-		sbox.corner_win[3] = viewerState.viewport.h - e->y();
-		/*
-	cout<<"e->rx(win[2])"<<endl<<e->x()<<endl;
-	cout<<"e->ry(win[3])"<<endl<<e->y()<<endl;
-	viewerState.print();
-	*/
-		computeGlobalSelectionBox();
+		sbox.corner_win[3] = view_cam.viewport.h - e->y();
+		
+		//kkkkkkkkkkkkkkk
+		//computeGlobalSelectionBox();
 		isSelecting = false;
 		mouseState.isPressed = false;   //later added
 		cout<<"releasing mousestate"<<mouseState.isPressed<<endl;
@@ -732,29 +728,29 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
 	case Qt::Key_Down:
 	{
 		double numSteps = .20f;
-		viewerState.translation.setY(viewerState.translation.y() - numSteps);
-		viewerState.updateModelView();
+		view_cam.translation.setY(view_cam.translation.y() - numSteps);
+		view_cam.updateModelView();
 		break;
 	}
 	case  Qt::Key_Up:
 	{
 		double numSteps =  .20f;
-		viewerState.translation.setY(viewerState.translation.y() + numSteps);
-		viewerState.updateModelView();
+		view_cam.translation.setY(view_cam.translation.y() + numSteps);
+		view_cam.updateModelView();
 		break;
 	}
 	case Qt::Key_Left:
 	{
 		double numSteps = .20f;
-		viewerState.translation.setX(viewerState.translation.x() - numSteps);
-		viewerState.updateModelView();
+		view_cam.translation.setX(view_cam.translation.x() - numSteps);
+		view_cam.updateModelView();
 		break;
 	}
 	case Qt::Key_Right:
 	{
 		double numSteps = .20f;
-		viewerState.translation.setX(viewerState.translation.x() + numSteps);
-		viewerState.updateModelView();
+		view_cam.translation.setX(view_cam.translation.x() + numSteps);
+		view_cam.updateModelView();
 		break;
 	}
 
@@ -773,8 +769,8 @@ void MeshViewer::wheelEvent(QWheelEvent *e)
 	switch (interactionState) {
 	case Camera:{
 		double numSteps = e->delta() / 200.0f;
-		viewerState.translation.setZ(viewerState.translation.z() + numSteps);
-		viewerState.updateModelView();
+		view_cam.translation.setZ(view_cam.translation.z() + numSteps);
+		view_cam.updateModelView();
 		break;
 	}
 	default:
@@ -851,14 +847,14 @@ void MeshViewer::resizeGL(int w, int h)
 {
 	initializeFBO();
 
-	viewerState.updateViewport(w, h);
-	viewerState.updateProjection();
+	view_cam.updateViewport(w, h);
+	view_cam.updateProjection();
 
-	glViewport(viewerState.viewport.x, viewerState.viewport.y, viewerState.viewport.w, viewerState.viewport.h);
+	glViewport(view_cam.viewport.x, view_cam.viewport.y, view_cam.viewport.w, view_cam.viewport.h);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glMultMatrixf(viewerState.projection.constData());
+	glMultMatrixf(view_cam.projection.constData());
 }
 
 void MeshViewer::paintGL()
@@ -870,7 +866,7 @@ void MeshViewer::paintGL()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	// the model view matrix is updated somewhere else
-	glMultMatrixf(viewerState.modelview.constData());
+	glMultMatrixf(view_cam.modelview.constData());
 
 	if (lightingState == Smooth) {
 		glEnable(GL_SMOOTH);
@@ -994,7 +990,7 @@ void MeshViewer::drawMeshToFBO() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	// the model view matrix is updated somewhere else
-	glMultMatrixf(viewerState.modelview.constData());
+	glMultMatrixf(view_cam.modelview.constData());
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);

@@ -67,9 +67,9 @@ public:
 	/* Legacy Drawing Functions                                             */
 	/************************************************************************/
 	void draw(ColorMap cmap);
-	void drawFaceIndices();
 	void drawVertexIndices();
 	void drawEdgeIndices();
+	void drawFaceIndices();
 	void flipShowEdges();
 	void flipShowFaces();
 	void flipShowVertices();

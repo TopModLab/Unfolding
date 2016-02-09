@@ -1,3 +1,4 @@
+#define OPENGL_LEGACY
 #include "mainwindow.h"
 #include <QApplication>
 #include <QStyleFactory>

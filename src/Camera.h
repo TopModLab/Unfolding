@@ -22,7 +22,7 @@ public:
 	perspCamera(const QVector3D& eyePos = QVector3D(0, 0, 0),
 		const QVector3D& targetPos = QVector3D(0, 0, 1),
 		const QVector3D& upVec = QVector3D(0, 1, 0),
-		Float verticalAngle = 90, Float aspectRatio = 1.67,
+		Float verticalAngle = 54.3, Float aspectRatio = 1.67,
 		Float nearPlane = 0.01, Float farPlane = 100);
 	~perspCamera(){};
 
@@ -48,7 +48,6 @@ protected:
 	QVector3D pos, target;
 
 	Float fov;
-	int sample = 1;
 private:
 };
 #endif

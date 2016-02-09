@@ -7,7 +7,7 @@ MeshViewerModern::MeshViewerModern(QWidget *parent)
 	, he_ibo(oglBuffer::Type::IndexBuffer)
 	, face_ibo(oglBuffer::Type::IndexBuffer)
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0,1,0)
-	, 45, 1.67, 1, 100)
+	, 54.3, 1.67, 1, 100)
 //	, grid_vtx_array(29, 0.0)
 	, grid_clr_array(29, 0.2)
 //	, grid_idx_array(12, 0)
@@ -45,13 +45,26 @@ MeshViewerModern::~MeshViewerModern()
 
 void MeshViewerModern::bindHalfEdgeMesh(HDS_Mesh *mesh)
 {
-	//makeCurrent();
 	heMesh = mesh;
 	mesh_changed = true;
 	
 	update();
 }
 
+
+void MeshViewerModern::setInteractionMode(InteractionState state)
+{
+	interactionState = state;
+	while (!selectedElementsIdxQueue.empty())
+	{
+		selectedElementsIdxQueue.pop();
+	}
+}
+
+void MeshViewerModern::setSelectionMode(SelectionState mode)
+{
+	selectionState = mode;
+}
 
 void MeshViewerModern::initializeGL()
 {
@@ -204,7 +217,7 @@ void MeshViewerModern::initShader()
 	// Grid Shader
 	grid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/grid_vs.glsl");
 	grid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/grid_fs.glsl");
-
+	grid_shader.link();
 	//////////////////////////////////////////////////////////////////////
 	face_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/face_vs.glsl");
 	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/face_fs.glsl");
@@ -216,6 +229,12 @@ void MeshViewerModern::initShader()
 	//////////////////////////////////////////////////////////////////////////
 	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/edge_vs.glsl");
 	edge_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/edge_fs.glsl");
+	edge_solid_shader.link();
+	//////////////////////////////////////////////////////////////////////////
+	uid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/uid_vs.glsl");
+	uid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/uid_fs.glsl");
+	uid_shader.link();
+
 }
 
 void MeshViewerModern::initializeFBO()
@@ -227,36 +246,57 @@ void MeshViewerModern::initializeFBO()
 void MeshViewerModern::drawMeshToFBO()
 {
 	fbo->bind();
-	switch (m_interactionState)
+
+	uid_shader.bind();
+	uid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
+	uid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+	switch (interactionState)
 	{
-	case SelectVertex:
+	case InteractionState::SelectVertex:
+		vtx_vbo.bind();
+		glPointSize(15.0);
+		glDrawArrays(GL_POINTS, 0, vtx_array.size());
+		vtx_vbo.release();
 		//draw vertices
 		break;
-	case SelectFace:
+	case InteractionState::SelectFace:
+		face_vao.bind();
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDrawElements(GL_TRIANGLES, fib_array.size(), GL_UNSIGNED_INT, 0);
+		face_vao.release();
 		//draw faces
 		break;
-	case SelectEdge:
+	case InteractionState::SelectEdge:
+		glLineWidth(2.0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_LINES, heib_array.size(), GL_UNSIGNED_INT, 0);
+		he_vao.release();
 		//draw edges
 		break;
 	default: break;
 	}
 	fbo->release();
+	uid_shader.release();
 
 	QRgb pixel = fbo->toImage().pixel(mouseState.x, mouseState.y);
 	size_t renderID = pixel;//convert rgba to 
-	switch (m_interactionState)
+	switch (interactionState)
 	{
-	case SelectVertex:
-		selectionID.vertexID = renderID << 2 | VERTEX_MARK;
+	case InteractionState::SelectVertex:
+		selectionID.vertexID = renderID << 2
+			| static_cast<size_t>(DataTypeMark::VERTEX_MARK);
 		break;
-	case SelectFace:
-		selectionID.faceID = renderID << 2 | FACE_MARK;
+	case InteractionState::SelectFace:
+		selectionID.faceID = renderID << 2
+			| static_cast<size_t>(DataTypeMark::FACE_MARK);
 		break;
-	case SelectEdge:
-		selectionID.edgeID = renderID << 2 | EDGE_MARK;
+	case InteractionState::SelectEdge:
+		selectionID.edgeID = renderID << 2
+			| static_cast<size_t>(DataTypeMark::EDGE_MARK);
 		break;
 	default:
-		selectionID.vertexID = NULL_MARK;
+		selectionID.vertexID = static_cast<size_t>(DataTypeMark::NULL_MARK);
 		break;
 	}
 }
@@ -270,11 +310,9 @@ void MeshViewerModern::paintGL()
 
 	drawGrid();
 	
-	/*glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK); // cull back face*/
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK); // cull back face
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//	glDepthFunc(GL_LEQUAL);
-//	glDisable(GL_MULTISAMPLE);
 	if (mesh_changed)
 	{
 		bind();
@@ -286,12 +324,8 @@ void MeshViewerModern::paintGL()
 	face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 	glDrawElements(GL_TRIANGLES, fib_array.size(), GL_UNSIGNED_INT, 0);
 
-	glLineWidth(2.0);
-//	glDisable(GL_MULTISAMPLE);
-//	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_CULL_FACE);
-//	glDepthFunc(GL_LEQUAL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glLineWidth(2.0);
 	he_vao.bind();
 	edge_solid_shader.bind();
 	edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
@@ -376,34 +410,38 @@ void MeshViewerModern::keyPressEvent(QKeyEvent* e)
 	case Qt::Key_Down:
 	{
 		/*double numSteps = .20f;
-		viewerState.translation.setY(viewerState.translation.y() - numSteps);
-		viewerState.updateModelView();*/
+		view_cam.translation.setY(view_cam.translation.y() - numSteps);
+		view_cam.updateModelView();*/
 		break;
 	}
 	case  Qt::Key_Up:
 	{
 		/*double numSteps = .20f;
-		viewerState.translation.setY(viewerState.translation.y() + numSteps);
-		viewerState.updateModelView();*/
+		view_cam.translation.setY(view_cam.translation.y() + numSteps);
+		view_cam.updateModelView();*/
 		break;
 	}
 	case Qt::Key_Left:
 	{
 		/*double numSteps = .20f;
-		viewerState.translation.setX(viewerState.translation.x() - numSteps);
-		viewerState.updateModelView();*/
+		view_cam.translation.setX(view_cam.translation.x() - numSteps);
+		view_cam.updateModelView();*/
 		break;
 	}
 	case Qt::Key_Right:
 	{
 		/*double numSteps = .20f;
-		viewerState.translation.setX(viewerState.translation.x() + numSteps);
-		viewerState.updateModelView();*/
+		view_cam.translation.setX(view_cam.translation.x() + numSteps);
+		view_cam.updateModelView();*/
 		break;
 	}
 
 	}
 	update();
+}
+
+void MeshViewerModern::keyReleaseEvent(QKeyEvent* e)
+{
 }
 
 void MeshViewerModern::mousePressEvent(QMouseEvent* e)
@@ -446,6 +484,157 @@ void MeshViewerModern::mouseMoveEvent(QMouseEvent* e)
 
 	mouseState.x += dx;
 	mouseState.y += dy;
+}
+
+void MeshViewerModern::mouseReleaseEvent(QMouseEvent* e)
+{
+	/*
+	switch (interactionState)
+	{
+	case Camera:
+	case Camera_Translation:
+	case Camera_Zoom:
+
+		mouseState.prev_pos = QVector2D(e->pos());
+		break;
+
+		//selection box
+	case SelectFace:
+	case SelectEdge:
+	case SelectVertex: {
+		sbox.corner_win[2] = e->x();
+		sbox.corner_win[3] = view_cam.viewport.h - e->y();
+
+		//kkkkkkkkkkkkkkk
+		//computeGlobalSelectionBox();
+		isSelecting = false;
+		mouseState.isPressed = false;   //later added
+		cout << "releasing mousestate" << mouseState.isPressed << endl;
+		int selectedElementIdx = getSelectedElementIndex(e->pos());//mouse positon;
+		cout << "selected element " << selectedElementIdx << endl;
+		if (selectedElementIdx >= 0) {
+			//for testing
+			if (interactionState == SelectEdge){
+				cout << "select edge's face index: " << heMesh->heMap[selectedElementIdx]->f->index << endl;
+				cout << "select edge flip's face index: " << heMesh->heMap[selectedElementIdx]->flip->f->index << endl;
+			}
+			if (interactionState == SelectFace) {
+				cout << "select face is cut face? " << heMesh->faceMap[selectedElementIdx]->isCutFace << endl;
+				cout << "select face is bridge? " << heMesh->faceMap[selectedElementIdx]->isBridger << endl;
+
+			}
+			selectedElementsIdxQueue.push(selectedElementIdx);
+
+			switch (selectionMode) {
+			case single:
+				if (selectedElementsIdxQueue.size() > 1) {
+					if (selectedElementsIdxQueue.front() != selectedElementsIdxQueue.back()) {
+						if (interactionState == SelectEdge) {
+							heMesh->heMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
+						}
+						else if (interactionState == SelectFace) {
+							heMesh->faceMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
+						}
+						else if (interactionState == SelectVertex){
+							heMesh->vertMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
+						}
+					}
+					selectedElementsIdxQueue.pop();
+
+				}
+
+			case multiple:
+				if (interactionState == SelectEdge) {
+					heMesh->selectEdge(selectedElementIdx);
+				}
+				else if (interactionState == SelectFace) {
+					heMesh->selectFace(selectedElementIdx);
+				}
+				else if (interactionState == SelectVertex){
+					heMesh->selectVertex(selectedElementIdx);
+					if (isCriticalPointModeSet)
+						findReebPoints();
+					if (isCutLocusModeset)
+						findCutLocusPoints();
+				}
+				break;
+
+			}
+		}
+		else
+			return;
+
+
+		break;
+	}
+	}
+	mouseState.isPressed = false;
+	//cout<<"releasing mousestate"<<mouseState.isPressed<<endl; //later added;
+	/// reset interaction mode if in camera mode triggered by holding alt
+	if (e->modifiers() & Qt::AltModifier) {
+		interactionState = interactionStateStack.top();
+		interactionStateStack.pop();
+	}
+
+	update();
+	*/
+}
+
+void MeshViewerModern::selectAll()
+{
+	switch (interactionState) {
+
+	case SelectFace:
+		for (auto f : heMesh->faces())
+			f->setPicked(true);
+		break;
+	case SelectEdge:
+		for (auto e : heMesh->halfedges())
+			e->setPicked(true);
+		break;
+	case SelectVertex:
+		for (auto v : heMesh->verts())
+			v->setPicked(true);
+		break;
+	default:
+		break;
+	}
+	update();
+}
+
+void MeshViewerModern::selectInverse()
+{
+	switch (interactionState)
+	{
+	case SelectFace:
+	{
+		for (auto f : heMesh->faces())
+			heMesh->selectFace(f->index);
+		break;
+	}
+	case SelectEdge:
+	{
+		unordered_set<HDS_HalfEdge*> selected = heMesh->getSelectedHalfEdges();
+
+		for (auto e : heMesh->halfedges())
+		{
+			if (selected.find(e) != selected.end())
+				e->setPicked(false);
+			else
+				e->setPicked(true);
+		}
+		break;
+	}
+	case SelectVertex:
+	{
+		for (auto v : heMesh->verts())
+			heMesh->selectVertex(v->index);
+		break;
+	}
+	default:
+		break;
+	}
+	update();
 }
 
 void MeshViewerModern::resetCamera()

@@ -458,14 +458,14 @@
     <ClInclude Include="..\src\OperationStack.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ViewerState.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_rimfacepanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshrimface.h">
       <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\CameraLegacy.h">
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

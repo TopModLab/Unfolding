@@ -1,12 +1,10 @@
 #ifndef GLUTILS_HPP
 #define GLUTILS_HPP
 
-/*
-#include <QtOpenGL/QGLFunctions>
-#include <QtGui/QVector3D>
-*/
-#include <QGLFunctions>
 #include <QVector3D>
+
+#ifdef OPENGL_LEGACY
+#include <QGLFunctions>
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
@@ -96,6 +94,22 @@ static void fillQuad(const QVector3D& p0,
 	glEnd();
 }
 
+
+
 }
+#else
+#include <QOpenGLFunctions>
+#include <QOpenGLShader>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLFramebufferObject>
+
+using oglShader		= QOpenGLShader;
+using oglShaderP	= QOpenGLShaderProgram;
+using oglVAO		= QOpenGLVertexArrayObject;
+using oglBuffer		= QOpenGLBuffer;
+using oglFBO		= QOpenGLFramebufferObject;
+#endif
 
 #endif // GLUTILS_HPP

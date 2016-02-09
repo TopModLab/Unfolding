@@ -1,6 +1,9 @@
 #ifndef MESHVIEWER_H
 #define MESHVIEWER_H
 
+#ifndef OPENGL_LEGACY
+#define OPENGL_LEGACY
+#endif
 // Legacy OpenGL
 #include <QGLWidget>
 #include <QGLFunctions>
@@ -11,11 +14,12 @@
 
 #include <QGLFramebufferObject>
 
+#include "glutils.hpp"
 #include "common.h"
 #include "hds_mesh.h"
 #include "colormap.h"
 #include "Graph.hpp"
-#include "ViewerState.h"
+#include "CameraLegacy.h"
 #include "morsesmalecomplex.h"
 
 const QGLFormat qglformat_3d(
@@ -91,7 +95,7 @@ public slots:
 private:
 	
 
-	ViewerState viewerState;
+	CameraLegacy view_cam;
 
 	struct MouseState {
 	MouseState():isPressed(false){}
@@ -115,12 +119,12 @@ public:
 	};
 	void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdxQueue.empty()) selectedElementsIdxQueue.pop();}
 
-	enum SelectionMode {
+	enum SelectionState {
 		single = 0,
 		multiple
 
 	};
-	void setSelectionMode(SelectionMode mode) {selectionMode = mode; }
+	void setSelectionMode(SelectionState mode) {selectionMode = mode; }
 
 	struct SelectionBox
 	{
@@ -133,7 +137,7 @@ public:
 	int lastSelectedIndex;
 
 
-	void computeGlobalSelectionBox();
+	//void computeGlobalSelectionBox();
 	bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
 	int getSelectedElementIndex(const QPoint& p);
 public slots:
@@ -153,7 +157,7 @@ public slots:
 
 private:
 	InteractionState interactionState;
-	SelectionMode selectionMode;
+	SelectionState selectionMode;
 	stack<InteractionState> interactionStateStack;
 
 	queue<int> selectedElementsIdxQueue;
