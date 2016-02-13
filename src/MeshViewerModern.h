@@ -102,8 +102,8 @@ private: // paint function
 public:
 	enum SelectionState
 	{
-		single = 0,
-		multiple
+		SingleSelect = 0,
+		MultiSelect
 	};
 	enum InteractionState : size_t
 	{
@@ -114,18 +114,18 @@ public:
 		SelectFace,
 		SelectEdge
 	};
+	enum ShadingState
+	{
+		SMOOTH = 0,
+		FLAT = 1,
+		WIREFRAME = 2
+	};
 	enum DataTypeMark : size_t
 	{
 		NULL_MARK = 0,
 		VERTEX_MARK = 1,
 		EDGE_MARK = 2,
 		FACE_MARK = 3
-	};
-	enum ShadingState
-	{
-		SMOOTH = 0,
-		FLAT = 1,
-		WIREFRAME = 2
 	};
 	enum CriticalPointMode
 	{
@@ -174,6 +174,7 @@ private://interaction ie selection
 		size_t vertexID;
 		size_t faceID;
 		size_t edgeID;
+		size_t selID;
 	} selectionID;
 
 private:

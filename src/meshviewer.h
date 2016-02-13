@@ -81,16 +81,16 @@ protected:
 
 
 public slots:
-	void slot_toggleLightingSmooth();
-	void slot_toggleLightingFlat();
-	void slot_toggleLightingWireframe();
+	void toggleLightingSmooth();
+	void toggleLightingFlat();
+	void toggleLightingWireframe();
 
-	void slot_toggleCriticalPoints();
-	void slot_toggleText();
+	void toggleCriticalPoints();
+	void toggleText();
 
-	void slot_toggleCutLocusPoints(int);
-	void slot_toggleCutLocusCut();
-	void slot_toggleCutLocusCutMode();
+	void toggleCutLocusPoints(int);
+	void toggleCutLocusCut();
+	void toggleCutLocusCutMode();
 
 private:
 	
@@ -120,8 +120,8 @@ public:
 	void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdxQueue.empty()) selectedElementsIdxQueue.pop();}
 
 	enum SelectionState {
-		single = 0,
-		multiple
+		SingleSelect = 0,
+		MultiSelect
 
 	};
 	void setSelectionMode(SelectionState mode) {selectionMode = mode; }
@@ -141,19 +141,19 @@ public:
 	bool QtUnProject(const QVector3D &pos_screen, QVector3D &pos_world);
 	int getSelectedElementIndex(const QPoint& p);
 public slots:
-	void slot_selectAll();
-	void slot_selectInverse();
+	void selectAll();
+	void selectInverse();
 
-	void slot_selectTwinPair();
-	void slot_selectNextEdge();
+	void selectTwinPair();
+	void selectNextEdge();
 
-	void slot_selectCP();
-	void slot_selectCC();
-	void slot_selectMSTEdges();
+	void selectCP();
+	void selectCC();
+	void selectMSTEdges();
 
-	void slot_selectGrow();
-	void slot_selectShrink();
-	void slot_selectClear();
+	void selectGrow();
+	void selectShrink();
+	void selectClear();
 
 private:
 	InteractionState interactionState;
@@ -194,12 +194,12 @@ public:
 	int getCmode(){if (isCriticalPointModeSet) return cmode; else return 0;}//get current cpp mode
 	int getLmode(){if (isCutLocusModeset) return lmode; else return 0;}//get current cut locus mode
 public slots:
-	void slot_disablecpp();
-	void slot_disableclp();
+	void disablecpp();
+	void disableclp();
 
-	void slot_resetVertices();
-	void slot_resetEdges();
-	void slot_resetFaces();
+	void resetVertices();
+	void resetEdges();
+	void resetFaces();
 private:
 	bool showReebPoints;
 	vector<double> CPdistances;

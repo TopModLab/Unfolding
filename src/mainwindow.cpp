@@ -341,31 +341,31 @@ void MainWindow::createActions()
 
 		//main menu bar
 
-
-
-
 		QAction *camAct = new QAction(QIcon(":/icons/select.png"), tr("Camera Operation"), this);
 		camAct->setStatusTip(tr("Camera operation"));
 		camAct->setCheckable(true);
+		camAct->setChecked(true);
 		connect(camAct, &QAction::triggered, this, &MainWindow::slot_toggleCameraOperation);
 		actionsMap["camera"] = camAct;
 
 		QAction *fsAct = new QAction(QIcon(":/icons/face.png"), tr("Face Select"), this);
 		fsAct->setStatusTip(tr("Select faces"));
 		fsAct->setCheckable(true);
+		fsAct->setChecked(false);
 		connect(fsAct, &QAction::triggered, this, &MainWindow::slot_toggleFaceSelection);
 		actionsMap["face select"] = fsAct;
 
 		QAction *esAct = new QAction(QIcon(":/icons/edge.png"), tr("Edge Select"), this);
 		esAct->setStatusTip(tr("Select edges"));
 		esAct->setCheckable(true);
+		esAct->setChecked(false);
 		connect(esAct, &QAction::triggered, this, &MainWindow::slot_toggleEdgeSelection);
 		actionsMap["edge select"] = esAct;
 
 		QAction *vsAct = new QAction(QIcon(":/icons/vertex.png"), tr("Vertex Select"), this);
 		vsAct->setStatusTip(tr("Select vertices"));
 		vsAct->setCheckable(true);
-		vsAct->setChecked(true);
+		vsAct->setChecked(false);
 		connect(vsAct, &QAction::triggered, this, &MainWindow::slot_toggleVertexSelection);
 		actionsMap["vertex select"] = vsAct;
 
@@ -833,7 +833,7 @@ void MainWindow::slot_reset()
 void MainWindow::slot_selectMultiple()
 {
 	//kkkkkkkkkkk
-	viewer->setSelectionMode(viewer_t::multiple);
+	viewer->setSelectionMode(viewer_t::MultiSelect);
 }
 
 void MainWindow::slot_toggleEdges()

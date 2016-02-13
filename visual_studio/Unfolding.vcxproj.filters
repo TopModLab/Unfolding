@@ -594,5 +594,11 @@
     <None Include="..\shaders\grid_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\shaders\uid_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\uid_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

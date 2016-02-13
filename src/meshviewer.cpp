@@ -18,7 +18,7 @@ MeshViewer::MeshViewer(QWidget *parent) :
 	QGLWidget(qglformat_3d, parent)
 {
 	interactionState = SelectVertex;
-	selectionMode = single;
+	selectionMode = SingleSelect;
 	view_cam.updateModelView();
 	heMesh = nullptr;
 	colormap = ColorMap::getDefaultColorMap();
@@ -84,7 +84,7 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 
 	return isInvertible;
 }
-void MeshViewer::slot_selectAll()
+void MeshViewer::selectAll()
 {
 	switch (interactionState) {
 
@@ -106,7 +106,7 @@ void MeshViewer::slot_selectAll()
 	updateGL();
 }
 
-void MeshViewer::slot_selectInverse()
+void MeshViewer::selectInverse()
 {
 	switch (interactionState) {
 	case SelectFace: {
@@ -139,7 +139,7 @@ void MeshViewer::slot_selectInverse()
 
 }
 
-void MeshViewer::slot_selectCC()
+void MeshViewer::selectCC()
 {
 	switch (interactionState) {
 
@@ -159,7 +159,7 @@ void MeshViewer::slot_selectCC()
 
 }
 
-void MeshViewer::slot_selectTwinPair()
+void MeshViewer::selectTwinPair()
 {
 	switch (interactionState) {
 	case SelectEdge:
@@ -181,7 +181,7 @@ void MeshViewer::slot_selectTwinPair()
 	updateGL();
 }
 
-void MeshViewer::slot_selectNextEdge()
+void MeshViewer::selectNextEdge()
 {
 	switch (interactionState) {
 	case SelectEdge:
@@ -198,7 +198,7 @@ void MeshViewer::slot_selectNextEdge()
 	updateGL();
 }
 
-void MeshViewer::slot_selectCP()
+void MeshViewer::selectCP()
 {
 	for (auto p : reebPoints) {
 		p->setPicked(true);
@@ -209,9 +209,9 @@ void MeshViewer::slot_selectCP()
 
 
 
-void MeshViewer::slot_selectMSTEdges()
+void MeshViewer::selectMSTEdges()
 {
-	slot_selectClear();
+	selectClear();
 
 	//find MST(with no weight), face as "graph node", edge between faces as "graph edge"
 	unordered_set<HDS_Face*> MSTnodes;
@@ -247,7 +247,7 @@ void MeshViewer::slot_selectMSTEdges()
 	}
 }
 
-void MeshViewer::slot_selectGrow()
+void MeshViewer::selectGrow()
 {
 	//get all neighbours
 	switch (interactionState) {
@@ -281,7 +281,7 @@ void MeshViewer::slot_selectGrow()
 
 }
 
-void MeshViewer::slot_selectShrink()
+void MeshViewer::selectShrink()
 {
 	//BFS to get all neighbours that are selected
 	switch (interactionState) {
@@ -311,23 +311,23 @@ void MeshViewer::slot_selectShrink()
 	updateGL();
 }
 
-void MeshViewer::slot_selectClear()
+void MeshViewer::selectClear()
 {
-	slot_resetEdges();
-	slot_resetFaces();
-	slot_resetVertices();
+	resetEdges();
+	resetFaces();
+	resetVertices();
 	updateGL();
 
 }
 
-void MeshViewer::slot_resetEdges()
+void MeshViewer::resetEdges()
 {
 	//reset all edges
 	for (auto he: heMesh->halfedges())
 		he->setPicked(false);
 }
 
-void MeshViewer::slot_resetVertices()
+void MeshViewer::resetVertices()
 {
 	//reset all vertices
 	for (auto v: heMesh->verts())
@@ -335,7 +335,7 @@ void MeshViewer::slot_resetVertices()
 
 }
 
-void MeshViewer::slot_resetFaces()
+void MeshViewer::resetFaces()
 {
 	//reset all faces
 	for (auto f: heMesh->faces())
@@ -344,7 +344,7 @@ void MeshViewer::slot_resetFaces()
 }
 
 
-void MeshViewer::slot_disablecpp()
+void MeshViewer::disablecpp()
 {
 	isCriticalPointModeSet = false;
 	showVIndex = true;
@@ -352,7 +352,7 @@ void MeshViewer::slot_disablecpp()
 	updateGL();
 }
 
-void MeshViewer::slot_disableclp()
+void MeshViewer::disableclp()
 {
 	isCutLocusModeset = false;
 	showVIndex = true;
@@ -620,7 +620,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 			selectedElementsIdxQueue.push(selectedElementIdx);
 
 			switch (selectionMode) {
-			case single:
+			case SingleSelect:
 				if (selectedElementsIdxQueue.size() > 1) {
 					if (selectedElementsIdxQueue.front() != selectedElementsIdxQueue.back()) {
 						if (interactionState == SelectEdge) {
@@ -635,7 +635,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 
 				}
 
-			case multiple:
+			case MultiSelect:
 				if (interactionState == SelectEdge) {
 					heMesh->selectEdge(selectedElementIdx);
 				}
@@ -1488,7 +1488,7 @@ void MeshViewer::findCutLocusPoints()
 void MeshViewer::selectCutLocusEdges()
 {
 
-	slot_resetEdges();
+	resetEdges();
 #if 0
 	for (auto i = 0; i < rbgraph->E.size(); ++i) {
 		int s = rbgraph->E[i].s;
@@ -1546,35 +1546,35 @@ void MeshViewer::selectCutLocusEdges()
 #endif
 }
 
-void MeshViewer::slot_toggleLightingSmooth()
+void MeshViewer::toggleLightingSmooth()
 {
 	lightingState = Smooth;
 }
 
-void MeshViewer::slot_toggleLightingFlat()
+void MeshViewer::toggleLightingFlat()
 {
 	lightingState = Flat;
 }
 
-void MeshViewer::slot_toggleLightingWireframe()
+void MeshViewer::toggleLightingWireframe()
 {
 	lightingState = Wireframe;
 }
 
-void MeshViewer::slot_toggleText()
+void MeshViewer::toggleText()
 {
 	showText = !showText;
 }
 
 
-void MeshViewer::slot_toggleCriticalPoints() {
+void MeshViewer::toggleCriticalPoints() {
 
 	showReebPoints = !showReebPoints;
 	updateGL();
 
 }
 
-void MeshViewer::slot_toggleCutLocusPoints(int state) {
+void MeshViewer::toggleCutLocusPoints(int state) {
 	if(state == Qt::Unchecked) {
 		showReebPoints = false;
 	}else {
@@ -1583,16 +1583,16 @@ void MeshViewer::slot_toggleCutLocusPoints(int state) {
 	updateGL();
 }
 
-void MeshViewer::slot_toggleCutLocusCut() {
+void MeshViewer::toggleCutLocusCut() {
 	showCut = !showCut;
-	slot_resetEdges();
+	resetEdges();
 	if (showCut)
 		selectCutLocusEdges();
 
 	updateGL();
 }
 
-void MeshViewer::slot_toggleCutLocusCutMode() {
+void MeshViewer::toggleCutLocusCutMode() {
 	showMultCut = !showMultCut;
 	selectCutLocusEdges();
 	updateGL();

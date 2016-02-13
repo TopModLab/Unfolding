@@ -4,16 +4,15 @@
 #include <QMainWindow>
 #include <QTime>
 
-#ifndef OPENGL_LEGACY
+/*#ifndef OPENGL_LEGACY
 #define OPENGL_LEGACY
-
+#endif*/
 #ifdef OPENGL_LEGACY
 #include "meshviewer.h"
 using viewer_t = MeshViewer;
 #else
 #include "MeshViewerModern.h"
 using viewer_t = MeshViewerModern;
-#endif
 #endif
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
