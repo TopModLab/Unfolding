@@ -305,7 +305,8 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		{
 			fprintf(SVG_File, "\t<text x=\"%lf\" y=\"%lf\" " \
 				"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;" \
-				"text-anchor:middle;alignment-baseline:middle\" >-</text>\n",
+				"text-anchor:middle;alignment-baseline:middle;" \
+				"font-family:'1CamBamStick8-normal'\" >-</text>\n",
 				labpos.x(), labpos.y());
 		}
 

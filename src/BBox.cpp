@@ -17,6 +17,11 @@ BBox3::BBox3(const QVector3D& p1, const QVector3D& p2)
 	pMax = QVector3D(max(p1.x(), p2.x()), max(p1.y(), p2.y()), max(p1.z(), p2.z()));
 }
 
+BBox3::BBox3(const BBox3& bound)
+	: pMin(bound.pMin), pMax(bound.pMax)
+{
+}
+
 BBox3::BBox3(float val)
 	: pMin(val, val, val), pMax(val, val, val)
 {

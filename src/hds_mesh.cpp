@@ -19,7 +19,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	: showFace(other.showFace), showEdge(other.showEdge)
 	, showVert(other.showVert), showNormals(other.showNormals)
 	, processType(other.processType)
-	, bound(nullptr)
 {
 	/// need a deep copy
 
@@ -84,6 +83,8 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	// Copy piece set information
 	this->pieceSet = other.pieceSet;
 
+	bound = other.bound != nullptr ?
+		new BBox3(*other.bound) : nullptr;
 }
 
 HDS_Mesh::~HDS_Mesh()

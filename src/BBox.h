@@ -21,6 +21,7 @@ public:
 	BBox3(float val);
 	BBox3(const QVector3D& p);
 	BBox3(const QVector3D& p1, const QVector3D& p2);
+	BBox3(const BBox3 &bound);
 	~BBox3();
 
 	void printInfo() const;
