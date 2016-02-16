@@ -4,7 +4,7 @@
 
 #define PI 3.14159265358
 
-void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHeight)
+void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidth, float planeHeight)
 {
 	initiate();
 	cur_mesh = mesh;
@@ -22,7 +22,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 		vector<QVector3D> control_points_n;
 		vector<QVector3D> control_points_p;
 
-		for (auto he: mesh->incidentEdges(v)) {
+		for (he_t* he: mesh->incidentEdges(v)) {
 
 			///get planes on the edge
 			vert_t* vp = he->flip->prev->v;
@@ -34,22 +34,20 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 			QVector3D n = np + nn;
 			n.normalize();
 
+			//get face_n face_p center
+			QVector3D fn_center = he->f->center();
+			QVector3D fp_center = he->flip->f->center();
+
 			//get middle point f the edge
 			QVector3D v_mid = (v->pos + v1->pos)/2;
 
-			//get perpendicular plane
-			QVector3D v_v1 = v1->pos - v->pos;
-			v_v1.normalize();
+			//get projected centers
+			cout<<fn_center.distanceToPlane(v->pos,n)<<endl;
+			QVector3D vn_max = fn_center - n * fn_center.distanceToPlane(v->pos,n);
+			QVector3D vp_max = fp_center - n * fp_center.distanceToPlane(v->pos,n);
 
-			QVector3D cross = QVector3D::crossProduct(n, v_v1);
-
-			//get scaling
-			float scale_wn = vn->pos.distanceToLine(v->pos, v_v1)*planeWidthScale/2;
-			float scale_wp = vp->pos.distanceToLine(v->pos, v_v1)*planeWidthScale/2;
-
-			//get mid points on plane
-			QVector3D vn_mid = v_mid + scale_wn * cross;
-			QVector3D vp_mid = v_mid - scale_wp * cross;
+			QVector3D vn_mid = planeWidth * vn_max + (1- planeWidth) * v_mid;
+			QVector3D vp_mid = planeWidth * vp_max + (1- planeWidth) * v_mid;
 
 			QVector3D vn_i_pos = ( planeHeight * v->pos + (1 - planeHeight) * vn_mid);
 			QVector3D vn_o_pos = (-planeHeight * v->pos + (1 + planeHeight) * vn_mid);
