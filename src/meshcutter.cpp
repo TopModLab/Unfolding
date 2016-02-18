@@ -150,7 +150,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 					});
 
 
-#if 1
+#if _DEBUG
 			/// test if we are merging the same face
 			//set<face_t*> cutFacesSet(cutFaces.begin(), cutFaces.end());
 			//if( cutFacesSet.size() == 1 ) {
@@ -189,15 +189,13 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 			/// the degree of the cut vertex
 			int cutSize = cutFaces.size();
-
+#if _DEBUG
 			cout << "cut vertex degree = " << cutSize << endl;
 			cout << "cut faces number = " << cutFaces.size() << endl;
 			cout << "incident edges = " << incidentHEs.size() << endl;
-			/*for(auto x : incidentHEs)
-				cout << x->index << " @ " << x->f->index << "[" << x->v->index << ", " << x->flip->v->index << "]" << endl;*/
 			cout << "cut edges = " << cutEdges.size() << endl;
-			/*for(auto x : cutEdges)
-				cout << x->index << " @ " << x->f->index << "[" << x->v->index << ", " << x->flip->v->index << "]" << endl;*/
+#endif
+
 #if 0
 			/// verify incident edges
 			for(int i=0;i<incidentHEs.size();++i) {
@@ -265,16 +263,17 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			/// remove the old vertex and add new vertices
 			cout << "removing vertex " << cv.first->index << endl;
 			mesh->vertSet.erase(mesh->vertSet.find(cv.first));
-			mesh->vertMap.erase(cv.first->index);
+			//mesh->vertMap.erase(cv.first->index);
 			delete cv.first;
 
 			for( auto v : cv_new ) {
 				cout << "inserting vertex " << v->index << endl;
 				mesh->addVertex(v);
 			}
-
+#if _DEBUG
 			mesh->printInfo("merged");
 			mesh->validate();
+#endif
 		}
 
 		progressIndex++;
@@ -318,9 +317,13 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	}
 
 	/// update the curvature of each vertex
+	mesh->vertMap.clear();
+	HDS_Vertex::resetIndex();
 	for( auto &v : mesh->vertSet )
 	{
 		v->computeCurvature();
+		v->index = HDS_Vertex::assignIndex();
+		mesh->vertMap.insert(make_pair(v->index, v));
 		cout << v->index << ": " << (*v) << endl;
 	}
 

@@ -3,11 +3,12 @@
 
 MeshViewerModern::MeshViewerModern(QWidget *parent)
 	: QOpenGLWidget(parent)
+	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0,1,0)
+	, 54.3, 1.67, 1, 100)
 	, vtx_vbo(oglBuffer::Type::VertexBuffer)
 	, he_ibo(oglBuffer::Type::IndexBuffer)
 	, face_ibo(oglBuffer::Type::IndexBuffer)
-	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0,1,0)
-	, 54.3, 1.67, 1, 100)
+	//, face_flag_tbo(oglTexture::TargetBuffer)
 	, interactionState(Camera)
 	, selectionState(SingleSelect)
 	, shadingSate(FLAT)
@@ -28,11 +29,6 @@ MeshViewerModern::MeshViewerModern(QWidget *parent)
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
 	
-
-
-
-
-
 	////////////////////////////////////////////////
 	grid_vtx_array = {
 		-1, 0, -1,		0, 0, -1,		1, 0, -1,
@@ -106,6 +102,7 @@ void MeshViewerModern::bind()
 	bindVertexVBO();
 	bindFaceVAO();
 	bindEdgesVAO();
+	bindEdgesTBO();
 
 	mesh_changed = false;
 }
@@ -121,6 +118,8 @@ void MeshViewerModern::initialVBO()
 	face_vao.destroy();
 	/*glDeleteVertexArrays(1, &he_vao);
 	glDeleteVertexArrays(1, &face_vao);*/
+	glDeleteBuffers(1, &he_flag_tbo);
+	glDeleteTextures(1, &he_flag_tbo_tex);
 }
 
 void MeshViewerModern::bindVertexVBO()
@@ -152,6 +151,27 @@ void MeshViewerModern::bindEdgesVAO()
 	vtx_vbo.release();
 }
 
+void MeshViewerModern::bindEdgesTBO()
+{
+	glGenTextures(1, &he_flag_tbo_tex);
+	//glBindBuffer(GL_TEXTURE_BUFFER, 0);
+	//glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
+	glGenBuffers(1, &he_flag_tbo);
+	glBindBuffer(GL_TEXTURE_BUFFER, he_flag_tbo);
+	glBufferData(GL_TEXTURE_BUFFER, sizeof(GLuint) * heflag_array.size(), &heflag_array[0], GL_STATIC_DRAW);
+
+	int count = 0;
+	for (auto flg : heflag_array)
+	{
+		if (flg == 4)
+		{
+			count++;
+		}
+	}
+	cout << "Cut edge flag:\t" << count << endl;
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, he_flag_tbo);
+}
+
 void MeshViewerModern::bindFaceVAO()
 {
 	// Bind VAO
@@ -170,6 +190,21 @@ void MeshViewerModern::bindFaceVAO()
 	face_vao.release();
 	face_ibo.release();
 	vtx_vbo.release();
+}
+
+void MeshViewerModern::bindFaceTBO()
+{
+	/*GLuint tbo_val[] = {
+		0, 1, 2,
+		4, 4, 0,
+		2, 8, 4
+	};
+	glGenBuffers(1, &tbo);
+	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
+	glBufferData(GL_TEXTURE_BUFFER, sizeof(tbo_val), tbo_val, GL_STATIC_DRAW);
+
+	glGenTextures(1, &tbo_tex);
+	glBindBuffer(GL_TEXTURE_BUFFER, 0);*/
 }
 
 void MeshViewerModern::bindGrid()
@@ -376,13 +411,14 @@ void MeshViewerModern::paintGL()
 			face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 			glDrawElements(GL_TRIANGLES, fib_array.size(), GL_UNSIGNED_INT, 0);
 			face_vao.release();
-
+			// Draw edge
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glLineWidth(2.0);
 			he_vao.bind();
 			edge_solid_shader.bind();
 			edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 			edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+			edge_solid_shader.setUniformValue("flag_tex", he_flag_tbo_tex);
 			glDrawElements(GL_LINES, heib_array.size(), GL_UNSIGNED_INT, 0);
 			he_vao.release();
 

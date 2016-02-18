@@ -6,7 +6,6 @@
 
 #include "glutils.hpp"
 // Legacy OpenGL
-#include <QGLFormat>
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QVector2D>
@@ -36,7 +35,7 @@ struct MouseState {
 	bool isPressed;
 };
 class MeshViewerModern
-	: public QOpenGLWidget, protected QOpenGLFunctions
+	: public QOpenGLWidget, protected oglFuncs
 {
 	Q_OBJECT
 public:
@@ -94,7 +93,9 @@ private: // paint function
 	void initialVBO();
 	void bindVertexVBO();
 	void bindEdgesVAO();
+	void bindEdgesTBO();
 	void bindFaceVAO();
+	void bindFaceTBO();
 
 	void bindGrid();
 	void drawGrid();
@@ -214,6 +215,7 @@ private://Mesh Data
 	// Face indices and vao
 	oglVAO face_vao;
 	oglBuffer face_ibo;
+	//oglTexture face_flag_tbo;
 	vector<GLuint> fib_array;
 	vector<GLuint> fid_array;
 	vector<GLuint> fflag_array;
@@ -221,6 +223,7 @@ private://Mesh Data
 	// Edge indices and vao
 	oglVAO he_vao;
 	oglBuffer he_ibo;
+	GLuint he_flag_tbo, he_flag_tbo_tex;
 	vector<GLuint> heib_array;// he ibo data
 	vector<GLuint> heid_array;// he id, for querying
 	vector<GLuint> heflag_array;// he flag data

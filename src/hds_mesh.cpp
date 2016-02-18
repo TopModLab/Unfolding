@@ -650,7 +650,7 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 		fid_array->clear();
 		fid_array->reserve(faceSet.size() * 2);
 		fflag_array->clear();
-		fflag_array->reserve(faceSet.size() * 2);
+		fflag_array->reserve(faceSet.size());
 		for (auto face : faceSet)
 		{
 			if (face->isCutFace)
@@ -693,34 +693,26 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 					fib_array->insert(fib_array->end(),
 						vid_array.begin(), vid_array.begin() + 2);
 					fib_array->push_back(vid_array.back());
-					// face attribute
-					fid_array->push_back(fid);
-					fflag_array->push_back(flag);
 
 					// Index buffer 123
 					fib_array->insert(fib_array->end(),
 						vid_array.begin() + 1, vid_array.end());
-					// face attribute
-					fid_array->push_back(fid);
-					fflag_array->push_back(flag);
 				}
 				else// P3 outside Triangle012
 				{
 					// Index buffer 012
 					fib_array->insert(fib_array->end(),
 						vid_array.begin(), vid_array.begin() + 3);
-					// face attribute
-					fid_array->push_back(fid);
-					fflag_array->push_back(flag);
 
 					// Index buffer 230
 					fib_array->insert(fib_array->end(),
 						vid_array.begin() + 2, vid_array.end());
 					fib_array->push_back(vid_array.front());
-					// face attribute
-					fid_array->push_back(fid);
-					fflag_array->push_back(flag);
+					
 				}
+				// face attribute
+				fid_array->insert(fid_array->end(), 2, fid);
+				fflag_array->insert(fflag_array->end(), 2, flag);
 			}
 			default: // n-gons
 				break;

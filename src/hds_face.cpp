@@ -253,7 +253,7 @@ void HDS_Face::scaleDown()
 	}
 }
 
-int HDS_Face::getFlag() const
+uint HDS_Face::getFlag() const
 {
 	return (isPicked & PICKED)
 		| (isCutFace & CUTFACE)

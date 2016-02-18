@@ -17,8 +17,8 @@ public:
 	{
 		DEFAULT		= 0,
 		PICKED		= 1 << 1,
-		CUTEDGE		= 1 << 1,
-		EXTENDED	= 1 << 2
+		CUTEDGE		= 1 << 2,
+		EXTENDED	= 1 << 3
 	};
 
 	static void resetIndex() { uid = 0; }
@@ -36,7 +36,7 @@ public:
 	void setFlip(HDS_HalfEdge* thef) {flip = thef; thef->flip = this;}
 	void setBridgeTwin(HDS_HalfEdge* he) {bridgeTwin = he; he->bridgeTwin = this;}
 
-	int getFlag() const;
+	uint getFlag() const;
 public:
 	HDS_Face *f;
 	HDS_Vertex *v;
