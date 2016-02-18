@@ -47,7 +47,7 @@ public:
 	void scaleDown();
 	double getScalingFactor(){ return scalingFactor; }
 
-	uint getFlag() const;
+	uint16_t getFlag() const;
 	//bounding box related, should only work on cut face
 	//void update_bbox();
 public:

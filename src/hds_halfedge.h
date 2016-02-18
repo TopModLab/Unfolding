@@ -36,7 +36,7 @@ public:
 	void setFlip(HDS_HalfEdge* thef) {flip = thef; thef->flip = this;}
 	void setBridgeTwin(HDS_HalfEdge* he) {bridgeTwin = he; he->bridgeTwin = this;}
 
-	uint getFlag() const;
+	uint16_t getFlag() const;
 public:
 	HDS_Face *f;
 	HDS_Vertex *v;

@@ -253,13 +253,13 @@ void HDS_Face::scaleDown()
 	}
 }
 
-uint HDS_Face::getFlag() const
+uint16_t HDS_Face::getFlag() const
 {
-	return (isPicked & PICKED)
-		| (isCutFace & CUTFACE)
-		| (isHole & HOLE)
-		| (isBridger & BRIDGER)
-		| (isPlanar & PLANAR);
+	return (uint16_t)(-(int16_t)isPicked) & PICKED
+		| (uint16_t)(-(int16_t)isCutFace) & CUTFACE
+		| (uint16_t)(-(int16_t)isHole) & HOLE
+		| (uint16_t)(-(int16_t)isBridger) & BRIDGER
+		| (uint16_t)(-(int16_t)isPlanar) & PLANAR;
 }
 
 /*

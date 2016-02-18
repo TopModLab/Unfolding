@@ -18,15 +18,15 @@ HDS_HalfEdge::HDS_HalfEdge()
 	cutTwin = nullptr;
 }
 
-uint HDS_HalfEdge::getFlag() const
+uint16_t HDS_HalfEdge::getFlag() const
 {
 	if (isCutEdge)
 	{
 		cout << "isCutEdge & CUTEDGE:\t" << (isCutEdge * CUTEDGE) << endl;
 	}
-	return (isPicked * PICKED)
-		| (isCutEdge * CUTEDGE)
-		| (isExtended * EXTENDED);
+	return (uint16_t)(-(int16_t)isPicked) & PICKED
+		| (uint16_t)(-(int16_t)isCutEdge) & CUTEDGE
+		| (uint16_t)(-(int16_t)isExtended) & EXTENDED;
 }
 
 HDS_HalfEdge::~HDS_HalfEdge()
