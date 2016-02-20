@@ -21,13 +21,6 @@
 #include "Graph.hpp"
 #include "morsesmalecomplex.h"
 
-/*
-using oglShader		= QOpenGLShader;
-using oglShaderP	= QOpenGLShaderProgram;
-using oglVAO		= QOpenGLVertexArrayObject;
-using oglBuffer		= QOpenGLBuffer;
-using oglFBO		= QOpenGLFramebufferObject;
-*/
 class MeshViewerModern;
 struct RenderBufferObject;
 
@@ -45,6 +38,7 @@ struct RenderBufferObject// : protected oglFuncs
 		, flag_tbo(0), flag_tex(0), id_tbo(0), id_tex(0)
 	{
 	}
+	~RenderBufferObject() { destroy(); }
 
 	void destroy()
 	{
@@ -128,8 +122,6 @@ private: // paint function
 	void bindFaceVAO();
 	void bindFaceTBO();
 
-	void bindGrid();
-	void drawGrid();
 	void initShader();
 public:
 	enum SelectionState
@@ -243,7 +235,6 @@ private://Mesh Data
 	RenderBufferObject heRBO;
 
 	// Shader Programs
-	oglShaderP grid_shader;
 	oglShaderP face_solid_shader, edge_solid_shader;
 	oglShaderP uid_shader, he_uid_shader, face_uid_shader;
 };

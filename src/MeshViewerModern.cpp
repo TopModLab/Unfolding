@@ -59,7 +59,7 @@ void MeshViewerModern::initializeGL()
 	cout << "Renderer: " << glGetString(GL_RENDERER) << endl; 
 	cout << "OpenGL version supported " << glGetString(GL_VERSION) << endl;
 	initShader();
-	bindGrid();
+	grid.bind();
 
 	// Enable OpenGL features
 	glEnable(GL_MULTISAMPLE);
@@ -165,16 +165,6 @@ void MeshViewerModern::bindFaceTBO()
 
 	glGenTextures(1, &tbo_tex);
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);*/
-}
-
-void MeshViewerModern::bindGrid()
-{
-	grid.bind();
-}
-
-void MeshViewerModern::drawGrid()
-{
-	grid.draw(view_cam.CameraToScreen, view_cam.WorldToCamera);
 }
 
 void MeshViewerModern::initShader()
@@ -297,7 +287,7 @@ void MeshViewerModern::paintGL()
 	glClearColor(0.6, 0.6, 0.6, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	drawGrid();
+	grid.draw(view_cam.CameraToScreen, view_cam.WorldToCamera);
 	
 	if (heMesh != nullptr)
 	{

@@ -4,8 +4,9 @@ const char* gridvs =
 "#version 400\n"\
 "in layout(location = 0) vec2 vp;"\
 "uniform mat4 view, proj;"\
+"uniform float size;"\
 "void main() {"\
-"	gl_Position = proj * view * vec4(vp.x, 0.0, vp.y, 1.0);"\
+"	gl_Position = proj * view * vec4(vp.x * size, 0.0, vp.y * size, 1.0);"\
 "}";
 
 const char* gridfs =
@@ -76,6 +77,7 @@ void ViewerGrid::draw(const QMatrix4x4 &proj, const QMatrix4x4 &view)
 	shader.bind();
 	shader.setUniformValue("proj", proj);
 	shader.setUniformValue("view", view);
+	shader.setUniformValue("size", size);
 	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_SHORT, 0);
 
 	vao.release();
@@ -87,42 +89,52 @@ void ViewerGrid::resize(size_t seg, GLfloat scale)
 	segment = seg;
 	size = scale;
 
-	size_t twoseg = static_cast<size_t>(segment) << 1;
-	size_t foursegsq = twoseg * twoseg;
-	// verts number: 4 * (seg + 1)
-	size_t vertCount = (segment + 1) << 2;
-	// indices number: (2seg + 1) * 2
-	size_t indexCount = (segment << 2) + 2;
-
+	// verts number: 8 * seg
 	verts.clear();
-	verts.insert(verts.end(), vertCount << 1, -scale);
+	verts.insert(verts.end(), segment << 4, -1.0);
+	// indices number: 4 * seg + 2
 	indices.clear();
-	indices.reserve(indexCount << 1);
+	indices.reserve((segment << 3) + 4);
 
-	GLfloat segsize = scale / static_cast<float>(segment);
+	GLfloat segsize = 1.0 / static_cast<float>(segment);
+	size_t edgeVertsNum = segment << 1;
+	//size_t idxOff = segment << 2;// Verts index offset
+	size_t offset[] = { segment << 2, segment << 3, (segment << 3) + (segment << 2)};
 	size_t vidx = 0;
-	for (size_t i = -segment; i < segment; i++, vidx += 2)
+	for (size_t i = 0; i < edgeVertsNum; i++)
 	{
-		verts[vidx] = -segsize * i;
-	}
-	size_t offset = segment << 1;
+		// Bottom
+		verts[vidx] = segsize * i - 1.0f;
 
-	for (size_t i = 0; i < 3 * offset; i++)
-	{
-		verts[vidx++] = -verts[vidx - offset + 1];
-		verts[vidx++] = verts[vidx - offset - 1];
+		// Left
+		verts[offset[0]++] = -verts[vidx + 1];
+		verts[offset[0]++] = verts[vidx];
+
+		// Top
+		verts[offset[1]++] = -verts[vidx];
+		verts[offset[1]++] = -verts[vidx + 1];
+
+		// Right
+		verts[offset[2]++] = verts[vidx + 1];
+		verts[offset[2]++] = -verts[vidx];
+		
+		vidx += 2;
 	}
-	////
-	vidx = 0;
-	for (size_t i = 0; i < twoseg + 1; i++)
+	//////////////////////////////////////////////////////////////////////////
+	//offset[0] = edgeVertsNum;
+	offset[1] = edgeVertsNum << 1;
+	offset[2] = (edgeVertsNum << 1) + edgeVertsNum;
+	for (size_t i = 0; i < edgeVertsNum + 1; i++)
 	{
-		for (size_t j = 0; j < twoseg; j++)
-		{
-			indices.push_back(vidx++);
-			indices.push_back(vidx);
-		}
-		vidx++;
+		// Vertical Line
+		indices.push_back(i);
+		indices.push_back(offset[2] - i);
+		// Horizontal Line
+		indices.push_back(offset[1] - i);
+		indices.push_back(offset[2] + i);
 	}
+	// Fix index over range
+	indices.back() = 0;
 }
 
 void ViewerGrid::initShader()
