@@ -1,6 +1,6 @@
 #include "hds_halfedge.h"
 
-size_t HDS_HalfEdge::uid = 0;
+hdsid_t HDS_HalfEdge::uid = 0;
 
 HDS_HalfEdge::HDS_HalfEdge()
 	: flag(DEFAULT)
@@ -20,10 +20,6 @@ HDS_HalfEdge::HDS_HalfEdge()
 
 uint16_t HDS_HalfEdge::getFlag() const
 {
-	if (isCutEdge)
-	{
-		cout << "isCutEdge & CUTEDGE:\t" << (isCutEdge * CUTEDGE) << endl;
-	}
 	return (uint16_t)(-(int16_t)isPicked) & PICKED
 		| (uint16_t)(-(int16_t)isCutEdge) & CUTEDGE
 		| (uint16_t)(-(int16_t)isExtended) & EXTENDED;

@@ -1,11 +1,11 @@
 #include "hds_common.h"
 
-int HDS_Common::assignRef_ID(int id, int type)
+int HDS_Common::assignRef_ID(hdsid_t id, hdsid_t type)
 {
 	return (id << 2) + type;
 }
 
-QString HDS_Common::ref_ID2String(int refid)
+QString HDS_Common::ref_ID2String(hdsid_t refid)
 {
 	QString ret;
 	int type = refid & 3;

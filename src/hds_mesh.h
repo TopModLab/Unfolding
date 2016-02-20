@@ -78,18 +78,18 @@ public:
 	/* Modern Rendering Functions                                           */
 	/************************************************************************/
 	void exportVBO(vector<float>* vtx_array,
-		vector<uint>* fib_array, vector<uint>* fid_array,
-		vector<uint>* fflag_array,
-		vector<uint>* heib_array, vector<uint>* heid_array,
-		vector<uint>* heflag_array) const;
+		vector<uint32_t>* fib_array, vector<uint32_t>* fid_array,
+		vector<uint16_t>* fflag_array,
+		vector<uint32_t>* heib_array, vector<uint32_t>* heid_array,
+		vector<uint16_t>* heflag_array) const;
 
 	 unordered_set<he_t*>& halfedges()  { return heSet; }
 	 unordered_set<face_t*>& faces()  { return faceSet; }
 	 unordered_set<vert_t*>& verts()  { return vertSet; }
 
-	 unordered_map<int, he_t*>& halfedgesMap()  { return heMap; }
-	 unordered_map<int, face_t*>& facesMap()  { return faceMap; }
-	 unordered_map<int, vert_t*>& vertsMap()  { return vertMap; }
+	 unordered_map<hdsid_t, he_t*>& halfedgesMap()  { return heMap; }
+	 unordered_map<hdsid_t, face_t*>& facesMap()  { return faceMap; }
+	 unordered_map<hdsid_t, vert_t*>& vertsMap()  { return vertMap; }
 
 	void addHalfEdge(he_t*);
 	void addVertex(vert_t*);
@@ -107,10 +107,10 @@ public:
 	static he_t* insertEdge(vert_t* v1, vert_t* v2, he_t* he1 = nullptr, he_t* he2 = nullptr);
 
 	template <typename T>
-	void flipSelectionState(int idx, unordered_map<int, T> &m);
-	void selectFace(int idx);
-	void selectEdge(int idx);
-	void selectVertex(int idx);
+	void flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m);
+	void selectFace(hdsid_t idx);
+	void selectEdge(hdsid_t idx);
+	void selectVertex(hdsid_t idx);
 
 	void validate();
 
@@ -127,6 +127,7 @@ protected:
 	friend class ReebGraph;
 	friend class MeshCutter;
 	friend class MeshViewer;
+	friend class MeshViewerModern;
 	friend class MeshManager;
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
@@ -141,12 +142,12 @@ private:
 
 	vector<face_t*> sortedFaces;
 
-	unordered_map<int, he_t*> heMap;
-	unordered_map<int, face_t*> faceMap;
-	unordered_map<int, vert_t*> vertMap;
+	unordered_map<hdsid_t, he_t*> heMap;
+	unordered_map<hdsid_t, face_t*> faceMap;
+	unordered_map<hdsid_t, vert_t*> vertMap;
 
 	// pieces information
-	set<set<int>> pieceSet;
+	set<set<hdsid_t>> pieceSet;
 	BBox3* bound;
 private:
 	//bool isHollowed;

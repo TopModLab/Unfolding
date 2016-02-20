@@ -16,6 +16,7 @@
 #include "common.h"
 #include "hds_mesh.h"
 #include "Camera.h"
+#include "ViewerGrid.h"
 #include "colormap.h"
 #include "Graph.hpp"
 #include "morsesmalecomplex.h"
@@ -27,6 +28,8 @@ using oglVAO		= QOpenGLVertexArrayObject;
 using oglBuffer		= QOpenGLBuffer;
 using oglFBO		= QOpenGLFramebufferObject;
 */
+class MeshViewerModern;
+struct RenderBufferObject;
 
 struct MouseState {
 	MouseState() : isPressed(false), x(0), y(0){}
@@ -34,8 +37,36 @@ struct MouseState {
 	int x, y;
 	bool isPressed;
 };
+struct RenderBufferObject// : protected oglFuncs
+{
+	RenderBufferObject(oglFuncs* f)
+		: funcs(f)
+		, ibo(oglBuffer::Type::IndexBuffer)
+		, flag_tbo(0), flag_tex(0), id_tbo(0), id_tex(0)
+	{
+	}
+
+	void destroy()
+	{
+		vao.destroy();
+		ibo.destroy();
+		funcs->glDeleteBuffers(1, &flag_tbo);
+		funcs->glDeleteTextures(1, &flag_tex);
+		funcs->glDeleteBuffers(1, &id_tbo);
+		funcs->glDeleteTextures(1, &id_tex);
+	}
+
+	oglFuncs* funcs;
+	oglVAO vao;
+	oglBuffer ibo;
+	GLuint flag_tbo, flag_tex;
+	GLuint id_tbo, id_tex;
+	vector<GLuint> ibos;// he ibo data
+	vector<GLuint> ids;// he id, for querying
+	vector<uint16_t> flags;// he flag data
+};
 class MeshViewerModern
-	: public QOpenGLWidget, protected oglFuncs
+	: public QOpenGLWidget, oglFuncs
 {
 	Q_OBJECT
 public:
@@ -195,13 +226,7 @@ private://viewer status
 
 private://Mesh Data
 	// Ground Grid VBO & VAO
-	oglBuffer grid_vtx_vbo;
-	oglBuffer grid_clr_vbo;
-	oglBuffer grid_ibo;
-	oglVAO grid_vao;
-	vector<GLfloat> grid_vtx_array;
-	vector<GLfloat> grid_clr_array;
-	vector<GLushort> grid_idx_array;
+	ViewerGrid grid;
 
 	HDS_Mesh* heMesh;   /// not own
 	bool mesh_changed;
@@ -213,21 +238,10 @@ private://Mesh Data
 	vector<GLfloat> vtx_array;
 
 	// Face indices and vao
-	oglVAO face_vao;
-	oglBuffer face_ibo;
-	//oglTexture face_flag_tbo;
-	vector<GLuint> fib_array;
-	vector<GLuint> fid_array;
-	vector<GLuint> fflag_array;
-
+	RenderBufferObject fRBO;
 	// Edge indices and vao
-	oglVAO he_vao;
-	oglBuffer he_ibo;
-	GLuint he_flag_tbo, he_flag_tbo_tex;
-	vector<GLuint> heib_array;// he ibo data
-	vector<GLuint> heid_array;// he id, for querying
-	vector<GLuint> heflag_array;// he flag data
-	
+	RenderBufferObject heRBO;
+
 	// Shader Programs
 	oglShaderP grid_shader;
 	oglShaderP face_solid_shader, edge_solid_shader;

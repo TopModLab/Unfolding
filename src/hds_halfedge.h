@@ -10,10 +10,10 @@ class HDS_Vertex;
 class HDS_HalfEdge
 {
 private:
-	static size_t uid;
+	static hdsid_t uid;
 
 public:
-	enum EDGE_FLAG
+	enum EDGE_FLAG : uint16_t
 	{
 		DEFAULT		= 0,
 		PICKED		= 1 << 1,
@@ -22,8 +22,8 @@ public:
 	};
 
 	static void resetIndex() { uid = 0; }
-	static size_t assignIndex() { return uid++; }
-	void setRefId(int id) { refid = (id << 2) + HDS_Common::FROM_EDGE; }
+	static hdsid_t assignIndex() { return uid++; }
+	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_EDGE; }
 
 	HDS_HalfEdge();
 	~HDS_HalfEdge();

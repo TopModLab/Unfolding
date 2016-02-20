@@ -71,8 +71,6 @@ bool MeshManager::loadOBJFile(const string& filename) {
 		clock.restart();
 #endif
 		/// save the half edge mesh out to a temporary file
-		//kkkkkkkkkkkkkkkkkkkkkkk
-		//hds_mesh->save("temp.obj");
 		loadingProgress->setValue(30);
 		///*
 		/// preprocess the mesh with smoothing
@@ -188,7 +186,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 		faces[i] = new face_t;
 	}
 
-	map<pair<int, int>, he_t*> heMap;
+	map<pair<hdsid_t, hdsid_t>, he_t*> heMap;
 	heMap.clear();
 
 	for(size_t i=0, heIdx = 0;i<facesCount;i++)

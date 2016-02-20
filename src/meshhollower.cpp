@@ -14,7 +14,7 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 	flapSize = newFlapSize;//Flap size needed in export function
 	shiftAmount = shift;
 
-	unordered_map <int, vert_t*> ori_map = ori_mesh->vertsMap();
+	unordered_map <hdsid_t, vert_t*> ori_map = ori_mesh->vertsMap();
 	unordered_set<he_t*> old_edges;
 	for (auto he: cur_mesh->halfedges()) {
 		if (old_edges.find(he->flip) == old_edges.end())

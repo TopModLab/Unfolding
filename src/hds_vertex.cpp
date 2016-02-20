@@ -5,7 +5,7 @@
 #include <iostream>
 using namespace std;
 
-size_t HDS_Vertex::uid = 0;
+hdsid_t HDS_Vertex::uid = 0;
 
 HDS_Vertex::HDS_Vertex()
 {

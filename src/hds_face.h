@@ -12,12 +12,12 @@ class HDS_Vertex;
 class HDS_Face
 {
 private:
-	static size_t uid;
+	static hdsid_t uid;
 
 public:
 	static void resetIndex() { uid = 0; }
-	static size_t assignIndex() { return uid++; }
-	void setRefId(int id) { refid = (id << 2) + HDS_Common::FROM_FACE; }
+	static hdsid_t assignIndex() { return uid++; }
+	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_FACE; }
 
 	HDS_Face();
 	~HDS_Face();
@@ -51,7 +51,7 @@ public:
 	//bounding box related, should only work on cut face
 	//void update_bbox();
 public:
-	enum FACE_FLAG
+	enum FACE_FLAG : uint16_t
 	{
 		DEFAULT		= 0,
 		PICKED		= 1 << 1,

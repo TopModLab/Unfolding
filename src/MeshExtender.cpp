@@ -155,11 +155,11 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
 	initiate();
 	cur_mesh = mesh;
-	unordered_map<int, vert_t*> ori_map = ori_mesh->vertMap;
+	unordered_map<hdsid_t, vert_t*> ori_map = ori_mesh->vertMap;
 	scaleFaces();
 
 	//get bridge pairs
-	unordered_map<int, he_t*> refidMap;
+	unordered_map<hdsid_t, he_t*> refidMap;
 	for (auto he: hes_new) {
 		if (refidMap.find(he->refid) == refidMap.end())
 			refidMap.insert(make_pair(he->refid, he));

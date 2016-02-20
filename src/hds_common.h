@@ -2,6 +2,8 @@
 #include "common.h"
 #include <QString>
 
+using hdsid_t = uint32_t;
+
 class HDS_Common
 {
 public:
@@ -12,8 +14,8 @@ public:
 		FROM_EDGE = 2,
 		FROM_FACE = 3
 	};
-	static int assignRef_ID(int id, int type);
+	static int assignRef_ID(hdsid_t id, hdsid_t type);
 	
-	static QString ref_ID2String(int refid);
+	static QString ref_ID2String(hdsid_t refid);
 
 };

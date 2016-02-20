@@ -306,6 +306,9 @@
     <ClCompile Include="..\src\meshrimface.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ViewerGrid.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -466,6 +469,9 @@
     </ClInclude>
     <ClInclude Include="..\src\CameraLegacy.h">
       <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ViewerGrid.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

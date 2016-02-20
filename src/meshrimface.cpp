@@ -9,7 +9,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float planeWidthScale, float planeHe
 	initiate();
 	cur_mesh = mesh;
 
-	unordered_map <int, he_t*> ori_map = ori_mesh->halfedgesMap();
+	unordered_map <hdsid_t, he_t*> ori_map = ori_mesh->halfedgesMap();
 
 	for(auto v: cur_mesh->verts()) {
 		///assign cut faces

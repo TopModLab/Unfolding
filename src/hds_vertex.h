@@ -11,12 +11,12 @@ class HDS_HalfEdge;
 class HDS_Vertex
 {
 private:
-	static size_t uid;
+	static hdsid_t uid;
 
 public:
 	static void resetIndex() { uid = 0; }
-	static size_t assignIndex() { return uid++; }
-	void setRefId(int id) { refid = (id << 2) + HDS_Common::FROM_VERTEX; }
+	static hdsid_t assignIndex() { return uid++; }
+	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_VERTEX; }
 
 	HDS_Vertex();
 	HDS_Vertex(const QVector3D &pos, int idx = -1, int refid = 0);

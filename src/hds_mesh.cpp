@@ -125,7 +125,7 @@ void HDS_Mesh::updatePieceSet()
 	}
 	pieceSet.clear();
 
-	unordered_set<int> visitedFaces;
+	unordered_set<hdsid_t> visitedFaces;
 
 	int progressIndex = 0;
 	// Find all faces
@@ -139,7 +139,7 @@ void HDS_Mesh::updatePieceSet()
 			/// Find all linked faces except cut face
 			set<HDS_Face*> linkedFaces = f->linkedFaces();
 
-			set<int> curPiece;
+			set<hdsid_t> curPiece;
 			for (auto cf : linkedFaces)
 			{
 				curPiece.insert(cf->index);
@@ -324,6 +324,7 @@ void HDS_Mesh::setMesh(
 //usage unknown
 #define MAX_CHAR        128
 
+#ifdef OPENGL_LEGACY
 void drawString(const char* str, int numb)
 {
 	static int isFirstCall = 1;
@@ -356,6 +357,7 @@ void display(int num)
 	num=0;
 
 }
+#endif
 void HDS_Mesh::draw(ColorMap cmap)
 {
 #ifdef OPENGL_LEGACY
@@ -604,8 +606,10 @@ void HDS_Mesh::flipShowNormals()
 }
 
 void HDS_Mesh::exportVBO(vector<float>* vtx_array,
-	vector<uint>* fib_array, vector<uint>* fid_array, vector<uint>* fflag_array,
-	vector<uint>* heib_array, vector<uint>* heid_array, vector<uint>* heflag_array) const
+	vector<uint32_t>* fib_array, vector<uint32_t>* fid_array,
+	vector<uint16_t>* fflag_array,
+	vector<uint32_t>* heib_array, vector<uint32_t>* heid_array,
+	vector<uint16_t>* heflag_array) const
 {
 	// vertex object buffer
 	if (vtx_array != nullptr)
@@ -641,24 +645,26 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 		}
 		return true;
 	};
+	
+	size_t fSetSize = faceSet.size();
 	if (fib_array != nullptr)
 	{
 		// triangulated face index buffer
 		fib_array->clear();
-		fib_array->reserve(faceSet.size() * 3);
+		fib_array->reserve(fSetSize * 3);
 		// original face idex, for query
 		fid_array->clear();
-		fid_array->reserve(faceSet.size() * 2);
+		fid_array->reserve(fSetSize * 2);
 		fflag_array->clear();
-		fflag_array->reserve(faceSet.size());
+		fflag_array->reserve(fSetSize * 2);
 		for (auto face : faceSet)
 		{
 			if (face->isCutFace)
 			{
 				continue;
 			}
-			vector<uint> vid_array;
-			auto fid = static_cast<uint>(face->index);
+			vector<uint32_t> vid_array;
+			auto fid = static_cast<uint32_t>(face->index);
 			auto flag = face->getFlag();
 			auto he = face->he;
 			auto curHE = he;
@@ -669,18 +675,19 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 			} while (curHE != he);
 
 			// Operate differently depending on edge number
-			switch (vid_array.size())
+			size_t vidCount = vid_array.size();
+			switch (vidCount)
 			{
 			case 3:
 			{
 				// Index buffer
 				fib_array->insert(fib_array->end(), vid_array.begin(), vid_array.end());
 				// face attribute
-				fid_array->push_back(fid);
-				fflag_array->push_back(flag);
+				//fid_array->push_back(fid);
+				//fflag_array->push_back(flag);
 				break;
 			}
-			case 4:
+			/*case 4:
 			{
 				// P3 in Triangle012
 				if (inTriangle(
@@ -711,24 +718,36 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 					
 				}
 				// face attribute
-				fid_array->insert(fid_array->end(), 2, fid);
-				fflag_array->insert(fflag_array->end(), 2, flag);
-			}
+				//fid_array->insert(fid_array->end(), 2, fid);
+				//fflag_array->insert(fflag_array->end(), 2, flag);
+			}*/
 			default: // n-gons
+			{
+				// Triangle Fan
+				for (size_t i = 0; i < vidCount - 1; i++)
+				{
+					fib_array->push_back(vid_array[0]);
+					fib_array->push_back(vid_array[i]);
+					fib_array->push_back(vid_array[i + 1]);
+				}
 				break;
 			}
+			}
+			fid_array->insert(fid_array->end(), vidCount - 2, fid);
+			fflag_array->insert(fflag_array->end(), vidCount - 2, flag);
 		}
 	}
+	size_t heSetSize = heSet.size() / 2;
 	if (heib_array != nullptr)
 	{
 		unordered_set<he_t*> visitiedHE;
 		visitiedHE.reserve(heSet.size());
 
-		int heNum = heSet.size() / 2;
+		
 		heib_array->clear();
-		heib_array->reserve(heNum);
+		heib_array->reserve(heSetSize);
 		heflag_array->clear();
-		heflag_array->reserve(heNum);
+		heflag_array->reserve(heSetSize);
 
 		for (auto he : heSet)
 		{
@@ -738,9 +757,9 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 				visitiedHE.insert(he->flip);
 
 				heib_array->push_back(he->v->index);
-				heib_array->push_back(he->next->v->index);
+				heib_array->push_back(he->flip->v->index);
 
-				heid_array->push_back(static_cast<uint>(he->index));
+				heid_array->push_back(static_cast<uint32_t>(he->index));
 				heflag_array->push_back(he->getFlag());
 			}
 		}
@@ -900,7 +919,7 @@ HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2
 }
 
 template <typename T>
-void HDS_Mesh::flipSelectionState(int idx, unordered_map<int, T> &m) {
+void HDS_Mesh::flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m) {
 	auto it = m.find(idx);
 
 	if( it != m.end() ) {
@@ -908,17 +927,17 @@ void HDS_Mesh::flipSelectionState(int idx, unordered_map<int, T> &m) {
 	}
 }
 
-void HDS_Mesh::selectFace(int idx)
+void HDS_Mesh::selectFace(hdsid_t idx)
 {
 	flipSelectionState(idx, faceMap);
 }
 
-void HDS_Mesh::selectEdge(int idx)
+void HDS_Mesh::selectEdge(hdsid_t idx)
 {
 	flipSelectionState(idx, heMap);
 }
 
-void HDS_Mesh::selectVertex(int idx)
+void HDS_Mesh::selectVertex(hdsid_t idx)
 {
 	flipSelectionState(idx, vertMap);
 }
