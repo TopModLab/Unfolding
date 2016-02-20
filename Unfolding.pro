@@ -63,7 +63,8 @@ SOURCES += src/main.cpp\
     src/OperationStack.cpp \
     src/rimfacepanel.cpp \
     src/Camera.cpp \
-    src/MeshViewerModern.cpp
+    src/MeshViewerModern.cpp \
+	src/ViewerGrid.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_common.h \
@@ -116,7 +117,8 @@ HEADERS  += src/mainwindow.h \
     src/rimfacepanel.h \
     src/Camera.h \
     src/MeshViewerModern.h \
-    src/ViewerState.h
+    src/ViewerState.h \
+    src/ViewerGrid.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
@@ -141,5 +143,3 @@ DISTFILES += \
     shaders/face_fs.glsl \
     shaders/face_gs.glsl \
     shaders/face_vs.glsl \
-    shaders/grid_gs.glsl \
-    shaders/grid_vs.glsl
