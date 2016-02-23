@@ -27,5 +27,5 @@ void BindingMeshPanel::slot_saved()
 
 double BindingMeshPanel::getBridgerSize()
 {
-	return (double)bridgerSize / (double)ui->sizeSlider->maximum();
+	return (double)bridgerSize / (double)ui->sizeSlider->maximum() /2.0;
 }

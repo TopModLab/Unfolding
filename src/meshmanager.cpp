@@ -281,10 +281,17 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 		v->computeCurvature();
 		v->computeNormal();
 	}
+	int negCount = 0;
+	for (auto &he: hes) {
+		he->computeCurvature();
+		if (he->isNegCurve) negCount++;
+	}
+	cout << "negative edge count :::"<< negCount/2.0<<endl;
 
 	thismesh->setMesh(faces, verts, hes);
 	cout << "finished building halfedge structure." << endl;
 	cout << "halfedge count = " << thismesh->halfedges().size() << endl;
+
 
 	return thismesh;
 }

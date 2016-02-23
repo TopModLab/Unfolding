@@ -13,6 +13,7 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 
 	flapSize = newFlapSize;//Flap size needed in export function
 	shiftAmount = shift;
+	HDS_Bridger::setSamples(3);
 
 	unordered_map <hdsid_t, vert_t*> ori_map = ori_mesh->vertsMap();
 	unordered_set<he_t*> old_edges;
@@ -86,12 +87,11 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 		he1->flip->f = cutFace;
 		faces_new.push_back(cutFace);
 
-		//get original vertices
-		HDS_Vertex* v1 = ori_map[(he1->flip->v->refid)>>2];
-		HDS_Vertex* v2 = ori_map[(he2->flip->v->refid)>>2];
+
+		vector <QVector3D> vpair = scaleBridgerEdge(he->flip, HDS_Bridger::getScale());
 
 		//add bridger
-		addBridger(he1->flip, he2->flip, v1, v2);
+		addBridger(he1->flip, he2->flip, vpair);
 
 		if (flapSize < 0.01)
 		{

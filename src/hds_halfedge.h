@@ -18,7 +18,8 @@ public:
 		DEFAULT		= 0,
 		PICKED		= 1 << 1,
 		CUTEDGE		= 1 << 2,
-		EXTENDED	= 1 << 3
+		EXTENDED	= 1 << 3,
+		NEGCURVE	= 1 << 4
 	};
 
 	static void resetIndex() { uid = 0; }
@@ -37,6 +38,8 @@ public:
 	void setBridgeTwin(HDS_HalfEdge* he) {bridgeTwin = he; he->bridgeTwin = this;}
 
 	uint16_t getFlag() const;
+
+	void computeCurvature();
 public:
 	HDS_Face *f;
 	HDS_Vertex *v;
@@ -51,6 +54,7 @@ public:
 	bool isPicked;
 	bool isCutEdge;
 	bool isExtended;//From hollower
+	bool isNegCurve;
 	int flag;
 };
 

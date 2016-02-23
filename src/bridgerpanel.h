@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include <map>
-#include "bridgerpanelviewer.h"
 
 namespace Ui {
 class BridgerPanel;
@@ -30,7 +29,6 @@ public slots:
 
 private:
 	Ui::BridgerPanel *ui;
-	BridgerPanelViewer *viewer;
 	std::map<QString,double> bridgerConfig;
 
 

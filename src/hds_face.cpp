@@ -1,5 +1,6 @@
 #include "hds_face.h"
 #include "hds_halfedge.h"
+#include <qdebug.h>
 
 hdsid_t HDS_Face::uid = 0;
 
