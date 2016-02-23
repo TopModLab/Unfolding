@@ -315,7 +315,6 @@ void MeshExtender::updateNewMesh()
 		cur_mesh->addFace(f);
 		if (f->isBridger) bridgerCount++;
 	}
-	cout<< ";;;;;;;;;;;;;;;;;;;"<<bridgerCount<<endl;
 	//add new vertices and edges
 	for (auto v: verts_new) {
 		v->index = HDS_Vertex::assignIndex();

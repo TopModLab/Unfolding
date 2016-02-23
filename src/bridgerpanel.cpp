@@ -1,7 +1,6 @@
 #include "bridgerpanel.h"
 #include "ui_bridgerpanel.h"
 
-
 BridgerPanel::BridgerPanel(QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::BridgerPanel)
@@ -10,6 +9,7 @@ BridgerPanel::BridgerPanel(QWidget *parent) :
 	setWindowTitle(tr("Bridger Panel"));
 
 	ui->image->setPixmap(QPixmap(":icons/bezier.png"));
+
 
 	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(slot_saved()));
 	connect(ui->buttonBox, SIGNAL(rejected()), this, SIGNAL(sig_canceled()));
