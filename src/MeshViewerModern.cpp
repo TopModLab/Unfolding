@@ -78,12 +78,13 @@ void MeshViewerModern::initializeGL()
 void MeshViewerModern::bind()
 {
 	heMesh->exportVBO(&vtx_array,
-		&fRBO.ibos, &fRBO.ids, &heRBO.flags,
+		&fRBO.ibos, &fRBO.ids, &fRBO.flags,
 		&heRBO.ibos, &heRBO.ids, &heRBO.flags);
 
 	initialVBO();
 	bindVertexVBO();
 	bindFaceVAO();
+	bindFaceTBO();
 	bindEdgesVAO();
 	bindEdgesTBO();
 
@@ -130,11 +131,14 @@ void MeshViewerModern::bindEdgesVAO()
 void MeshViewerModern::bindEdgesTBO()
 {
 	glGenTextures(1, &heRBO.flag_tex);
+	glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
 	glGenBuffers(1, &heRBO.flag_tbo);
 	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.flag_tbo);
 	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * heRBO.flags.size(), &heRBO.flags[0], GL_STATIC_DRAW);
 
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
+	//glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
+	//glBindTexture(GL_TEXTURE_BUFFER, 0);
+	//glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 void MeshViewerModern::bindFaceVAO()
@@ -159,12 +163,15 @@ void MeshViewerModern::bindFaceVAO()
 
 void MeshViewerModern::bindFaceTBO()
 {
-	/*glGenBuffers(1, &tbo);
-	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(tbo_val), tbo_val, GL_STATIC_DRAW);
+	glGenTextures(1, &fRBO.flag_tex);
+	glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
+	glGenBuffers(1, &fRBO.flag_tbo);
+	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.flag_tbo);
+	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * fRBO.flags.size(), &fRBO.flags[0], GL_STATIC_DRAW);
 
-	glGenTextures(1, &tbo_tex);
-	glBindBuffer(GL_TEXTURE_BUFFER, 0);*/
+	//glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, fRBO.flag_tbo);
+	//glBindTexture(GL_TEXTURE_BUFFER, 0);
+	//glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 void MeshViewerModern::initShader()
@@ -323,6 +330,10 @@ void MeshViewerModern::paintGL()
 			face_solid_shader.bind();
 			face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 			face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
+			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, fRBO.flag_tbo);
+			face_solid_shader.setUniformValue("flag_tex", 0);
 			glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 			fRBO.vao.release();
 			
@@ -333,7 +344,10 @@ void MeshViewerModern::paintGL()
 			edge_solid_shader.bind();
 			edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 			edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-			edge_solid_shader.setUniformValue("flag_tex", heRBO.flag_tex);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
+			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
+			edge_solid_shader.setUniformValue("flag_tex", 1);
 			glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 			heRBO.vao.release();
 
