@@ -159,6 +159,7 @@ void MeshViewerModern::bindFaceVAO()
 	fRBO.vao.release();
 	fRBO.ibo.release();
 	vtx_vbo.release();
+
 }
 
 void MeshViewerModern::bindFaceTBO()

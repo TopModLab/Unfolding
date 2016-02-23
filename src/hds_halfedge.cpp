@@ -1,4 +1,5 @@
 #include "hds_halfedge.h"
+#include <QDebug>
 
 hdsid_t HDS_HalfEdge::uid = 0;
 
@@ -48,4 +49,14 @@ HDS_HalfEdge::HDS_HalfEdge(const HDS_HalfEdge &other)
 HDS_HalfEdge HDS_HalfEdge::operator=(const HDS_HalfEdge &other)
 {
 	throw "Not implemented.";
+}
+
+void HDS_HalfEdge::computeCurvature()
+{
+	QVector3D normalCross = QVector3D::crossProduct(f->n, flip->f->n);
+	if ( QVector3D::dotProduct(normalCross,(v->pos - flip->v->pos)) > 0 ) {
+		isNegCurve = true;
+	} else {
+		isNegCurve = false;
+	}
 }

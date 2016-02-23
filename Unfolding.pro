@@ -52,7 +52,6 @@ SOURCES += src/main.cpp\
     src/cutlocuspanel.cpp \
 	src/hds_bridger.cpp \
 	src/bridgerpanel.cpp \
-	src/bridgerpanelviewer.cpp \
     src/hollowmeshpanel.cpp \
     src/meshhollower.cpp \
     src/BBox.cpp \
@@ -105,7 +104,6 @@ HEADERS  += src/mainwindow.h \
     src/cutlocuspanel.h \
 	src/hds_bridger.h \
 	src/bridgerpanel.h \
-	src/bridgerpanelviewer.h \
     src/hollowmeshpanel.h \
     src/meshhollower.h \
     src/BBox.h \

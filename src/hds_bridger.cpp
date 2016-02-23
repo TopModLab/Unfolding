@@ -20,6 +20,10 @@ void HDS_Bridger::setBridger(std::map<QString, double> config)
 
 }
 
+void HDS_Bridger::setSamples(int sample) {
+	nSamples = sample;
+}
+
 void HDS_Bridger::setScale(double size)
 {
 	scale = size;
@@ -31,39 +35,32 @@ void HDS_Bridger::setCutFace(face_t* face1, face_t* face2)
 	cutFace2 = face2;
 }
 
-void HDS_Bridger::setBezierCurve()
+
+
+
+HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, vector<QVector3D> controlPoints)
 {
-	p10 = he->flip->v->pos;
-	p11 = he->v->pos;
-	p20 = hef->v->pos;
-	p21 = hef->flip->v->pos;
+
+	this->he = he;
+	this->hef = hef;
 
 	if (shape != 2) {
-		bezierPos_front = calculateBezierCurve(p10, p00, p20);
-		bezierPos_back = calculateBezierCurve(p11, p01, p21);
+		QVector3D p10, p11, p20, p21;
+		p10 = he->flip->v->pos;
+		p20 = hef->v->pos;
+		p11 = he->v->pos;
+		p21 = hef->flip->v->pos;
+
+		if (controlPoints.size() == 2){
+			//quadratic bezier curve constructor
+
+			bezierPos_front = quadraticBezierCurve(p10, controlPoints[1], p20);
+			bezierPos_back = quadraticBezierCurve(p11, controlPoints[0], p21);
+		}else {
+			bezierPos_front = cubicBezierCurve(p10, controlPoints[1], controlPoints[3], p20);
+			bezierPos_back = cubicBezierCurve(p11, controlPoints[0], controlPoints[2], p21);
+		}
 	}
-}
-
-//used when input is vertices that needs to be scaled down
-HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, HDS_Vertex* v1, HDS_Vertex* v2)
-{
-	p01 = (1 - scale/2)* v1->pos + scale/2 *v2->pos;
-	p00 = (1 - scale/2)* v2->pos + scale/2 *v1->pos;
-	this->he = he;
-	this->hef = hef;
-	setBezierCurve();
-}
-
-//pure bezier curve constructor
-HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, QVector3D v1, QVector3D v2)
-{
-
-	this->he = he;
-	this->hef = hef;
-	p01 = v1;
-	p00 = v2;
-	setBezierCurve();
-
 }
 
 void HDS_Bridger::createBridge()
@@ -115,7 +112,7 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 }
 
 
-//	///bezier curve calculator
+//	///quadratic bezier curve calculator
 //	///
 //	///           _________p0'
 //	///         p0      c2/__\
@@ -127,20 +124,44 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 // ///
 
 
-vector<QVector3D> HDS_Bridger::calculateBezierCurve(QVector3D p1, QVector3D p0, QVector3D p2)
+vector<QVector3D> HDS_Bridger::quadraticBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2)
 {
 	vector<QVector3D> pos;
 	if (shape == 1)
 	{
-		pos.push_back(p0);
+		pos.push_back(p1);
 	}else {
 
 		for( float i = 1.0/(float)nSamples ; i < 1 ; i += 1.0/(float)nSamples )
 		{
-			QVector3D pa = getPt( p1 , p0 , i );
-			QVector3D pb = getPt( p0 , p2 , i );
+			QVector3D pa = getPt( p0 , p1 , i );
+			QVector3D pb = getPt( p1 , p2 , i );
 
 			QVector3D p = getPt( pa , pb , i );
+			pos.push_back(p);
+		}
+	}
+	return pos;
+}
+
+vector<QVector3D> HDS_Bridger::cubicBezierCurve(QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3)
+{
+	vector<QVector3D> pos;
+	if (shape == 1)
+	{
+		pos.push_back(p1);
+		pos.push_back(p2);
+	}else {
+
+		for( float i = 1.0/(float)nSamples ; i < 1 ; i += 1.0/(float)nSamples )
+		{
+			QVector3D pa = getPt( p0 , p1 , i );
+			QVector3D pb = getPt( p1 , p2 , i );
+			QVector3D pc = getPt( p2 , p3 , i );
+			QVector3D pab = getPt( pa, pb, i);
+			QVector3D pbc = getPt( pb, pc, i);
+			QVector3D p = getPt( pab, pbc, i);
+
 			pos.push_back(p);
 		}
 	}
