@@ -117,7 +117,7 @@ HEADERS  += src/mainwindow.h \
     src/rimfacepanel.h \
     src/Camera.h \
     src/MeshViewerModern.h \
-    src/ViewerState.h \
+    src/CameraLegacy.h \
     src/ViewerGrid.h
 
 FORMS    += forms/mainwindow.ui \
