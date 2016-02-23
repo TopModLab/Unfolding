@@ -607,6 +607,12 @@ void MeshViewerModern::mouseReleaseEvent(QMouseEvent* e)
 	*/
 }
 
+void MeshViewerModern::wheelEvent(QWheelEvent* e)
+{
+	view_cam.zoom(0, 0, -e->delta() * 0.01);
+	update();
+}
+
 void MeshViewerModern::selectAll()
 {
 	switch (interactionState) {

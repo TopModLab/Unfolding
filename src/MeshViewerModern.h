@@ -80,7 +80,7 @@ protected:
 	void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
 	void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
 	void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-	//void wheelEvent(QWheelEvent* e) Q_DECL_OVERRIDE;
+	void wheelEvent(QWheelEvent* e) Q_DECL_OVERRIDE;
 public:// slots functions
 	void disableclp();
 	void disablecpp();
