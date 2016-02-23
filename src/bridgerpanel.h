@@ -30,7 +30,7 @@ public slots:
 
 private:
 	Ui::BridgerPanel *ui;
-	BridgerPanelViewer *viewer;
+	//BridgerPanelViewer *viewer;
 	std::map<QString,double> bridgerConfig;
 
 

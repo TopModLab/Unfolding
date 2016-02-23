@@ -1,7 +1,11 @@
 #ifndef CONNECTORPANELVIEWER_H
 #define CONNECTORPANELVIEWER_H
 
+#ifndef OPENGL_LEGACY
+#define OPENGL_LEGACY
+#endif
 #include <QGLWidget>
+#include "glutils.hpp"
 
 class BridgerPanelViewer : public QGLWidget
 {
