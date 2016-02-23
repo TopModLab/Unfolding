@@ -211,16 +211,16 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 			curBound.Union(vert->pos);
 		}
 		// if current row is too long, move to second row
-		cur_row_count++;
-		if (cur_row_count >= row_len_limit)
+		if (cur_row_count > row_len_limit)
 		{
 			global_bound = BBox3(QVector3D(global_bound.pMin.x(), global_bound.pMax.y(), 0));
 			piece_offset = global_bound.pMin - curBound.pMin;
-			cur_row_count = 0;
+			cur_row_count = 1;
 		}
 		else// keep panning from original bound
 		{
 			piece_offset = QVector3D(global_bound.pMax.x(), global_bound.pMin.y(), 0) - curBound.pMin;
+			cur_row_count++;
 		}
 		/************************************************************************/
 		/* Assembling Offset                                                    */
