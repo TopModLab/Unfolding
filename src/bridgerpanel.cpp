@@ -1,6 +1,6 @@
 #include "bridgerpanel.h"
 #include "ui_bridgerpanel.h"
-#include "bridgerpanelviewer.h"
+//#include "bridgerpanelviewer.h"
 
 
 BridgerPanel::BridgerPanel(QWidget *parent) :
@@ -12,8 +12,7 @@ BridgerPanel::BridgerPanel(QWidget *parent) :
 
 	ui->image->setPixmap(QPixmap(":icons/bezier.png"));
 
-	viewer = new BridgerPanelViewer(this);
-	//ui->viewerLayout->addWidget(viewer);
+	//viewer = new BridgerPanelViewer(this);
 
 	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(slot_saved()));
 	connect(ui->buttonBox, SIGNAL(rejected()), this, SIGNAL(sig_canceled()));
@@ -21,13 +20,14 @@ BridgerPanel::BridgerPanel(QWidget *parent) :
 
 	connect(ui->shapeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_restrainSliders(int)));
 
+	/*
 	connect(ui->curvSlider, SIGNAL(valueChanged(int)), viewer, SLOT(setCurvature(int)));
 	connect(ui->shapeComboBox, SIGNAL(currentIndexChanged(int)), viewer, SLOT(setShape(int)));
 	connect(ui->samplesSlider, SIGNAL(valueChanged(int)), viewer, SLOT(setSamples(int)));
 	connect(ui->sizeSlider, SIGNAL(valueChanged(int)), viewer, SLOT(setSize(int)));
 	connect(ui->convergeSlider, SIGNAL(valueChanged(int)), viewer, SLOT(setConvergingPoint(int)));
 	connect(ui->adhesiveComboBox, SIGNAL(currentIndexChanged(int)), viewer, SLOT(setOpeningType(int)));
-
+	*/
 }
 
 BridgerPanel::~BridgerPanel()
