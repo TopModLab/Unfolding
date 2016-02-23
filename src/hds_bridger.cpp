@@ -5,7 +5,7 @@ size_t HDS_Bridger::uid = 0;
 int HDS_Bridger::shape = 0;
 double HDS_Bridger::scale = 0.2;
 double HDS_Bridger::curv = 0.5;
-int HDS_Bridger::nSamples = 8;
+int HDS_Bridger::nSamples = 32;
 double HDS_Bridger::cp = 0;
 int HDS_Bridger::opening = 0;
 
