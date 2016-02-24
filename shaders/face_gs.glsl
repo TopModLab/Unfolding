@@ -19,7 +19,7 @@ void main()
 
 	normal = normalize(cross(v1.xyz, v2.xyz));
 
-	
+	gl_PrimitiveID = gl_PrimitiveIDIn;
 	// Send the triangle along with the edge distances
 	gl_Position = proj_matrix * p0;
 	pos = p0.xyz;
@@ -32,7 +32,6 @@ void main()
 	gl_Position = proj_matrix * p2;
 	pos = p2.xyz;
 	EmitVertex();
-	
 }
 
 

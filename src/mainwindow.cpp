@@ -47,6 +47,7 @@ bool MainWindow::createComponents()
 {
 	try {
 		viewer = new viewer_t(this);
+		viewer->setFocusPolicy(Qt::StrongFocus);
 		ceditor = new ColormapEditor;
 		cppanel = new CriticalPointsPanel;
 		clpanel = new CutLocusPanel;
