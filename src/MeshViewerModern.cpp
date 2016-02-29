@@ -138,23 +138,7 @@ void MeshViewerModern::bindEdgesTBO()
 
 	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.tbo[1]);
 	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * heRBO.ids.size(), &heRBO.ids[0], GL_STATIC_DRAW);
-	cout << "tbo[]:\t" << heRBO.tbo[0] << ", " << heRBO.tbo[1]
-		<< "\tflagt: " << heRBO.flag_tbo << ", " << heRBO.id_tbo << endl;
-	/*
-	glGenTextures(1, &heRBO.flag_tex);
-	//glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
-	glGenBuffers(1, &heRBO.flag_tbo);
-	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.flag_tbo);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * heRBO.flags.size(), &heRBO.flags[0], GL_STATIC_DRAW);
-
 	
-	glGenTextures(1, &heRBO.id_tex);
-	glGenBuffers(1, &heRBO.id_tbo);
-	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.id_tbo);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * heRBO.ids.size(), &heRBO.ids[0], GL_STATIC_DRAW);
-*/
-	//glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
-	//glBindTexture(GL_TEXTURE_BUFFER, 0);
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
@@ -189,13 +173,7 @@ void MeshViewerModern::bindFaceTBO()
 
 	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.tbo[1]);
 	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * fRBO.ids.size(), &fRBO.ids[0], GL_STATIC_DRAW);
-	/*
-	glGenTextures(1, &fRBO.flag_tex);
-
-	glGenBuffers(1, &fRBO.flag_tbo);
-	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.flag_tbo);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * fRBO.flags.size(), &fRBO.flags[0], GL_STATIC_DRAW);
-*/
+	
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
@@ -209,8 +187,6 @@ void MeshViewerModern::initShader()
 	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/face_fs.glsl");
 	face_solid_shader.addShaderFromSourceFile(oglShader::Geometry, "shaders/face_gs.glsl");
 	face_solid_shader.link();
-	//m_shader.bind();
-	//cout << "Shader log:\n" << m_shader.log().constData();
 
 	//////////////////////////////////////////////////////////////////////////
 	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/edge_vs.glsl");

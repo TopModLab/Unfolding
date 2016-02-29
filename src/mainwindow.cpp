@@ -117,53 +117,20 @@ bool MainWindow::connectComponents()
 void MainWindow::createActions()
 {
 	try {
-		//file menu
-		QAction *newAct = new QAction(QIcon(":/icons/open.png"), tr("Import"), this);
-		newAct->setShortcuts(QKeySequence::New);
-		newAct->setStatusTip(tr("Import a new obj file"));
-		connect(newAct, &QAction::triggered, this, &MainWindow::slot_newFile);
-		actionsMap["new"] = newAct;
+		ui->actionImport->setStatusTip(ui->actionImport->toolTip());
+		connect(ui->actionImport, &QAction::triggered, this, &MainWindow::slot_newFile);
+		ui->actionExport->setStatusTip(ui->actionExport->toolTip());
+		connect(ui->actionExport, &QAction::triggered, this, &MainWindow::slot_exportFile);//need to change
+		ui->actionExit->setStatusTip(ui->actionExit->toolTip());
+		connect(ui->actionExit, &QAction::triggered, this, &MainWindow::slot_closeFile);
+		ui->actionSave->setStatusTip(ui->actionSave->toolTip());
+		connect(ui->actionSave, &QAction::triggered, this, &MainWindow::slot_saveFile);
 
-		QAction *exportAct = new QAction(QIcon(":/icons/export.png"), tr("Export"), this);//new added
-		exportAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
-		exportAct->setStatusTip(tr("Export data as"));
-		connect(exportAct, &QAction::triggered, this, &MainWindow::slot_exportFile);//need to change
-		actionsMap["export"] = exportAct;
-
-		QAction *closeAct = new QAction(QIcon(":/icons/close.png"), tr("Close"), this);
-		closeAct->setShortcuts(QKeySequence::Quit);
-		closeAct->setStatusTip(tr("close a file"));
-		connect(closeAct, &QAction::triggered, this, &MainWindow::slot_closeFile);
-		actionsMap["close"] = closeAct;
-
-		QAction *saveAct = new QAction(QIcon(":/icons/save.png"), tr("Save"), this);
-		saveAct->setShortcuts(QKeySequence::Save);
-		saveAct->setStatusTip(tr("Save a file"));
-		connect(saveAct, &QAction::triggered, this, &MainWindow::slot_saveFile);
-		actionsMap["save"] = saveAct;
-
-
-
-		//Edit Menu
-		QAction *resetAct = new QAction(QIcon(":/icons/reset.png"), tr("Reset mesh"), this);
-		resetAct->setStatusTip(tr("Reset"));
-		connect(resetAct, &QAction::triggered, this, &MainWindow::slot_reset);
-		actionsMap["reset"] = resetAct;
-
-		QAction *undoAct = new QAction(QIcon(":/icons/undo.png"), tr("Undo last operation"), this);
-		undoAct->setStatusTip(tr("Undo last mesh operation"));
-		undoAct->setCheckable(false);
-		connect(undoAct, &QAction::triggered, this, &MainWindow::slot_undo);
-		actionsMap["mesh undo"] = undoAct;
-
-		QAction *redoAct = new QAction(QIcon(":/icons/redo.png"), tr("Redo last operation"), this);
-		redoAct->setStatusTip(tr("Redo last mesh operation"));
-		redoAct->setCheckable(false);
-		connect(redoAct, &QAction::triggered, this, &MainWindow::slot_redo);
-		actionsMap["mesh redo"] = redoAct;
+		connect(ui->actionReset, &QAction::triggered, this, &MainWindow::slot_reset);
+		connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::slot_undo);
+		connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::slot_redo);
 
 		//selection menu
-
 		QAction *selectAllAct = new QAction(tr("Select All"), this);
 		selectAllAct->setShortcut(QKeySequence::SelectAll);
 		selectAllAct->setStatusTip(tr("Select All"));
@@ -450,19 +417,6 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
 	try {
-		QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
-
-
-
-		fileMenu->addAction(actionsMap["new"]);
-		fileMenu->addAction(actionsMap["export"]);
-		fileMenu->addAction(actionsMap["close"]);
-
-		QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
-		editMenu->addAction(actionsMap["mesh undo"]);
-		editMenu->addAction(actionsMap["mesh redo"]);
-		editMenu->addAction(actionsMap["reset"]);
-
 		QMenu *selectionMenu = ui->menuBar->addMenu(tr("&Selection"));
 		selectionMenu->addAction(actionsMap["select all"]);
 		selectionMenu->addAction(actionsMap["select inverse"]);
@@ -532,17 +486,6 @@ void MainWindow::createDock()
 void MainWindow::createToolBar()
 {
 	try {
-		ui->mainToolBar->addAction(actionsMap["new"]);
-		ui->mainToolBar->addAction(actionsMap["save"]);
-		ui->mainToolBar->addAction(actionsMap["export"]);
-		ui->mainToolBar->addSeparator();
-
-		ui->mainToolBar->addAction(actionsMap["reset"]);
-		ui->mainToolBar->addAction(actionsMap["mesh undo"]);
-		ui->mainToolBar->addAction(actionsMap["mesh redo"]);
-
-		ui->mainToolBar->addSeparator();
-
 		QActionGroup *selectGroup = new QActionGroup(ui->mainToolBar);
 		selectGroup->addAction(actionsMap["camera"]);
 		selectGroup->addAction(actionsMap["face select"]);
@@ -959,6 +902,14 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 	clpanel->close();
 }
 
+
+void MainWindow::updateCurrentMesh()
+{
+	curMesh = meshStack.top();
+#if _DEBUG
+	cout << "current mesh mode:::" << curMesh << endl;
+#endif
+}
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 	//kkkkkkkkkkk
