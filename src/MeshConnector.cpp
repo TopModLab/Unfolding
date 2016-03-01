@@ -37,6 +37,10 @@ cstchar SVG_TEXT[] =		"\t<text x=\"%lf\" y=\"%lf\" transform=\"rotate(%lf %lf,%l
 							"style=\"font-size:10;font-family:'1CamBamStick8-normal';"\
 							"stroke:blue;stroke-width:0.8;fill:none;" \
 							"text-anchor:middle;alignment-baseline:middle;\" >%s</text>\n";
+cstchar SVG_LABEL[] =		"\t<text x=\"%lf\" y=\"%lf\" " \
+							"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;" \
+							"text-anchor:middle;alignment-baseline:middle;" \
+							"font-family:'1CamBamStick8-normal'\" >-</text>\n";
 cstchar SVG_ARCH[] =		"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
 							"L %lf %lf " \
@@ -221,35 +225,50 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 					QVector2D startPos = cut_he->v->pos.toVector2D();
 					QVector2D dirPin = targPos - startPos;
 
-					int pin_seg = max(3, min(2, static_cast<int>(
-						dirPin.length() * he_scale / pin_radius / 4)) + 1);
-					if (pin_seg > 1)
+					// 1 Pinhole
+					if (pinholecount_type == 0)
 					{
-						for (int pin_i = 1; pin_i < pin_seg; pin_i++)
+						printPinholes.push_back((startPos + dirPin * 0.5) * he_scale);
+						// Add orientation label
+						if (!cut_he->next->isCutEdge)
 						{
-							printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
+							printOrientLabel.push_back((startPos + dirPin * 0.75) * he_scale);
+						}
+					}
+					// 2 or 4 Pinhole
+					else
+					{
+						int pin_seg = max(3, min(2, static_cast<int>(
+							dirPin.length() * he_scale / pin_radius / 4)) + 1);
+						if (pin_seg > 1)
+						{
+							for (int pin_i = 1; pin_i < pin_seg; pin_i++)
+							{
+								printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
+							}
+						}
+
+						// If 4 pinholes
+						if (pinholecount_type == 2 || pin_seg < 2)
+						{
+							targPos += startPos - targetVPos;
+							startPos = targetVPos;
+							dirPin = targPos - startPos;
+
+							pin_seg = max(3, min(2, static_cast<int>(
+								dirPin.length() * he_scale / pin_radius / 4)) + 1);
+							for (int pin_i = 1; pin_i < pin_seg; pin_i++)
+							{
+								printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
+							}
+						}
+						// Add orientation label
+						if (!cut_he->next->isCutEdge)
+						{
+							printOrientLabel.push_back((startPos + dirPin * 0.5) * he_scale);
 						}
 					}
 					
-					// Add orientation label
-					if (!cut_he->next->isCutEdge)
-					{
-						printOrientLabel.push_back((startPos + dirPin * 0.5) * he_scale);
-					}
-					// If 4 pinholes
-					if (pinholecount_type == 1 || pin_seg < 2)
-					{
-						targPos += startPos - targetVPos;
-						startPos = targetVPos;
-						dirPin = targPos - startPos;
-
-						pin_seg = max(3, min(2, static_cast<int>(
-							dirPin.length() * he_scale / pin_radius / 4)) + 1);
-						for (int pin_i = 1; pin_i < pin_seg; pin_i++)
-						{
-							printPinholes.push_back((startPos + dirPin * pin_i / pin_seg) * he_scale);
-						}
-					}
 					/*
 					printPinholes.push_back(startPos + dirPin / 3.0);
 					printPinholes.push_back(startPos + dirPin * 2.0 / 3.0);*/
@@ -303,10 +322,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		/************************************************************************/
 		for (auto labpos : printOrientLabel)
 		{
-			fprintf(SVG_File, "\t<text x=\"%lf\" y=\"%lf\" " \
-				"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;" \
-				"text-anchor:middle;alignment-baseline:middle;" \
-				"font-family:'1CamBamStick8-normal'\" >-</text>\n",
+			fprintf(SVG_File, SVG_LABEL,
 				labpos.x(), labpos.y());
 		}
 
