@@ -129,7 +129,7 @@ FORMS    += forms/mainwindow.ui \
     forms/rimfacepanel.ui
 
 RESOURCES += \
-    icons.qrc
+    resources.qrc
 
 OTHER_FILES +=
 LIBS += -glut32

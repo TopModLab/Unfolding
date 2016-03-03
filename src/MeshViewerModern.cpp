@@ -183,18 +183,19 @@ void MeshViewerModern::initShader()
 	// Grid Shader
 	grid.initShader();
 	//////////////////////////////////////////////////////////////////////
-	face_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/face_vs.glsl");
-	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/face_fs.glsl");
-	face_solid_shader.addShaderFromSourceFile(oglShader::Geometry, "shaders/face_gs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Vertex, ":shaders/face_vs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, ":shaders/face_fs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Geometry, ":shaders/face_gs.glsl");
 	face_solid_shader.link();
 
 	//////////////////////////////////////////////////////////////////////////
-	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/edge_vs.glsl");
-	edge_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/edge_fs.glsl");
+	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, ":shaders/edge_vs.glsl");
+	edge_solid_shader.addShaderFromSourceFile(oglShader::Fragment, ":shaders/edge_fs.glsl");
 	edge_solid_shader.link();
+
 	//////////////////////////////////////////////////////////////////////////
-	uid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/uid_vs.glsl");
-	uid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/uid_fs.glsl");
+	uid_shader.addShaderFromSourceFile(oglShader::Vertex, ":shaders/uid_vs.glsl");
+	uid_shader.addShaderFromSourceFile(oglShader::Fragment, ":shaders/uid_fs.glsl");
 	uid_shader.link();
 
 }
