@@ -114,6 +114,10 @@
    <addaction name="actionRim"/>
    <addaction name="actionCut"/>
    <addaction name="actionUnfold"/>
+   <addaction name="separator"/>
+   <addaction name="actionColormap"/>
+   <addaction name="actionCPts"/>
+   <addaction name="actionCutLocus"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="sizeGripEnabled">
@@ -560,6 +564,42 @@
    </property>
    <property name="shortcut">
     <string>Alt+U</string>
+   </property>
+  </action>
+  <action name="actionColormap">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/colormap.png</normaloff>:/icons/colormap.png</iconset>
+   </property>
+   <property name="text">
+    <string>Colormap</string>
+   </property>
+   <property name="toolTip">
+    <string>Colormap</string>
+   </property>
+  </action>
+  <action name="actionCPts">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/cp.png</normaloff>:/icons/cp.png</iconset>
+   </property>
+   <property name="text">
+    <string>Critical Points</string>
+   </property>
+   <property name="toolTip">
+    <string>Critical points</string>
+   </property>
+  </action>
+  <action name="actionCutLocus">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/cl.png</normaloff>:/icons/cl.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut Locus</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut locus</string>
    </property>
   </action>
  </widget>

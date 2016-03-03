@@ -288,21 +288,9 @@ void MainWindow::createActions()
 		ui->actionUnfold->setChecked(false);
 		connect(ui->actionUnfold, &QAction::toggled, this, &MainWindow::slot_unfoldMesh);
 		
-		QAction *colormapAct = new QAction(QIcon(":/icons/colormap.png"), tr("Colormap"), this);
-		colormapAct->setStatusTip(tr("Color map"));
-		connect(colormapAct, &QAction::triggered, this, &MainWindow::slot_triggerColormap);
-		actionsMap["colormap"] = colormapAct;
-
-		QAction *cpAct = new QAction(QIcon(":/icons/cp.png"), tr("Critical Points"), this);
-		cpAct->setStatusTip(tr("Critical points"));
-		connect(cpAct, &QAction::triggered, this, &MainWindow::slot_triggerCriticalPoints);
-		actionsMap["critical_points"] = cpAct;
-
-		QAction *clAct = new QAction(QIcon(":/icons/cl.png"), tr("Cut Locus"), this);
-		clAct->setStatusTip(tr("Cut Locus"));
-		connect(clAct, &QAction::triggered, this, &MainWindow::slot_triggerCutLocusPanel);
-		actionsMap["cut_locus"] = clAct;
-
+		connect(ui->actionColormap, &QAction::triggered, this, &MainWindow::slot_triggerColormap);
+		connect(ui->actionCPts, &QAction::triggered, this, &MainWindow::slot_triggerCriticalPoints);
+		connect(ui->actionCutLocus, &QAction::triggered, this, &MainWindow::slot_triggerCutLocusPanel);
 	}
 	catch(...) {
 		throw UnfoldingAppException("Failed to create actions!");
@@ -374,11 +362,6 @@ void MainWindow::createToolBar()
 		//QActionGroup *unfoldGroup = new QActionGroup(ui->mainToolBar);
 		//unfoldGroup->addAction(actionsMap["mesh unfold"]);
 		//unfoldGroup->addAction(actionsMap["mesh fold"]);
-
-		ui->mainToolBar->addSeparator();
-		ui->mainToolBar->addAction(actionsMap["colormap"]);
-		ui->mainToolBar->addAction(actionsMap["critical_points"]);
-		ui->mainToolBar->addAction(actionsMap["cut_locus"]);
 	}
 	catch(...) {
 		throw UnfoldingAppException("Failed to create status bar!");
@@ -483,7 +466,7 @@ void MainWindow::slot_triggerExtendMesh()
 {
 	if (MeshManager::getInstance()->getMeshStack()->canExtend)
 	{
-	conpanel->setSaveMode((sender() == actionsMap["extend"] )? true:false);
+	conpanel->setSaveMode((sender() == ui->actionExtend/*actionsMap["extend"]*/ )? true:false);
 	conpanel->show();
 	conpanel->activateWindow();
 	}
@@ -727,9 +710,9 @@ void MainWindow::slot_triggerCutLocusPanel() {
 	clpanel->show();
 }
 
-void MainWindow::slot_disableclp() {
+void MainWindow::slot_disableclp()
+{
 	actionsMap["show CP"]->setChecked(clpanel->isMinMaxChecked());
-
 }
 
 void MainWindow::slot_updateViewerColormap()
