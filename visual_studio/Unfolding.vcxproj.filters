@@ -558,7 +558,7 @@
     <None Include="..\icons\fold.png">
       <Filter>Resource Files</Filter>
     </None>
-    <CustomBuild Include="..\icons.qrc">
+    <CustomBuild Include="..\resources.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <None Include="..\icons\open.png">

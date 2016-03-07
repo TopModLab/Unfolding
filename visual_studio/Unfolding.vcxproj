@@ -189,7 +189,8 @@
       <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>xcopy /i /e /s /y /f "$(ProjectDir)..\shaders\*.glsl" "$(TargetDir)\shaders\*.glsl"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -272,7 +273,8 @@
       <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>xcopy /i /e /s /y /f "$(ProjectDir)..\shaders\*.glsl" "$(TargetDir)\shaders\*.glsl"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -1017,7 +1019,7 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <CustomBuild Include="..\icons.qrc">
+    <CustomBuild Include="..\resources.qrc">
       <FileType>Document</FileType>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);..\icons\edge.png;..\icons\face.png;..\icons\vertex.png;..\icons\cut.png;..\icons\unfold.png;..\icons\open.png;..\icons\save.png;..\icons\colormap.png;..\icons\smooth.png;..\icons\extend.png;..\icons\cp.png;..\icons\cl.png;..\icons\select.png;..\icons\fold.png;%(AdditionalInputs)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath);..\icons\edge.png;..\icons\face.png;..\icons\vertex.png;..\icons\cut.png;..\icons\unfold.png;..\icons\open.png;..\icons\save.png;..\icons\colormap.png;..\icons\smooth.png;..\icons\extend.png;..\icons\cp.png;..\icons\cl.png;..\icons\select.png;..\icons\fold.png;%(AdditionalInputs)</AdditionalInputs>

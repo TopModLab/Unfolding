@@ -30,5 +30,13 @@
         <file>icons/vertex.png</file>
         <file>icons/rimface_3d.png</file>
         <file>icons/reset.png</file>
+        <file>shaders/edge_fs.glsl</file>
+        <file>shaders/edge_vs.glsl</file>
+        <file>shaders/face_fs.glsl</file>
+        <file>shaders/face_gs.glsl</file>
+        <file>shaders/face_vs.glsl</file>
+        <file>shaders/uid_fs.glsl</file>
+        <file>shaders/uid_vs.glsl</file>
+        <file>meshes/cube.obj</file>
     </qresource>
 </RCC>

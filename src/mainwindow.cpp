@@ -34,9 +34,8 @@ void MainWindow::initialization()
 	isExtended = false;
 
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Original);
-	QString curPath = QDir::currentPath();
-	QString filename = curPath + "/meshes/cube.obj";
-	if (MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()))) {
+	
+	if (MeshManager::getInstance()->loadOBJFile(":meshes/cube.obj")) {
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 		//meshStack.push((CurrentMesh)Original);
 		//updateCurrentMesh();
@@ -397,8 +396,12 @@ void MainWindow::createStatusBar()
 
 void MainWindow::slot_newFile()
 {
-
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)")); //later added
+#ifdef _DEBUG
+	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)"));
+#else // Release
+	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "/", tr("OBJ files(*.obj)"));
+#endif
+	
 	if (filename != NULL) {
 #ifdef _DEBUG
 		QTime clock;
