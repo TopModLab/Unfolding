@@ -665,7 +665,7 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 			}
 			vector<uint32_t> vid_array;
 			auto fid = static_cast<uint32_t>(face->index);
-			auto flag = face->getFlag();
+			uint16_t flag = face->getFlag();
 			auto he = face->he;
 			auto curHE = he;
 			do
@@ -724,7 +724,7 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 			default: // n-gons
 			{
 				// Triangle Fan
-				for (size_t i = 0; i < vidCount - 1; i++)
+				for (size_t i = 1; i < vidCount - 1; i++)
 				{
 					fib_array->push_back(vid_array[0]);
 					fib_array->push_back(vid_array[i]);

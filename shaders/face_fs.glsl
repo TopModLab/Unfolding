@@ -14,20 +14,24 @@ void main()
 {
 	uint flag = texelFetch(flag_tex, gl_PrimitiveID).r;
 	// final colour
+	//frag_color = vec4(gl_PrimitiveID / 255.0, 0, 0, 1.0);
+	
+	
+	vec3 dist2eye = light_pos - pos;
+	vec3 dir = normalize(dist2eye);
+	float dot_prod = dot(dir, normal);
+	dot_prod = (dot_prod + 1.0) / 2.0;
+	vec3 Id = mix(La, Kd, dot_prod); // final diffuse intensity
+
+	// final colour
+	//frag_color = vec4(Id, 1.0);
+	
 	if (bool(flag & 16))
 	{
-		frag_color = vec4(0.8, 0.6, 0.2, 1.0);
+		frag_color = vec4(Id * 0.8, 1.0);
 	}
 	else
 	{
-		vec3 dist2eye = light_pos - pos;
-		vec3 dir = normalize(dist2eye);
-		float dot_prod = dot(dir, normal);
-		dot_prod = (dot_prod + 1.0) / 2.0;
-		vec3 Id = mix(La, Kd, dot_prod); // final diffuse intensity
-
-		// final colour
 		frag_color = vec4(Id, 1.0);
 	}
-	
 }

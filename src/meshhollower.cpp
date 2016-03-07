@@ -15,6 +15,7 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 	shiftAmount = shift;
     //HDS_Bridger::setSamples(3);
 
+
 	unordered_map <hdsid_t, vert_t*> ori_map = ori_mesh->vertsMap();
 	unordered_set<he_t*> old_edges;
 	for (auto he: cur_mesh->halfedges()) {
@@ -30,7 +31,6 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 	//set new bridger on each edge
 	for (auto he : old_edges)
 	{
-		cout << "bridger based on original edge " << he->index << endl;
 		//get edge vertex, calculate scaled vertex
 		vert_t* he_v = he->v;
 		vert_t* he_flip_v = he->flip->v;

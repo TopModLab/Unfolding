@@ -116,7 +116,9 @@ void svg_precompute(const string& input_obj_name, const int fixed_k, string& svg
 		if (time_once.getTime() -  past_time > 5 ) {
 			past_time = time_once.getTime();
 			char buf[128];
-			sprintf(buf, "Computed %.0lf percent", (double) tmp_source  * 100. / (end_vertex_index - begin_vertex_index));
+#if _DEBUG
+			sprintf(buf, "Computed %.0lf percent", (double)tmp_source  * 100. / (end_vertex_index - begin_vertex_index));
+#endif
 			time_once.printTime(buf );
 		}
 		ElapasedTime dis_time;

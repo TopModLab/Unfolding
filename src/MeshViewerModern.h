@@ -35,7 +35,8 @@ struct RenderBufferObject// : protected oglFuncs
 	RenderBufferObject(oglFuncs* f)
 		: funcs(f)
 		, ibo(oglBuffer::Type::IndexBuffer)
-		, flag_tbo(0), flag_tex(0), id_tbo(0), id_tex(0)
+		//, flag_tbo(0), flag_tex(0), id_tbo(0), id_tex(0)
+		, tbo{}, tex{}
 	{
 	}
 	~RenderBufferObject() { destroy(); }
@@ -44,17 +45,30 @@ struct RenderBufferObject// : protected oglFuncs
 	{
 		vao.destroy();
 		ibo.destroy();
+		funcs->glDeleteTextures(2, tex);
+		funcs->glDeleteBuffers(2, tbo);
+		/*
 		funcs->glDeleteBuffers(1, &flag_tbo);
 		funcs->glDeleteTextures(1, &flag_tex);
 		funcs->glDeleteBuffers(1, &id_tbo);
 		funcs->glDeleteTextures(1, &id_tex);
+		*/
 	}
 
 	oglFuncs* funcs;
 	oglVAO vao;
 	oglBuffer ibo;
-	GLuint flag_tbo, flag_tex;
-	GLuint id_tbo, id_tex;
+	union
+	{
+		GLuint tbo[2];
+		struct { GLuint flag_tbo, id_tbo; };
+	};
+	union
+	{
+		GLuint tex[2];
+		struct { GLuint flag_tex, id_tex; };
+	};
+
 	vector<GLuint> ibos;// he ibo data
 	vector<GLuint> ids;// he id, for querying
 	vector<uint16_t> flags;// he flag data
@@ -80,7 +94,7 @@ protected:
 	void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
 	void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
 	void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-	//void wheelEvent(QWheelEvent* e) Q_DECL_OVERRIDE;
+	void wheelEvent(QWheelEvent* e) Q_DECL_OVERRIDE;
 public:// slots functions
 	void disableclp();
 	void disablecpp();
@@ -132,11 +146,11 @@ public:
 	enum InteractionState : size_t
 	{
 		Camera = 0,
-		Camera_Translation,
-		Camera_Zoom,
-		SelectVertex,
-		SelectFace,
-		SelectEdge
+		Camera_Translation = 1,
+		Camera_Zoom = 2,
+		SelectVertex = 4,
+		SelectFace = 5,
+		SelectEdge = 6
 	};
 	enum ShadingState
 	{

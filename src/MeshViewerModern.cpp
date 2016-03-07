@@ -1,5 +1,5 @@
 #include "MeshViewerModern.h"
-
+#include <QFileDialog>
 
 MeshViewerModern::MeshViewerModern(QWidget *parent)
 	: QOpenGLWidget(parent)
@@ -130,15 +130,16 @@ void MeshViewerModern::bindEdgesVAO()
 
 void MeshViewerModern::bindEdgesTBO()
 {
-	glGenTextures(1, &heRBO.flag_tex);
-	glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
-	glGenBuffers(1, &heRBO.flag_tbo);
-	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.flag_tbo);
+	glGenTextures(2, heRBO.tex);
+	glGenBuffers(2, heRBO.tbo);
+
+	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.tbo[0]);
 	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * heRBO.flags.size(), &heRBO.flags[0], GL_STATIC_DRAW);
 
-	//glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
-	//glBindTexture(GL_TEXTURE_BUFFER, 0);
-	//glBindBuffer(GL_TEXTURE_BUFFER, 0);
+	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.tbo[1]);
+	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * heRBO.ids.size(), &heRBO.ids[0], GL_STATIC_DRAW);
+	
+	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 void MeshViewerModern::bindFaceVAO()
@@ -164,15 +165,16 @@ void MeshViewerModern::bindFaceVAO()
 
 void MeshViewerModern::bindFaceTBO()
 {
-	glGenTextures(1, &fRBO.flag_tex);
-	glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
-	glGenBuffers(1, &fRBO.flag_tbo);
-	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.flag_tbo);
+	glGenTextures(2, fRBO.tex);
+	glGenBuffers(2, fRBO.tbo);
+
+	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.tbo[0]);
 	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * fRBO.flags.size(), &fRBO.flags[0], GL_STATIC_DRAW);
 
-	//glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, fRBO.flag_tbo);
-	//glBindTexture(GL_TEXTURE_BUFFER, 0);
-	//glBindBuffer(GL_TEXTURE_BUFFER, 0);
+	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.tbo[1]);
+	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * fRBO.ids.size(), &fRBO.ids[0], GL_STATIC_DRAW);
+	
+	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 void MeshViewerModern::initShader()
@@ -185,8 +187,6 @@ void MeshViewerModern::initShader()
 	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/face_fs.glsl");
 	face_solid_shader.addShaderFromSourceFile(oglShader::Geometry, "shaders/face_gs.glsl");
 	face_solid_shader.link();
-	//m_shader.bind();
-	//cout << "Shader log:\n" << m_shader.log().constData();
 
 	//////////////////////////////////////////////////////////////////////////
 	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/edge_vs.glsl");
@@ -221,8 +221,14 @@ void MeshViewerModern::drawMeshToFBO()
 	{
 	case InteractionState::SelectVertex:
 	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		fRBO.vao.bind();
+		uid_shader.setUniformValue("depthonly", true);
+		glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+
 		vtx_vbo.bind();
 		glPointSize(15.0);
+		uid_shader.setUniformValue("depthonly", false);
 		glDrawArrays(GL_POINTS, 0, vtx_array.size());
 		vtx_vbo.release();
 		//draw vertices
@@ -231,19 +237,45 @@ void MeshViewerModern::drawMeshToFBO()
 	case InteractionState::SelectFace:
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 		fRBO.vao.bind();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_BUFFER, fRBO.id_tex);
+		glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, fRBO.id_tbo);
+		uid_shader.setUniformValue("id_tex", 0);
+		uid_shader.setUniformValue("depthonly", false);
+
 		glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+		
 		fRBO.vao.release();
+		glBindTexture(GL_TEXTURE_BUFFER, 0);
 		//draw faces
 		break;
 	}
 	case InteractionState::SelectEdge:
 	{
-		glLineWidth(2.0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		fRBO.vao.bind();
+		uid_shader.setUniformValue("depthonly", true);
+		glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+
+		glLineWidth(10.0);
 		heRBO.vao.bind();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		uid_shader.setUniformValue("depthonly", false);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_BUFFER, heRBO.id_tex);
+		glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, heRBO.id_tbo);
+		uid_shader.setUniformValue("id_tex", 0);
+
+
 		glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+		
 		heRBO.vao.release();
+		glBindTexture(GL_TEXTURE_BUFFER, 0);
 		//draw edges
 		break;
 	}
@@ -263,29 +295,23 @@ void MeshViewerModern::drawMeshToFBO()
 		return;
 	}
 	size_t renderID = pixel & 0xFFFFFF;
-	size_t actualID;
 	unordered_set<int> settest;
 	switch (interactionState)
 	{
 	case InteractionState::SelectVertex:
 		selectionID.vertexID = renderID << 2
 			| static_cast<size_t>(DataTypeMark::VERTEX_MARK);
-		actualID = renderID;
 		break;
 	case InteractionState::SelectFace:
 		selectionID.faceID = renderID << 2
 			| static_cast<size_t>(DataTypeMark::FACE_MARK);
-		actualID = fRBO.ids[renderID];
 		break;
 	case InteractionState::SelectEdge:
 		selectionID.edgeID = renderID << 2
 			| static_cast<size_t>(DataTypeMark::EDGE_MARK);
-		actualID = heRBO.ids[renderID];
 		break;
 	}
 	cout << "draw primitive id:" << (selectionID.selID >> 2) << endl;
-	cout << "primitive type:" << (selectionID.selID & 0x03) << endl;
-	cout << "actual id:" << actualID << endl;
 }
 
 void MeshViewerModern::paintGL()
@@ -331,6 +357,7 @@ void MeshViewerModern::paintGL()
 			face_solid_shader.bind();
 			face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 			face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+			// Bind Texture Buffer
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, fRBO.flag_tbo);
@@ -340,19 +367,20 @@ void MeshViewerModern::paintGL()
 			
 			// Draw edge
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glLineWidth(2.0);
+			glLineWidth(1.0);
 			heRBO.vao.bind();
 			edge_solid_shader.bind();
 			edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 			edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-			glActiveTexture(GL_TEXTURE1);
+			// Bind Texture Buffer
 			glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
-			edge_solid_shader.setUniformValue("flag_tex", 1);
+			edge_solid_shader.setUniformValue("flag_tex", 0);
 			glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 			heRBO.vao.release();
 
 			edge_solid_shader.release();
+			glBindTexture(GL_TEXTURE_BUFFER, 0);
 		}
 	}
 }
@@ -456,9 +484,15 @@ void MeshViewerModern::keyPressEvent(QKeyEvent* e)
 		view_cam.updateModelView();*/
 		break;
 	}
-
+	case Qt::Key_P:
+	{
+		QString filename = QFileDialog::getSaveFileName(
+				this, "Save Screenshot file...", "default", tr("PNG(*.png)"));
+		this->grab().save(filename);
+		
+		break;
 	}
-	update();
+	}
 }
 
 void MeshViewerModern::keyReleaseEvent(QKeyEvent* e)
@@ -606,6 +640,12 @@ void MeshViewerModern::mouseReleaseEvent(QMouseEvent* e)
 
 	update();
 	*/
+}
+
+void MeshViewerModern::wheelEvent(QWheelEvent* e)
+{
+	view_cam.zoom(0, 0, -e->delta() * 0.01);
+	update();
 }
 
 void MeshViewerModern::selectAll()

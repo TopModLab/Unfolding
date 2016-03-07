@@ -15,6 +15,7 @@ void HDS_Bridger::setBridger(std::map<QString, double> config)
 	scale = config["size"];
 	curv = config["curv"];
 	nSamples = (int)config["samples"];
+	cout << "N-Sample:\t" << nSamples << endl;
 	cp = config["cp"];
 	opening = (int)config["opening"];
 

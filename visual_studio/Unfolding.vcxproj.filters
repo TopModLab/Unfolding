@@ -307,7 +307,7 @@
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ViewerGrid.cpp">
-      <Filter>Generated Files</Filter>
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -471,7 +471,7 @@
       <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ViewerGrid.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

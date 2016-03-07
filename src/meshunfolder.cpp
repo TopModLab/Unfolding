@@ -211,16 +211,16 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 			curBound.Union(vert->pos);
 		}
 		// if current row is too long, move to second row
-		cur_row_count++;
-		if (cur_row_count >= row_len_limit)
+		if (cur_row_count > row_len_limit)
 		{
 			global_bound = BBox3(QVector3D(global_bound.pMin.x(), global_bound.pMax.y(), 0));
 			piece_offset = global_bound.pMin - curBound.pMin;
-			cur_row_count = 0;
+			cur_row_count = 1;
 		}
 		else// keep panning from original bound
 		{
 			piece_offset = QVector3D(global_bound.pMax.x(), global_bound.pMin.y(), 0) - curBound.pMin;
+			cur_row_count++;
 		}
 		/************************************************************************/
 		/* Assembling Offset                                                    */
@@ -261,7 +261,9 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 	/// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
+#if _DEBUG
 		cout << "No face is selected, finding fixed faces..." << endl;
+#endif
 		/// find all fixed faces
 		unordered_set<int> visitedFaces;
 
@@ -295,8 +297,10 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 			unfoldingProgress->setValue((double)progressIndex/(double)ref_mesh->faceSet.size()*10);
 		}
 
+#if _DEBUG
 		cout << "Fixed faces found: ";
 		Utils::print(fixedFaces);
+#endif
 	}
 
 	unfoldingProgress->setValue(10);

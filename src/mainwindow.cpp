@@ -47,6 +47,7 @@ bool MainWindow::createComponents()
 {
 	try {
 		viewer = new viewer_t(this);
+		viewer->setFocusPolicy(Qt::StrongFocus);
 		ceditor = new ColormapEditor;
 		cppanel = new CriticalPointsPanel;
 		clpanel = new CutLocusPanel;
@@ -116,125 +117,32 @@ bool MainWindow::connectComponents()
 void MainWindow::createActions()
 {
 	try {
-		//file menu
-		QAction *newAct = new QAction(QIcon(":/icons/open.png"), tr("Import"), this);
-		newAct->setShortcuts(QKeySequence::New);
-		newAct->setStatusTip(tr("Import a new obj file"));
-		connect(newAct, &QAction::triggered, this, &MainWindow::slot_newFile);
-		actionsMap["new"] = newAct;
+		ui->actionImport->setStatusTip(ui->actionImport->toolTip());
+		connect(ui->actionImport, &QAction::triggered, this, &MainWindow::slot_newFile);
+		ui->actionExport->setStatusTip(ui->actionExport->toolTip());
+		connect(ui->actionExport, &QAction::triggered, this, &MainWindow::slot_exportFile);//need to change
+		ui->actionExit->setStatusTip(ui->actionExit->toolTip());
+		connect(ui->actionExit, &QAction::triggered, this, &MainWindow::slot_closeFile);
+		ui->actionSave->setStatusTip(ui->actionSave->toolTip());
+		connect(ui->actionSave, &QAction::triggered, this, &MainWindow::slot_saveFile);
 
-		QAction *exportAct = new QAction(QIcon(":/icons/export.png"), tr("Export"), this);//new added
-		exportAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
-		exportAct->setStatusTip(tr("Export data as"));
-		connect(exportAct, &QAction::triggered, this, &MainWindow::slot_exportFile);//need to change
-		actionsMap["export"] = exportAct;
-
-		QAction *closeAct = new QAction(QIcon(":/icons/close.png"), tr("Close"), this);
-		closeAct->setShortcuts(QKeySequence::Quit);
-		closeAct->setStatusTip(tr("close a file"));
-		connect(closeAct, &QAction::triggered, this, &MainWindow::slot_closeFile);
-		actionsMap["close"] = closeAct;
-
-		QAction *saveAct = new QAction(QIcon(":/icons/save.png"), tr("Save"), this);
-		saveAct->setShortcuts(QKeySequence::Save);
-		saveAct->setStatusTip(tr("Save a file"));
-		connect(saveAct, &QAction::triggered, this, &MainWindow::slot_saveFile);
-		actionsMap["save"] = saveAct;
-
-
-
-		//Edit Menu
-		QAction *resetAct = new QAction(QIcon(":/icons/reset.png"), tr("Reset mesh"), this);
-		resetAct->setStatusTip(tr("Reset"));
-		connect(resetAct, &QAction::triggered, this, &MainWindow::slot_reset);
-		actionsMap["reset"] = resetAct;
-
-		QAction *undoAct = new QAction(QIcon(":/icons/undo.png"), tr("Undo last operation"), this);
-		undoAct->setStatusTip(tr("Undo last mesh operation"));
-		undoAct->setCheckable(false);
-		connect(undoAct, &QAction::triggered, this, &MainWindow::slot_undo);
-		actionsMap["mesh undo"] = undoAct;
-
-		QAction *redoAct = new QAction(QIcon(":/icons/redo.png"), tr("Redo last operation"), this);
-		redoAct->setStatusTip(tr("Redo last mesh operation"));
-		redoAct->setCheckable(false);
-		connect(redoAct, &QAction::triggered, this, &MainWindow::slot_redo);
-		actionsMap["mesh redo"] = redoAct;
+		connect(ui->actionReset, &QAction::triggered, this, &MainWindow::slot_reset);
+		connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::slot_undo);
+		connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::slot_redo);
 
 		//selection menu
-
-		QAction *selectAllAct = new QAction(tr("Select All"), this);
-		selectAllAct->setShortcut(QKeySequence::SelectAll);
-		selectAllAct->setStatusTip(tr("Select All"));
-		connect(selectAllAct, &QAction::triggered, viewer, &viewer_t::selectAll);
-		actionsMap["select all"] = selectAllAct;
-
-		QAction *selectInverseAct = new QAction(tr("Select Inverse"), this);
-		selectInverseAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
-		selectInverseAct->setStatusTip(tr("Select Inverse"));
-		connect(selectInverseAct, &QAction::triggered, viewer, &viewer_t::selectInverse);
-		actionsMap["select inverse"] = selectInverseAct;
-
-		QAction *selectMultipleAct = new QAction(tr("Select Multiple"), this);
-		selectMultipleAct->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_M));
-		selectMultipleAct->setStatusTip(tr("Select Multiple"));
-		connect(selectMultipleAct, &QAction::triggered, this, &MainWindow::slot_selectMultiple);
-		actionsMap["select multiple"] = selectMultipleAct;
-
-		QAction *selectCutEdgePairAct = new QAction(tr("Select Twin Pair"), this);
-		selectCutEdgePairAct->setStatusTip(tr("Select the counterpart for current selected elements"));
+		connect(ui->actionSelAll, &QAction::triggered, viewer, &viewer_t::selectAll);
+		connect(ui->actionSelInv, &QAction::triggered, viewer, &viewer_t::selectInverse);
+		connect(ui->actionSelMulti, &QAction::triggered, this, &MainWindow::slot_selectMultiple);
 		//kkkkkkkkkkk
-		//connect(selectCutEdgePairAct, &QAction::triggered, viewer, &viewer_t::selectTwinPair()));
-		actionsMap["select cut edge pair"] = selectCutEdgePairAct;
-
-		QAction *selectnextEdgeAct = new QAction(tr("Select Next Edge"), this);
-		selectnextEdgeAct->setStatusTip(tr("Select next half edge"));
-		//kkkkkkkkkkk
-		//connect(selectnextEdgeAct, &QAction::triggered, viewer, &viewer_t::selectNextEdge()));
-		actionsMap["select next edge"] = selectnextEdgeAct;
-
-		QAction *selectCPAct = new QAction(tr("Select Critical Points"), this);
-		selectCPAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
-		selectCPAct->setStatusTip(tr("Select All Critical Points (turn into minimum points)"));
-		//kkkkkkkkkkk
-		//connect(selectCPAct, &QAction::triggered, viewer, &viewer_t::selectCP()));
-		actionsMap["select cp"] = selectCPAct;
-
-		QAction *selectMSTEdgesAct = new QAction(tr("Select MST Edges"), this);
-		selectMSTEdgesAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
-		selectMSTEdgesAct->setStatusTip(tr("Select Minimal Spanning Tree based cuttable edges"));
-		//kkkkkkkkkkk
-		//connect(selectMSTEdgesAct, &QAction::triggered, viewer, &viewer_t::selectMSTEdges()));
-		actionsMap["select mst"] = selectMSTEdgesAct;
-
-
-		QAction *selectCCAct = new QAction(tr("Select Connected Component"), this);
-		selectCCAct->setShortcut(QKeySequence(Qt::Key_Asterisk));
-		selectCCAct->setStatusTip(tr("Select Connected Component"));
-		//kkkkkkkkkkk
-		//connect(selectCCAct, &QAction::triggered, viewer, &viewer_t::selectCC()));
-		actionsMap["select cc"] = selectCCAct;
-
-		QAction *selectGrowAct = new QAction(tr("Grow Selection"), this);
-		selectGrowAct->setShortcut(QKeySequence(Qt::Key_Equal));
-		selectGrowAct->setStatusTip(tr("Grow Selection"));
-		//kkkkkkkkkkk
-		//connect(selectGrowAct, &QAction::triggered, viewer, &viewer_t::selectGrow()));
-		actionsMap["select grow"] = selectGrowAct;
-
-		QAction *selectShrinkAct = new QAction(tr("Shrink Selection"), this);
-		selectShrinkAct->setShortcut(QKeySequence(Qt::Key_Minus));
-		selectShrinkAct->setStatusTip(tr("Shrink Selection"));
-		//kkkkkkkkkkk
-		//connect(selectShrinkAct, &QAction::triggered, viewer, &viewer_t::selectShrink()));
-		actionsMap["select shrink"] = selectShrinkAct;
-
-		QAction *selectClearAct = new QAction(tr("Clear Selection"), this);
-		selectClearAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Backspace));
-		selectClearAct->setStatusTip(tr("Clear Selection"));
-		//kkkkkkkkkkk
-		//connect(selectClearAct, &QAction::triggered, viewer, &viewer_t::selectClear()));
-		actionsMap["select clear"] = selectClearAct;
+		/*connect(ui->actionSelTwinP, &QAction::triggered, viewer, &viewer_t::selectTwinPair()));
+		connect(ui->actionSelNE, &QAction::triggered, viewer, &viewer_t::selectNextEdge()));
+		connect(ui->actionSelCPts, &QAction::triggered, viewer, &viewer_t::selectCP()));
+		connect(ui->actionSelMST, &QAction::triggered, viewer, &viewer_t::selectMSTEdges()));
+		connect(ui->actionSelConnComp, &QAction::triggered, viewer, &viewer_t::selectCC()));
+		connect(ui->actionGrowSel, &QAction::triggered, viewer, &viewer_t::selectGrow()));
+		connect(ui->actionShrinkSel, &QAction::triggered, viewer, &viewer_t::selectShrink()));
+		connect(ui->actionClearSel, &QAction::triggered, viewer, &viewer_t::selectClear()));*/
 
 
 		//display menu
@@ -341,127 +249,64 @@ void MainWindow::createActions()
 
 		//main menu bar
 
-		QAction *camAct = new QAction(QIcon(":/icons/select.png"), tr("Camera Operation"), this);
-		camAct->setStatusTip(tr("Camera operation"));
-		camAct->setCheckable(true);
-		camAct->setChecked(true);
-		connect(camAct, &QAction::triggered, this, &MainWindow::slot_toggleCameraOperation);
-		actionsMap["camera"] = camAct;
-
-		QAction *fsAct = new QAction(QIcon(":/icons/face.png"), tr("Face Select"), this);
-		fsAct->setStatusTip(tr("Select faces"));
-		fsAct->setCheckable(true);
-		fsAct->setChecked(false);
-		connect(fsAct, &QAction::triggered, this, &MainWindow::slot_toggleFaceSelection);
-		actionsMap["face select"] = fsAct;
-
-		QAction *esAct = new QAction(QIcon(":/icons/edge.png"), tr("Edge Select"), this);
-		esAct->setStatusTip(tr("Select edges"));
-		esAct->setCheckable(true);
-		esAct->setChecked(false);
-		connect(esAct, &QAction::triggered, this, &MainWindow::slot_toggleEdgeSelection);
-		actionsMap["edge select"] = esAct;
-
-		QAction *vsAct = new QAction(QIcon(":/icons/vertex.png"), tr("Vertex Select"), this);
-		vsAct->setStatusTip(tr("Select vertices"));
-		vsAct->setCheckable(true);
-		vsAct->setChecked(false);
-		connect(vsAct, &QAction::triggered, this, &MainWindow::slot_toggleVertexSelection);
-		actionsMap["vertex select"] = vsAct;
-
-		QAction *smoothAct = new QAction(QIcon(":/icons/smooth.png"), tr("Smooth Mesh"), this);
-		smoothAct->setStatusTip(tr("Smooth mesh"));
-		connect(smoothAct, &QAction::triggered, this, &MainWindow::slot_smoothMesh);
-		actionsMap["smooth"] = smoothAct;
-
-		QAction *extendAct = new QAction(QIcon(":/icons/extend.png"), tr("Extend Mesh"), this);
-		extendAct->setStatusTip(tr("Extend mesh"));
-		extendAct->setCheckable(false);
-		extendAct->setChecked(false);
-		connect(extendAct, &QAction::triggered, this, &MainWindow::slot_triggerExtendMesh);
-		actionsMap["extend"] = extendAct;
-
-		QAction *hollowAct = new QAction(QIcon(":/icons/HollowSphere.png"), tr("Generate Hollow Mesh"), this);
-		hollowAct->setStatusTip(tr("Generate Hollow Mesh"));
-		hollowAct->setCheckable(false);
-		hollowAct->setChecked(false);
-		connect(hollowAct, &QAction::triggered, this, &MainWindow::slot_triggerHollowMesh);
-		actionsMap["hollow"] = hollowAct;
-
-		QAction *bindingAct = new QAction(QIcon(":/icons/bind.png"), tr("Generate Binding Composition Mesh"), this);
-		bindingAct->setStatusTip(tr("Generate Bind Mesh"));
-		bindingAct->setCheckable(false);
-		bindingAct->setChecked(false);
-		connect(bindingAct, &QAction::triggered, this, &MainWindow::slot_triggerBindingMesh);
-		actionsMap["bind"] = bindingAct;
+		ui->actionCamOP->setChecked(true);
+		connect(ui->actionCamOP, &QAction::triggered, this, &MainWindow::slot_toggleCameraOperation);
 		
-		QAction *rimfaceAct = new QAction(QIcon(":/icons/rimface.png"), tr("Rim faces 2D"), this);
-		rimfaceAct->setStatusTip(tr("Rim Faces"));
-		rimfaceAct->setCheckable(false);
-		rimfaceAct->setChecked(false);
-		connect(rimfaceAct, &QAction::triggered, this, &MainWindow::slot_triggerRimmedMesh);
-		actionsMap["rimface"] = rimfaceAct;
+		ui->actionSelFace->setChecked(false);
+		connect(ui->actionSelFace, &QAction::triggered, this, &MainWindow::slot_toggleFaceSelection);
+		
+		ui->actionSelEdge->setChecked(false);
+		connect(ui->actionSelEdge, &QAction::triggered, this, &MainWindow::slot_toggleEdgeSelection);
+		
+		ui->actionSelVertex->setChecked(false);
+		connect(ui->actionSelVertex, &QAction::triggered, this, &MainWindow::slot_toggleVertexSelection);
+		
+		connect(ui->actionSmooth, &QAction::triggered, this, &MainWindow::slot_smoothMesh);
 
-		QAction *rimface3DAct = new QAction(QIcon(":/icons/rimface_3d.png"), tr("Rim faces 3D"), this);
-		rimface3DAct->setStatusTip(tr("Rim Faces"));
-		rimface3DAct->setCheckable(false);
-		rimface3DAct->setChecked(false);
-		connect(rimface3DAct, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
-        actionsMap["rimface3d"] = rimface3DAct;
+		ui->actionExtend->setChecked(false);
+		connect(ui->actionExtend, &QAction::triggered, this, &MainWindow::slot_triggerExtendMesh);
+		
+		ui->actionHollow->setChecked(false);
+		connect(ui->actionHollow, &QAction::triggered, this, &MainWindow::slot_triggerHollowMesh);
 
-        QMenu *rimFaceMenu =  new QMenu();
-        QAction *rimEdgeBezier = new QAction("Edge With Quadratic Bezier", this);
-        connect(rimEdgeBezier, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+		ui->actionBinding->setChecked(false);
+		connect(ui->actionBinding, &QAction::triggered, this, &MainWindow::slot_triggerBindingMesh);
+		
 
-        QAction *rimEdgeCubic = new QAction("Edge With Cubic Bezier", this);
-        connect(rimEdgeCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+		ui->actionRim->setChecked(false);
+		connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+		
+//        QMenu *rimFaceMenu =  new QMenu();
+//        QAction *rimEdgeBezier = new QAction("Edge With Quadratic Bezier", this);
+//        connect(rimEdgeBezier, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
 
-        QAction *rimFaceCubic = new QAction("Face With Cubic Bezier", this);
-        connect(rimFaceCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+//        QAction *rimEdgeCubic = new QAction("Edge With Cubic Bezier", this);
+//        connect(rimEdgeCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
 
-        rimFaceMenu->addAction(rimEdgeBezier);
-        rimFaceMenu->addAction(rimEdgeCubic);
-        rimFaceMenu->addAction(rimFaceCubic);
+//        QAction *rimFaceCubic = new QAction("Face With Cubic Bezier", this);
+//        connect(rimFaceCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
 
-        actionsMap["rimface3d_edge_bezier"] = rimEdgeBezier;
-        actionsMap["rimface3d_edge_cubic"] = rimEdgeCubic;
-        actionsMap["rimface3d_face_cubic"] = rimFaceCubic;
+//        rimFaceMenu->addAction(rimEdgeBezier);
+//        rimFaceMenu->addAction(rimEdgeCubic);
+//        rimFaceMenu->addAction(rimFaceCubic);
 
-
-        rimface3DAct->setMenu(rimFaceMenu);
-
-
-		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
-		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
-		cutAct->setStatusTip(tr("Cut mesh (ALT+C)"));
-		connect(cutAct, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
-		actionsMap["mesh cut"] = cutAct;
-
-
-		QAction *unfoldAct = new QAction(QIcon(":/icons/unfold.png"), tr("Unfold"), this);
-		unfoldAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_U));
-		unfoldAct->setStatusTip(tr("Unfold mesh (ALT+U)"));
-		unfoldAct->setCheckable(true);
-		unfoldAct->setChecked(false);
-		connect(unfoldAct, &QAction::toggled, this, &MainWindow::slot_unfoldMesh);
-		actionsMap["mesh unfold"] = unfoldAct;
+//        actionsMap["rimface3d_edge_bezier"] = rimEdgeBezier;
+//        actionsMap["rimface3d_edge_cubic"] = rimEdgeCubic;
+//        actionsMap["rimface3d_face_cubic"] = rimFaceCubic;
 
 
-		QAction *colormapAct = new QAction(QIcon(":/icons/colormap.png"), tr("Colormap"), this);
-		colormapAct->setStatusTip(tr("Color map"));
-		connect(colormapAct, &QAction::triggered, this, &MainWindow::slot_triggerColormap);
-		actionsMap["colormap"] = colormapAct;
+//        rimface3DAct->setMenu(rimFaceMenu);
 
-		QAction *cpAct = new QAction(QIcon(":/icons/cp.png"), tr("Critical Points"), this);
-		cpAct->setStatusTip(tr("Critical points"));
-		connect(cpAct, &QAction::triggered, this, &MainWindow::slot_triggerCriticalPoints);
-		actionsMap["critical_points"] = cpAct;
 
-		QAction *clAct = new QAction(QIcon(":/icons/cl.png"), tr("Cut Locus"), this);
-		clAct->setStatusTip(tr("Cut Locus"));
-		connect(clAct, &QAction::triggered, this, &MainWindow::slot_triggerCutLocusPanel);
-		actionsMap["cut_locus"] = clAct;
-
+		ui->actionCut->setChecked(false);
+		connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
+		
+		ui->actionUnfold->setChecked(false);
+		connect(ui->actionUnfold, &QAction::toggled, this, &MainWindow::slot_unfoldMesh);
+		
+		connect(ui->actionColormap, &QAction::triggered, this, &MainWindow::slot_triggerColormap);
+		connect(ui->actionCPts, &QAction::triggered, this, &MainWindow::slot_triggerCriticalPoints);
+		connect(ui->actionCutLocus, &QAction::triggered, this, &MainWindow::slot_triggerCutLocusPanel);
 	}
 	catch(...) {
 		throw UnfoldingAppException("Failed to create actions!");
@@ -471,37 +316,7 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
 	try {
-		QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
-
-
-
-		fileMenu->addAction(actionsMap["new"]);
-		fileMenu->addAction(actionsMap["export"]);
-		fileMenu->addAction(actionsMap["close"]);
-
-		QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
-		editMenu->addAction(actionsMap["mesh undo"]);
-		editMenu->addAction(actionsMap["mesh redo"]);
-		editMenu->addAction(actionsMap["reset"]);
-
-		QMenu *selectionMenu = ui->menuBar->addMenu(tr("&Selection"));
-		selectionMenu->addAction(actionsMap["select all"]);
-		selectionMenu->addAction(actionsMap["select inverse"]);
-		selectionMenu->addAction(actionsMap["select multiple"]);
-		selectionMenu->addAction(actionsMap["select cc"]);
-
-		selectionMenu->addSeparator();
-		selectionMenu->addAction(actionsMap["select cut edge pair"]);
-		selectionMenu->addAction(actionsMap["select next edge"]);
-		selectionMenu->addSeparator();
-		selectionMenu->addAction(actionsMap["select mst"]);
-		selectionMenu->addAction(actionsMap["select cp"]);
-		selectionMenu->addSeparator();
-		selectionMenu->addAction(actionsMap["select grow"]);
-		selectionMenu->addAction(actionsMap["select shrink"]);
-		selectionMenu->addAction(actionsMap["select clear"]);
-
-		QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
+		//QMenu *displayMenu = ui->menuBar->addMenu(tr("&Display"));
 		//		QMenu *displayVertexMenu = displayMenu->addMenu(tr("Show Vertices"));
 		//		displayVertexMenu->setDefaultAction(actionsMap["show vertices"]);
 		//		displayVertexMenu->addAction(actionsMap["show vertices"]);
@@ -553,57 +368,16 @@ void MainWindow::createDock()
 void MainWindow::createToolBar()
 {
 	try {
-		ui->mainToolBar->addAction(actionsMap["new"]);
-		ui->mainToolBar->addAction(actionsMap["save"]);
-		ui->mainToolBar->addAction(actionsMap["export"]);
-		ui->mainToolBar->addSeparator();
-
-		ui->mainToolBar->addAction(actionsMap["reset"]);
-		ui->mainToolBar->addAction(actionsMap["mesh undo"]);
-		ui->mainToolBar->addAction(actionsMap["mesh redo"]);
-
-		ui->mainToolBar->addSeparator();
-
 		QActionGroup *selectGroup = new QActionGroup(ui->mainToolBar);
-		selectGroup->addAction(actionsMap["camera"]);
-		selectGroup->addAction(actionsMap["face select"]);
-		selectGroup->addAction(actionsMap["edge select"]);
-		selectGroup->addAction(actionsMap["vertex select"]);
+		selectGroup->addAction(ui->actionCamOP);
+		selectGroup->addAction(ui->actionSelFace);
+		selectGroup->addAction(ui->actionSelEdge);
+		selectGroup->addAction(ui->actionSelVertex);
 		selectGroup->setExclusive(true);
 
 		//QActionGroup *unfoldGroup = new QActionGroup(ui->mainToolBar);
 		//unfoldGroup->addAction(actionsMap["mesh unfold"]);
 		//unfoldGroup->addAction(actionsMap["mesh fold"]);
-
-
-		ui->mainToolBar->addAction(actionsMap["camera"]);
-
-		ui->mainToolBar->addSeparator();
-		ui->mainToolBar->addAction(actionsMap["face select"]);
-		ui->mainToolBar->addAction(actionsMap["edge select"]);
-		ui->mainToolBar->addAction(actionsMap["vertex select"]);
-
-		ui->mainToolBar->addSeparator();
-		ui->mainToolBar->addAction(actionsMap["smooth"]);
-		ui->mainToolBar->addAction(actionsMap["extend"]);
-		ui->mainToolBar->addAction(actionsMap["hollow"]);
-		ui->mainToolBar->addAction(actionsMap["bind"]);
-		ui->mainToolBar->addAction(actionsMap["rimface"]);
-		ui->mainToolBar->addAction(actionsMap["rimface3d"]);
-
-		ui->mainToolBar->addSeparator();
-		ui->mainToolBar->addAction(actionsMap["mesh cut"]);
-
-		//QToolButton *cutButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(actionsMap["mesh cut"]));
-		//cutButton->setPopupMode(QToolButton::InstantPopup);
-		//cutButton->addAction(new QAction("Expanded Cut", this));
-
-		ui->mainToolBar->addAction(actionsMap["mesh unfold"]);
-
-		ui->mainToolBar->addSeparator();
-		ui->mainToolBar->addAction(actionsMap["colormap"]);
-		ui->mainToolBar->addAction(actionsMap["critical_points"]);
-		ui->mainToolBar->addAction(actionsMap["cut_locus"]);
 	}
 	catch(...) {
 		throw UnfoldingAppException("Failed to create status bar!");
@@ -708,7 +482,7 @@ void MainWindow::slot_triggerExtendMesh()
 {
 	if (MeshManager::getInstance()->getMeshStack()->canExtend)
 	{
-	conpanel->setSaveMode((sender() == actionsMap["extend"] )? true:false);
+	conpanel->setSaveMode((sender() == ui->actionExtend/*actionsMap["extend"]*/ )? true:false);
 	conpanel->show();
 	conpanel->activateWindow();
 	}
@@ -721,7 +495,7 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 	hmpanel->show();
 	hmpanel->activateWindow();
 
-	actionsMap["hollow"]->setChecked(false);
+	ui->actionHollow->setChecked(false);
 	}
 }
 
@@ -734,7 +508,7 @@ void MainWindow::slot_triggerBindingMesh(bool checked)
 
 	}
 
-	actionsMap["bind"]->setChecked(false);
+	ui->actionBinding->setChecked(false);
 }
 
 void MainWindow::slot_triggerRimmedMesh(bool checked)
@@ -749,7 +523,7 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 
 	}
 
-	actionsMap["rimface"]->setChecked(false);
+	ui->actionRim->setChecked(false);
 }
 
 void MainWindow::slot_triggerRimmed3DMesh()
@@ -768,7 +542,7 @@ void MainWindow::slot_triggerRimmed3DMesh()
 
 	}
 
-	actionsMap["rimface3d"]->setChecked(false);
+	ui->actionRim->setChecked(false);
 }
 
 void MainWindow::slot_rimmed3DMesh()
@@ -845,9 +619,9 @@ void MainWindow::slot_reset()
 {
 
 	//reset actions
-	actionsMap["mesh unfold"]->setChecked(false);
-	actionsMap["extend"]->setChecked(false);
-	actionsMap["hollow"]->setChecked(false);
+	ui->actionUnfold->setChecked(false);
+	ui->actionExtend->setChecked(false);
+	ui->actionHollow->setChecked(false);
 
 	//reset mesh
 	//MeshManager::getInstance()->resetMesh();
@@ -959,9 +733,9 @@ void MainWindow::slot_triggerCutLocusPanel() {
 	clpanel->show();
 }
 
-void MainWindow::slot_disableclp() {
+void MainWindow::slot_disableclp()
+{
 	actionsMap["show CP"]->setChecked(clpanel->isMinMaxChecked());
-
 }
 
 void MainWindow::slot_updateViewerColormap()
@@ -987,6 +761,14 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 	clpanel->close();
 }
 
+
+void MainWindow::updateCurrentMesh()
+{
+	curMesh = meshStack.top();
+#if _DEBUG
+	cout << "current mesh mode:::" << curMesh << endl;
+#endif
+}
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 	//kkkkkkkkkkk

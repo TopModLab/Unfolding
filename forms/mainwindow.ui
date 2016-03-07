@@ -23,6 +23,68 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_Display">
+    <property name="title">
+     <string>Display</string>
+    </property>
+    <addaction name="actionSmooth_Shading"/>
+    <addaction name="actionFlat"/>
+    <addaction name="separator"/>
+    <addaction name="actionHightlight_Cut_Edge"/>
+    <addaction name="actionHighlight_Non_Planar_Face"/>
+    <addaction name="actionHighlight_Bridger_Face"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Edges"/>
+    <addaction name="actionShow_Vertices"/>
+    <addaction name="actionShow_All_Vertices"/>
+    <addaction name="actionShow_Mins"/>
+    <addaction name="actionShow_Maxs"/>
+    <addaction name="actionShow_Saddles"/>
+    <addaction name="actionShow_Faces"/>
+    <addaction name="actionShow_Vertices_2"/>
+    <addaction name="actionShow_Vertex_Index"/>
+   </widget>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionImport"/>
+    <addaction name="actionExport"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="actionReset"/>
+   </widget>
+   <widget class="QMenu" name="menu_Selection">
+    <property name="title">
+     <string>Selection</string>
+    </property>
+    <addaction name="actionSelAll"/>
+    <addaction name="actionSelInv"/>
+    <addaction name="actionSelMulti"/>
+    <addaction name="actionSelConnComp"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelTwinP"/>
+    <addaction name="actionSelNE"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelMST"/>
+    <addaction name="actionSelCPts"/>
+    <addaction name="separator"/>
+    <addaction name="actionGrowSel"/>
+    <addaction name="actionShrinkSel"/>
+    <addaction name="actionClearSel"/>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_Edit"/>
+   <addaction name="menu_Selection"/>
+   <addaction name="menu_Display"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -31,6 +93,31 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionImport"/>
+   <addaction name="actionExport"/>
+   <addaction name="actionExit"/>
+   <addaction name="actionSave"/>
+   <addaction name="separator"/>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+   <addaction name="actionReset"/>
+   <addaction name="separator"/>
+   <addaction name="actionCamOP"/>
+   <addaction name="actionSelFace"/>
+   <addaction name="actionSelEdge"/>
+   <addaction name="actionSelVertex"/>
+   <addaction name="separator"/>
+   <addaction name="actionSmooth"/>
+   <addaction name="actionExtend"/>
+   <addaction name="actionHollow"/>
+   <addaction name="actionBinding"/>
+   <addaction name="actionRim"/>
+   <addaction name="actionCut"/>
+   <addaction name="actionUnfold"/>
+   <addaction name="separator"/>
+   <addaction name="actionColormap"/>
+   <addaction name="actionCPts"/>
+   <addaction name="actionCutLocus"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="sizeGripEnabled">
@@ -42,8 +129,483 @@
     <string>New</string>
    </property>
   </action>
+  <action name="actionImport">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/open.png</normaloff>:/icons/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import</string>
+   </property>
+   <property name="toolTip">
+    <string>Import a new obj file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/export.png</normaloff>:/icons/export.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export</string>
+   </property>
+   <property name="toolTip">
+    <string>Export data as</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="toolTip">
+    <string>Close a file</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/undo.png</normaloff>:/icons/undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="toolTip">
+    <string>Undo last mesh operation</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/redo.png</normaloff>:/icons/redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="toolTip">
+    <string>Redo last mesh operation</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/reset.png</normaloff>:/icons/reset.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reset</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset All</string>
+   </property>
+  </action>
+  <action name="actionSmooth_Shading">
+   <property name="text">
+    <string>Smooth</string>
+   </property>
+  </action>
+  <action name="actionFlat">
+   <property name="text">
+    <string>Flat</string>
+   </property>
+  </action>
+  <action name="actionHightlight_Cut_Edge">
+   <property name="text">
+    <string>Hightlight Cut-Edge</string>
+   </property>
+  </action>
+  <action name="actionHighlight_Non_Planar_Face">
+   <property name="text">
+    <string>Highlight Non-Planar Face</string>
+   </property>
+  </action>
+  <action name="actionHighlight_Bridger_Face">
+   <property name="text">
+    <string>Highlight Bridger Face</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save a file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSelAll">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+   <property name="toolTip">
+    <string>Select All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionSelInv">
+   <property name="text">
+    <string>Select Inverse</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionSelMulti">
+   <property name="text">
+    <string>Select Multiple</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+M</string>
+   </property>
+  </action>
+  <action name="actionSelConnComp">
+   <property name="text">
+    <string>Select Connected Component</string>
+   </property>
+   <property name="shortcut">
+    <string>*</string>
+   </property>
+  </action>
+  <action name="actionSelTwinP">
+   <property name="text">
+    <string>Select Twin Pair</string>
+   </property>
+   <property name="toolTip">
+    <string>Select the counterpart for current selected elements</string>
+   </property>
+  </action>
+  <action name="actionSelNE">
+   <property name="text">
+    <string>Select Next Edge</string>
+   </property>
+   <property name="toolTip">
+    <string>Select next half edge</string>
+   </property>
+  </action>
+  <action name="actionSelMST">
+   <property name="text">
+    <string>Select MST Edges</string>
+   </property>
+   <property name="toolTip">
+    <string>Select Minimal Spanning Tree based cuttable edges</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionSelCPts">
+   <property name="text">
+    <string>Select Critical Points</string>
+   </property>
+   <property name="toolTip">
+    <string>Select All Critical Points (turn into minimum points)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionGrowSel">
+   <property name="text">
+    <string>Grow Selection</string>
+   </property>
+   <property name="shortcut">
+    <string>=</string>
+   </property>
+  </action>
+  <action name="actionShrinkSel">
+   <property name="text">
+    <string>Shrink Selection</string>
+   </property>
+   <property name="shortcut">
+    <string>-</string>
+   </property>
+  </action>
+  <action name="actionClearSel">
+   <property name="text">
+    <string>Clear Selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Backspace</string>
+   </property>
+  </action>
+  <action name="actionShow_Edges">
+   <property name="text">
+    <string>Show Edges</string>
+   </property>
+  </action>
+  <action name="actionShow_Vertices">
+   <property name="text">
+    <string>Show Vertices</string>
+   </property>
+  </action>
+  <action name="actionShow_All_Vertices">
+   <property name="text">
+    <string>Show All Vertices</string>
+   </property>
+  </action>
+  <action name="actionShow_Mins">
+   <property name="text">
+    <string>Show Min</string>
+   </property>
+  </action>
+  <action name="actionShow_Maxs">
+   <property name="text">
+    <string>Show Max</string>
+   </property>
+  </action>
+  <action name="actionShow_Saddles">
+   <property name="text">
+    <string>Show Saddles</string>
+   </property>
+  </action>
+  <action name="actionShow_Faces">
+   <property name="text">
+    <string>Show Faces</string>
+   </property>
+  </action>
+  <action name="actionShow_Vertices_2">
+   <property name="text">
+    <string>Show Normals</string>
+   </property>
+  </action>
+  <action name="actionShow_Vertex_Index">
+   <property name="text">
+    <string>Show Vertex Index</string>
+   </property>
+  </action>
+  <action name="actionCamOP">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/select.png</normaloff>:/icons/select.png</iconset>
+   </property>
+   <property name="text">
+    <string>Camera operation</string>
+   </property>
+   <property name="toolTip">
+    <string>Camera operation</string>
+   </property>
+  </action>
+  <action name="actionSelFace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/face.png</normaloff>:/icons/face.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Faces</string>
+   </property>
+   <property name="toolTip">
+    <string>Select faces</string>
+   </property>
+  </action>
+  <action name="actionSelEdge">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/edge.png</normaloff>:/icons/edge.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Edges</string>
+   </property>
+   <property name="toolTip">
+    <string>Select edges</string>
+   </property>
+  </action>
+  <action name="actionSelVertex">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/vertex.png</normaloff>:/icons/vertex.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Vertices</string>
+   </property>
+   <property name="toolTip">
+    <string>Select vertices</string>
+   </property>
+  </action>
+  <action name="actionSmooth">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/smooth.png</normaloff>:/icons/smooth.png</iconset>
+   </property>
+   <property name="text">
+    <string>Smooth Mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Smooth mesh</string>
+   </property>
+  </action>
+  <action name="actionExtend">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/extend.png</normaloff>:/icons/extend.png</iconset>
+   </property>
+   <property name="text">
+    <string>Extend Mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Extend mesh</string>
+   </property>
+  </action>
+  <action name="actionHollow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/HollowSphere.png</normaloff>:/icons/HollowSphere.png</iconset>
+   </property>
+   <property name="text">
+    <string>Hollow Mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Generate Hollow Mesh</string>
+   </property>
+  </action>
+  <action name="actionBinding">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/bind.png</normaloff>:/icons/bind.png</iconset>
+   </property>
+   <property name="text">
+    <string>Binding Mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Generate Binding Composition Mesh</string>
+   </property>
+  </action>
+  <action name="actionRim">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/rimface_3d.png</normaloff>:/icons/rimface_3d.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rim Faces</string>
+   </property>
+   <property name="toolTip">
+    <string>Rim faces</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/cut.png</normaloff>:/icons/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut Mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut mesh (ALT+C)</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
+   </property>
+  </action>
+  <action name="actionUnfold">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/unfold.png</normaloff>:/icons/unfold.png</iconset>
+   </property>
+   <property name="text">
+    <string>Unfold Mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Unfold mesh (ALT+U)</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+U</string>
+   </property>
+  </action>
+  <action name="actionColormap">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/colormap.png</normaloff>:/icons/colormap.png</iconset>
+   </property>
+   <property name="text">
+    <string>Colormap</string>
+   </property>
+   <property name="toolTip">
+    <string>Colormap</string>
+   </property>
+  </action>
+  <action name="actionCPts">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/cp.png</normaloff>:/icons/cp.png</iconset>
+   </property>
+   <property name="text">
+    <string>Critical Points</string>
+   </property>
+   <property name="toolTip">
+    <string>Critical points</string>
+   </property>
+  </action>
+  <action name="actionCutLocus">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/cl.png</normaloff>:/icons/cl.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut Locus</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut locus</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

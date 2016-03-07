@@ -4,9 +4,7 @@
 #include <QMainWindow>
 #include <QTime>
 
-/*#ifndef OPENGL_LEGACY
-#define OPENGL_LEGACY
-#endif*/
+#include <tchar.h>
 #ifdef OPENGL_LEGACY
 #include "meshviewer.h"
 using viewer_t = MeshViewer;
@@ -119,7 +117,8 @@ private:
 	stack<CurrentMesh> meshStack;
 	bool isExtended;
 
-	void updateCurrentMesh(){curMesh = meshStack.top(); cout<<"current mesh mode:::"<<curMesh<<endl;}
+	void updateCurrentMesh();
+	
 
 private:
 	Ui::MainWindow *ui;

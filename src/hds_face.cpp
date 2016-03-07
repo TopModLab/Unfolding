@@ -63,7 +63,9 @@ set<HDS_Face *> HDS_Face::connectedFaces()
 		}
 		curHE = curHE->next;
 	} while (curHE != he);
+#if _DEBUG
 	cout << "#connected faces = " << faces.size() << endl;
+#endif
 	return faces;
 }
 
@@ -97,8 +99,9 @@ set<HDS_Face *> HDS_Face::linkedFaces()
 			curHE = curHE->next;
 		} while (curHE != fhe);
 	}
-
+#if _DEBUG
 	cout << "#linked faces = " << faces.size() << endl;
+#endif
 	return faces;
 
 }
