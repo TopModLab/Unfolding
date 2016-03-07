@@ -12,7 +12,7 @@ TARGET = Unfolding
 TEMPLATE = app
 
 CONFIG += c++11
-CONFIG += console
+#CONFIG += console
 
 QMAKE_CXXFLAGS += -std=c++11
 

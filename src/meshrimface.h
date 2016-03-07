@@ -4,17 +4,16 @@
 #include "common.h"
 #include "MeshExtender.h"
 
-class MeshExtender;
 
 class MeshRimFace : public MeshExtender
 {
 public:
 	MeshRimFace();
-	static void rimMesh3D(HDS_Mesh *mesh, float planeWidth, float planeHeight);
+    static void rimMesh3D(HDS_Mesh *mesh, int rimType, float planeWidth, float planeHeight);
 	~MeshRimFace();
 
-	void computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos);
-	void computePlaneCornerOnFace(vert_t* v, he_t* he, vector<QVector3D> &control_points_p, vector<QVector3D> &control_points_n);
+    static void computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos);
+    static void computePlaneCornerOnFace(vert_t* v, he_t* he, vector<he_t*> &control_edges, vector<QVector3D> &control_points_p, vector<QVector3D> &control_points_n);
 
 	enum RimType {
 		EdgeWithBezier = 0,
@@ -23,8 +22,8 @@ public:
 	};
 
 private:
-	float planeWidth;
-	float planeHeight;
+    static float planeWidth;
+    static float planeHeight;
 };
 
 #endif // MESHRIMFACE_H

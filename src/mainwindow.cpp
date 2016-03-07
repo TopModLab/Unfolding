@@ -407,7 +407,29 @@ void MainWindow::createActions()
 		rimface3DAct->setCheckable(false);
 		rimface3DAct->setChecked(false);
 		connect(rimface3DAct, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
-		actionsMap["rimface3d"] = rimface3DAct;
+        actionsMap["rimface3d"] = rimface3DAct;
+
+        QMenu *rimFaceMenu =  new QMenu();
+        QAction *rimEdgeBezier = new QAction("Edge With Quadratic Bezier", this);
+        connect(rimEdgeBezier, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+
+        QAction *rimEdgeCubic = new QAction("Edge With Cubic Bezier", this);
+        connect(rimEdgeCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+
+        QAction *rimFaceCubic = new QAction("Face With Cubic Bezier", this);
+        connect(rimFaceCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+
+        rimFaceMenu->addAction(rimEdgeBezier);
+        rimFaceMenu->addAction(rimEdgeCubic);
+        rimFaceMenu->addAction(rimFaceCubic);
+
+        actionsMap["rimface3d_edge_bezier"] = rimEdgeBezier;
+        actionsMap["rimface3d_edge_cubic"] = rimEdgeCubic;
+        actionsMap["rimface3d_face_cubic"] = rimFaceCubic;
+
+
+        rimface3DAct->setMenu(rimFaceMenu);
+
 
 		QAction *cutAct = new QAction(QIcon(":/icons/cut.png"), tr("Cut"), this);
 		cutAct->setShortcut(QKeySequence(Qt::ALT + Qt::Key_C));
@@ -732,10 +754,17 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 
 void MainWindow::slot_triggerRimmed3DMesh()
 {
+    QObject* obj = sender();
     if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
 		rmpanel->show();
 		rmpanel->activateWindow();
+        if (obj == actionsMap["rimface3d_edge_bezier"] ) {
+            rmpanel->setType(0);
+        }else if (obj == actionsMap["rimface3d_edge_cubic"] ) {
+            rmpanel->setType(1);
+        }else
+            rmpanel->setType(2);
 
 	}
 
@@ -746,7 +775,7 @@ void MainWindow::slot_rimmed3DMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
-	MeshManager::getInstance()->set3DRimMesh(rmpanel->getW(), rmpanel->getH());
+    MeshManager::getInstance()->set3DRimMesh(rmpanel->getType(), rmpanel->getW(), rmpanel->getH());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 

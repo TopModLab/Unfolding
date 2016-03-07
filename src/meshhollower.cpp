@@ -13,7 +13,7 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 
 	flapSize = newFlapSize;//Flap size needed in export function
 	shiftAmount = shift;
-	HDS_Bridger::setSamples(3);
+    //HDS_Bridger::setSamples(3);
 
 	unordered_map <hdsid_t, vert_t*> ori_map = ori_mesh->vertsMap();
 	unordered_set<he_t*> old_edges;
@@ -126,8 +126,14 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 
 	QVector3D v1_flap, v2_flap;
 	if (type == 0){
-		v1_flap = (1.0 - flapSize) * v1 + flapSize * v0;
-		v2_flap = (1.0 - flapSize) * v2 + flapSize * v3;
+        //non-parallel
+//		v1_flap = (1.0 - flapSize) * v1 + flapSize * v0;
+//		v2_flap = (1.0 - flapSize) * v2 + flapSize * v3;
+        QVector3D v1_flap_scaled = (1.0 - flapSize) * v1 + flapSize * center;
+        QVector3D v2_flap_scaled = (1.0 - flapSize) * v2 + flapSize * center;
+        HDS_Face::LineLineIntersect(v1, v0, v1_flap_scaled, v2_flap_scaled, &v1_flap);
+        HDS_Face::LineLineIntersect(v2, v3, v1_flap_scaled, v2_flap_scaled, &v2_flap);
+
 	}else {
 		//get parallel flaps
 		//linear area incresement using sqrt(flapSize)
