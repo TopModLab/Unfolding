@@ -3,13 +3,15 @@
 
 MeshViewerModern::MeshViewerModern(QWidget *parent)
 	: QOpenGLWidget(parent)
-	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
-	, 54.3, 1.67, 1, 100)
 	, vtx_vbo(oglBuffer::Type::VertexBuffer)
 	, interactionState(Camera)
 	, selectionState(SingleSelect)
 	, shadingSate(FLAT)
 	, heMesh(nullptr)
+	, dispComp(static_cast<uint32_t>(DispComp::GRID))
+	, hlComp(static_cast<uint32_t>(HighlightComp::NONE))
+	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
+	, 54.3, 1.67, 1, 100)
 	, grid(4, 6.0f, this)
 	, fRBO(this), heRBO(this)
 {
@@ -48,6 +50,16 @@ void MeshViewerModern::setInteractionMode(InteractionState state)
 void MeshViewerModern::setSelectionMode(SelectionState mode)
 {
 	selectionState = mode;
+}
+
+void MeshViewerModern::showComp(DispComp comp)
+{
+	dispComp ^= static_cast<uint32_t>(comp);
+}
+
+void MeshViewerModern::highlightComp(HighlightComp comp)
+{
+	hlComp ^= static_cast<uint32_t>(comp);
 }
 
 void MeshViewerModern::initializeGL()
@@ -182,20 +194,25 @@ void MeshViewerModern::initShader()
 	//////////////////////////////////////////////////////////////////////////
 	// Grid Shader
 	grid.initShader();
+#if _DEBUG
+	QString rcDir = "";
+#else
+	QString rcDir = ":";
+#endif
 	//////////////////////////////////////////////////////////////////////
-	face_solid_shader.addShaderFromSourceFile(oglShader::Vertex, ":shaders/face_vs.glsl");
-	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, ":shaders/face_fs.glsl");
-	face_solid_shader.addShaderFromSourceFile(oglShader::Geometry, ":shaders/face_gs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Vertex, rcDir + "shaders/face_vs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Fragment, rcDir + "shaders/face_fs.glsl");
+	face_solid_shader.addShaderFromSourceFile(oglShader::Geometry, rcDir + "shaders/face_gs.glsl");
 	face_solid_shader.link();
 
 	//////////////////////////////////////////////////////////////////////////
-	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, ":shaders/edge_vs.glsl");
-	edge_solid_shader.addShaderFromSourceFile(oglShader::Fragment, ":shaders/edge_fs.glsl");
+	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, rcDir + "shaders/edge_vs.glsl");
+	edge_solid_shader.addShaderFromSourceFile(oglShader::Fragment, rcDir + "shaders/edge_fs.glsl");
 	edge_solid_shader.link();
 
 	//////////////////////////////////////////////////////////////////////////
-	uid_shader.addShaderFromSourceFile(oglShader::Vertex, ":shaders/uid_vs.glsl");
-	uid_shader.addShaderFromSourceFile(oglShader::Fragment, ":shaders/uid_fs.glsl");
+	uid_shader.addShaderFromSourceFile(oglShader::Vertex, rcDir + "shaders/uid_vs.glsl");
+	uid_shader.addShaderFromSourceFile(oglShader::Fragment, rcDir + "shaders/uid_fs.glsl");
 	uid_shader.link();
 
 }
@@ -322,7 +339,14 @@ void MeshViewerModern::paintGL()
 	glClearColor(0.6, 0.6, 0.6, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	grid.draw(view_cam.CameraToScreen, view_cam.WorldToCamera);
+	auto checkDispMode = [](uint32_t disp, DispComp mode)->bool{
+		return disp & static_cast<uint32_t>(mode);
+	};
+
+	if (checkDispMode(dispComp, DispComp::GRID))
+	{
+		grid.draw(view_cam.CameraToScreen, view_cam.WorldToCamera);
+	}
 	
 	if (heMesh != nullptr)
 	{
@@ -358,6 +382,8 @@ void MeshViewerModern::paintGL()
 			face_solid_shader.bind();
 			face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 			face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+			//face_solid_shader.setUniformValue("hl_comp", hlComp);
+			glUniform1ui(glGetUniformLocation(face_solid_shader.programId(), "hl_comp"), hlComp);
 			// Bind Texture Buffer
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
@@ -373,10 +399,14 @@ void MeshViewerModern::paintGL()
 			edge_solid_shader.bind();
 			edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 			edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+			//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
+			glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
+			cout << "Highlight Component: " << hlComp << endl;
 			// Bind Texture Buffer
 			glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
 			edge_solid_shader.setUniformValue("flag_tex", 0);
+			
 			glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 			heRBO.vao.release();
 

@@ -2,6 +2,7 @@
 in vec3 pos;
 in vec3 normal;
 
+uniform uint hl_comp;// Highlight Components
 uniform usamplerBuffer flag_tex;
 
 uniform vec3 Kd = vec3(0.6, 0.8, 1);
@@ -23,14 +24,12 @@ void main()
 	dot_prod = (dot_prod + 1.0) / 2.0;
 	vec3 Id = mix(La, Kd, dot_prod); // final diffuse intensity
 
-	// final colour
-	//frag_color = vec4(Id, 1.0);
-	
-	if (bool(flag & 16))
+	// final colour	
+	if (bool(flag & 16) && bool(hl_comp & 4))// Bridger
 	{
 		frag_color = vec4(Id * 0.8, 1.0);
 	}
-	else
+	else// Regular color
 	{
 		frag_color = vec4(Id, 1.0);
 	}

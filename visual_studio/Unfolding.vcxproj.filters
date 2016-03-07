@@ -88,9 +88,6 @@
     <Filter Include="Shader Files">
       <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{4ed32ef1-702e-4f56-890e-02c49cffd53d}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
@@ -580,25 +577,25 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\shaders\edge_fs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="..\shaders\edge_vs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="..\shaders\face_fs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="..\shaders\face_gs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="..\shaders\face_vs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="..\shaders\uid_fs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="..\shaders\uid_vs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
 </Project>

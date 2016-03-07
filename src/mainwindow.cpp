@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	setWindowTitle(tr("Geometry Unfolding"));
+	//setWindowTitle(tr("Geometry Unfolding"));
 
 	createComponents();
 	layoutComponents();
@@ -145,6 +145,12 @@ void MainWindow::createActions()
 
 
 		//display menu
+		connect(ui->actionDispGrid, &QAction::triggered,
+			[&] { viewer->showComp(viewer_t::DispComp::GRID); });
+		connect(ui->actHL_CutEdge, &QAction::triggered,
+			[&] { viewer->highlightComp(viewer_t::HighlightComp::CUT_EDGE); });
+		connect(ui->actHL_Bridger, &QAction::triggered,
+			[&] { viewer->highlightComp(viewer_t::HighlightComp::BRIDGER_FACE); });
 		//"E: edges  V : vertices  F : faces  N: Normals L : lighting  C : critical points"
 		QAction *showEdgesAct = new QAction(tr("Show Edges"), this);
 		showEdgesAct->setShortcut(Qt::Key_E);
@@ -292,7 +298,6 @@ void MainWindow::createActions()
 //        actionsMap["rimface3d_edge_bezier"] = rimEdgeBezier;
 //        actionsMap["rimface3d_edge_cubic"] = rimEdgeCubic;
 //        actionsMap["rimface3d_face_cubic"] = rimFaceCubic;
-
 
 //        rimface3DAct->setMenu(rimFaceMenu);
 
@@ -638,7 +643,6 @@ void MainWindow::slot_reset()
 
 void MainWindow::slot_selectMultiple()
 {
-	//kkkkkkkkkkk
 	viewer->setSelectionMode(viewer_t::MultiSelect);
 }
 

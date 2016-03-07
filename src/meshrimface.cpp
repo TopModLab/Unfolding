@@ -3,8 +3,8 @@
 
 #define PI 3.14159265358
 
-float MeshRimFace::planeWidth = 0.2;
-float MeshRimFace::planeHeight = 0.2;
+float MeshRimFace::planeWidth = 0.2f;
+float MeshRimFace::planeHeight = 0.2f;
 
 void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos) {
     ///get planes on the edge

@@ -118,8 +118,6 @@ private:
 	bool isExtended;
 
 	void updateCurrentMesh();
-	
-
 private:
 	Ui::MainWindow *ui;
 	QMap<QString, QAction*> actionsMap;

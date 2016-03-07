@@ -180,7 +180,26 @@ public:
 		GraphDist = 0,
 		GeodesicsDist = 1
 	}lmode;
-
+	enum class DispComp : uint32_t// Display Compoment
+	{
+		NONE = 0,
+		GRID = 1 << 0,
+		CLDistance = 1 << 1, //show cut locus dists
+		CPDistance = 1 << 2, //show critical points dists
+		
+		MULT_CUT = 1 << 4,
+		ONE_CUT = 1 << 5,
+		REEB_POINTS = 1 << 6,
+		TEXT = 1 << 7,
+		V_INDEX = 1 << 8
+	};
+	enum class HighlightComp : uint32_t
+	{
+		NONE = 0,
+		CUT_EDGE = 1 << 0,// related to shader
+		NON_PLANAR_FACE = 1 << 1,
+		BRIDGER_FACE = 1 << 2
+	};
 public:
 	void selectCutLocusEdges();
 	void setCriticalPointsMethod(int midx);
@@ -196,6 +215,8 @@ public:
 	void showCutLocusCut();
 	void showCutLocusPoints();
 
+	void showComp(DispComp comp);
+	void highlightComp(HighlightComp comp);
 private://interaction ie selection
 	QScopedPointer<oglFBO> fbo;
 	void initializeFBO();
@@ -227,6 +248,9 @@ private:
 	bool showReebPoints;
 	bool showText;
 	bool showVIndex; // show vertex index
+
+	uint32_t dispComp;//Display Components Flag
+	uint32_t hlComp;// Highlight Components Flag
 private://viewer status
 	perspCamera view_cam;
 
