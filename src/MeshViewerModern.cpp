@@ -401,7 +401,7 @@ void MeshViewerModern::paintGL()
 			edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 			//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
 			glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
-			cout << "Highlight Component: " << hlComp << endl;
+            //cout << "Highlight Component: " << hlComp << endl;
 			// Bind Texture Buffer
 			glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);

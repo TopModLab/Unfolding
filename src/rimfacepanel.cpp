@@ -11,9 +11,7 @@ RimFacePanel::RimFacePanel(QWidget *parent) :
 
 	width = (float)ui->widthSlider->value()/(float)ui->widthSlider->maximum();
 	height = (float)ui->heightSlider->value()/(float)ui->heightSlider->maximum();
-	cout<<ui->widthSlider->value()<<endl;
-	cout<<ui->widthSlider->maximum()<<endl;
-
+    type = abs(ui->buttonGroup->checkedId()+2);
 	ui->widthText->setText(QString::number(width));
 	ui->heightText->setText(QString::number(height));
 
@@ -23,7 +21,7 @@ RimFacePanel::RimFacePanel(QWidget *parent) :
 
 	connect(ui->widthSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setW(int)));
 	connect(ui->heightSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setH(int)));
-
+    connect(ui->buttonGroup, SIGNAL(buttonClicked(int)), this, SLOT(slot_setType(int)));
 }
 
 RimFacePanel::~RimFacePanel()
@@ -45,3 +43,8 @@ void RimFacePanel::slot_setH(int value)
 
 }
 
+void RimFacePanel::slot_setType(int value)
+{
+    type = abs(value+2);
+    cout<<type<<endl;
+}

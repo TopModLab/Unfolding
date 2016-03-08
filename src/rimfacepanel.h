@@ -12,10 +12,10 @@ class RimFacePanel : public QWidget
 	Q_OBJECT
 
 public:
+
 	explicit RimFacePanel(QWidget *parent = 0);
 	~RimFacePanel();
 
-    void setType(int type) {this->type = type;}
     int getType() {return type;}
 	float getW() { return width;}
 	float getH() { return height;}
@@ -27,6 +27,8 @@ signals:
 public slots:
 	void slot_setW(int);
 	void slot_setH(int);
+    void slot_setType(int type);
+
 
 private:
 	Ui::RimFacePanel *ui;
