@@ -4,7 +4,7 @@
 double MeshHollower::flapSize = 0.2;//[0 >> 1]
 double MeshHollower::shiftAmount = 0;//[-1 >> 1]
 
-holePosRefMap* MeshHollower::refMapPointer = new holePosRefMap();
+holePosRefMap* MeshHollower::refMapPointer = nullptr;
 unordered_map<HDS_HalfEdge*,Flap> MeshHollower::flapMap;
 
 double getT(QVector3D v_start, QVector3D v_t, QVector3D v_end)
@@ -12,12 +12,9 @@ double getT(QVector3D v_start, QVector3D v_t, QVector3D v_end)
     QVector3D vt2vs = (v_t - v_start);
     QVector3D ve2vs = (v_end - v_start);
 
-    int maxidx = 0;
-    for(int i = 1; i < 3; i++)
-    {
-        if(abs(ve2vs[i]) > abs(ve2vs[maxidx]))
-            maxidx = i;
-    }
+    int maxidx = abs(ve2vs[0]) > abs(ve2vs[1]) ?  0 : 1;
+	maxidx = abs(ve2vs[maxidx]) > abs(ve2vs[2]) ? maxidx : 2;
+
     return vt2vs[maxidx] / ve2vs[maxidx];
 }
 
@@ -25,6 +22,8 @@ void MeshHollower::
 hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 {
 	initiate();
+	delete refMapPointer;
+	refMapPointer = new holePosRefMap;
     cur_mesh = mesh;
 
 	flapSize = newFlapSize;//Flap size needed in export function

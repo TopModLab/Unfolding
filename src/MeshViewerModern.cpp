@@ -515,12 +515,17 @@ void MeshViewerModern::keyPressEvent(QKeyEvent* e)
 		view_cam.updateModelView();*/
 		break;
 	}
-	case Qt::Key_P:
+	case Qt::Key_S:
 	{
-		QString filename = QFileDialog::getSaveFileName(
+		if (e->modifiers() == Qt::AltModifier)
+		{
+			QString filename = QFileDialog::getSaveFileName(
 				this, "Save Screenshot file...", "default", tr("PNG(*.png)"));
-		this->grab().save(filename);
-		
+			if (!filename.isEmpty())
+			{
+				this->grab().save(filename);
+			}
+		}
 		break;
 	}
 	}
