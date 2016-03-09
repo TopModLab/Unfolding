@@ -63,9 +63,7 @@ set<HDS_Face *> HDS_Face::connectedFaces()
 		}
 		curHE = curHE->next;
 	} while (curHE != he);
-#if _DEBUG
-	cout << "#connected faces = " << faces.size() << endl;
-#endif
+
 	return faces;
 }
 
@@ -99,11 +97,7 @@ set<HDS_Face *> HDS_Face::linkedFaces()
 			curHE = curHE->next;
 		} while (curHE != fhe);
 	}
-#if _DEBUG
-	cout << "#linked faces = " << faces.size() << endl;
-#endif
 	return faces;
-
 }
 
 QVector3D HDS_Face::center() const
@@ -199,34 +193,35 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
     QVector3D vec_cv = v->pos - c;
     return c + scalingFactor * vec_cv;
 
-//	//scale down corner proportionally along edges
-//    QVector3D v0 = v->pos;
+/*
+	//scale down corner proportionally along edges
+   QVector3D v0 = v->pos;
 
 
-//    //find half edge from v0 to v1_n
-//    HDS_HalfEdge* curHe = he;
-//    do {
-//        if (curHe->v == v) {
-//            break;
-//        }
-//        curHe = curHe->next;
-//    } while( curHe != he );
+   //find half edge from v0 to v1_n
+   HDS_HalfEdge* curHe = he;
+   do {
+       if (curHe->v == v) {
+           break;
+       }
+       curHe = curHe->next;
+   } while( curHe != he );
 
-//    QVector3D v1_n = curHe->next->v->pos;
-//    QVector3D v2_n = curHe->next->next->v->pos;
-//    QVector3D v1_p = curHe->prev->v->pos;
-//    QVector3D v2_p = curHe->prev->prev->v->pos;
+   QVector3D v1_n = curHe->next->v->pos;
+   QVector3D v2_n = curHe->next->next->v->pos;
+   QVector3D v1_p = curHe->prev->v->pos;
+   QVector3D v2_p = curHe->prev->prev->v->pos;
 
-//    QVector3D v01_n = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_n;
-//    QVector3D v12_p = (1 - scalingFactor/2)* v1_p + scalingFactor/2 *v2_p;
+   QVector3D v01_n = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_n;
+   QVector3D v12_p = (1 - scalingFactor/2)* v1_p + scalingFactor/2 *v2_p;
 
-//    QVector3D v01_p = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_p;
-//    QVector3D v12_n = (1 - scalingFactor/2)* v1_n + scalingFactor/2 *v2_n;
+   QVector3D v01_p = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_p;
+   QVector3D v12_n = (1 - scalingFactor/2)* v1_n + scalingFactor/2 *v2_n;
 
-//    //get intersection point
-//    QVector3D v0_scaled;
-//    HDS_Face::LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
-//    return v0_scaled;
+   //get intersection point
+   QVector3D v0_scaled;
+   HDS_Face::LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
+   return v0_scaled;*/
 
 }
 
@@ -291,7 +286,6 @@ void HDS_Face::checkPlanar()
 			break;
 		}
 	}
-
 }
 
 bool HDS_Face::isConnected(const HDS_Face *other)

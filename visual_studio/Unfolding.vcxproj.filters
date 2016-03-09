@@ -120,9 +120,6 @@
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_icons.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_meshviewer.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -305,6 +302,9 @@
     </ClCompile>
     <ClCompile Include="..\src\ViewerGrid.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_resources.cpp">
+      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -595,6 +595,9 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="..\shaders\uid_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\edge_gs.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

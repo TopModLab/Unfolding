@@ -1,11 +1,9 @@
-#version 430
+#version 400
 in vec3 pos;
 in vec3 normal;
 
-uniform uint hl_comp;// Highlight Components
-uniform usamplerBuffer flag_tex;
-
-uniform vec3 Kd = vec3(0.6, 0.8, 1);
+flat in vec3 Kd;
+//uniform vec3 Kd = vec3(0.6, 0.8, 1);
 uniform vec3 La = vec3(0, 0, 0);
 uniform vec3 light_pos = vec3(0.0, 1.0, 0);
 
@@ -13,24 +11,12 @@ out vec4 frag_color; // final colour of surface
 
 void main()
 {
-	uint flag = texelFetch(flag_tex, gl_PrimitiveID).r;
-	// final colour
-	//frag_color = vec4(gl_PrimitiveID / 255.0, 0, 0, 1.0);
-	
-	
 	vec3 dist2eye = light_pos - pos;
 	vec3 dir = normalize(dist2eye);
 	float dot_prod = dot(dir, normal);
 	dot_prod = (dot_prod + 1.0) / 2.0;
 	vec3 Id = mix(La, Kd, dot_prod); // final diffuse intensity
 
-	// final colour	
-	if (bool(flag & 16) && bool(hl_comp & 4))// Bridger
-	{
-		frag_color = vec4(Id * 0.8, 1.0);
-	}
-	else// Regular color
-	{
-		frag_color = vec4(Id, 1.0);
-	}
+	// final color	
+	frag_color = vec4(Id, 1.0);
 }

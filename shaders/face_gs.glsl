@@ -1,10 +1,13 @@
-#version 430
+#version 400
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
 uniform mat4 proj_matrix;
+uniform uint hl_comp;// Highlight Components
+uniform usamplerBuffer flag_tex;
 
+flat out vec3 Kd;
 out vec3 normal;
 out vec3 pos;
 
@@ -18,8 +21,17 @@ void main()
 	vec4 v2 = normalize(p2 - p0);
 
 	normal = normalize(cross(v1.xyz, v2.xyz));
-
-	gl_PrimitiveID = gl_PrimitiveIDIn;
+	
+	uint flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
+	if (bool(flag & +16) && bool(hl_comp & +4))// Bridger
+	{
+		Kd = vec3(0.0f, 0.8f, 1.0f);
+	}
+	else// Regular color
+	{
+		Kd = vec3(0.6, 0.8, 1);
+	}
+	
 	// Send the triangle along with the edge distances
 	gl_Position = proj_matrix * p0;
 	pos = p0.xyz;
