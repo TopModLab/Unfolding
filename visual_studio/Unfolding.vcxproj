@@ -1075,6 +1075,7 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\shaders\edge_fs.glsl" />
+    <None Include="..\shaders\edge_gs.glsl" />
     <None Include="..\shaders\edge_vs.glsl" />
     <None Include="..\shaders\face_fs.glsl" />
     <None Include="..\shaders\face_gs.glsl" />

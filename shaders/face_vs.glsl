@@ -1,4 +1,4 @@
-#version 430
+#version 400
 in layout(location = 0) vec3 vp;
 
 uniform mat4 view_matrix;

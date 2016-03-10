@@ -38,5 +38,6 @@
         <file>shaders/uid_fs.glsl</file>
         <file>shaders/uid_vs.glsl</file>
         <file>meshes/cube.obj</file>
+        <file>shaders/edge_gs.glsl</file>
     </qresource>
 </RCC>

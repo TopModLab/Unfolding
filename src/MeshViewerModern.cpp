@@ -208,6 +208,7 @@ void MeshViewerModern::initShader()
 	//////////////////////////////////////////////////////////////////////////
 	edge_solid_shader.addShaderFromSourceFile(oglShader::Vertex, rcDir + "shaders/edge_vs.glsl");
 	edge_solid_shader.addShaderFromSourceFile(oglShader::Fragment, rcDir + "shaders/edge_fs.glsl");
+	edge_solid_shader.addShaderFromSourceFile(oglShader::Geometry, rcDir + "shaders/edge_gs.glsl");
 	edge_solid_shader.link();
 
 	//////////////////////////////////////////////////////////////////////////
@@ -336,7 +337,7 @@ void MeshViewerModern::paintGL()
 {
 	makeCurrent();
 	// Clear background and color buffer
-	glClearColor(0.6, 0.6, 0.6, 1.0);
+	glClearColor(0.6, 0.6, 0.6, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	auto checkDispMode = [](uint32_t disp, DispComp mode)->bool{
@@ -401,12 +402,10 @@ void MeshViewerModern::paintGL()
 			edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 			//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
 			glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
-            //cout << "Highlight Component: " << hlComp << endl;
 			// Bind Texture Buffer
 			glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
 			edge_solid_shader.setUniformValue("flag_tex", 0);
-			
 			glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 			heRBO.vao.release();
 
@@ -515,12 +514,17 @@ void MeshViewerModern::keyPressEvent(QKeyEvent* e)
 		view_cam.updateModelView();*/
 		break;
 	}
-	case Qt::Key_P:
+	case Qt::Key_S:
 	{
-		QString filename = QFileDialog::getSaveFileName(
+		if (e->modifiers() == Qt::AltModifier)
+		{
+			QString filename = QFileDialog::getSaveFileName(
 				this, "Save Screenshot file...", "default", tr("PNG(*.png)"));
-		this->grab().save(filename);
-		
+			if (!filename.isEmpty())
+			{
+				this->grab().save(filename);
+			}
+		}
 		break;
 	}
 	}

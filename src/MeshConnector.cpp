@@ -121,8 +121,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	//cout << "Score text is: " << score_text << endl;
 	double pin_radius = ConvertToPt(unit_type,
 		conf.find(ConnectorConf::PINHOLESIZE)->second) * 0.5;
-	double scale = MeshHollower::flapSize;
-
+	
 	double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
@@ -209,19 +208,23 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 				{
 					vert_t* targetV;
 					vert_t* targetNextV;
+					he_t* targHE;
 					if (cut_he->next == refedge)
 					{
+						targHE = refedge;
 						targetV = refedge->v;
 						targetNextV = refedge->flip->v;
 					}
 					else
 					{
+						targHE = refedge->flip;
 						targetV = refedge->flip->v;
 						targetNextV = refedge->v;
 					}
 					QVector2D targetVPos = targetV->pos.toVector2D();
-					QVector2D targPos = targetVPos * (1 - scale)
-						+ targetNextV->pos.toVector2D() * scale;
+					double tpin = MeshHollower::refMapPointer->at(targHE->index);
+					QVector2D targPos = targetVPos * (1 - tpin)
+						+ targetNextV->pos.toVector2D() * tpin;
 					QVector2D startPos = cut_he->v->pos.toVector2D();
 					QVector2D dirPin = targPos - startPos;
 
