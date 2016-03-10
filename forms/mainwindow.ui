@@ -92,8 +92,17 @@
     <addaction name="actionShrinkSel"/>
     <addaction name="actionClearSel"/>
    </widget>
+   <widget class="QMenu" name="menuCreate">
+    <property name="title">
+     <string>Create</string>
+    </property>
+    <addaction name="actGenCube"/>
+    <addaction name="actGenTorus"/>
+    <addaction name="actGenTetra"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Edit"/>
+   <addaction name="menuCreate"/>
    <addaction name="menu_Selection"/>
    <addaction name="menu_Display"/>
   </widget>
@@ -658,6 +667,33 @@
    </property>
    <property name="text">
     <string>Show Grid</string>
+   </property>
+  </action>
+  <action name="actGenCube">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/polygon/polycube.png</normaloff>:/icons/polygon/polycube.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cube</string>
+   </property>
+  </action>
+  <action name="actGenTorus">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/polygon/polytorus.png</normaloff>:/icons/polygon/polytorus.png</iconset>
+   </property>
+   <property name="text">
+    <string>Torus</string>
+   </property>
+  </action>
+  <action name="actGenTetra">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/polygon/polytetra.png</normaloff>:/icons/polygon/polytetra.png</iconset>
+   </property>
+   <property name="text">
+    <string>Tetrahedron</string>
    </property>
   </action>
  </widget>

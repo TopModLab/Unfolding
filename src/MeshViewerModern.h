@@ -47,12 +47,6 @@ struct RenderBufferObject// : protected oglFuncs
 		ibo.destroy();
 		funcs->glDeleteTextures(2, tex);
 		funcs->glDeleteBuffers(2, tbo);
-		/*
-		funcs->glDeleteBuffers(1, &flag_tbo);
-		funcs->glDeleteTextures(1, &flag_tex);
-		funcs->glDeleteBuffers(1, &id_tbo);
-		funcs->glDeleteTextures(1, &id_tex);
-		*/
 	}
 
 	oglFuncs* funcs;

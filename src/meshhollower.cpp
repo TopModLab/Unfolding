@@ -251,7 +251,6 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 			vertices.push_back(hv1_flap);
 			vertices.push_back(hv0_flap_scaled);
 			vertices.push_back(hv0_scaled);
-
 		}
 		else
 		{
