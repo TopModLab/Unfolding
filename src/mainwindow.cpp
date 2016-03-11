@@ -32,13 +32,21 @@ MainWindow::~MainWindow()
 void MainWindow::initialization()
 {
 	isExtended = false;
-
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Original);
 	
-	if (MeshManager::getInstance()->loadOBJFile(":meshes/cube.obj")) {
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
-		//meshStack.push((CurrentMesh)Original);
-		//updateCurrentMesh();
+	initMesh(":meshes/cube.obj");
+}
+
+void MainWindow::initMesh(const string& filename)
+{
+	if (!filename.empty())
+	{
+		auto manager = MeshManager::getInstance();
+		manager->getMeshStack()->clear();
+		manager->getMeshStack()->setCurrentFlag(OperationStack::Original);
+		if (manager->loadOBJFile(filename))
+		{
+			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		}
 	}
 }
 
@@ -125,6 +133,16 @@ void MainWindow::createActions()
 		ui->actionSave->setStatusTip(ui->actionSave->toolTip());
 		connect(ui->actionSave, &QAction::triggered, this, &MainWindow::slot_saveFile);
 
+		/************************************************************************/
+		/* Create Menu                                                          */
+		/************************************************************************/
+		connect(ui->actGenCube, &QAction::triggered,
+			[&] { this->initMesh(":meshes/cube.obj"); });
+		/*connect(ui->actGenTorus, &QAction::triggered,
+			[&] { this->initMesh(":meshes/torus.obj"); });*/
+		connect(ui->actGenTetra, &QAction::triggered,
+			[&] { this->initMesh(":meshes/tetrahedron.obj"); });
+		//////////////////////////////////////////////////////////////////////////
 		connect(ui->actionReset, &QAction::triggered, this, &MainWindow::slot_reset);
 		connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::slot_undo);
 		connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::slot_redo);

@@ -1,5 +1,7 @@
 #include "ConnectorPanel.h"
 
+QFont ConnectorPanel::fontfamily = QFont("Arial");
+
 ConnectorPanel::ConnectorPanel(int mesh_process_type)
 	: ui(new Ui::ConnectorPanel)
 	, meshType(mesh_process_type)
@@ -59,6 +61,8 @@ int ConnectorPanel::getConnectorType() const
 confMap ConnectorPanel::getConfiguration() const
 {
 	confMap ret;
+	fontfamily = ui->font_val->currentFont();
+
 	ret.insert(make_pair(ConnectorConf::SCALE, ui->scale_val->value()));
 	ret.insert(make_pair(ConnectorConf::WIDTH, ui->width_val->value()));
 	ret.insert(make_pair(ConnectorConf::LENGTH, ui->length_val->value()));

@@ -28,24 +28,24 @@ typedef const char cstchar;
 cstchar SVG_HEAD[] =		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
 							"<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">\n";
 cstchar SVG_CIRCLE[] =		"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
-							"style=\"stroke:magenta;stroke-width:0.1;fill:none\" />\n";
+							"style=\"stroke:magenta;stroke-width:0.01;fill:none\" />\n";
 cstchar SVG_LINE[] =		"\t<line id=\"Line%d\" x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" " \
-							"style=\"fill:none;stroke:%s;stroke-width:0.8\" />\n";
+							"style=\"fill:none;stroke:%s;stroke-width:0.01\" />\n";
 cstchar SVG_DASHARRAY[] =	"\t<path stroke-dasharray=\"%f, %f\" id=\"Dash%d\" d=\"M%f %f L%f %f\" " \
-							"style=\"fill:none;stroke:blue;stroke-width:0.8\" />";
+							"style=\"fill:none;stroke:blue;stroke-width:0.01\" />";
 cstchar SVG_TEXT[] =		"\t<text x=\"%lf\" y=\"%lf\" transform=\"rotate(%lf %lf,%lf)\" " \
-							"style=\"font-size:10;font-family:'1CamBamStick8-normal';"\
-							"stroke:blue;stroke-width:0.8;fill:none;" \
+							"style=\"font-size:10;font-family:'%s';"\
+							"stroke:blue;stroke-width:0.01;fill:none;" \
 							"text-anchor:middle;alignment-baseline:middle;\" >%s</text>\n";
 cstchar SVG_LABEL[] =		"\t<text x=\"%lf\" y=\"%lf\" " \
-							"style=\"font-size:10;stroke:blue;stroke-width:0.1;fill:none;" \
+							"style=\"font-size:10;stroke:blue;stroke-width:0.01;fill:none;" \
 							"text-anchor:middle;alignment-baseline:middle;" \
 							"font-family:'1CamBamStick8-normal'\" >-</text>\n";
 cstchar SVG_ARCH[] =		"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
 							"L %lf %lf " \
 							"A %lf %lf, 0, 1, 0, %lf %lf " \
-							"Z\" style=\"fill:none;stroke:blue;stroke-width:0.1\" />\n";
+							"Z\" style=\"fill:none;stroke:blue;stroke-width:0.01\" />\n";
 							/*
 							"<path d=\"M p1x p1y " \
 							"A R R, 0, 1, 0, p2x p2y " \
@@ -56,7 +56,8 @@ cstchar SVG_ARCH[] =		"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 
 void printText(FILE* file, double x, double y, double angle, const QString &text)
 {
-	fprintf(file, SVG_TEXT, x, y, angle, x, y, text.toUtf8().data());
+	fprintf(file, SVG_TEXT, x, y, angle, x, y,
+		ConnectorPanel::fontfamily.family().toUtf8().constData(),text.toUtf8().data());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -612,7 +613,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 				printBorderEdgePts[isec].x() * he_scale,
 				printBorderEdgePts[isec].y() * he_scale);
 		}
-		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
+		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.01\" />\n");
 		/************************************************************************/
 		/* Write out edge for etch                                               */
 		/************************************************************************/
@@ -745,7 +746,7 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 				printBorderEdgePts[isec].x() * he_scale,
 				printBorderEdgePts[isec].y() * he_scale);
 		}
-		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n");
+		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:0.01\" />\n");
 		/************************************************************************/
 		/* Write out edge for etch                                               */
 		/************************************************************************/
@@ -1087,7 +1088,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 		{
 			fprintf(SVG_File, "%f,%f ", printEdgePts[i]->x(), printEdgePts[i]->y());
 		}
-		fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
+		fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:0.01\" />\n",
 			printEdgePts[0]->x(), printEdgePts[0]->y());
 		//print carve edges
 		if (printEdgePtsCarves.size())
@@ -1096,7 +1097,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			for (int i = 0; i < printEdgePtsCarves.size(); i += 2)
 			{
 				fprintf(SVG_File, "\t<polyline id=\"%d\" points=\"%f,%f %f,%f\" " \
-					"style=\"fill:none;stroke:blue;stroke-width:0.8\" />\n",
+					"style=\"fill:none;stroke:blue;stroke-width:0.01\" />\n",
 					i,
 					printEdgePtsCarves[i]->x(), printEdgePtsCarves[i]->y(),
 					printEdgePtsCarves[i + 1]->x(), printEdgePtsCarves[i + 1]->y());
@@ -1117,7 +1118,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 					curHE->v->pos.x() * he_scale, curHE->v->pos.y() * he_scale);
 				curHE = curHE->next;
 			} while (curHE != he);
-			fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.8\" />\n",
+			fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:0.01\" />\n",
 				he->v->pos.x() * he_scale, he->v->pos.y() * he_scale);
 		}
 		//////////////////////////////////////////////////////////////////////////
@@ -1255,11 +1256,11 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 		case RING_CONNECTOR:
 			fprintf(SVG_File, // Outer circle
 				"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
-				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
+				"style=\"stroke:blue;stroke-width:0.01;fill:none\" />\n",
 				printFaceID, centerPt.x(), centerPt.y(), outerR);
 			fprintf(SVG_File, // Inner circle
 				"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
-				"style=\"stroke:blue;stroke-width:0.1;fill:none\" />\n",
+				"style=\"stroke:blue;stroke-width:0.01;fill:none\" />\n",
 				printFaceID, centerPt.x(), centerPt.y(), innerR);
 			fprintf(SVG_File, // Carve edge
 				SVG_LINE,
@@ -1306,7 +1307,7 @@ void MeshConnector::writeCutLayer(FILE* SVG_File, const vector<QVector2D> &cut,
 		fprintf(SVG_File, "%f,%f ", cut[isec].x(), cut[isec].y());
 	}
 	
-	fprintf(SVG_File, "\" style=\"fill:none;stroke:cyan;stroke-width:0.8\" />\n");
+	fprintf(SVG_File, "\" style=\"fill:none;stroke:cyan;stroke-width:0.01\" />\n");
 }
 
 void MeshConnector::wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch, int seg)

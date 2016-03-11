@@ -26,6 +26,8 @@ public:
 	double getScale() const;
 	int getConnectorType() const;
 	confMap getConfiguration() const;
+
+	static QFont fontfamily;
 private:
 	void initConnectorType();
 private slots:

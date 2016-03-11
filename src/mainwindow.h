@@ -38,6 +38,7 @@ protected:
 	bool connectComponents();
 
 	void initialization();
+	void initMesh(const string& filename);
 protected:
 	void createActions();
 	void createMenus();

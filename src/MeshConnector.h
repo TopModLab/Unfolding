@@ -24,7 +24,8 @@
 enum ConnectorConf: int
 {
 	// General
-	SCALE = 0,
+	LABEL_FONT = 0,
+	SCALE,
 	WIDTH,
 	LENGTH,
 	LABELED,

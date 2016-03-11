@@ -97,7 +97,6 @@
      <string>Create</string>
     </property>
     <addaction name="actGenCube"/>
-    <addaction name="actGenTorus"/>
     <addaction name="actGenTetra"/>
    </widget>
    <addaction name="menu_File"/>

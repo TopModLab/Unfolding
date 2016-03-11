@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/">
+    <file>meshes/torus.obj</file>
+    <file>meshes/tetrahedron.obj</file>
     <file>icons/polygon/polycube.png</file>
     <file>icons/polygon/polytetra.png</file>
     <file>icons/polygon/polytorus.png</file>
