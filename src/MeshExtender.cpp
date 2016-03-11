@@ -24,30 +24,20 @@ void MeshExtender::setOriMesh(HDS_Mesh* mesh)
 	ori_mesh = mesh;
 }
 
-vector <QVector3D> MeshExtender::scaleBridgerEdge(he_t* he, he_t* he1, he_t* he2)
+vector <QVector3D> MeshExtender::scaleBridgerEdge(he_t* he)
 {
+    double scale = HDS_Bridger::getScale();
 	vector <QVector3D> vpair;
     //obsolete scale function
-//	QVector3D v1 = he->v->pos;
-//	QVector3D v2 = he->flip->v->pos;
+    QVector3D v1 = he->v->pos;
+    QVector3D v2 = he->flip->v->pos;
 
-//	vpair.push_back( (1 - scale/2)* v1 + scale/2 *v2 );
-//	vpair.push_back( (1 - scale/2)* v2 + scale/2 *v1 );
+    QVector3D vmid = (v1 + v2)/2;
 
-    //middle point projection scale
-    //get middle point of he1 and he2
-    QVector3D v1 = (he1->v->pos + he2->flip->v->pos)/2.0;
-    QVector3D v2 = (he2->v->pos + he1->flip->v->pos)/2.0;
+    vpair.push_back( (1 - scale)* vmid + scale *v1 );
+    vpair.push_back( (1 - scale)* vmid + scale *v2 );
 
-    //get projected point on he
-    QVector3D vs = he->v->pos;
-    QVector3D ve = he->flip->v->pos;
 
-    QVector3D v1_projected = vs + QVector3D::dotProduct((v1 - vs), (ve - vs)) / QVector3D::dotProduct((ve - vs), (ve - vs))  *(ve - vs);
-    QVector3D v2_projected = vs + QVector3D::dotProduct((v2 - vs), (ve - vs)) / QVector3D::dotProduct((ve - vs), (ve - vs))  *(ve - vs);
-
-    vpair.push_back(v1_projected);
-    vpair.push_back(v2_projected);
 	return vpair;
 }
 
@@ -244,7 +234,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			///for all non-cut-edge edges, create bridge faces
 
 			he_t* he_ori = ori_hemap[(he->refid)>>2];
-            vector <QVector3D> vpair = scaleBridgerEdge(he_ori, he, he->bridgeTwin);
+            vector <QVector3D> vpair = scaleBridgerEdge(he_ori);
 			addBridger(he, he->bridgeTwin, vpair);
 
 		}else {
@@ -271,7 +261,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			hes_new.push_back(flap_he);
 
 			he_t* he_ori = ori_hemap[(he->refid)>>2];
-            vector <QVector3D> vpair = scaleBridgerEdge(he_ori, he, flap_he);
+            vector <QVector3D> vpair = scaleBridgerEdge(he_ori);
 
 
 			vert_t* twin_flap_vs = new vert_t;
