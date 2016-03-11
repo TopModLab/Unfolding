@@ -298,27 +298,6 @@ void MainWindow::createActions()
 
 		ui->actionRim->setChecked(false);
 		connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
-		
-//        QMenu *rimFaceMenu =  new QMenu();
-//        QAction *rimEdgeBezier = new QAction("Edge With Quadratic Bezier", this);
-//        connect(rimEdgeBezier, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
-
-//        QAction *rimEdgeCubic = new QAction("Edge With Cubic Bezier", this);
-//        connect(rimEdgeCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
-
-//        QAction *rimFaceCubic = new QAction("Face With Cubic Bezier", this);
-//        connect(rimFaceCubic, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
-
-//        rimFaceMenu->addAction(rimEdgeBezier);
-//        rimFaceMenu->addAction(rimEdgeCubic);
-//        rimFaceMenu->addAction(rimFaceCubic);
-
-//        actionsMap["rimface3d_edge_bezier"] = rimEdgeBezier;
-//        actionsMap["rimface3d_edge_cubic"] = rimEdgeCubic;
-//        actionsMap["rimface3d_face_cubic"] = rimFaceCubic;
-
-//        rimface3DAct->setMenu(rimFaceMenu);
-
 
 		ui->actionCut->setChecked(false);
 		connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
@@ -558,14 +537,7 @@ void MainWindow::slot_triggerRimmed3DMesh()
     if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
 		rmpanel->show();
-		rmpanel->activateWindow();
-        if (obj == actionsMap["rimface3d_edge_bezier"] ) {
-            rmpanel->setType(0);
-        }else if (obj == actionsMap["rimface3d_edge_cubic"] ) {
-            rmpanel->setType(1);
-        }else
-            rmpanel->setType(2);
-
+        rmpanel->activateWindow();
 	}
 
 	ui->actionRim->setChecked(false);
