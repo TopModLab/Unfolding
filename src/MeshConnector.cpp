@@ -40,7 +40,7 @@ cstchar SVG_TEXT[] =		"\t<text x=\"%lf\" y=\"%lf\" transform=\"rotate(%lf %lf,%l
 cstchar SVG_LABEL[] =		"\t<text x=\"%lf\" y=\"%lf\" " \
 							"style=\"font-size:10;stroke:blue;stroke-width:0.01;fill:none;" \
 							"text-anchor:middle;alignment-baseline:middle;" \
-							"font-family:'1CamBamStick8-normal'\" >-</text>\n";
+                            "font-family:'%s'\" >-</text>\n";
 cstchar SVG_ARCH[] =		"\t<path id=\"Rim%d\" d=\"M %lf %lf " \
 							"A %lf %lf, 0, 1, 1, %lf %lf " \
 							"L %lf %lf " \
@@ -326,8 +326,8 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		/************************************************************************/
 		for (auto labpos : printOrientLabel)
 		{
-			fprintf(SVG_File, SVG_LABEL,
-				labpos.x(), labpos.y());
+            fprintf(SVG_File, SVG_LABEL, labpos.x(), labpos.y(),
+                    ConnectorPanel::fontfamily.family().toUtf8().constData());
 		}
 
 		/************************************************************************/
