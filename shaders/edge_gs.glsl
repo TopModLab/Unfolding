@@ -1,4 +1,4 @@
-#version 400
+#version 330
 
 layout(lines) in;
 layout(line_strip, max_vertices = 2) out;
@@ -14,7 +14,7 @@ void main()
 	vec4 p1 = gl_in[1].gl_Position;
 	
 	uint flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
-	if (bool(flag & +4) && bool(hl_comp & +1))// Cut Edge
+	if (bool(flag & + uint(4)) && bool(hl_comp & + uint(1)))// Cut Edge
 	{
 		p0.z -= 0.00125f;
 		p1.z -= 0.00125f;

@@ -1,7 +1,7 @@
 #include "ViewerGrid.h"
 
 const char* gridvs =
-"#version 400\n"\
+"#version 330\n"\
 "in layout(location = 0) vec2 vp;"\
 "uniform mat4 view, proj;"\
 "uniform float size;"\
@@ -10,7 +10,7 @@ const char* gridvs =
 "}";
 
 const char* gridfs =
-"#version 400\n"\
+"#version 330\n"\
 "out vec4 frag_color;"\
 "void main() {"\
 "	frag_color = vec4(0.5,0.5,0.5, 1.0);"\
