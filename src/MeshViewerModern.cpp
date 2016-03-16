@@ -422,11 +422,6 @@ void MeshViewerModern::resizeGL(int w, int h)
 	initializeFBO();
 }
 
-void MeshViewerModern::paintEvent(QPaintEvent* e)
-{
-	paintGL();
-}
-
 void MeshViewerModern::keyPressEvent(QKeyEvent* e)
 {
 	switch (e->key()) {
