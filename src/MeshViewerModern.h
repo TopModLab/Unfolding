@@ -219,7 +219,8 @@ private://interaction ie selection
 	InteractionState interactionState;
 	stack<InteractionState> interactionStateStack;
 	SelectionState selectionState;
-	queue<int> selectedElementsIdxQueue;
+	queue<int> selVTX, selHE, selFACE;
+
 	ShadingState shadingSate;
 	MouseState mouseState;
 

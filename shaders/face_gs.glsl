@@ -27,6 +27,10 @@ void main()
 	{
 		Kd = vec3(0.0f, 0.8f, 1.0f);
 	}
+	else if (bool(flag & uint(2)))
+	{
+		Kd = vec3(1.f, 0.f, 0.f);
+	}
 	else// Regular color
 	{
 		Kd = vec3(0.6, 0.8, 1);

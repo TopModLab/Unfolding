@@ -5,13 +5,14 @@
 #include <QTime>
 
 #include <tchar.h>
+/*
 #ifdef OPENGL_LEGACY
 #include "meshviewer.h"
 using viewer_t = MeshViewer;
-#else
+#else*/
 #include "MeshViewerModern.h"
 using viewer_t = MeshViewerModern;
-#endif
+/*#endif*/
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"

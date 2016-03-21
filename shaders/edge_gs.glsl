@@ -20,6 +20,10 @@ void main()
 		p1.z -= 0.00125f;
 		color = vec3(0.f, 1.f, 0.2f);
 	}
+	else if (bool(flag & uint(2)))
+	{
+		color = vec3(1.f, 0.f, 0.f);
+	}
 	else// Regular edge
 	{
 		color = vec3(0.f, 0.f, 1.f);

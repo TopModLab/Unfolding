@@ -1,7 +1,5 @@
 #define NOMINMAX
 
-
-
 #include "meshmanager.h"
 #include <iostream>
 //#include "glutils.hpp"
@@ -340,7 +338,6 @@ void MeshViewer::resetFaces()
 	//reset all faces
 	for (auto f: heMesh->faces())
 		f->setPicked(false);
-
 }
 
 

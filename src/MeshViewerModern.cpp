@@ -41,10 +41,10 @@ void MeshViewerModern::bindHalfEdgeMesh(HDS_Mesh *mesh)
 void MeshViewerModern::setInteractionMode(InteractionState state)
 {
 	interactionState = state;
-	while (!selectedElementsIdxQueue.empty())
+	/*while (!selectedElementsIdxQueue.empty())
 	{
 		selectedElementsIdxQueue.pop();
-	}
+	}*/
 }
 
 void MeshViewerModern::setSelectionMode(SelectionState mode)
@@ -279,7 +279,7 @@ void MeshViewerModern::drawMeshToFBO()
 		uid_shader.setUniformValue("depthonly", true);
 		glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 
-		glLineWidth(10.0);
+		glLineWidth(16.0);
 		heRBO.vao.bind();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -305,32 +305,69 @@ void MeshViewerModern::drawMeshToFBO()
 	uid_shader.release();
 
 	auto fboRes = fbo->toImage();
-	//fboRes.save("fbo.png");
+	fboRes.save("fbo.png");
 	QRgb pixel = fboRes.pixel(mouseState.x, mouseState.y);
-	if ((pixel >> 24) == 0)
-	{
-		selectionID.selID = 0;
-		cout << "no object selected" << endl;
-		return;
-	}
+	bool selected = pixel >> 24;
 	size_t renderID = pixel & 0xFFFFFF;
-	unordered_set<int> settest;
+	
 	switch (interactionState)
 	{
 	case InteractionState::SelectVertex:
-		selectionID.vertexID = renderID << 2
-			| static_cast<size_t>(DataTypeMark::VERTEX_MARK);
+		if (selected)
+		{
+			selVTX.push(renderID);
+			heMesh->vertMap.at(renderID)->isPicked = true;
+		} 
+		else
+		{
+			while (!selVTX.empty())
+			{
+				heMesh->vertMap.at(selVTX.front())->isPicked = false;
+				selVTX.pop();
+			}
+		}
 		break;
 	case InteractionState::SelectFace:
-		selectionID.faceID = renderID << 2
-			| static_cast<size_t>(DataTypeMark::FACE_MARK);
+		if (selected)
+		{
+			selFACE.push(renderID);
+			heMesh->faceMap.at(renderID)->isPicked = true;
+		} 
+		else
+		{
+			while (!selFACE.empty())
+			{
+				heMesh->faceMap.at(selFACE.front())->isPicked = false;
+				selFACE.pop();
+			}
+		}
+		heMesh->exportVBO(nullptr, nullptr, nullptr, &fRBO.flags);
+		fRBO.destroy();
+		bindFaceVAO();
+		bindFaceTBO();
 		break;
 	case InteractionState::SelectEdge:
-		selectionID.edgeID = renderID << 2
-			| static_cast<size_t>(DataTypeMark::EDGE_MARK);
+		if (selected)
+		{
+			selHE.push(renderID);
+			heMesh->heMap.at(renderID)->isPicked = true;
+		} 
+		else
+		{
+			while (!selHE.empty())
+			{
+				heMesh->heMap.at(selHE.front())->isPicked = false;
+				selHE.pop();
+			}
+		}
+		heMesh->exportVBO(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &heRBO.flags);
+		heRBO.destroy();
+		bindEdgesVAO();
+		bindEdgesTBO();
 		break;
 	}
-	cout << "draw primitive id:" << (selectionID.selID >> 2) << endl;
+	
+	cout << "draw primitive id:" << renderID << endl;
 }
 
 void MeshViewerModern::paintGL()

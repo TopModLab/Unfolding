@@ -330,7 +330,7 @@ void drawString(const char* str, int numb)
 	static int isFirstCall = 1;
 	static GLuint lists;
 
-	if( isFirstCall ) {
+	if (isFirstCall) {
 		isFirstCall = 0;
 
 		lists = glGenLists(MAX_CHAR);
@@ -340,8 +340,8 @@ void drawString(const char* str, int numb)
 
 	//for(int i=0; i<numb; i++){
 
-	glCallList(lists+*str);
-	cout<<"ok"<<*str<<endl;
+	glCallList(lists + *str);
+	cout << "ok" << *str << endl;
 
 	//}
 }
@@ -352,28 +352,28 @@ void display(int num)
 	//    glRasterPos2f(0.0f, 0.0f);
 	//     glScalef(100,100,100);
 	char ss[20];
-	itoa(num,ss,10);
+	itoa(num, ss, 10);
 	drawString(ss, num);
-	num=0;
+	num = 0;
 
 }
 #endif
 void HDS_Mesh::draw(ColorMap cmap)
 {
 #ifdef OPENGL_LEGACY
-	if( showFace )
+	if (showFace)
 	{
-		GLfloat face_mat_diffuse[4] = {0.75, 0.75, 0.75, 1};
-		GLfloat face_mat_diffuse_selected[4] = {1, 0, 0.5, 1};
-		GLfloat face_mat_diffuse_bridger[4] = {0.75, 0.75, 0.95, 1};
+		GLfloat face_mat_diffuse[4] = { 0.75, 0.75, 0.75, 1 };
+		GLfloat face_mat_diffuse_selected[4] = { 1, 0, 0.5, 1 };
+		GLfloat face_mat_diffuse_bridger[4] = { 0.75, 0.75, 0.95, 1 };
 
 
 		/// traverse the mesh and render every single face
 		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
 		{
 			face_t* f = (*fit);
-			if( f->isCutFace || f->isHole ) continue; //invisible face
-			// render the faces
+			if (f->isCutFace || f->isHole) continue; //invisible face
+													 // render the faces
 			he_t* he = f->he;
 			he_t* hen = he->next;
 			he_t* hep = he->prev;
@@ -381,7 +381,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 			he_t* curHe = he;
 
-			if( f->isPicked ) {
+			if (f->isPicked) {
 				glColor4f(1, 0, 0.5, 1);
 				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_selected);
 
@@ -411,25 +411,25 @@ void HDS_Mesh::draw(ColorMap cmap)
 				GLUtils::useNormal(v->normal);
 				GLUtils::useVertex(v->pos);
 				curHe = curHe->next;
-			}while( curHe != he );
+			} while (curHe != he);
 			glEnd();
 
 
 		}
 	}
 
-	if( showEdge )
+	if (showEdge)
 	{
 
 		glColor4f(0.25, 0.25, 0.25, 1);
-		GLfloat line_mat_diffuse[4] = {0.25, 0.25, 0.25, 1};
-		GLfloat line_mat_diffuse_selected[4] = {1, 0, 0.5, 1};
-		GLfloat line_mat_diffuse_cutEdge[4] = {0, 1, 0, 1};
+		GLfloat line_mat_diffuse[4] = { 0.25, 0.25, 0.25, 1 };
+		GLfloat line_mat_diffuse_selected[4] = { 1, 0, 0.5, 1 };
+		GLfloat line_mat_diffuse_cutEdge[4] = { 0, 1, 0, 1 };
 
 
 		glLineWidth(2.0);
 		// render the boundaires
-		for(auto eit=heSet.begin();eit!=heSet.end();eit++)
+		for (auto eit = heSet.begin(); eit != heSet.end(); eit++)
 		{
 			he_t* e = (*eit);
 			he_t* en = e->next;
@@ -437,11 +437,11 @@ void HDS_Mesh::draw(ColorMap cmap)
 			QColor c = Qt::black;
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
 
-			if( e->isPicked ) {
-				c.setRgbF(1.0,0.0,0.5,1.0);
+			if (e->isPicked) {
+				c.setRgbF(1.0, 0.0, 0.5, 1.0);
 				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse_selected);
 			}
-			else if( e->isCutEdge ) {
+			else if (e->isCutEdge) {
 				c = Qt::green;
 				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse_cutEdge);
 
@@ -451,14 +451,14 @@ void HDS_Mesh::draw(ColorMap cmap)
 		}
 	}
 
-	if(showVert || showNormals) {
+	if (showVert || showNormals) {
 		glColor4f(0, 0, 1, 1);
-		GLfloat vert_mat_diffuse[4] = {1, 1, 0, 1};
-		GLfloat vert_mat_diffuse_selected[4] = {1, 0, 0.5, 1};
+		GLfloat vert_mat_diffuse[4] = { 1, 1, 0, 1 };
+		GLfloat vert_mat_diffuse_selected[4] = { 1, 0, 0.5, 1 };
 
 
 		// render the boundaires
-		for(auto vit=vertSet.begin();vit!=vertSet.end();vit++)
+		for (auto vit = vertSet.begin(); vit != vertSet.end(); vit++)
 		{
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vert_mat_diffuse);
 			vert_t* v = (*vit);
@@ -468,7 +468,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 			glutSolidSphere(0.125, 16, 16);
 #else
 			glPointSize(5.0);
-			if( v->isPicked ){
+			if (v->isPicked) {
 				glColor4f(1, 0, 0.5, 1);
 				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vert_mat_diffuse_selected);
 
@@ -476,25 +476,25 @@ void HDS_Mesh::draw(ColorMap cmap)
 
 
 			else {
-				double c = .5 - clamp(v->curvature, -Pi/2, Pi/2) / Pi; //[0, 1]
-				//cout << v->index << ":" << v->curvature << ", " << c << endl;
-				//        if( c < 0.5 ) {
-				//          glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
-				//        }
-				//        else {
-				//          glColor4f(c, (c-0.5, 0.0, 1.0);
-				//        }
-				//glColor4f(c, 1-c, 1-c, 1.0); //commented out show colors depanding on curvature
-				glColor4f(0.55,0.55,0.55,0.0);
+				double c = .5 - clamp(v->curvature, -Pi / 2, Pi / 2) / Pi; //[0, 1]
+																		   //cout << v->index << ":" << v->curvature << ", " << c << endl;
+																		   //        if( c < 0.5 ) {
+																		   //          glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
+																		   //        }
+																		   //        else {
+																		   //          glColor4f(c, (c-0.5, 0.0, 1.0);
+																		   //        }
+																		   //glColor4f(c, 1-c, 1-c, 1.0); //commented out show colors depanding on curvature
+				glColor4f(0.55, 0.55, 0.55, 0.0);
 			}
 
-			if( showVert )
+			if (showVert)
 			{
 				glBegin(GL_POINTS);
 				glVertex3f(0, 0, 0);
 				glEnd();
 			}
-			if( showNormals )
+			if (showNormals)
 			{
 				glBegin(GL_LINES);
 
@@ -516,11 +516,11 @@ void HDS_Mesh::drawVertexIndices()
 {
 #ifdef OPENGL_LEGACY
 	glColor4f(0, 0, 1, 1);
-	GLfloat line_mat_diffuse[4] = {1, 0, 0, 1};
+	GLfloat line_mat_diffuse[4] = { 1, 0, 0, 1 };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
 
 	// render the boundaires
-	for(auto vit=vertSet.begin();vit!=vertSet.end();vit++)
+	for (auto vit = vertSet.begin(); vit != vertSet.end(); vit++)
 	{
 		vert_t* v = (*vit);
 		glPushMatrix();
@@ -546,13 +546,13 @@ void HDS_Mesh::drawVertexIndices()
 void HDS_Mesh::drawEdgeIndices()
 {
 #ifdef OPENGL_LEGACY
-	for(auto eit=heSet.begin();eit!=heSet.end();eit++)
+	for (auto eit = heSet.begin(); eit != heSet.end(); eit++)
 	{
 		he_t* e = (*eit);
 		he_t* en = e->next;
 
 		// draw only odd index half edges
-		if( e->index & 0x1 ) continue;
+		if (e->index & 0x1) continue;
 
 		float r, g, b;
 		encodeIndex<float>(e->index, r, g, b);
@@ -565,7 +565,7 @@ void HDS_Mesh::drawEdgeIndices()
 void HDS_Mesh::drawFaceIndices()
 {
 #ifdef OPENGL_LEGACY
-	for(auto &f : faceSet) {
+	for (auto &f : faceSet) {
 		float r, g, b;
 		encodeIndex<float>(f->index, r, g, b);
 		glColor4f(r, g, b, 1.0);
@@ -579,7 +579,7 @@ void HDS_Mesh::drawFaceIndices()
 			vert_t* v = curHe->v;
 			GLUtils::useVertex(v->pos);
 			curHe = curHe->next;
-		}while( curHe != he );
+		} while (curHe != he);
 		glEnd();
 	}
 #endif
@@ -737,6 +737,30 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 			fflag_array->insert(fflag_array->end(), vidCount - 2, flag);
 		}
 	}
+	else if (fflag_array != nullptr)
+	{
+		// re-export face flag
+		fflag_array->clear();
+		fflag_array->reserve(fSetSize * 2);
+		for (auto face : faceSet)
+		{
+			if (face->isCutFace)
+			{
+				continue;
+			}
+			uint16_t flag = face->getFlag();
+			auto he = face->he;
+			auto curHE = he;
+			size_t vidCount = 0;
+			do
+			{
+				vidCount++;
+				curHE = curHE->next;
+			} while (curHE != he);
+			fflag_array->insert(fflag_array->end(), vidCount - 2, flag);
+		}
+	}
+
 	size_t heSetSize = heSet.size() / 2;
 	if (heib_array != nullptr)
 	{
@@ -745,9 +769,9 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 
 		
 		heib_array->clear();
-		heib_array->reserve(heSetSize);
+		heib_array->reserve(heSetSize >> 1);
 		heflag_array->clear();
-		heflag_array->reserve(heSetSize);
+		heflag_array->reserve(heSetSize >> 1);
 
 		for (auto he : heSet)
 		{
@@ -760,6 +784,25 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 				heib_array->push_back(he->flip->v->index);
 
 				heid_array->push_back(static_cast<uint32_t>(he->index));
+				heflag_array->push_back(he->getFlag());
+			}
+		}
+	}
+	else if (heflag_array != nullptr)
+	{
+		unordered_set<he_t*> visitiedHE;
+		visitiedHE.reserve(heSet.size());
+
+		heflag_array->clear();
+		heflag_array->reserve(heSetSize >> 1);
+
+		for (auto he : heSet)
+		{
+			if (visitiedHE.find(he) == visitiedHE.end())
+			{
+				visitiedHE.insert(he);
+				visitiedHE.insert(he->flip);
+
 				heflag_array->push_back(he->getFlag());
 			}
 		}
