@@ -98,7 +98,7 @@ static void fillQuad(const QVector3D& p0,
 
 }
 #else// Modern OpenGL
-#include <QOpenGLFunctions_4_0_Core>
+#include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShader>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
@@ -112,7 +112,7 @@ using oglVAO		= QOpenGLVertexArrayObject;
 using oglBuffer		= QOpenGLBuffer;
 using oglFBO		= QOpenGLFramebufferObject;
 using oglTexture	= QOpenGLTexture;
-using oglFuncs		= QOpenGLFunctions_4_0_Core;
+using oglFuncs		= QOpenGLFunctions_3_3_Core;
 #endif
 
 #endif // GLUTILS_HPP

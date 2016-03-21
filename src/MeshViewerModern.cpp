@@ -20,7 +20,7 @@ MeshViewerModern::MeshViewerModern(QWidget *parent)
 	format.setDepthBufferSize(32);
 	format.setStencilBufferSize(8);
 //	format.setSamples(16);
-	format.setVersion(3, 2);
+	format.setVersion(3, 3);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
 }
@@ -457,11 +457,6 @@ void MeshViewerModern::resizeGL(int w, int h)
 	view_cam.resizeViewport(w / static_cast<double>(h));
 
 	initializeFBO();
-}
-
-void MeshViewerModern::paintEvent(QPaintEvent* e)
-{
-	paintGL();
 }
 
 void MeshViewerModern::keyPressEvent(QKeyEvent* e)

@@ -1,4 +1,4 @@
-#version 400
+#version 330
 
 out vec4 frag_color;
 
@@ -10,13 +10,14 @@ void main()
 {
 	if (depthonly)
 	{
-		frag_color = vec4(0, 0, 0, 0);
+		frag_color = vec4(0.f, 0.f, 0.f, 0.f);
 	}
 	else
 	{
 		uint uid = texelFetch(id_tex, gl_PrimitiveID).r;
 		//int uid = gl_PrimitiveID;
-		frag_color = vec4(float(uid >> 16) / 255.0, float((uid >> 8) & 0xFF) / 255.0,
-			float(uid & 0xFF) / 255.0, 1.0);
+		frag_color = vec4(float(uid >> uint(16)) / 255.0,
+						float((uid >> uint(8)) & uint(0xFF)) / 255.0,
+						float(uid & uint(0xFF)) / 255.0, 1.0);
 	}
 }
