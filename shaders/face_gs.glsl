@@ -1,4 +1,4 @@
-#version 400
+#version 330
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
@@ -23,13 +23,17 @@ void main()
 	normal = normalize(cross(v1.xyz, v2.xyz));
 	
 	uint flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
-	if (bool(flag & +16) && bool(hl_comp & +4))// Bridger
+	if (bool(flag & + uint(16)) && bool(hl_comp & + uint(4)))// Bridger
 	{
-		Kd = vec3(0.0f, 0.8f, 1.0f);
+		Kd = vec3(0.0f, 0.8f, 1.f);
+	}
+	else if (bool(flag & uint(2)))
+	{
+		Kd = vec3(1.f, 0.f, 0.f);
 	}
 	else// Regular color
 	{
-		Kd = vec3(0.6, 0.8, 1);
+		Kd = vec3(0.6, 0.8, 1.f);
 	}
 	
 	// Send the triangle along with the edge distances

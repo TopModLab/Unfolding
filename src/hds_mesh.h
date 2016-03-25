@@ -70,6 +70,7 @@ public:
 	void drawVertexIndices();
 	void drawEdgeIndices();
 	void drawFaceIndices();
+
 	void flipShowEdges();
 	void flipShowFaces();
 	void flipShowVertices();
@@ -77,11 +78,13 @@ public:
 	/************************************************************************/
 	/* Modern Rendering Functions                                           */
 	/************************************************************************/
-	void exportVBO(vector<float>* vtx_array,
-		vector<uint32_t>* fib_array, vector<uint32_t>* fid_array,
-		vector<uint16_t>* fflag_array,
-		vector<uint32_t>* heib_array, vector<uint32_t>* heid_array,
-		vector<uint16_t>* heflag_array) const;
+	void exportVBO(vector<float>* vtx_array = nullptr,
+		vector<uint32_t>* fib_array = nullptr,
+		vector<uint32_t>* fid_array = nullptr,
+		vector<uint16_t>* fflag_array = nullptr,
+		vector<uint32_t>* heib_array = nullptr,
+		vector<uint32_t>* heid_array = nullptr,
+		vector<uint16_t>* heflag_array = nullptr) const;
 
 	 unordered_set<he_t*>& halfedges()  { return heSet; }
 	 unordered_set<face_t*>& faces()  { return faceSet; }

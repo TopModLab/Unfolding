@@ -1,4 +1,4 @@
-#version 400
+#version 330
 flat in vec3 color;
 out vec4 frag_color; // final colour of surface
 

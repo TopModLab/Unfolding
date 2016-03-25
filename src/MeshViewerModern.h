@@ -81,7 +81,6 @@ protected:
 	void initializeGL() Q_DECL_OVERRIDE;
 	void paintGL() Q_DECL_OVERRIDE;
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
-	void paintEvent(QPaintEvent *e) Q_DECL_OVERRIDE;
 
 	void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
 	void keyReleaseEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
@@ -219,7 +218,8 @@ private://interaction ie selection
 	InteractionState interactionState;
 	stack<InteractionState> interactionStateStack;
 	SelectionState selectionState;
-	queue<int> selectedElementsIdxQueue;
+	queue<int> selVTX, selHE, selFACE;
+
 	ShadingState shadingSate;
 	MouseState mouseState;
 
