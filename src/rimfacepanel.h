@@ -16,7 +16,7 @@ public:
 	explicit RimFacePanel(QWidget *parent = 0);
 	~RimFacePanel();
 
-    int getType() {return type;}
+    std::map<QString,bool> getConfig() {return config;}
 	float getW() { return width;}
 	float getH() { return height;}
 
@@ -27,14 +27,14 @@ signals:
 public slots:
 	void slot_setW(int);
 	void slot_setH(int);
-    void slot_setType(int type);
+    void slot_setType();
 
 
 private:
 	Ui::RimFacePanel *ui;
 	float width;
 	float height;
-    int type;
+    std::map<QString,bool> config;
 };
 
 #endif // RIMFACEPANEL_H

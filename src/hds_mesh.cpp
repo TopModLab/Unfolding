@@ -166,6 +166,7 @@ bool HDS_Mesh::validateEdge(he_t *e) {
 bool HDS_Mesh::validateFace(face_t *f)
 {
 	if( faceMap.find(f->index) == faceMap.end() ) {
+        cout<<"cant find in face map"<<endl;
 		return false;
 	}
 	int maxEdges = 100;
@@ -177,6 +178,7 @@ bool HDS_Mesh::validateFace(face_t *f)
 		++edgeCount;
 		if (edgeCount > maxEdges)
 		{
+            cout<<"edge count error"<<endl;
 			return false;
 		}
 	} while( curHe != he );

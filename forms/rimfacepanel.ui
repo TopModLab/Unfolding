@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>269</width>
-    <height>229</height>
+    <width>280</width>
+    <height>314</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,99 +18,133 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>258</width>
-     <height>209</height>
+     <width>249</width>
+     <height>295</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetDefaultConstraint</enum>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Rim Face Piece</string>
       </property>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <item>
-         <widget class="QToolButton" name="toolButton_1">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Edge With 
-Quadratic Bezier</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-          <property name="autoExclusive">
-           <bool>false</bool>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextOnly</enum>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">buttonGroup</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="toolButton_2">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Edge With
- Cubic Bezier</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="autoExclusive">
-           <bool>false</bool>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextOnly</enum>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">buttonGroup</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="toolButton_3">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Face With
- Cubic Bezier</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextOnly</enum>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">buttonGroup</string>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QRadioButton" name="edgeBtn">
+           <property name="text">
+            <string>Edge Based</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">piecePositionGrp</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="faceBtn">
+           <property name="text">
+            <string>Face Based</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">piecePositionGrp</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="smoothBox">
+         <property name="text">
+          <string>Smooth on Edge</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <widget class="QRadioButton" name="halfBtn">
+           <property name="text">
+            <string>Half</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">pieceSizeGrp</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="wholeBtn">
+           <property name="text">
+            <string>Whole</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">pieceSizeGrp</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="connectorBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Add Connector</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Beizier</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QRadioButton" name="quaBtn">
+           <property name="text">
+            <string>Quadratic</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">bezierGrp</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="cubicBtn">
+           <property name="text">
+            <string>Cubic</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">bezierGrp</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -125,7 +159,7 @@ Quadratic Bezier</string>
            </size>
           </property>
           <property name="text">
-           <string>Edge Piece Width</string>
+           <string>Roundness</string>
           </property>
          </widget>
         </item>
@@ -172,7 +206,7 @@ Quadratic Bezier</string>
            </size>
           </property>
           <property name="text">
-           <string>Edge Piece Height</string>
+           <string>Thickness</string>
           </property>
          </widget>
         </item>
@@ -217,7 +251,7 @@ Quadratic Bezier</string>
       <property name="sizeHint" stdset="0">
        <size>
         <width>20</width>
-        <height>70</height>
+        <height>20</height>
        </size>
       </property>
      </spacer>
@@ -246,14 +280,12 @@ Quadratic Bezier</string>
     </item>
    </layout>
   </widget>
-  <zorder>verticalLayoutWidget</zorder>
-  <zorder></zorder>
-  <zorder></zorder>
-  <zorder></zorder>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
+  <buttongroup name="pieceSizeGrp"/>
+  <buttongroup name="piecePositionGrp"/>
+  <buttongroup name="bezierGrp"/>
  </buttongroups>
 </ui>
