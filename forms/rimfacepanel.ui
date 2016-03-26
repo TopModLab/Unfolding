@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>280</width>
-    <height>314</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>10</x>
      <y>10</y>
      <width>249</width>
-     <height>295</height>
+     <height>394</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -55,6 +55,35 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="pieceShapeGrpBox">
+         <property name="title">
+          <string>Piece Shape</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QRadioButton" name="rectBtn">
+            <property name="text">
+             <string>Rectangle</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">shapeGrp</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="diamBtn">
+            <property name="text">
+             <string>Diamond</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">shapeGrp</string>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="smoothBox">
@@ -241,6 +270,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QCheckBox" name="intersectionBox">
+      <property name="text">
+       <string>Avoid Self Intersection</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -284,8 +320,9 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="pieceSizeGrp"/>
   <buttongroup name="piecePositionGrp"/>
   <buttongroup name="bezierGrp"/>
+  <buttongroup name="pieceSizeGrp"/>
+  <buttongroup name="shapeGrp"/>
  </buttongroups>
 </ui>

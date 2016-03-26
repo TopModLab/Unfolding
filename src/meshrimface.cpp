@@ -11,6 +11,7 @@ bool MeshRimFace::isQuadratic = true;
 bool MeshRimFace::onEdge = true;
 bool MeshRimFace::smoothEdge = false;
 bool MeshRimFace::addConnector = false;
+bool MeshRimFace::avoidIntersect = false;
 
 void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos) {
 	///get planes on the edge
@@ -27,7 +28,7 @@ void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D
 	QVector3D fn_center = he->f->center();
 	QVector3D fp_center = he->flip->f->center();
 
-	//get middle point f the edge
+	//get middle point of the edge
 	QVector3D v_mid = (v->pos + v1->pos)/2;
 
 	//get projected centers
@@ -37,16 +38,29 @@ void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D
 	QVector3D vn_mid = planeWidth * vn_max + (1- planeWidth) * v_mid;
 	QVector3D vp_mid = planeWidth * vp_max + (1- planeWidth) * v_mid;
 
+	QVector3D vn_i_pos = ( planeHeight * v->pos + (1 - planeHeight) * vn_mid);
+	QVector3D vp_i_pos = ( planeHeight * v->pos + (1 - planeHeight) * vp_mid);
 	QVector3D vn_o_pos, vp_o_pos;
 	if (isHalf) {
 		vn_o_pos = vn_mid;
 		vp_o_pos = vp_mid;
 	}else {
-		vn_o_pos = (-planeHeight * v->pos + (1 + planeHeight) * vn_mid);
-		vp_o_pos = (-planeHeight * v->pos + (1 + planeHeight) * vp_mid);
+		if (isQuadratic && avoidIntersect) {
+			//reverse
+			vn_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vn_mid;
+			vp_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vp_mid;
+			vn_i_pos = 2* vn_mid - vn_o_pos;
+			vp_i_pos = 2* vp_mid - vp_o_pos;
+
+		}else if (!isQuadratic && avoidIntersect){
+			vn_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vn_mid;
+			vp_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vp_mid;
+
+		}else {
+			vn_o_pos = 2* vn_mid - vn_i_pos;
+			vp_o_pos = 2* vp_mid - vp_i_pos;
+		}
 	}
-	QVector3D vn_i_pos = ( planeHeight * v->pos + (1 - planeHeight) * vn_mid);
-	QVector3D vp_i_pos = ( planeHeight * v->pos + (1 - planeHeight) * vp_mid);
 
 	vpos.push_back(vn_i_pos);
 	vpos.push_back(vn_o_pos);
@@ -55,7 +69,7 @@ void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D
 
 }
 
-void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<he_t*> &control_edges,vector<QVector3D> &control_points_p, vector<QVector3D> &control_points_n) {
+void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<QVector3D> &vmid, vector<QVector3D> &vpos) {
 
 	//get center of the face
 	QVector3D top = v->pos;
@@ -67,16 +81,17 @@ void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<he_t*> &c
 	HDS_Face::LineLineIntersect(v->pos, center,vn->pos, vp->pos, &bot);
 
 	QVector3D v_up = ( planeHeight * top + (1 - planeHeight) * center);
-	QVector3D v_down = ( planeHeight * bot + (1 - planeHeight) * center);
+	QVector3D v_down;
+	if (isHalf) {
+		v_down = ( planeHeight * bot + (1 - planeHeight) * center);
+	}else {
+		//mirror up vector based on center point
+		v_down = 2* center - v_up;
+	}
 
-	vert_t* vup = new vert_t(v_up);
-	vert_t* vdown = new vert_t(v_down);
-	verts_new.push_back(vup);
-	verts_new.push_back(vdown);
-	he_t* he_mid = HDS_Mesh::insertEdge(vup, vdown);
-	he_mid->refid = he->refid;
-	hes_new.push_back(he_mid);
-	control_edges.push_back(he_mid);
+	vmid.push_back(v_up);
+	vmid.push_back(v_down);
+
 
 	//get vector vp to vn
 	QVector3D cross = (vn->pos - vp->pos);
@@ -86,12 +101,18 @@ void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<he_t*> &c
 	QVector3D v_up_prev_max;
 	HDS_Face::LineLineIntersect(v->pos, vp->pos, v_up, v_up - cross, &v_up_prev_max);
 	QVector3D v_down_prev_max;
-	HDS_Face::LineLineIntersect(v->pos, vp->pos, v_down, v_down - cross, &v_down_prev_max);
+	if (isHalf)
+		HDS_Face::LineLineIntersect(v->pos, vp->pos, v_down, v_down - cross, &v_down_prev_max);
+	else
+		v_down_prev_max = v_up_prev_max - (v_up - v_down);
 
 	QVector3D v_up_next_max;
 	HDS_Face::LineLineIntersect(v->pos, vn->pos, v_up, v_up + cross, &v_up_next_max);
 	QVector3D v_down_next_max;
-	HDS_Face::LineLineIntersect(v->pos, vn->pos, v_down, v_down + cross, &v_down_next_max);
+	if (isHalf)
+		HDS_Face::LineLineIntersect(v->pos, vn->pos, v_down, v_down + cross, &v_down_next_max);
+	else
+		v_down_next_max = v_up_next_max - (v_up - v_down);
 
 	//get v_up_prev, v_down_prev, v_up_next, v_down_next
 	QVector3D v_up_prev = ( planeWidth * v_up_prev_max + (1 - planeWidth) * v_up);
@@ -99,10 +120,11 @@ void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<he_t*> &c
 	QVector3D v_up_next = ( planeWidth * v_up + (1 - planeWidth) * v_up_next_max);
 	QVector3D v_down_next = ( planeWidth * v_down + (1 - planeWidth) * v_down_next_max);
 
-	control_points_p.push_back(v_up_next);
-	control_points_p.push_back(v_down_next);
-	control_points_n.push_back(v_up_prev);
-	control_points_n.push_back(v_down_prev);
+
+	vpos.push_back(v_up_prev);
+	vpos.push_back(v_down_prev);
+	vpos.push_back(v_up_next);
+	vpos.push_back(v_down_next);
 }
 
 void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
@@ -186,7 +208,47 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 				}
 			}
 			else {
-				computePlaneCornerOnFace(v,he,control_edges, control_points_p,control_points_n);
+				vector<QVector3D> vmid;
+				computePlaneCornerOnFace(v,he,vmid, vpos);
+				if (isQuadratic) {
+					vert_t* vn_i = new vert_t(vpos[0]);
+					vert_t* vn_o = new vert_t(vpos[1]);
+					vert_t* vp_i = new vert_t(vpos[2]);
+					vert_t* vp_o = new vert_t(vpos[3]);
+
+					vn_i->refid = v->refid;
+					vn_o->refid = he->prev->v->refid;
+					vp_i->refid = v->refid;
+					vp_o->refid = v1->refid;
+
+					vector<vert_t*> vertices;
+					vertices.push_back(vp_i);
+					vertices.push_back(vp_o);
+					vertices.push_back(vn_o);
+					vertices.push_back(vn_i);
+
+					verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+
+					face_t* newFace = createFace(vertices, cutFace);
+					newFace->refid = he->refid;
+					faces_new.push_back(newFace);
+					pieces.push_back(newFace);
+				}else {
+					vert_t* vup = new vert_t(vmid[0]);
+					vert_t* vdown = new vert_t(vmid[1]);
+					verts_new.push_back(vup);
+					verts_new.push_back(vdown);
+					he_t* he_mid = HDS_Mesh::insertEdge(vup, vdown);
+					he_mid->refid = he->refid;
+					hes_new.push_back(he_mid);
+					control_edges.push_back(he_mid);
+
+					control_points_n.push_back(vpos[0]);
+					control_points_n.push_back(vpos[1]);
+					control_points_p.push_back(vpos[2]);
+					control_points_p.push_back(vpos[3]);
+
+				}
 			}
 
 		}

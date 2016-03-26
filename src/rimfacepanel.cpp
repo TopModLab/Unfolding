@@ -20,13 +20,16 @@ RimFacePanel::RimFacePanel(QWidget *parent) :
 	ui->piecePositionGrp->setId(ui->faceBtn, 1);
 	ui->pieceSizeGrp->setId(ui->halfBtn, 0);
 	ui->pieceSizeGrp->setId(ui->wholeBtn, 1);
+	ui->pieceShapeGrpBox->hide();
 
 	connect(ui->piecePositionGrp,static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
 			[=](int id){
 		if (id == 1) {
-			ui->smoothBox->setEnabled(false);
+			ui->smoothBox->hide();
+			ui->pieceShapeGrpBox->show();
 		}else {
-			ui->smoothBox->setEnabled(true);
+			ui->smoothBox->show();
+			ui->pieceShapeGrpBox->hide();
 		}
 	});
 
@@ -34,8 +37,19 @@ RimFacePanel::RimFacePanel(QWidget *parent) :
 			[=](int id){
 		if (id == 1) {
 			ui->connectorBox->setEnabled(false);
+			ui->connectorBox->setChecked(false);
+			if (ui->faceBtn->isChecked()) {
+				ui->intersectionBox->setEnabled(false);
+				ui->intersectionBox->setChecked(false);
+			} else {
+				ui->intersectionBox->setEnabled(true);
+			}
+
 		}else {
 			ui->connectorBox->setEnabled(true);
+			ui->intersectionBox->setEnabled(false);
+			ui->intersectionBox->setChecked(false);
+
 		}
 	});
 
@@ -75,5 +89,6 @@ void RimFacePanel::slot_setType()
 	config["isQuadratic"] = ui->bezierGrp->checkedId() == 0? true:false;
 	config["addConnector"] = ui->connectorBox->isChecked();
 	config["smoothEdge"] = ui->smoothBox->isChecked();
+	config["avoidIntersect"] = ui->intersectionBox->isChecked();
 
 }

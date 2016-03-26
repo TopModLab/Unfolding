@@ -13,8 +13,8 @@ public:
 	static void rimMesh3D(HDS_Mesh *mesh, float planeWidth, float planeHeight);
 	~MeshRimFace();
 
-    static void computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos);
-    static void computePlaneCornerOnFace(vert_t* v, he_t* he, vector<he_t*> &control_edges, vector<QVector3D> &control_points_p, vector<QVector3D> &control_points_n);
+	static void computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos);
+	static void computePlaneCornerOnFace(vert_t* v, he_t* he, vector<QVector3D> &vmid, vector<QVector3D> &vpos);
 
 private:
     static float planeWidth;
@@ -25,6 +25,7 @@ private:
 	static bool isQuadratic;
 	static bool smoothEdge;
 	static bool addConnector;
+	static bool avoidIntersect;
 };
 
 inline void
@@ -34,6 +35,7 @@ MeshRimFace::configRimMesh(std::map<QString, bool> config) {
 	isQuadratic = config["isQuadratic"];
 	smoothEdge = config["smoothEdge"];
 	addConnector = config["addConnector"];
+	avoidIntersect = config["avoidIntersect"];
 }
 
 #endif // MESHRIMFACE_H
