@@ -522,13 +522,14 @@ void MeshManager::rimMesh(double rimSize)
 	selectedEdges.clear();
 }
 
-void MeshManager::set3DRimMesh(int type, float w, float h)
+void MeshManager::set3DRimMesh(std::map<QString,bool> config, float w, float h)
 {
     MeshRimFace::setOriMesh(operationStack->getOriMesh());
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-    MeshRimFace::rimMesh3D(outMesh, type, w, h);
+    MeshRimFace::configRimMesh(config);
+    MeshRimFace::rimMesh3D(outMesh, w, h);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 }

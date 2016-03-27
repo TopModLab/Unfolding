@@ -533,7 +533,8 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 
 void MainWindow::slot_triggerRimmed3DMesh()
 {
-    QObject* obj = sender();
+	HDS_Bridger::setSamples(16);
+	QObject* obj = sender();
     if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
 		rmpanel->show();
@@ -547,7 +548,7 @@ void MainWindow::slot_rimmed3DMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
-    MeshManager::getInstance()->set3DRimMesh(rmpanel->getType(), rmpanel->getW(), rmpanel->getH());
+	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig(), rmpanel->getW(), rmpanel->getH());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 
