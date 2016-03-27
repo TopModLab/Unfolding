@@ -143,7 +143,6 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
             double flip_t = getT(flip_v, vp_of_flap_next, v);
             // assign (he_flap, t)to holePosRefMap
             (*refMapPointer)[flap_cur.flap_he->index] = t;
-            cout<<"face "<<f->index<<" edge "<<curHE->index<<" t "<<t<<endl;
 
             //repeat for (he_flap->flip, t)
             (*refMapPointer)[flap_cur.flap_he->flip->index] = flip_t;

@@ -305,7 +305,7 @@ void MeshViewerModern::drawMeshToFBO()
 	uid_shader.release();
 
 	auto fboRes = fbo->toImage();
-	fboRes.save("fbo.png");
+	//fboRes.save("fbo.png");
 	QRgb pixel = fboRes.pixel(mouseState.x, mouseState.y);
 	bool selected = pixel >> 24;
 	size_t renderID = pixel & 0xFFFFFF;
