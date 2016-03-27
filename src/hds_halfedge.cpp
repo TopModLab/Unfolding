@@ -59,4 +59,10 @@ void HDS_HalfEdge::computeCurvature()
 	} else {
 		isNegCurve = false;
 	}
+
+	//calculate curvature angle
+	double dot = QVector3D::dotProduct(f->n, flip->f->n)/(f->n.length()*flip->f->n.length());
+	angle = M_PI - acos (dot);
+	if (isNegCurve) angle = 2* M_PI - angle;
+	//cout<<"edge curvature angle"<<angle/3.14*180<<endl;
 }

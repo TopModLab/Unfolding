@@ -55,6 +55,7 @@ public:
 	bool isCutEdge;
 	bool isExtended;//From hollower
 	bool isNegCurve;
+	float angle;
 	int flag;
 };
 

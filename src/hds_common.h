@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 #include <QString>
+#include "mathutils.hpp"
 
 using hdsid_t = uint32_t;
 

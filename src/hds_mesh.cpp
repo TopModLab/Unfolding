@@ -169,7 +169,7 @@ bool HDS_Mesh::validateFace(face_t *f)
         cout<<"cant find in face map"<<endl;
 		return false;
 	}
-	int maxEdges = 100;
+	int maxEdges = 1000;
 	he_t *he = f->he;
 	he_t *curHe = he;
 	int edgeCount = 0;

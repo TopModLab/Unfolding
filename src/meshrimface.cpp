@@ -1,19 +1,20 @@
 #include "meshrimface.h"
 #include "common.h"
 
-#define PI 3.14159265358
 
 float MeshRimFace::planeWidth = 0.2f;
 float MeshRimFace::planeHeight = 0.2f;
 
 bool MeshRimFace::isHalf = true;
+bool MeshRimFace::isRect = true;
 bool MeshRimFace::isQuadratic = true;
 bool MeshRimFace::onEdge = true;
 bool MeshRimFace::smoothEdge = false;
 bool MeshRimFace::addConnector = false;
 bool MeshRimFace::avoidIntersect = false;
 
-void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos) {
+void MeshRimFace::projectFaceCenter(vert_t* v, he_t* he, QVector3D &vn_pos, QVector3D &vp_pos)
+{
 	///get planes on the edge
 	vert_t* vp = he->flip->prev->v;
 	vert_t* v1 = he->flip->v;
@@ -28,13 +29,24 @@ void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D
 	QVector3D fn_center = he->f->center();
 	QVector3D fp_center = he->flip->f->center();
 
+	//get projected centers
+	//cout<<fn_center.distanceToPlane(v->pos,n)<<endl;
+	vn_pos = fn_center - n * fn_center.distanceToPlane(v->pos,n);
+	vp_pos = fp_center - n * fp_center.distanceToPlane(v->pos,n);
+}
+
+void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos) {
+
+	vert_t* v1 = he->flip->v;
+
 	//get middle point of the edge
 	QVector3D v_mid = (v->pos + v1->pos)/2;
 
 	//get projected centers
 	//cout<<fn_center.distanceToPlane(v->pos,n)<<endl;
-	QVector3D vn_max = fn_center - n * fn_center.distanceToPlane(v->pos,n);
-	QVector3D vp_max = fp_center - n * fp_center.distanceToPlane(v->pos,n);
+	QVector3D vn_max, vp_max;
+	projectFaceCenter(v, he, vn_max, vp_max);
+
 	QVector3D vn_mid = planeWidth * vn_max + (1- planeWidth) * v_mid;
 	QVector3D vp_mid = planeWidth * vp_max + (1- planeWidth) * v_mid;
 
@@ -45,18 +57,12 @@ void MeshRimFace::computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D
 		vn_o_pos = vn_mid;
 		vp_o_pos = vp_mid;
 	}else {
-		if (isQuadratic && avoidIntersect) {
-			//reverse
-			vn_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vn_mid;
-			vp_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vp_mid;
-			vn_i_pos = 2* vn_mid - vn_o_pos;
-			vp_i_pos = 2* vp_mid - vp_o_pos;
-
-		}else if (!isQuadratic && avoidIntersect){
-			vn_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vn_mid;
-			vp_o_pos = planeHeight * v1->pos + (1 - planeHeight) * vp_mid;
-
+		if (avoidIntersect) {
+			//mirror
+			vn_o_pos = ( planeHeight * v1->pos + (1 - planeHeight) * vn_mid);
+			vp_o_pos = ( planeHeight * v1->pos + (1 - planeHeight) * vp_mid);
 		}else {
+
 			vn_o_pos = 2* vn_mid - vn_i_pos;
 			vp_o_pos = 2* vp_mid - vp_i_pos;
 		}
@@ -127,6 +133,34 @@ void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<QVector3D
 	vpos.push_back(v_down_next);
 }
 
+void MeshRimFace::computeDiamondCornerOnFace(he_t* he, vector<QVector3D> &vpos)
+{
+	//planeHeight as thickness scale factor
+	face_t* f = he->f;
+	f->setScaleFactor(planeHeight);
+	he_t* curHE = he;
+	do {
+		vpos.push_back(f->scaleCorner(curHE->v));
+		curHE = curHE->next;
+	}while(curHE != he);
+}
+
+void MeshRimFace::computeDiamondCornerOnEdge(he_t* he, vector<QVector3D> &vpos)
+{
+	//get face centers
+	QVector3D vn_max, vp_max;
+	projectFaceCenter(he->v, he, vn_max, vp_max);
+
+	//scale down those corners
+	QVector3D c = (he->v->pos + he->flip->v->pos)/2;
+	//scale v
+	vpos.push_back(c + planeHeight * (he->v->pos - c));
+	vpos.push_back(c + planeHeight * (vp_max - c));
+	vpos.push_back(c + planeHeight * (he->flip->v->pos - c));
+	vpos.push_back(c + planeHeight * (vn_max - c));
+
+}
+
 void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 {
 	initiate();
@@ -136,7 +170,6 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 	if (isQuadratic && onEdge)
 		planeWidth = 1- planeWidth;
 
-	cout<<"width :"<<planeWidth<< " height: "<<planeHeight<<endl;
 
 	unordered_map <hdsid_t, he_t*> ori_map = ori_mesh->halfedgesMap();
 
@@ -152,102 +185,150 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 		vector<QVector3D> control_points_p;
 
 		for (he_t* he: mesh->incidentEdges(v)) {
-
 			vert_t* v1 = he->flip->v;
 			QVector3D v_mid = (v->pos + v1->pos)/2;
 			vector<QVector3D> vpos;
 			if (onEdge) {
-				computePlaneCornerOnEdge(v, he, vpos);
-				if (isQuadratic) {
-					vert_t* vn_i = new vert_t(vpos[0]);
-					vert_t* vn_o = new vert_t(vpos[1]);
-					vert_t* vp_i = new vert_t(vpos[2]);
-					vert_t* vp_o = new vert_t(vpos[3]);
+				if (isRect) {
+					computePlaneCornerOnEdge(v, he, vpos);
+					if (isQuadratic) {
+						vert_t* vn_i = new vert_t(vpos[0]);
+						vert_t* vn_o = new vert_t(vpos[1]);
+						vert_t* vp_i = new vert_t(vpos[2]);
+						vert_t* vp_o = new vert_t(vpos[3]);
 
-					vn_i->refid = v->refid;
-					vn_o->refid = v1->refid;
-					vp_i->refid = v->refid;
-					vp_o->refid = v1->refid;
+						vn_i->refid = v->refid;
+						vn_o->refid = v1->refid;
+						vp_i->refid = v->refid;
+						vp_o->refid = v1->refid;
 
-					vector<vert_t*> vertices;
-					vertices.push_back(vp_i);
-					vertices.push_back(vp_o);
-					vertices.push_back(vn_o);
-					vertices.push_back(vn_i);
+						vector<vert_t*> vertices;
+						vertices.push_back(vp_i);
+						vertices.push_back(vp_o);
+						vertices.push_back(vn_o);
+						vertices.push_back(vn_i);
 
-					verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+						verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
-					face_t* newFace = createFace(vertices, cutFace);
-					newFace->refid = he->refid;
-					faces_new.push_back(newFace);
-					pieces.push_back(newFace);
-				}else {
-					control_points_n.push_back(vpos[0]);
-					control_points_n.push_back(vpos[1]);
-					control_points_p.push_back(vpos[2]);
-					control_points_p.push_back(vpos[3]);
-
-					vert_t *vmid_i, *vmid_o;
-					if (smoothEdge) {
-						vmid_i = new vert_t((vpos[0]+vpos[2])/2.0);
-						vmid_o = new vert_t((vpos[1]+vpos[3])/2.0);
+						face_t* newFace = createFace(vertices, cutFace);
+						newFace->refid = he->refid;
+						faces_new.push_back(newFace);
+						pieces.push_back(newFace);
 					}else {
-						vmid_i = new vert_t( planeHeight * v->pos + (1 - planeHeight) * v_mid);
-						if (isHalf) {
-							vmid_o = new vert_t(v_mid);
+						control_points_n.push_back(vpos[0]);
+						control_points_n.push_back(vpos[1]);
+						control_points_p.push_back(vpos[2]);
+						control_points_p.push_back(vpos[3]);
+
+						vert_t *vmid_i, *vmid_o;
+						if (smoothEdge) {
+							vmid_i = new vert_t((vpos[0]+vpos[2])/2.0);
+							vmid_o = new vert_t((vpos[1]+vpos[3])/2.0);
 						}else {
-							vmid_o = new vert_t(-planeHeight * v->pos + (1 + planeHeight) * v_mid);
+							vmid_i = new vert_t( planeHeight * v->pos + (1 - planeHeight) * v_mid);
+							if (isHalf) {
+								vmid_o = new vert_t(v_mid);
+							}else {
+								vmid_o = new vert_t(-planeHeight * v->pos + (1 + planeHeight) * v_mid);
+							}
 						}
+						verts_new.push_back(vmid_i);
+						verts_new.push_back(vmid_o);
+						he_t* he_mid = HDS_Mesh::insertEdge(vmid_i, vmid_o);
+						he_mid->refid = he->refid;
+						hes_new.push_back(he_mid);
+						control_edges.push_back(he_mid);
 					}
-					verts_new.push_back(vmid_i);
-					verts_new.push_back(vmid_o);
-					he_t* he_mid = HDS_Mesh::insertEdge(vmid_i, vmid_o);
-					he_mid->refid = he->refid;
-					hes_new.push_back(he_mid);
-					control_edges.push_back(he_mid);
+				}else {
+					computeDiamondCornerOnEdge(he, vpos);
+					if (isQuadratic) {
+						vector<vert_t*> vertices;
+						for (QVector3D pos: vpos) {
+							vert_t* vertex = new vert_t(pos);
+							vertices.push_back(vertex);
+						}
+						vertices[0]->refid = he->v->refid;
+						vertices[1]->refid = he->flip->refid;
+						vertices[2]->refid = he->flip->v->refid;
+						vertices[3]->refid = he->refid;
+
+						verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+
+						face_t* newFace = createFace(vertices, cutFace);
+						newFace->refid = he->refid;
+						faces_new.push_back(newFace);
+						pieces.push_back(newFace);
+					}else {
+						cout<<"cubic diamond piece on edge is not defined yet."<<endl;
+
+					}
 				}
 			}
 			else {
-				vector<QVector3D> vmid;
-				computePlaneCornerOnFace(v,he,vmid, vpos);
-				if (isQuadratic) {
-					vert_t* vn_i = new vert_t(vpos[0]);
-					vert_t* vn_o = new vert_t(vpos[1]);
-					vert_t* vp_i = new vert_t(vpos[2]);
-					vert_t* vp_o = new vert_t(vpos[3]);
+				if (isRect) {
+					vector<QVector3D> vmid;
+					computePlaneCornerOnFace(v,he,vmid, vpos);
+					if (isQuadratic) {
+						vert_t* vn_i = new vert_t(vpos[0]);
+						vert_t* vn_o = new vert_t(vpos[1]);
+						vert_t* vp_i = new vert_t(vpos[2]);
+						vert_t* vp_o = new vert_t(vpos[3]);
 
-					vn_i->refid = v->refid;
-					vn_o->refid = he->prev->v->refid;
-					vp_i->refid = v->refid;
-					vp_o->refid = v1->refid;
+						vn_i->refid = v->refid;
+						vn_o->refid = he->prev->v->refid;
+						vp_i->refid = v->refid;
+						vp_o->refid = v1->refid;
 
-					vector<vert_t*> vertices;
-					vertices.push_back(vp_i);
-					vertices.push_back(vp_o);
-					vertices.push_back(vn_o);
-					vertices.push_back(vn_i);
+						vector<vert_t*> vertices;
+						vertices.push_back(vp_i);
+						vertices.push_back(vp_o);
+						vertices.push_back(vn_o);
+						vertices.push_back(vn_i);
 
-					verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+						verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
-					face_t* newFace = createFace(vertices, cutFace);
-					newFace->refid = he->refid;
-					faces_new.push_back(newFace);
-					pieces.push_back(newFace);
+						face_t* newFace = createFace(vertices, cutFace);
+						newFace->he->refid = he->refid;
+						faces_new.push_back(newFace);
+						pieces.push_back(newFace);
+					}else {
+						vert_t* vup = new vert_t(vmid[0]);
+						vert_t* vdown = new vert_t(vmid[1]);
+						verts_new.push_back(vup);
+						verts_new.push_back(vdown);
+						he_t* he_mid = HDS_Mesh::insertEdge(vup, vdown);
+						he_mid->refid = he->refid;
+						hes_new.push_back(he_mid);
+						control_edges.push_back(he_mid);
+
+						control_points_n.push_back(vpos[0]);
+						control_points_n.push_back(vpos[1]);
+						control_points_p.push_back(vpos[2]);
+						control_points_p.push_back(vpos[3]);
+
+					}
 				}else {
-					vert_t* vup = new vert_t(vmid[0]);
-					vert_t* vdown = new vert_t(vmid[1]);
-					verts_new.push_back(vup);
-					verts_new.push_back(vdown);
-					he_t* he_mid = HDS_Mesh::insertEdge(vup, vdown);
-					he_mid->refid = he->refid;
-					hes_new.push_back(he_mid);
-					control_edges.push_back(he_mid);
+					//is diamond shape piece
+					computeDiamondCornerOnFace(he,vpos);
+					if(isQuadratic) {
+						he_t* ori_he = he;
+						vector<vert_t*> vertices;
+						for (QVector3D pos: vpos) {
+							vert_t* vertex = new vert_t(pos);
+							vertices.push_back(vertex);
+							vertex->refid = ori_he->v->refid;
+							ori_he = ori_he->next;
+						}
 
-					control_points_n.push_back(vpos[0]);
-					control_points_n.push_back(vpos[1]);
-					control_points_p.push_back(vpos[2]);
-					control_points_p.push_back(vpos[3]);
+						verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
+						face_t* newFace = createFace(vertices, cutFace);
+						newFace->refid = he->f->refid;
+						faces_new.push_back(newFace);
+						pieces.push_back(newFace);
+					}else {
+						cout<<"cubic diamond piece on face is not defined yet."<<endl;
+					}
 				}
 			}
 
@@ -255,7 +336,6 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 		///connect pieces
 
 		float angleSum = 0;
-
 		if (isQuadratic) {
 			for(int i = 0; i < pieces.size(); i++) {
 				face_t* curFace = pieces[i];
@@ -264,7 +344,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 				//check for negative curvature vertices,
 				//if angleSum exceeds 360 degree,
 				//cut it, duplicate current piece and start a new cutFace
-				if (angleSum > 1* PI) {
+				if (angleSum > 1.5* M_PI) {
 					cutFace = new face_t;
 					cutFace->isCutFace = true;
 					faces_new.push_back(cutFace);
@@ -280,15 +360,19 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 					//duplicate pieces[0]
 					nextFace = duplicateFace(pieces[0], cutFace);
 				}
-
-				//calculate angle between pieces' original he
-				he_t* curHE = ori_map[(curFace->refid)>>2];
-				he_t* nxtHE = ori_map[(nextFace->refid)>>2];
-				QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
-				QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
-				double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
-				double angle = acos (param);
-				angleSum += angle;
+				if (onEdge) {
+					//calculate angle between pieces' original he
+					he_t* curHE = ori_map[(curFace->refid)>>2];
+					he_t* nxtHE = ori_map[(nextFace->refid)>>2];
+					QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
+					QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
+					double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
+					double angle = acos (param);
+					angleSum += angle;
+				}else {
+					he_t* HE =  ori_map[(nextFace->he->refid)>>2];
+					angleSum += HE->angle;
+				}
 
 				//update nextFace 's cutFace
 				if (nextFace->he->flip->f != cutFace) {
@@ -296,25 +380,38 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 					assignCutFace(nextFace, cutFace);
 				}
 
+
 				//get curFace he1
 				he_t* he1 = curFace->he;
 				//get nextFace he2
-				he_t* he2 = nextFace->he->next->next;
+				he_t* he2;
+				if(isRect)
+					he2 = nextFace->he->next->next;
+				else
+					he2 = nextFace->he->prev;
 				he1->setCutEdge(false);
 				he2->setCutEdge(false);
 
-				vector<vert_t*> curCorners = curFace->corners();
-				vector<vert_t*> nxtCorners = nextFace->corners();
+				vector<vert_t*> curCorners, nxtCorners;
+				curCorners = curFace->corners();
+				nxtCorners = nextFace->corners();
 
+				if (!isRect) {
+					nxtCorners.push_back(nxtCorners[0]);
+					nxtCorners.erase(nxtCorners.begin());
+				}
+
+				vector<QVector3D> vpos;
 				QVector3D v1;
 				HDS_Face::LineLineIntersect(nxtCorners[0]->pos, nxtCorners[3]->pos, curCorners[3]->pos, curCorners[0]->pos, &v1);
-
 				QVector3D v2;
 				HDS_Face::LineLineIntersect(nxtCorners[1]->pos, nxtCorners[2]->pos, curCorners[2]->pos, curCorners[1]->pos, &v2);
-				vector<QVector3D> vpos;
+
 				vpos.push_back(v1);
 				vpos.push_back(v2);
+
 				addBridger(he2->flip, he1->flip, vpos);
+
 			}
 
 		}
@@ -327,7 +424,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 				he_t* curEdge = control_edges[index];
 				he_t* nxtEdge;
 
-				if (angleSum > 1.6* PI) {
+				if (angleSum > 1.6* M_PI) {
 					cutFace = new face_t;
 					cutFace->isCutFace = true;
 					faces_new.push_back(cutFace);
@@ -342,14 +439,20 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 					nxtEdge = duplicateEdge(control_edges[0]);
 				}
 
-				//calculate angle between pieces' original he
-				he_t* curHE = ori_map[(curEdge->refid)>>2];
-				he_t* nxtHE = ori_map[(nxtEdge->refid)>>2];
-				QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
-				QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
-				double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
-				double angle = acos (param);
-				angleSum += angle;
+				if (onEdge){
+					//calculate angle between pieces' original he
+					he_t* curHE = ori_map[(curEdge->refid)>>2];
+					he_t* nxtHE = ori_map[(nxtEdge->refid)>>2];
+					QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
+					QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
+					double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
+					double angle = acos (param);
+					angleSum += angle;
+				}else {
+					he_t* HE =  ori_map[(nxtEdge->refid)>>2];
+					angleSum += HE->angle;
+				}
+
 
 				vector<QVector3D> vpos;
 				vpos = {control_points_p[2*index+1], control_points_p[2*index],
