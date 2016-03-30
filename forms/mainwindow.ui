@@ -13,8 +13,124 @@
   <property name="windowTitle">
    <string>Geometry Unfolding</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
-  <widget class="QMenuBar" name="menuBar">
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QMenuBar" name="displayMenuBar">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <widget class="QMenu" name="menuView">
+       <property name="tearOffEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="title">
+        <string>View</string>
+       </property>
+       <property name="separatorsCollapsible">
+        <bool>true</bool>
+       </property>
+       <property name="toolTipsVisible">
+        <bool>true</bool>
+       </property>
+       <addaction name="actionDispGrid"/>
+      </widget>
+      <widget class="QMenu" name="menuShading">
+       <property name="title">
+        <string>Shading</string>
+       </property>
+       <addaction name="actWireframe"/>
+       <addaction name="actShaded"/>
+       <addaction name="actWfShaded"/>
+      </widget>
+      <widget class="QMenu" name="menuHighlight">
+       <property name="title">
+        <string>Highlight</string>
+       </property>
+       <addaction name="actHL_CutEdge"/>
+       <addaction name="actHL_NonPlanarFace"/>
+       <addaction name="actHL_Bridger"/>
+      </widget>
+      <widget class="QMenu" name="menuDisplay">
+       <property name="title">
+        <string>Display</string>
+       </property>
+       <addaction name="actionShow_Edges"/>
+       <addaction name="actionShow_Vertices"/>
+       <addaction name="actionShow_All_Vertices"/>
+       <addaction name="actionShow_Mins"/>
+       <addaction name="actionShow_Maxs"/>
+       <addaction name="actionShow_Saddles"/>
+       <addaction name="actionShow_Faces"/>
+       <addaction name="actionShow_Vertices_2"/>
+       <addaction name="actionShow_Vertex_Index"/>
+      </widget>
+      <addaction name="menuView"/>
+      <addaction name="menuShading"/>
+      <addaction name="menuHighlight"/>
+      <addaction name="menuDisplay"/>
+     </widget>
+    </item>
+    <item>
+     <widget class="QToolBar" name="displayToolBar">
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="movable">
+       <bool>false</bool>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
+      </property>
+      <property name="floatable">
+       <bool>false</bool>
+      </property>
+      <addaction name="actionDispGrid"/>
+      <addaction name="separator"/>
+      <addaction name="actWireframe"/>
+      <addaction name="actShaded"/>
+      <addaction name="actWfShaded"/>
+      <addaction name="separator"/>
+      <addaction name="actHL_CutEdge"/>
+      <addaction name="actHL_NonPlanarFace"/>
+      <addaction name="actHL_Bridger"/>
+      <addaction name="separator"/>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="viewerLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="mainMenuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -23,39 +139,7 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_Display">
-    <property name="tearOffEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string>Display</string>
-    </property>
-    <property name="separatorsCollapsible">
-     <bool>true</bool>
-    </property>
-    <property name="toolTipsVisible">
-     <bool>true</bool>
-    </property>
-    <addaction name="actionDispGrid"/>
-    <addaction name="separator"/>
-    <addaction name="actionSmooth_Shading"/>
-    <addaction name="actionFlat"/>
-    <addaction name="separator"/>
-    <addaction name="actHL_CutEdge"/>
-    <addaction name="actHL_NonPlanarFace"/>
-    <addaction name="actHL_Bridger"/>
-    <addaction name="separator"/>
-    <addaction name="actionShow_Edges"/>
-    <addaction name="actionShow_Vertices"/>
-    <addaction name="actionShow_All_Vertices"/>
-    <addaction name="actionShow_Mins"/>
-    <addaction name="actionShow_Maxs"/>
-    <addaction name="actionShow_Saddles"/>
-    <addaction name="actionShow_Faces"/>
-    <addaction name="actionShow_Vertices_2"/>
-    <addaction name="actionShow_Vertex_Index"/>
-   </widget>
-   <widget class="QMenu" name="menu_File">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
@@ -65,7 +149,7 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menu_Edit">
+   <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
@@ -73,7 +157,7 @@
     <addaction name="actionRedo"/>
     <addaction name="actionReset"/>
    </widget>
-   <widget class="QMenu" name="menu_Selection">
+   <widget class="QMenu" name="menuSelection">
     <property name="title">
      <string>Selection</string>
     </property>
@@ -99,13 +183,15 @@
     <addaction name="actGenCube"/>
     <addaction name="actGenTetra"/>
    </widget>
-   <addaction name="menu_File"/>
-   <addaction name="menu_Edit"/>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuCreate"/>
-   <addaction name="menu_Selection"/>
-   <addaction name="menu_Display"/>
+   <addaction name="menuSelection"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -235,19 +321,34 @@
     <string>Reset All</string>
    </property>
   </action>
-  <action name="actionSmooth_Shading">
+  <action name="actWireframe">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/disp/wireframe.png</normaloff>:/icons/disp/wireframe.png</iconset>
+   </property>
    <property name="text">
-    <string>Smooth</string>
+    <string>Wireframe</string>
+   </property>
+   <property name="toolTip">
+    <string>Wireframe Display Mode</string>
    </property>
   </action>
-  <action name="actionFlat">
+  <action name="actShaded">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/disp/flatShaded.png</normaloff>:/icons/disp/flatShaded.png</iconset>
+   </property>
    <property name="text">
-    <string>Flat</string>
+    <string>Shaded</string>
    </property>
   </action>
   <action name="actHL_CutEdge">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/disp/highlightCut.png</normaloff>:/icons/disp/highlightCut.png</iconset>
    </property>
    <property name="text">
     <string>Hightlight Cut-Edge</string>
@@ -257,6 +358,10 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/disp/highlightNonPlanar.png</normaloff>:/icons/disp/highlightNonPlanar.png</iconset>
+   </property>
    <property name="text">
     <string>Highlight Non-Planar Face</string>
    </property>
@@ -264,6 +369,10 @@
   <action name="actHL_Bridger">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/disp/highlightBridger.png</normaloff>:/icons/disp/highlightBridger.png</iconset>
    </property>
    <property name="text">
     <string>Highlight Bridger Face</string>
@@ -664,6 +773,10 @@
    <property name="checked">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/disp/dispGrid.png</normaloff>:/icons/disp/dispGrid.png</iconset>
+   </property>
    <property name="text">
     <string>Show Grid</string>
    </property>
@@ -693,6 +806,21 @@
    </property>
    <property name="text">
     <string>Tetrahedron</string>
+   </property>
+  </action>
+  <action name="actWfShaded">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/disp/wireframeOnShaded.png</normaloff>:/icons/disp/wireframeOnShaded.png</iconset>
+   </property>
+   <property name="text">
+    <string>Wireframe with Shaded</string>
+   </property>
+   <property name="toolTip">
+    <string>Wireframe with Shaded</string>
    </property>
   </action>
  </widget>

@@ -1,5 +1,12 @@
 <RCC>
   <qresource prefix="/">
+    <file>icons/disp/dispGrid.png</file>
+    <file>icons/disp/flatShaded.png</file>
+    <file>icons/disp/highlightBridger.png</file>
+    <file>icons/disp/highlightCut.png</file>
+    <file>icons/disp/highlightNonPlanar.png</file>
+    <file>icons/disp/wireframe.png</file>
+    <file>icons/disp/wireframeOnShaded.png</file>
     <file>meshes/torus.obj</file>
     <file>meshes/tetrahedron.obj</file>
     <file>icons/polygon/polycube.png</file>

@@ -145,13 +145,14 @@ public:
 		SelectFace = 5,
 		SelectEdge = 6
 	};
-	enum ShadingState
+	enum class ShadingState : uint8_t
 	{
 		SMOOTH = 0,
-		FLAT = 1,
-		WIREFRAME = 2
+		FLAT = 1 << 0,
+		WIREFRAME = 1 << 1,
+		WIREFRAME_WITH_SHADED = FLAT | WIREFRAME
 	};
-	enum DataTypeMark : size_t
+	enum DataTypeMark : uint8_t
 	{
 		NULL_MARK = 0,
 		VERTEX_MARK = 1,
@@ -208,6 +209,7 @@ public:
 	void showCutLocusCut();
 	void showCutLocusPoints();
 
+	void showShading(ShadingState shading);
 	void showComp(DispComp comp);
 	void highlightComp(HighlightComp comp);
 private://interaction ie selection
@@ -220,7 +222,6 @@ private://interaction ie selection
 	SelectionState selectionState;
 	queue<int> selVTX, selHE, selFACE;
 
-	ShadingState shadingSate;
 	MouseState mouseState;
 
 	union SelectionID{
@@ -243,6 +244,7 @@ private:
 	bool showText;
 	bool showVIndex; // show vertex index
 
+	uint8_t shadingSate;
 	uint32_t dispComp;//Display Components Flag
 	uint32_t hlComp;// Highlight Components Flag
 private://viewer status

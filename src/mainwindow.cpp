@@ -77,8 +77,8 @@ bool MainWindow::createComponents()
 
 bool MainWindow::layoutComponents()
 {
-	setCentralWidget(viewer);
-
+	//setCentralWidget(viewer);
+	ui->viewerLayout->addWidget(viewer);
 	return true;
 }
 
@@ -165,6 +165,14 @@ void MainWindow::createActions()
 		//display menu
 		connect(ui->actionDispGrid, &QAction::triggered,
 			[&] { viewer->showComp(viewer_t::DispComp::GRID); });
+		// Shading State
+		connect(ui->actShaded, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::ShadingState::FLAT); });
+		connect(ui->actWireframe, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::ShadingState::WIREFRAME); });
+		connect(ui->actWfShaded, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::ShadingState::WIREFRAME_WITH_SHADED); });
+		// Higlight
 		connect(ui->actHL_CutEdge, &QAction::triggered,
 			[&] { viewer->highlightComp(viewer_t::HighlightComp::CUT_EDGE); });
 		connect(ui->actHL_Bridger, &QAction::triggered,

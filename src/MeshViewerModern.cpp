@@ -6,10 +6,10 @@ MeshViewerModern::MeshViewerModern(QWidget *parent)
 	, vtx_vbo(oglBuffer::Type::VertexBuffer)
 	, interactionState(Camera)
 	, selectionState(SingleSelect)
-	, shadingSate(FLAT)
 	, heMesh(nullptr)
 	, dispComp(static_cast<uint32_t>(DispComp::GRID))
 	, hlComp(static_cast<uint32_t>(HighlightComp::NONE))
+	, shadingSate(static_cast<uint8_t>(ShadingState::FLAT))
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
 	, 54.3, 1.67, 1, 100)
 	, grid(4, 6.0f, this)
@@ -52,14 +52,22 @@ void MeshViewerModern::setSelectionMode(SelectionState mode)
 	selectionState = mode;
 }
 
+void MeshViewerModern::showShading(ShadingState shading)
+{
+	shadingSate ^= static_cast<uint8_t>(shading);
+	update();
+}
+
 void MeshViewerModern::showComp(DispComp comp)
 {
 	dispComp ^= static_cast<uint32_t>(comp);
+	update();
 }
 
 void MeshViewerModern::highlightComp(HighlightComp comp)
 {
 	hlComp ^= static_cast<uint32_t>(comp);
+	update();
 }
 
 void MeshViewerModern::initializeGL()
@@ -408,45 +416,53 @@ void MeshViewerModern::paintGL()
 			break;
 		}*/
 		// Draw Mesh
-		if (true)
+		//if (true)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			if (mesh_changed)
+			if (shadingSate & static_cast<uint8_t>(ShadingState::FLAT))
 			{
-				bind();
-			}
-			fRBO.vao.bind();
-			// use shader
-			face_solid_shader.bind();
-			face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
-			face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-			//face_solid_shader.setUniformValue("hl_comp", hlComp);
-			glUniform1ui(glGetUniformLocation(face_solid_shader.programId(), "hl_comp"), hlComp);
-			// Bind Texture Buffer
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
-			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, fRBO.flag_tbo);
-			face_solid_shader.setUniformValue("flag_tex", 0);
-			glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
-			fRBO.vao.release();
-			
-			// Draw edge
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glLineWidth(1.0);
-			heRBO.vao.bind();
-			edge_solid_shader.bind();
-			edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
-			edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-			//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
-			glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
-			// Bind Texture Buffer
-			glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
-			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
-			edge_solid_shader.setUniformValue("flag_tex", 0);
-			glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
-			heRBO.vao.release();
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				if (mesh_changed)
+				{
+					bind();
+				}
+				fRBO.vao.bind();
+				// use shader
+				face_solid_shader.bind();
+				face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
+				face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+				//face_solid_shader.setUniformValue("hl_comp", hlComp);
+				glUniform1ui(glGetUniformLocation(face_solid_shader.programId(), "hl_comp"), hlComp);
+				// Bind Texture Buffer
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
+				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, fRBO.flag_tbo);
+				face_solid_shader.setUniformValue("flag_tex", 0);
+				glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 
-			edge_solid_shader.release();
+				fRBO.vao.release();
+				face_solid_shader.release();
+			}
+			
+			if (shadingSate & static_cast<uint8_t>(ShadingState::WIREFRAME))
+			{
+				// Draw edge
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glLineWidth(1.0);
+				heRBO.vao.bind();
+				edge_solid_shader.bind();
+				edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
+				edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+				//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
+				glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
+				// Bind Texture Buffer
+				glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
+				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
+				edge_solid_shader.setUniformValue("flag_tex", 0);
+				glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+
+				heRBO.vao.release();
+				edge_solid_shader.release();
+			}
 			glBindTexture(GL_TEXTURE_BUFFER, 0);
 		}
 	}
