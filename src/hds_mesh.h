@@ -78,13 +78,17 @@ public:
 	/************************************************************************/
 	/* Modern Rendering Functions                                           */
 	/************************************************************************/
-	void exportVBO(vector<float>* vtx_array = nullptr,
-		vector<uint32_t>* fib_array = nullptr,
-		vector<uint32_t>* fid_array = nullptr,
-		vector<uint16_t>* fflag_array = nullptr,
-		vector<uint32_t>* heib_array = nullptr,
-		vector<uint32_t>* heid_array = nullptr,
-		vector<uint16_t>* heflag_array = nullptr) const;
+	using floats_t = vector<float>;
+	using ui32s_t = vector<uint32_t>;
+	using ui16s_t = vector<uint16_t>;
+	void exportVertVBO(floats_t* verts = nullptr) const;
+	void exportEdgeVBO(ui32s_t* heIBOs = nullptr,
+		ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;
+	void exportFaceVBO(ui32s_t* fIBOs = nullptr,
+		ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr) const;
+	/*void exportVBO(floats_t* verts = nullptr,
+		ui32s_t* fIBOs = nullptr, ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr,
+		ui32s_t* heIBOs = nullptr, ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;*/
 
 	 unordered_set<he_t*>& halfedges()  { return heSet; }
 	 unordered_set<face_t*>& faces()  { return faceSet; }

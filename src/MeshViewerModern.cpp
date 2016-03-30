@@ -97,9 +97,9 @@ void MeshViewerModern::initializeGL()
 
 void MeshViewerModern::bind()
 {
-	heMesh->exportVBO(&vtx_array,
-		&fRBO.ibos, &fRBO.ids, &fRBO.flags,
-		&heRBO.ibos, &heRBO.ids, &heRBO.flags);
+	heMesh->exportVertVBO(&vtx_array);
+	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
+	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
 
 	initialVBO();
 	bindVertexVBO();
