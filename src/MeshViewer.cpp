@@ -1,7 +1,7 @@
-#include "MeshViewerModern.h"
+#include "MeshViewer.h"
 #include <QFileDialog>
 
-MeshViewerModern::MeshViewerModern(QWidget *parent)
+MeshViewer::MeshViewer(QWidget *parent)
 	: QOpenGLWidget(parent)
 	, vtx_vbo(oglBuffer::Type::VertexBuffer)
 	, interactionState(Camera)
@@ -25,11 +25,11 @@ MeshViewerModern::MeshViewerModern(QWidget *parent)
 	this->setFormat(format);
 }
 
-MeshViewerModern::~MeshViewerModern()
+MeshViewer::~MeshViewer()
 {
 }
 
-void MeshViewerModern::bindHalfEdgeMesh(HDS_Mesh *mesh)
+void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh)
 {
 	heMesh = mesh;
 	mesh_changed = true;
@@ -38,7 +38,7 @@ void MeshViewerModern::bindHalfEdgeMesh(HDS_Mesh *mesh)
 }
 
 
-void MeshViewerModern::setInteractionMode(InteractionState state)
+void MeshViewer::setInteractionMode(InteractionState state)
 {
 	interactionState = state;
 	/*while (!selectedElementsIdxQueue.empty())
@@ -47,30 +47,30 @@ void MeshViewerModern::setInteractionMode(InteractionState state)
 	}*/
 }
 
-void MeshViewerModern::setSelectionMode(SelectionState mode)
+void MeshViewer::setSelectionMode(SelectionState mode)
 {
 	selectionState = mode;
 }
 
-void MeshViewerModern::showShading(ShadingState shading)
+void MeshViewer::showShading(ShadingState shading)
 {
 	shadingSate ^= static_cast<uint8_t>(shading);
 	update();
 }
 
-void MeshViewerModern::showComp(DispComp comp)
+void MeshViewer::showComp(DispComp comp)
 {
 	dispComp ^= static_cast<uint32_t>(comp);
 	update();
 }
 
-void MeshViewerModern::highlightComp(HighlightComp comp)
+void MeshViewer::highlightComp(HighlightComp comp)
 {
 	hlComp ^= static_cast<uint32_t>(comp);
 	update();
 }
 
-void MeshViewerModern::initializeGL()
+void MeshViewer::initializeGL()
 {
 	// OpenGL extension initialization
 	initializeOpenGLFunctions();
@@ -95,7 +95,7 @@ void MeshViewerModern::initializeGL()
 }
 
 
-void MeshViewerModern::bind()
+void MeshViewer::bind()
 {
 	heMesh->exportVertVBO(&vtx_array);
 	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
@@ -111,14 +111,14 @@ void MeshViewerModern::bind()
 	mesh_changed = false;
 }
 
-void MeshViewerModern::initialVBO()
+void MeshViewer::initialVBO()
 {
 	vtx_vbo.destroy();
 	heRBO.destroy();
 	fRBO.destroy();
 }
 
-void MeshViewerModern::bindVertexVBO()
+void MeshViewer::bindVertexVBO()
 {
 	vtx_vbo.create();
 	vtx_vbo.setUsagePattern(oglBuffer::StaticDraw);
@@ -127,7 +127,7 @@ void MeshViewerModern::bindVertexVBO()
 	vtx_vbo.release();
 }
 
-void MeshViewerModern::bindEdgesVAO()
+void MeshViewer::bindEdgesVAO()
 {
 	// Bind VAO
 	heRBO.vao.create();
@@ -148,7 +148,7 @@ void MeshViewerModern::bindEdgesVAO()
 	vtx_vbo.release();
 }
 
-void MeshViewerModern::bindEdgesTBO()
+void MeshViewer::bindEdgesTBO()
 {
 	glGenTextures(2, heRBO.tex);
 	glGenBuffers(2, heRBO.tbo);
@@ -162,7 +162,7 @@ void MeshViewerModern::bindEdgesTBO()
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
-void MeshViewerModern::bindFaceVAO()
+void MeshViewer::bindFaceVAO()
 {
 	// Bind VAO
 	fRBO.vao.create();
@@ -183,7 +183,7 @@ void MeshViewerModern::bindFaceVAO()
 
 }
 
-void MeshViewerModern::bindFaceTBO()
+void MeshViewer::bindFaceTBO()
 {
 	glGenTextures(2, fRBO.tex);
 	glGenBuffers(2, fRBO.tbo);
@@ -197,7 +197,7 @@ void MeshViewerModern::bindFaceTBO()
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
-void MeshViewerModern::initShader()
+void MeshViewer::initShader()
 {
 	//////////////////////////////////////////////////////////////////////////
 	// Grid Shader
@@ -226,13 +226,13 @@ void MeshViewerModern::initShader()
 
 }
 
-void MeshViewerModern::initializeFBO()
+void MeshViewer::initializeFBO()
 {
 	fbo.reset(new oglFBO(width(), height(), oglFBO::CombinedDepthStencil, GL_TEXTURE_2D));
 //	selectionBuffer.resize(width()*height() * 4);
 }
 
-void MeshViewerModern::drawMeshToFBO()
+void MeshViewer::drawMeshToFBO()
 {
 	makeCurrent();
 	fbo->bind();
@@ -349,7 +349,7 @@ void MeshViewerModern::drawMeshToFBO()
 				selFACE.pop();
 			}
 		}
-		heMesh->exportVBO(nullptr, nullptr, nullptr, &fRBO.flags);
+		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
 		fRBO.destroy();
 		bindFaceVAO();
 		bindFaceTBO();
@@ -368,7 +368,7 @@ void MeshViewerModern::drawMeshToFBO()
 				selHE.pop();
 			}
 		}
-		heMesh->exportVBO(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &heRBO.flags);
+		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
 		heRBO.destroy();
 		bindEdgesVAO();
 		bindEdgesTBO();
@@ -378,7 +378,7 @@ void MeshViewerModern::drawMeshToFBO()
 	cout << "draw primitive id:" << renderID << endl;
 }
 
-void MeshViewerModern::paintGL()
+void MeshViewer::paintGL()
 {
 	makeCurrent();
 	// Clear background and color buffer
@@ -468,14 +468,14 @@ void MeshViewerModern::paintGL()
 	}
 }
 
-void MeshViewerModern::resizeGL(int w, int h)
+void MeshViewer::resizeGL(int w, int h)
 {
 	view_cam.resizeViewport(w / static_cast<double>(h));
 
 	initializeFBO();
 }
 
-void MeshViewerModern::keyPressEvent(QKeyEvent* e)
+void MeshViewer::keyPressEvent(QKeyEvent* e)
 {
 	switch (e->key()) {
 	case Qt::Key_C:
@@ -578,11 +578,11 @@ void MeshViewerModern::keyPressEvent(QKeyEvent* e)
 	}
 }
 
-void MeshViewerModern::keyReleaseEvent(QKeyEvent* e)
+void MeshViewer::keyReleaseEvent(QKeyEvent* e)
 {
 }
 
-void MeshViewerModern::mousePressEvent(QMouseEvent* e)
+void MeshViewer::mousePressEvent(QMouseEvent* e)
 {
 	mouseState.x = e->x();
 	mouseState.y = e->y();
@@ -595,7 +595,7 @@ void MeshViewerModern::mousePressEvent(QMouseEvent* e)
 	}
 }
 
-void MeshViewerModern::mouseMoveEvent(QMouseEvent* e)
+void MeshViewer::mouseMoveEvent(QMouseEvent* e)
 {
 	
 	int dx = e->x() - mouseState.x;
@@ -631,7 +631,7 @@ void MeshViewerModern::mouseMoveEvent(QMouseEvent* e)
 	mouseState.y += dy;
 }
 
-void MeshViewerModern::mouseReleaseEvent(QMouseEvent* e)
+void MeshViewer::mouseReleaseEvent(QMouseEvent* e)
 {
 	/*
 	switch (interactionState)
@@ -725,13 +725,13 @@ void MeshViewerModern::mouseReleaseEvent(QMouseEvent* e)
 	*/
 }
 
-void MeshViewerModern::wheelEvent(QWheelEvent* e)
+void MeshViewer::wheelEvent(QWheelEvent* e)
 {
 	view_cam.zoom(0, 0, -e->delta() * 0.01);
 	update();
 }
 
-void MeshViewerModern::selectAll()
+void MeshViewer::selectAll()
 {
 	switch (interactionState) {
 
@@ -753,7 +753,7 @@ void MeshViewerModern::selectAll()
 	update();
 }
 
-void MeshViewerModern::selectInverse()
+void MeshViewer::selectInverse()
 {
 	switch (interactionState)
 	{
@@ -788,7 +788,7 @@ void MeshViewerModern::selectInverse()
 	update();
 }
 
-void MeshViewerModern::resetCamera()
+void MeshViewer::resetCamera()
 {
 	view_cam = perspCamera(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0));
 }

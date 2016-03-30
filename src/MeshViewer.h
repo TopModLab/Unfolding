@@ -21,7 +21,7 @@
 #include "Graph.hpp"
 #include "morsesmalecomplex.h"
 
-class MeshViewerModern;
+class MeshViewer;
 struct RenderBufferObject;
 
 struct MouseState {
@@ -67,13 +67,13 @@ struct RenderBufferObject// : protected oglFuncs
 	vector<GLuint> ids;// he id, for querying
 	vector<uint16_t> flags;// he flag data
 };
-class MeshViewerModern
+class MeshViewer
 	: public QOpenGLWidget, oglFuncs
 {
 	Q_OBJECT
 public:
-	explicit MeshViewerModern(QWidget *parent = nullptr);
-	~MeshViewerModern();
+	explicit MeshViewer(QWidget *parent = nullptr);
+	~MeshViewer();
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	

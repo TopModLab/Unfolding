@@ -1,5 +1,6 @@
-#ifndef MESHVIEWER_H
-#define MESHVIEWER_H
+#pragma once
+#ifndef MESH_VIEWER_LEGACY_H
+#define MESH_VIEWER_LEGACY_H
 
 #ifndef OPENGL_LEGACY
 #define OPENGL_LEGACY
@@ -36,13 +37,13 @@ const QGLFormat qglformat_3d(
 	);
 
 
-class MeshViewer : public QGLWidget, protected QGLFunctions
+class MeshViewerLegacy : public QGLWidget, protected QGLFunctions
 	//, public QOpenGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 public:
-	explicit MeshViewer(QWidget *parent = 0);
-	virtual ~MeshViewer();
+	explicit MeshViewerLegacy(QWidget *parent = 0);
+	virtual ~MeshViewerLegacy();
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	void bindReebGraph(SimpleGraph *g);

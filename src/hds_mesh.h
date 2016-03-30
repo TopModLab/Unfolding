@@ -133,8 +133,8 @@ private:
 protected:
 	friend class ReebGraph;
 	friend class MeshCutter;
+	friend class MeshViewerLegacy;
 	friend class MeshViewer;
-	friend class MeshViewerModern;
 	friend class MeshManager;
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
