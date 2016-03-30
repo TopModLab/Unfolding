@@ -322,6 +322,9 @@
    </property>
   </action>
   <action name="actWireframe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/disp/wireframe.png</normaloff>:/icons/disp/wireframe.png</iconset>
@@ -334,6 +337,9 @@
    </property>
   </action>
   <action name="actShaded">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/disp/flatShaded.png</normaloff>:/icons/disp/flatShaded.png</iconset>

@@ -65,7 +65,7 @@ struct RenderBufferObject// : protected oglFuncs
 
 	vector<GLuint> ibos;// he ibo data
 	vector<GLuint> ids;// he id, for querying
-	vector<uint16_t> flags;// he flag data
+	ui16s_t flags;// he flag data
 };
 class MeshViewer
 	: public QOpenGLWidget, oglFuncs
@@ -145,12 +145,12 @@ public:
 		SelectFace = 5,
 		SelectEdge = 6
 	};
-	enum class ShadingState : uint8_t
+	enum ShadingState : uint8_t
 	{
-		SMOOTH = 0,
-		FLAT = 1 << 0,
-		WIREFRAME = 1 << 1,
-		WIREFRAME_WITH_SHADED = FLAT | WIREFRAME
+		SHADE_NONE = 0,
+		SHADE_FLAT = 1 << 0,
+		SHADE_WF = 1 << 1,
+		SHADE_WF_FLAT = SHADE_FLAT | SHADE_WF
 	};
 	enum DataTypeMark : uint8_t
 	{
@@ -174,25 +174,25 @@ public:
 		GraphDist = 0,
 		GeodesicsDist = 1
 	}lmode;
-	enum class DispComp : uint32_t// Display Compoment
+	enum DispComp : uint32_t// Display Compoment
 	{
-		NONE = 0,
-		GRID = 1 << 0,
-		CLDistance = 1 << 1, //show cut locus dists
-		CPDistance = 1 << 2, //show critical points dists
+		DISP_NONE = 0,
+		DISP_GRID = 1 << 0,
+		DISP_CLDistance = 1 << 1, //show cut locus dists
+		DISP_CPDistance = 1 << 2, //show critical points dists
 		
-		MULT_CUT = 1 << 4,
-		ONE_CUT = 1 << 5,
-		REEB_POINTS = 1 << 6,
-		TEXT = 1 << 7,
-		V_INDEX = 1 << 8
+		DISP_MULT_CUT = 1 << 4,
+		DISP_ONE_CUT = 1 << 5,
+		DISP_REEB_POINTS = 1 << 6,
+		DISP_TEXT = 1 << 7,
+		DISP_V_INDEX = 1 << 8
 	};
-	enum class HighlightComp : uint32_t
+	enum HighlightComp : uint32_t
 	{
-		NONE = 0,
-		CUT_EDGE = 1 << 0,// related to shader
-		NON_PLANAR_FACE = 1 << 1,
-		BRIDGER_FACE = 1 << 2
+		HIGHLIGHT_NONE = 0,
+		HIGHLIGHT_CUTEDGE = 1 << 0,// related to shader
+		HIGHLIGHT_NON_PLANAR_FACE = 1 << 1,
+		HIGHLIGHT_BRIDGER = 1 << 2
 	};
 public:
 	void selectCutLocusEdges();
@@ -261,7 +261,7 @@ private://Mesh Data
 	// VBOs and VAOs
 	// Vertices data and vao
 	oglBuffer vtx_vbo;
-	vector<GLfloat> vtx_array;
+	floats_t vtx_array;
 
 	// Face indices and vao
 	RenderBufferObject fRBO;

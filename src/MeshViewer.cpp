@@ -7,9 +7,9 @@ MeshViewer::MeshViewer(QWidget *parent)
 	, interactionState(Camera)
 	, selectionState(SingleSelect)
 	, heMesh(nullptr)
-	, dispComp(static_cast<uint32_t>(DispComp::GRID))
-	, hlComp(static_cast<uint32_t>(HighlightComp::NONE))
-	, shadingSate(static_cast<uint8_t>(ShadingState::FLAT))
+	, dispComp(DispComp::DISP_GRID)
+	, hlComp(HighlightComp::HIGHLIGHT_NONE)
+	, shadingSate(SHADE_WF_FLAT)
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
 	, 54.3, 1.67, 1, 100)
 	, grid(4, 6.0f, this)
@@ -54,19 +54,19 @@ void MeshViewer::setSelectionMode(SelectionState mode)
 
 void MeshViewer::showShading(ShadingState shading)
 {
-	shadingSate ^= static_cast<uint8_t>(shading);
+	shadingSate ^= shading;
 	update();
 }
 
 void MeshViewer::showComp(DispComp comp)
 {
-	dispComp ^= static_cast<uint32_t>(comp);
+	dispComp ^= comp;
 	update();
 }
 
 void MeshViewer::highlightComp(HighlightComp comp)
 {
-	hlComp ^= static_cast<uint32_t>(comp);
+	hlComp ^= comp;
 	update();
 }
 
@@ -389,7 +389,7 @@ void MeshViewer::paintGL()
 		return disp & static_cast<uint32_t>(mode);
 	};
 
-	if (checkDispMode(dispComp, DispComp::GRID))
+	if (checkDispMode(dispComp, DispComp::DISP_GRID))
 	{
 		grid.draw(view_cam.CameraToScreen, view_cam.WorldToCamera);
 	}
@@ -418,7 +418,7 @@ void MeshViewer::paintGL()
 		// Draw Mesh
 		//if (true)
 		{
-			if (shadingSate & static_cast<uint8_t>(ShadingState::FLAT))
+			if (shadingSate & SHADE_FLAT)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				if (mesh_changed)
@@ -443,7 +443,7 @@ void MeshViewer::paintGL()
 				face_solid_shader.release();
 			}
 			
-			if (shadingSate & static_cast<uint8_t>(ShadingState::WIREFRAME))
+			if (shadingSate & SHADE_WF)
 			{
 				// Draw edge
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

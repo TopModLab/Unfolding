@@ -143,7 +143,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		vector<QVector2D> printPinholes;
 
 		vector<QVector2D> printTextPos;
-		vector<double> printTextRot;
+		doubles_t printTextRot;
 		vector<QString> printTextIfo;
 		unordered_map<int, QVector2D> printTextRecord;
 
@@ -412,7 +412,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 		vector<QVector2D> printPinholes;
 
 		vector<QVector2D> printTextPos;
-		vector<double> printTextRot;
+		doubles_t printTextRot;
 		vector<QString> printTextIfo;
 		unordered_map<int, QVector2D> printTextRecord;
 
@@ -848,7 +848,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 
 		// Connection label
 		vector<QVector2D> printTextPos;
-		vector<double> printTextRot;
+		doubles_t printTextRot;
 		vector<QString> printTextIfo;
 		do
 		{

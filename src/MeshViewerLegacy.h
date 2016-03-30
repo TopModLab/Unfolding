@@ -203,7 +203,7 @@ public slots:
 	void resetFaces();
 private:
 	bool showReebPoints;
-	vector<double> CPdistances;
+	doubles_t CPdistances;
 	bool isCriticalPointModeSet = false;
 	enum CriticalPointMode {
 		Geodesics = 0,
@@ -225,7 +225,7 @@ private:
 	bool showCut;
 	bool showOneCut;
 	bool showMultCut;
-	vector<double> CLdistances;
+	doubles_t CLdistances;
 
 	bool isCutLocusModeset = false;
 	enum CutLocusMode {

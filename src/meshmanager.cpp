@@ -564,11 +564,11 @@ void MeshManager::exportXMLFile()
 
 void MeshManager::colorMeshByGeoDistance(int vidx)
 {
-	auto laplacianSmoother = [&](const vector<double> &val, HDS_Mesh *mesh) {
+	auto laplacianSmoother = [&](const doubles_t &val, HDS_Mesh *mesh) {
 		const double lambda = 0.25;
 		const double sigma = 1.0;
 		unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
-		vector<double> newval(mesh->verts().size());
+		doubles_t newval(mesh->verts().size());
 		for (auto vi : mesh->verts()) {
 			auto neighbors = vi->neighbors();
 
@@ -598,7 +598,7 @@ void MeshManager::colorMeshByGeoDistance(int vidx)
 		dists = laplacianSmoother(dists, operationStack->getOriMesh());
 #else
 	auto Q = MeshIterator::BFS(hds_mesh.data(), vidx);
-	vector<double> dists(hds_mesh->verts().size());
+	doubles_t dists(hds_mesh->verts().size());
 	while (!Q.empty()){
 		auto cur = Q.front();
 		Q.pop();
@@ -635,7 +635,7 @@ void MeshManager::colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ra
 }
 
 #if USE_REEB_GRAPH
-void MeshManager::updateReebGraph(const vector<double> &fvals)
+void MeshManager::updateReebGraph(const doubles_t &fvals)
 {
 	vtkSmartPointer<vtkReebGraph> surfaceReebGraph = vtkSmartPointer<vtkReebGraph>::New();
 	int nverts = vtkMesh->GetNumberOfPoints();
@@ -722,7 +722,7 @@ void MeshManager::updateReebGraph(const vector<double> &fvals)
 }
 #endif
 
-vector<double> MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
+doubles_t MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
 {
 	auto dist0 = gcomp_smoothed[lev0]->distanceTo(vidx);
 	auto dist1 = gcomp_smoothed[lev1]->distanceTo(vidx);
@@ -730,15 +730,15 @@ vector<double> MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev
 }
 
 
-vector<double> MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
+doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
 {
 	auto m0 = hds_mesh_smoothed[lev0];
 	auto m1 = hds_mesh_smoothed[lev1];
 
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 
-	auto dist0 = vector<double>(hds_mesh->verts().size());
-	auto dist1 = vector<double>(hds_mesh->verts().size());
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {
 		dist0[v->index] = v->pos.z();
 	}
@@ -748,15 +748,15 @@ vector<double> MeshManager::getInterpolatedZValue(int lev0, int lev1, double alp
 	return Utils::interpolate(dist0, dist1, alpha);
 }
 
-vector<double> MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
+doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
 {
 	auto m0 = hds_mesh_smoothed[lev0];
 	auto m1 = hds_mesh_smoothed[lev1];
 
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 
-	auto dist0 = vector<double>(hds_mesh->verts().size());
-	auto dist1 = vector<double>(hds_mesh->verts().size());
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {
 		dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
 	}
@@ -766,14 +766,14 @@ vector<double> MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, 
 	return Utils::interpolate(dist0, dist1, alpha);
 }
 
-vector<double> MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
+doubles_t MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
 {
 	auto m0 = hds_mesh_smoothed[lev0];
 	auto m1 = hds_mesh_smoothed[lev1];
 
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-	auto dist0 = vector<double>(hds_mesh->verts().size());
-	auto dist1 = vector<double>(hds_mesh->verts().size());
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
 	for (auto v : m0->verts()) {
 		dist0[v->index] = v->curvature;
 	}

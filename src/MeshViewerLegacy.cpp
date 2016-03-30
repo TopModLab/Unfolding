@@ -1150,11 +1150,11 @@ void MeshViewerLegacy::drawReebPoints()
 
 void MeshViewerLegacy::findReebPoints()
 {
-	auto laplacianSmoother = [&](const vector<double> &val, HDS_Mesh *mesh) {
+	auto laplacianSmoother = [&](const doubles_t &val, HDS_Mesh *mesh) {
 		const double lambda = 0.25;
 		const double sigma = 1.0;
 		unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
-		vector<double> newval(mesh->verts().size());
+		doubles_t newval(mesh->verts().size());
 		for (auto vi : mesh->verts()) {
 			auto neighbors = vi->neighbors();
 
@@ -1186,11 +1186,11 @@ void MeshViewerLegacy::findReebPoints()
 	// find the seeds of the laplacian smoothing
 	// pick a few vertices based on their curvatures
 
-	auto dists = vector<double>();
+	auto dists = doubles_t();
 	int isSmoothingOnActualMeshChecked = cp_smoothing_type;
 	/* if(isSmoothingOnActualMeshChecked==NULL)        //later added;
 	{
-		dists = vector<double>(heMesh->verts().size());
+		dists = doubles_t(heMesh->verts().size());
 		QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
 		for (auto v : heMesh->verts()) {
 		dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
@@ -1229,7 +1229,7 @@ void MeshViewerLegacy::findReebPoints()
 		}
 		case Random:
 		{
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto &x : dists) {
 				x= rand()/ (double)RAND_MAX - 0.5;
 			}
@@ -1255,7 +1255,7 @@ void MeshViewerLegacy::findReebPoints()
 		}
 		case Z: {
 			cout<<"Z value method..."<<endl;
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto v : heMesh->verts()) {
 				dists[v->index] = v->pos.z();//here pos.z() can be changed to pos.y(); later
 			}
@@ -1264,7 +1264,7 @@ void MeshViewerLegacy::findReebPoints()
 		case PointNormal: {
 			cout<<"Point normal method..."<<endl;
 
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;//last selected point normal dotproduct other points vector;
 			for (auto v : heMesh->verts()) {
 				dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
@@ -1274,7 +1274,7 @@ void MeshViewerLegacy::findReebPoints()
 		case Curvature: {
 			cout<<"Curvature method..."<<endl;
 
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto v : heMesh->verts()) {
 				dists[v->index] = v->curvature;
 			}
@@ -1284,12 +1284,12 @@ void MeshViewerLegacy::findReebPoints()
 		{
 			cout<<"Random method..."<<endl;
 
-			/*   dists = vector<double>(heMesh->verts().size());
+			/*   dists = doubles_t(heMesh->verts().size());
 		for (auto &x : dists) {
 			x= rand()/ (double)RAND_MAX - 0.5;
 		}
 	*/
-			//vector<double> y(heMesh->verts().size());
+			//doubles_t y(heMesh->verts().size());
 			int ty=0;
 			int tt=0;
 			int ts=0;
@@ -1297,14 +1297,14 @@ void MeshViewerLegacy::findReebPoints()
 			int tq;
 			tq=ta;
 			int id=0;
-			vector<double> memo(ta);
+			doubles_t memo(ta);
 			for(int i=0;i<ta;i++){
 				memo[i]=(double)i;
 
 			}
 
 
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto &x : dists) {
 
 
@@ -1400,7 +1400,7 @@ void MeshViewerLegacy::findReebPoints()
 			}
 			c /= heMesh->vertSet.size();
 			// compute per-vertex distance
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto &v : heMesh->vertSet) {
 				dists[v->index] = heMesh->vertMap[0]->pos.distanceToPoint(v->pos);
 			}
@@ -1442,7 +1442,7 @@ void MeshViewerLegacy::findReebPoints()
 
 void MeshViewerLegacy::findCutLocusPoints()
 {
-	auto dists = vector<double>();
+	auto dists = doubles_t();
 
 	if(heMesh->verts().size()>10){
 		switch (lmode) {

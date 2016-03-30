@@ -164,19 +164,25 @@ void MainWindow::createActions()
 
 		//display menu
 		connect(ui->actionDispGrid, &QAction::triggered,
-			[&] { viewer->showComp(viewer_t::DispComp::GRID); });
+			[&] { viewer->showComp(viewer_t::DISP_GRID); });
 		// Shading State
+		QActionGroup *shadingGroup = new QActionGroup(ui->menuShading);
+		shadingGroup->addAction(ui->actWireframe);
+		shadingGroup->addAction(ui->actShaded);
+		shadingGroup->addAction(ui->actWfShaded);
+		shadingGroup->setExclusive(true);
 		connect(ui->actShaded, &QAction::triggered,
-			[&] { viewer->showShading(viewer_t::ShadingState::FLAT); });
+			[&] { viewer->showShading(viewer_t::SHADE_FLAT); });
 		connect(ui->actWireframe, &QAction::triggered,
-			[&] { viewer->showShading(viewer_t::ShadingState::WIREFRAME); });
+			[&] { viewer->showShading(viewer_t::SHADE_WF); });
 		connect(ui->actWfShaded, &QAction::triggered,
-			[&] { viewer->showShading(viewer_t::ShadingState::WIREFRAME_WITH_SHADED); });
+			[&] { viewer->showShading(viewer_t::SHADE_WF_FLAT); });
+
 		// Higlight
 		connect(ui->actHL_CutEdge, &QAction::triggered,
-			[&] { viewer->highlightComp(viewer_t::HighlightComp::CUT_EDGE); });
+			[&] { viewer->highlightComp(viewer_t::HIGHLIGHT_CUTEDGE); });
 		connect(ui->actHL_Bridger, &QAction::triggered,
-			[&] { viewer->highlightComp(viewer_t::HighlightComp::BRIDGER_FACE); });
+			[&] { viewer->highlightComp(viewer_t::HIGHLIGHT_BRIDGER); });
 		//"E: edges  V : vertices  F : faces  N: Normals L : lighting  C : critical points"
 		QAction *showEdgesAct = new QAction(tr("Show Edges"), this);
 		showEdgesAct->setShortcut(Qt::Key_E);

@@ -20,7 +20,7 @@ public:
 	typedef HDS_Vertex vert_t;
 	typedef HDS_HalfEdge he_t;
 
-	enum PROCESS_TYPE
+	enum PROCESS_TYPE : uint16_t
 	{
 		REGULAR_PROC,
 		HOLLOWED_PROC,
@@ -29,11 +29,20 @@ public:
 		EXTENDED_PROC,
 		RIMMED_PROC
 	};
-	enum ElementType {
+	enum SHOW_COMP : uint16_t
+	{
+		SHOW_NONE = 0,
+		SHOW_VERT = 1 << 0,
+		SHOW_FACE = 1 << 1,
+		SHOW_EDGE = 1 << 2,
+		SHOW_NORM = 1 << 3
+	};
+	/*enum ElementType
+	{
 		Face = 0,
 		Edge,
 		Vertex
-	};
+	};*/
 
 	HDS_Mesh();
 	HDS_Mesh(const HDS_Mesh& other);
@@ -54,14 +63,14 @@ public:
 					const vector<he_t*> &hes);
 
 
-	unordered_set<vert_t*> getReebPoints(const vector<double> &val = vector<double>(), const QVector3D &normdir = QVector3D(0, 0, 1));
+	unordered_set<vert_t*> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
 	unordered_set<vert_t*> getSelectedVertices();
 	unordered_set<he_t*> getSelectedEdges(); //use one half edge to represent an edge
 	unordered_set<he_t*> getSelectedHalfEdges(); //return all ispicked half edges
 	unordered_set<face_t*> getSelectedFaces();
 
-	void colorVertices(const vector<double> &val);
+	void colorVertices(const doubles_t &val);
 
 	/************************************************************************/
 	/* Legacy Drawing Functions                                             */
@@ -78,17 +87,11 @@ public:
 	/************************************************************************/
 	/* Modern Rendering Functions                                           */
 	/************************************************************************/
-	using floats_t = vector<float>;
-	using ui32s_t = vector<uint32_t>;
-	using ui16s_t = vector<uint16_t>;
 	void exportVertVBO(floats_t* verts = nullptr) const;
 	void exportEdgeVBO(ui32s_t* heIBOs = nullptr,
 		ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;
 	void exportFaceVBO(ui32s_t* fIBOs = nullptr,
 		ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr) const;
-	/*void exportVBO(floats_t* verts = nullptr,
-		ui32s_t* fIBOs = nullptr, ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr,
-		ui32s_t* heIBOs = nullptr, ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;*/
 
 	 unordered_set<he_t*>& halfedges()  { return heSet; }
 	 unordered_set<face_t*>& faces()  { return faceSet; }
@@ -158,7 +161,8 @@ private:
 	BBox3* bound;
 private:
 	//bool isHollowed;
-	int processType;
+	uint16_t processType;
+	uint8_t showComponent;
 	bool showFace, showEdge, showVert, showNormals;
 };
 

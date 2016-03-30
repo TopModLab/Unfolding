@@ -320,7 +320,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		//unfolded_mesh->printInfo();
 		Q.push(unfolded_mesh->faceMap[fid]);
 
-		vector<int> expSeq;     // sequence of expansion
+		int32s_t expSeq;     // sequence of expansion
 		map<int, int> parentMap;
 		set<int> visited;
 		set<int> frontier;

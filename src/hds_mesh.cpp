@@ -8,7 +8,8 @@
 using namespace std;
 
 HDS_Mesh::HDS_Mesh()
-	: showFace(true), showVert(true)
+	: showComponent(SHOW_FACE | SHOW_EDGE)
+	, showFace(true), showVert(true)
 	, showEdge(true), showNormals(false)
 	, processType(REGULAR_PROC)
 	, bound(nullptr)
@@ -816,209 +817,6 @@ void HDS_Mesh::exportFaceVBO(
 	}
 }
 
-/*
-void HDS_Mesh::exportVBO(floats_t* verts,
-	ui32s_t* fIBOs, ui32s_t* fIDs, ui16s_t* fFLAGs,
-	ui32s_t* heIBOs, ui32s_t* heIDs, ui16s_t* heFLAGs) const
-{
-	// vertex object buffer
-	if (verts != nullptr)
-	{
-		verts->clear();
-		verts->reserve(vertSet.size());
-		for (int i = 0; i < vertMap.size(); i++)
-		{
-			auto vert = vertMap.at(i);
-			auto& pos = vert->pos;
-			verts->push_back(pos.x());
-			verts->push_back(pos.y());
-			verts->push_back(pos.z());
-		}
-	}
-	// face index buffer
-	auto inTriangle = [](const QVector3D& p, const QVector3D& v0, const QVector3D& v1, const QVector3D& v2)->bool {
-		auto area = QVector3D::crossProduct(v1 - v0, v2 - v0);
-		auto v1p = v1 - p;
-		auto v2p = v2 - p;
-		if (QVector3D::dotProduct(QVector3D::crossProduct(v1p, v2p), area) < 0)
-		{
-			return false;
-		}
-		auto v0p = v0 - p;
-		if (QVector3D::dotProduct(QVector3D::crossProduct(v2p, v0p), area) < 0)
-		{
-			return false;
-		}
-		if (QVector3D::dotProduct(QVector3D::crossProduct(v0p, v1p), area) < 0)
-		{
-			return false;
-		}
-		return true;
-	};
-	
-	size_t fSetSize = faceSet.size();
-	if (fIBOs != nullptr)
-	{
-		// triangulated face index buffer
-		fIBOs->clear();
-		fIBOs->reserve(fSetSize * 3);
-		// original face idex, for query
-		fIDs->clear();
-		fIDs->reserve(fSetSize * 2);
-		fFLAGs->clear();
-		fFLAGs->reserve(fSetSize * 2);
-		for (auto face : faceSet)
-		{
-			if (face->isCutFace)
-			{
-				continue;
-			}
-			ui32s_t vid_array;
-			auto fid = static_cast<uint32_t>(face->index);
-			uint16_t flag = face->getFlag();
-			auto he = face->he;
-			auto curHE = he;
-			do
-			{
-				vid_array.push_back(curHE->v->index);
-				curHE = curHE->next;
-			} while (curHE != he);
-
-			// Operate differently depending on edge number
-			size_t vidCount = vid_array.size();
-			switch (vidCount)
-			{
-			case 3:
-			{
-				// Index buffer
-				fIBOs->insert(fIBOs->end(), vid_array.begin(), vid_array.end());
-				// face attribute
-				//fid_array->push_back(fid);
-				//fflag_array->push_back(flag);
-				break;
-			}
-			/ *case 4:
-			{
-				// P3 in Triangle012
-				if (inTriangle(
-					vertMap.at(vid_array[3])->pos,
-					vertMap.at(vid_array[0])->pos,
-					vertMap.at(vid_array[1])->pos,
-					vertMap.at(vid_array[2])->pos))
-				{
-					// Index buffer 013
-					fib_array->insert(fib_array->end(),
-						vid_array.begin(), vid_array.begin() + 2);
-					fib_array->push_back(vid_array.back());
-
-					// Index buffer 123
-					fib_array->insert(fib_array->end(),
-						vid_array.begin() + 1, vid_array.end());
-				}
-				else// P3 outside Triangle012
-				{
-					// Index buffer 012
-					fib_array->insert(fib_array->end(),
-						vid_array.begin(), vid_array.begin() + 3);
-
-					// Index buffer 230
-					fib_array->insert(fib_array->end(),
-						vid_array.begin() + 2, vid_array.end());
-					fib_array->push_back(vid_array.front());
-					
-				}
-				// face attribute
-				//fid_array->insert(fid_array->end(), 2, fid);
-				//fflag_array->insert(fflag_array->end(), 2, flag);
-			}* /
-			default: // n-gons
-			{
-				// Triangle Fan
-				for (size_t i = 1; i < vidCount - 1; i++)
-				{
-					fIBOs->push_back(vid_array[0]);
-					fIBOs->push_back(vid_array[i]);
-					fIBOs->push_back(vid_array[i + 1]);
-				}
-				break;
-			}
-			}
-			fIDs->insert(fIDs->end(), vidCount - 2, fid);
-			fFLAGs->insert(fFLAGs->end(), vidCount - 2, flag);
-		}
-	}
-	else if (fFLAGs != nullptr)
-	{
-		// re-export face flag
-		fFLAGs->clear();
-		fFLAGs->reserve(fSetSize * 2);
-		for (auto face : faceSet)
-		{
-			if (face->isCutFace)
-			{
-				continue;
-			}
-			uint16_t flag = face->getFlag();
-			auto he = face->he;
-			auto curHE = he;
-			size_t vidCount = 0;
-			do
-			{
-				vidCount++;
-				curHE = curHE->next;
-			} while (curHE != he);
-			fFLAGs->insert(fFLAGs->end(), vidCount - 2, flag);
-		}
-	}
-
-	size_t heSetSize = heSet.size() / 2;
-	if (heIBOs != nullptr)
-	{
-		unordered_set<he_t*> visitiedHE;
-		visitiedHE.reserve(heSet.size());
-
-		
-		heIBOs->clear();
-		heIBOs->reserve(heSetSize >> 1);
-		heFLAGs->clear();
-		heFLAGs->reserve(heSetSize >> 1);
-
-		for (auto he : heSet)
-		{
-			if (visitiedHE.find(he) == visitiedHE.end())
-			{
-				visitiedHE.insert(he);
-				visitiedHE.insert(he->flip);
-
-				heIBOs->push_back(he->v->index);
-				heIBOs->push_back(he->flip->v->index);
-
-				heIDs->push_back(static_cast<uint32_t>(he->index));
-				heFLAGs->push_back(he->getFlag());
-			}
-		}
-	}
-	else if (heFLAGs != nullptr)
-	{
-		unordered_set<he_t*> visitiedHE;
-		visitiedHE.reserve(heSet.size());
-
-		heFLAGs->clear();
-		heFLAGs->reserve(heSetSize >> 1);
-
-		for (auto he : heSet)
-		{
-			if (visitiedHE.find(he) == visitiedHE.end())
-			{
-				visitiedHE.insert(he);
-				visitiedHE.insert(he->flip);
-
-				heFLAGs->push_back(he->getFlag());
-			}
-		}
-	}
-}*/
-
 void HDS_Mesh::addHalfEdge(he_t* he)
 {
 	heSet.insert(he);
@@ -1243,7 +1041,7 @@ unordered_set<HDS_Mesh::face_t*> HDS_Mesh::getSelectedFaces()
 }
 
 
-unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &funcval, const QVector3D &normdir)
+unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
 {
 
 	auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
@@ -1309,7 +1107,7 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
 			//   cout<<" moorseFunc("<<v->index<<", a, b, c) = "<< moorseFunc(v, a, b, c);
 			// if this is a saddle point
 			bool isSaddle = false;
-			vector<double> diffs;
+			doubles_t diffs;
 
 			if(!allSmaller&&!allLarger)                 //later added;
 			{
@@ -1413,7 +1211,7 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
 
 }
 
-void HDS_Mesh::colorVertices(const vector<double> &val)
+void HDS_Mesh::colorVertices(const doubles_t &val)
 {
 #if 1
 	int nverts = vertSet.size();
