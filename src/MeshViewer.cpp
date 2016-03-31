@@ -220,6 +220,10 @@ void MeshViewer::initShader()
 	edge_solid_shader.link();
 
 	//////////////////////////////////////////////////////////////////////////
+	vtx_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/vtx_vs.glsl");
+	vtx_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/vtx_fs.glsl");
+	vtx_solid_shader.link();
+	//////////////////////////////////////////////////////////////////////////
 	uid_shader.addShaderFromSourceFile(oglShader::Vertex, rcDir + "shaders/uid_vs.glsl");
 	uid_shader.addShaderFromSourceFile(oglShader::Fragment, rcDir + "shaders/uid_fs.glsl");
 	uid_shader.link();
@@ -418,6 +422,17 @@ void MeshViewer::paintGL()
 		// Draw Mesh
 		//if (true)
 		{
+#if _DEBUG
+			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+			vtx_vbo.bind();
+			vtx_solid_shader.bind();
+			vtx_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
+			vtx_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+			glDrawArrays(GL_POINTS, 0, vtx_array.size());
+
+			vtx_vbo.release();
+			vtx_solid_shader.release();
+#endif
 			if (shadingSate & SHADE_FLAT)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

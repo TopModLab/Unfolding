@@ -270,5 +270,6 @@ private://Mesh Data
 
 	// Shader Programs
 	oglShaderP face_solid_shader, edge_solid_shader;
+	oglShaderP vtx_solid_shader;
 	oglShaderP uid_shader, he_uid_shader, face_uid_shader;
 };
