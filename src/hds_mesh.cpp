@@ -608,13 +608,16 @@ void HDS_Mesh::flipShowNormals()
 	showNormals = !showNormals;
 }
 
-void HDS_Mesh::exportVertVBO(floats_t* verts) const
+void HDS_Mesh::exportVertVBO(
+	floats_t* verts, ui16s_t* vFLAGs) const
 {
 	// vertex object buffer
 	if (verts != nullptr)
 	{
 		verts->clear();
 		verts->reserve(vertSet.size());
+		vFLAGs->clear();
+		vFLAGs->reserve(vertSet.size());
 		for (int i = 0; i < vertMap.size(); i++)
 		{
 			auto vert = vertMap.at(i);
@@ -622,6 +625,16 @@ void HDS_Mesh::exportVertVBO(floats_t* verts) const
 			verts->push_back(pos.x());
 			verts->push_back(pos.y());
 			verts->push_back(pos.z());
+			vFLAGs->push_back(vert->getFlag());
+		}
+	}
+	else
+	{
+		vFLAGs->clear();
+		vFLAGs->reserve(vertSet.size());
+		for (int i = 0; i < vertMap.size(); i++)
+		{
+			vFLAGs->push_back(vertMap.at(i)->getFlag());
 		}
 	}
 }
@@ -1043,7 +1056,6 @@ unordered_set<HDS_Mesh::face_t*> HDS_Mesh::getSelectedFaces()
 
 unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
 {
-
 	auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
 		if (!funcval.empty()) {
 			// assign the function value to the vertex
@@ -1192,8 +1204,6 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcva
 				v->rtype = HDS_Vertex::Regular;
 				return false;
 			}
-
-
 		}
 		if(s1==3)s11+=v->sdegree;
 		if(s2==3)s22+=1;
@@ -1205,8 +1215,6 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcva
 		return true;
 	};
 
-
-
 	return Utils::filter_set(vertSet, isReebPoint);
 
 }
@@ -1214,8 +1222,7 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcva
 void HDS_Mesh::colorVertices(const doubles_t &val)
 {
 #if 1
-	int nverts = vertSet.size();
-	for (int i = 0; i < nverts; ++i) {
+	for (int i = 0; i < vertSet.size(); ++i) {
 		vertMap[i]->colorVal = val[i];
 	}
 

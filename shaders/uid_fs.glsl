@@ -1,23 +1,31 @@
 #version 330
+uniform usamplerBuffer id_tex;
+uniform int mode = 0;
 
 out vec4 frag_color;
 
-uniform usamplerBuffer id_tex;
-
-uniform bool depthonly = false;
-
 void main()
 {
-	if (depthonly)
+	int uid;
+	switch (mode)
 	{
+	case 0://background
 		frag_color = vec4(0.f, 0.f, 0.f, 0.f);
-	}
-	else
-	{
-		uint uid = texelFetch(id_tex, gl_PrimitiveID).r;
+		break;
+	case 1://vertex
+		uid = gl_PrimitiveID;
+		frag_color = vec4(float(uid >> 16) / 255.0,
+			float((uid >> 8) & 0xFF) / 255.0,
+			float(uid & 0xFF) / 255.0, 1.0);
+		break;
+	case 2://edge or face
+		uid = int(texelFetch(id_tex, gl_PrimitiveID).r);
 		//int uid = gl_PrimitiveID;
-		frag_color = vec4(float(uid >> uint(16)) / 255.0,
-						float((uid >> uint(8)) & uint(0xFF)) / 255.0,
-						float(uid & uint(0xFF)) / 255.0, 1.0);
+		frag_color = vec4(float(uid >> 16) / 255.0,
+			float((uid >> 8) & 0xFF) / 255.0,
+			float(uid & 0xFF) / 255.0, 1.0);
+		break;
+	default:
+		break;
 	}
 }

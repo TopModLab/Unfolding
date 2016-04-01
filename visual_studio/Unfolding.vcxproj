@@ -1066,6 +1066,8 @@ endlocal
     <None Include="..\shaders\face_vs.glsl" />
     <None Include="..\shaders\uid_fs.glsl" />
     <None Include="..\shaders\uid_vs.glsl" />
+    <None Include="..\shaders\vtx_fs.glsl" />
+    <None Include="..\shaders\vtx_vs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

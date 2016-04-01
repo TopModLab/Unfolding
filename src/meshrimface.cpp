@@ -116,7 +116,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 
 	cout<<"width :"<<planeWidth<< " height: "<<planeHeight<<endl;
 
-	unordered_map <hdsid_t, he_t*> ori_map = ori_mesh->halfedgesMap();
+	unordered_map <hdsid_t, he_t*> ori_map = ori_mesh->hesMap();
 
 
 	for(vert_t* v: cur_mesh->verts()) {

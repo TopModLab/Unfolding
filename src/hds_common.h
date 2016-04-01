@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 #include <QString>
+#include <QVector3D>
 
 using hdsid_t = uint32_t;
 
@@ -18,4 +19,11 @@ public:
 	
 	static QString ref_ID2String(hdsid_t refid);
 
+	virtual uint16_t getFlag() const = 0;
+
+
 };
+
+class HDS_Vertex;
+class HDS_HalfEdge;
+class HDS_Face;

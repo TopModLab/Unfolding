@@ -600,5 +600,11 @@
     <None Include="..\shaders\edge_gs.glsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="..\shaders\vtx_fs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\vtx_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

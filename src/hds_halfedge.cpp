@@ -1,4 +1,7 @@
+#include "hds_vertex.h"
 #include "hds_halfedge.h"
+#include "hds_face.h"
+
 #include <QDebug>
 
 hdsid_t HDS_HalfEdge::uid = 0;

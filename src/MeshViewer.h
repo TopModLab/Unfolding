@@ -35,7 +35,6 @@ struct RenderBufferObject// : protected oglFuncs
 	RenderBufferObject(oglFuncs* f)
 		: funcs(f)
 		, ibo(oglBuffer::Type::IndexBuffer)
-		//, flag_tbo(0), flag_tex(0), id_tbo(0), id_tex(0)
 		, tbo{}, tex{}
 	{
 	}
@@ -45,11 +44,22 @@ struct RenderBufferObject// : protected oglFuncs
 	{
 		vao.destroy();
 		ibo.destroy();
+		destroyTextures();
+	}
+	void destroyTextures()
+	{
 		funcs->glDeleteTextures(2, tex);
 		funcs->glDeleteBuffers(2, tbo);
 	}
+	void releaseAll()
+	{
+		vao.release();
+		ibo.release();
+		vbo->release();
+	}
 
 	oglFuncs* funcs;
+	shared_ptr<oglBuffer> vbo;
 	oglVAO vao;
 	oglBuffer ibo;
 	union
@@ -123,11 +133,9 @@ private: // paint function
 	void resetCamera();
 	void bind();
 	void initialVBO();
-	void bindVertexVBO();
-	void bindEdgesVAO();
-	void bindEdgesTBO();
-	void bindFaceVAO();
-	void bindFaceTBO();
+	void bindVertices();
+	void bindPrimitive(RenderBufferObject &RBO);
+	void bindTBO(RenderBufferObject &RBO, int nTBO = 2);
 
 	void initShader();
 public:
@@ -150,7 +158,8 @@ public:
 		SHADE_NONE = 0,
 		SHADE_FLAT = 1 << 0,
 		SHADE_WF = 1 << 1,
-		SHADE_WF_FLAT = SHADE_FLAT | SHADE_WF
+		SHADE_WF_FLAT = SHADE_FLAT | SHADE_WF,
+		SHADE_VERT = 1 << 2
 	};
 	enum DataTypeMark : uint8_t
 	{
@@ -260,7 +269,9 @@ private://Mesh Data
 
 	// VBOs and VAOs
 	// Vertices data and vao
-	oglBuffer vtx_vbo;
+	/*oglBuffer vtx_vbo;
+	oglVAO vtx_vao;*/
+	RenderBufferObject vRBO;
 	floats_t vtx_array;
 
 	// Face indices and vao

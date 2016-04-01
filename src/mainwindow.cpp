@@ -177,6 +177,9 @@ void MainWindow::createActions()
 			[&] { viewer->showShading(viewer_t::SHADE_WF); });
 		connect(ui->actWfShaded, &QAction::triggered,
 			[&] { viewer->showShading(viewer_t::SHADE_WF_FLAT); });
+		connect(ui->actDispVert, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::SHADE_VERT); });
+		
 
 		// Higlight
 		connect(ui->actHL_CutEdge, &QAction::triggered,
@@ -511,10 +514,10 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 {
 	if (MeshManager::getInstance()->getMeshStack()->canHollow)
 	{
-	hmpanel->show();
-	hmpanel->activateWindow();
+		hmpanel->show();
+		hmpanel->activateWindow();
 
-	ui->actionHollow->setChecked(false);
+		ui->actionHollow->setChecked(false);
 	}
 }
 

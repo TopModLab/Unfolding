@@ -1,9 +1,6 @@
 #ifndef HDS_MESH_H
 #define HDS_MESH_H
 
-#include <QtGui/QVector3D>
-
-#include "common.h"
 #include "hds_halfedge.h"
 #include "hds_vertex.h"
 #include "hds_face.h"
@@ -87,7 +84,7 @@ public:
 	/************************************************************************/
 	/* Modern Rendering Functions                                           */
 	/************************************************************************/
-	void exportVertVBO(floats_t* verts = nullptr) const;
+	void exportVertVBO(floats_t* verts,	ui16s_t* vFLAGs = nullptr) const;
 	void exportEdgeVBO(ui32s_t* heIBOs = nullptr,
 		ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;
 	void exportFaceVBO(ui32s_t* fIBOs = nullptr,
@@ -97,7 +94,7 @@ public:
 	 unordered_set<face_t*>& faces()  { return faceSet; }
 	 unordered_set<vert_t*>& verts()  { return vertSet; }
 
-	 unordered_map<hdsid_t, he_t*>& halfedgesMap()  { return heMap; }
+	 unordered_map<hdsid_t, he_t*>& hesMap()  { return heMap; }
 	 unordered_map<hdsid_t, face_t*>& facesMap()  { return faceMap; }
 	 unordered_map<hdsid_t, vert_t*>& vertsMap()  { return vertMap; }
 

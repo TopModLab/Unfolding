@@ -1,13 +1,11 @@
 #ifndef HDS_EDGE_H
 #define HDS_EDGE_H
 #include "hds_common.h"
+/*
 #include "hds_face.h"
-#include "hds_vertex.h"
+#include "hds_vertex.h"*/
 
-class HDS_Face;
-class HDS_Vertex;
-
-class HDS_HalfEdge
+class HDS_HalfEdge : public HDS_Common
 {
 private:
 	static hdsid_t uid;

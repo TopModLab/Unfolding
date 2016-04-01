@@ -3,7 +3,7 @@
 
 MeshViewer::MeshViewer(QWidget *parent)
 	: QOpenGLWidget(parent)
-	, vtx_vbo(oglBuffer::Type::VertexBuffer)
+	//, vtx_vbo(oglBuffer::Type::VertexBuffer)
 	, interactionState(Camera)
 	, selectionState(SingleSelect)
 	, heMesh(nullptr)
@@ -13,7 +13,7 @@ MeshViewer::MeshViewer(QWidget *parent)
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
 	, 54.3, 1.67, 1, 100)
 	, grid(4, 6.0f, this)
-	, fRBO(this), heRBO(this)
+	, vRBO(this), fRBO(this), heRBO(this)
 {
 	// Set surface format for current widget
 	QSurfaceFormat format;
@@ -23,6 +23,9 @@ MeshViewer::MeshViewer(QWidget *parent)
 	format.setVersion(3, 3);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
+
+	//
+	fRBO.vbo = heRBO.vbo = vRBO.vbo = make_shared<oglBuffer>(oglBuffer::Type::VertexBuffer);
 }
 
 MeshViewer::~MeshViewer()
@@ -97,104 +100,80 @@ void MeshViewer::initializeGL()
 
 void MeshViewer::bind()
 {
-	heMesh->exportVertVBO(&vtx_array);
+	heMesh->exportVertVBO(&vtx_array, &vRBO.flags);
 	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
 	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
 
 	initialVBO();
-	bindVertexVBO();
-	bindFaceVAO();
-	bindFaceTBO();
-	bindEdgesVAO();
-	bindEdgesTBO();
+	bindVertices();
+	bindTBO(vRBO, 1);// Bind only flag tbo
+	bindPrimitive(fRBO);
+	bindTBO(fRBO);
+	bindPrimitive(heRBO);
+	bindTBO(heRBO);
 
 	mesh_changed = false;
 }
 
 void MeshViewer::initialVBO()
 {
-	vtx_vbo.destroy();
+	vRBO.destroy();
 	heRBO.destroy();
 	fRBO.destroy();
 }
 
-void MeshViewer::bindVertexVBO()
+void MeshViewer::bindVertices()
 {
-	vtx_vbo.create();
-	vtx_vbo.setUsagePattern(oglBuffer::StaticDraw);
-	vtx_vbo.bind();
-	vtx_vbo.allocate(&vtx_array[0], sizeof(GLfloat) * vtx_array.size());
-	vtx_vbo.release();
-}
+	vRBO.vao.create();
+	vRBO.vao.bind();
 
-void MeshViewer::bindEdgesVAO()
-{
-	// Bind VAO
-	heRBO.vao.create();
-	heRBO.vao.bind();
-
-	vtx_vbo.bind();
+	vRBO.vbo->create();
+	vRBO.vbo->setUsagePattern(oglBuffer::StaticDraw);
+	vRBO.vbo->bind();
+	vRBO.vbo->allocate(&vtx_array[0], sizeof(GLfloat) * vtx_array.size());
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 	glEnableVertexAttribArray(0);
 
-	heRBO.ibo.create();
-	heRBO.ibo.setUsagePattern(oglBuffer::StaticDraw);
-	heRBO.ibo.bind();
-	
-	heRBO.ibo.allocate(&heRBO.ibos[0], sizeof(GLuint) * heRBO.ibos.size());
-
-	heRBO.vao.release();
-	heRBO.ibo.release();
-	vtx_vbo.release();
+	vRBO.releaseAll();	
 }
 
-void MeshViewer::bindEdgesTBO()
-{
-	glGenTextures(2, heRBO.tex);
-	glGenBuffers(2, heRBO.tbo);
-
-	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.tbo[0]);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * heRBO.flags.size(), &heRBO.flags[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_TEXTURE_BUFFER, heRBO.tbo[1]);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * heRBO.ids.size(), &heRBO.ids[0], GL_STATIC_DRAW);
-	
-	glBindBuffer(GL_TEXTURE_BUFFER, 0);
-}
-
-void MeshViewer::bindFaceVAO()
+void MeshViewer::bindPrimitive(RenderBufferObject &RBO)
 {
 	// Bind VAO
-	fRBO.vao.create();
-	fRBO.vao.bind();
+	RBO.vao.create();
+	RBO.vao.bind();
 
-	vtx_vbo.bind();
+	RBO.vbo->bind();
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 	glEnableVertexAttribArray(0);
 
-	fRBO.ibo.create();
-	fRBO.ibo.setUsagePattern(oglBuffer::StaticDraw);
-	fRBO.ibo.bind();
-	fRBO.ibo.allocate(&fRBO.ibos[0], sizeof(GLuint) * fRBO.ibos.size());
+	RBO.ibo.create();
+	RBO.ibo.setUsagePattern(oglBuffer::StaticDraw);
+	RBO.ibo.bind();
 
-	fRBO.vao.release();
-	fRBO.ibo.release();
-	vtx_vbo.release();
+	RBO.ibo.allocate(&RBO.ibos[0], sizeof(GLuint) * RBO.ibos.size());
 
+	RBO.releaseAll();
 }
 
-void MeshViewer::bindFaceTBO()
+void MeshViewer::bindTBO(RenderBufferObject &RBO, int nTBO)
 {
-	glGenTextures(2, fRBO.tex);
-	glGenBuffers(2, fRBO.tbo);
+	// nTBO: number of tbos to be generated
+	if (nTBO > 0)
+	{
+		glGenTextures(nTBO, RBO.tex);
+		glGenBuffers(nTBO, RBO.tbo);
 
-	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.tbo[0]);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * fRBO.flags.size(), &fRBO.flags[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_TEXTURE_BUFFER, fRBO.tbo[1]);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * fRBO.ids.size(), &fRBO.ids[0], GL_STATIC_DRAW);
-	
-	glBindBuffer(GL_TEXTURE_BUFFER, 0);
+		// Bind flag TBO
+		glBindBuffer(GL_TEXTURE_BUFFER, RBO.tbo[0]);
+		glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * RBO.flags.size(), &RBO.flags[0], GL_STATIC_DRAW);
+		if (nTBO > 1)
+		{
+			glBindBuffer(GL_TEXTURE_BUFFER, RBO.tbo[1]);
+			glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * RBO.ids.size(), &RBO.ids[0], GL_STATIC_DRAW);
+		}
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+	}
 }
 
 void MeshViewer::initShader()
@@ -229,7 +208,6 @@ void MeshViewer::initShader()
 	uid_shader.link();
 
 }
-
 void MeshViewer::initializeFBO()
 {
 	fbo.reset(new oglFBO(width(), height(), oglFBO::CombinedDepthStencil, GL_TEXTURE_2D));
@@ -252,16 +230,20 @@ void MeshViewer::drawMeshToFBO()
 	{
 	case InteractionState::SelectVertex:
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		fRBO.vao.bind();
-		uid_shader.setUniformValue("depthonly", true);
-		glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+		if (shadingSate & ShadingState::SHADE_FLAT)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			fRBO.vao.bind();
+			uid_shader.setUniformValue("mode", 0);
+			glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+		}
 
-		vtx_vbo.bind();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+		vRBO.vao.bind();
 		glPointSize(15.0);
-		uid_shader.setUniformValue("depthonly", false);
-		glDrawArrays(GL_POINTS, 0, vtx_array.size());
-		vtx_vbo.release();
+		uid_shader.setUniformValue("mode", 1);
+		glDrawArrays(GL_POINTS, 0, vtx_array.size() / 3);
+		vRBO.vao.release();//vtx_vbo.release();
 		//draw vertices
 		break;
 	}
@@ -275,7 +257,7 @@ void MeshViewer::drawMeshToFBO()
 		glBindTexture(GL_TEXTURE_BUFFER, fRBO.id_tex);
 		glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, fRBO.id_tbo);
 		uid_shader.setUniformValue("id_tex", 0);
-		uid_shader.setUniformValue("depthonly", false);
+		uid_shader.setUniformValue("mode", 2);
 
 		glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 		
@@ -286,16 +268,19 @@ void MeshViewer::drawMeshToFBO()
 	}
 	case InteractionState::SelectEdge:
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		fRBO.vao.bind();
-		uid_shader.setUniformValue("depthonly", true);
-		glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+		if (shadingSate & ShadingState::SHADE_FLAT)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			fRBO.vao.bind();
+			uid_shader.setUniformValue("mode", 0);
+			glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
+		}
 
 		glLineWidth(16.0);
 		heRBO.vao.bind();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		uid_shader.setUniformValue("depthonly", false);
+		uid_shader.setUniformValue("mode", 2);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_BUFFER, heRBO.id_tex);
@@ -338,6 +323,9 @@ void MeshViewer::drawMeshToFBO()
 				selVTX.pop();
 			}
 		}
+		heMesh->exportVertVBO(nullptr, &vRBO.flags);
+		vRBO.destroyTextures();
+		bindTBO(vRBO, 1);
 		break;
 	case InteractionState::SelectFace:
 		if (selected)
@@ -354,9 +342,8 @@ void MeshViewer::drawMeshToFBO()
 			}
 		}
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
-		fRBO.destroy();
-		bindFaceVAO();
-		bindFaceTBO();
+		fRBO.destroyTextures();
+		bindTBO(fRBO);
 		break;
 	case InteractionState::SelectEdge:
 		if (selected)
@@ -373,9 +360,8 @@ void MeshViewer::drawMeshToFBO()
 			}
 		}
 		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
-		heRBO.destroy();
-		bindEdgesVAO();
-		bindEdgesTBO();
+		heRBO.destroyTextures();
+		bindTBO(heRBO);
 		break;
 	}
 	
@@ -386,7 +372,7 @@ void MeshViewer::paintGL()
 {
 	makeCurrent();
 	// Clear background and color buffer
-	glClearColor(0.6, 0.6, 0.6, 0.0);
+	glClearColor(0.6f, 0.6f, 0.6f, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	auto checkDispMode = [](uint32_t disp, DispComp mode)->bool{
@@ -422,31 +408,42 @@ void MeshViewer::paintGL()
 		// Draw Mesh
 		//if (true)
 		{
-#if _DEBUG
-			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-			vtx_vbo.bind();
-			vtx_solid_shader.bind();
-			vtx_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
-			vtx_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-			glDrawArrays(GL_POINTS, 0, vtx_array.size());
+			if (mesh_changed)
+			{
+				bind();
+			}
+			// Draw Vertices
+			if (shadingSate & SHADE_VERT || interactionState == SelectVertex)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+				glPointSize(10);
+				vRBO.vao.bind();
+				vtx_solid_shader.bind();
+				vtx_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
+				vtx_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_BUFFER, vRBO.flag_tex);
+				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, vRBO.flag_tbo);
+				vtx_solid_shader.setUniformValue("flag_tex", 0);
+				glDrawArrays(GL_POINTS, 0, vtx_array.size() / 3);
 
-			vtx_vbo.release();
-			vtx_solid_shader.release();
-#endif
-			if (shadingSate & SHADE_FLAT)
+				vRBO.vao.release();//vtx_vbo.release();
+				vtx_solid_shader.release();
+			}
+			
+
+			// Draw Faces
+			if (shadingSate & SHADE_FLAT || interactionState == SelectFace)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				if (mesh_changed)
-				{
-					bind();
-				}
+				
 				fRBO.vao.bind();
 				// use shader
 				face_solid_shader.bind();
 				face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-				//face_solid_shader.setUniformValue("hl_comp", hlComp);
-				glUniform1ui(glGetUniformLocation(face_solid_shader.programId(), "hl_comp"), hlComp);
+				face_solid_shader.setUniformValue("hl_comp", hlComp);
+				//glUniform1ui(glGetUniformLocation(face_solid_shader.programId(), "hl_comp"), hlComp);
 				// Bind Texture Buffer
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
@@ -458,7 +455,8 @@ void MeshViewer::paintGL()
 				face_solid_shader.release();
 			}
 			
-			if (shadingSate & SHADE_WF)
+			// Draw Edges
+			if (shadingSate & SHADE_WF || interactionState == SelectEdge)
 			{
 				// Draw edge
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -467,8 +465,8 @@ void MeshViewer::paintGL()
 				edge_solid_shader.bind();
 				edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-				//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
-				glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
+				edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
+				//glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
 				// Bind Texture Buffer
 				glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
