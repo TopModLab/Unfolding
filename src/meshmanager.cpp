@@ -25,7 +25,7 @@
 
 MeshManager* MeshManager::instance = nullptr;
 
-bool MeshManager::loadOBJFile(const string& filename) {
+bool MeshManager::loadOBJFile(const string &filename) {
 #if USE_REEB_GRAPH
 	try {
 		cout << "[VTK] Reading mesh file ..." << endl;
@@ -64,7 +64,8 @@ bool MeshManager::loadOBJFile(const string& filename) {
 
 		/// build a half edge mesh here
 		//hds_mesh->printMesh("original");
-		operationStack->push(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
+		//operationStack->push(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
+		operationStack->push(buildHalfEdgeMesh(loader.getVerts(), loader.getFaces()));
 		HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 #ifdef _DEBUG
 		qDebug("Clear Operation Takes %d ms In Total.", clock.elapsed());
@@ -91,7 +92,8 @@ bool MeshManager::loadOBJFile(const string& filename) {
 				// load the mesh directly
 				OBJLoader tmploader;
 				tmploader.load(smesh_filename);
-				tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
+				//tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
+				tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getVerts(), tmploader.getFaces()));
 				//  cout<<"load mesh directly"<<endl;
 			}
 			else {
@@ -150,9 +152,11 @@ bool MeshManager::loadOBJFile(const string& filename) {
 		return false;
 	}
 }
-
-HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFaces,
-										 const vector<MeshLoader::vert_t> &inVerts) {
+/*
+HDS_Mesh* MeshManager::buildHalfEdgeMesh(
+	const vector<MeshLoader::face_t> &inFaces,
+	const vector<MeshLoader::vert_t> &inVerts)
+{
 
 	mesh_t *thismesh = new mesh_t;
 
@@ -171,17 +175,17 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	verts.resize(vertsCount);
 	faces.resize(facesCount);
 
-	for(size_t i=0;i<inFaces.size();i++)
+	for (size_t i = 0; i < inFaces.size(); i++)
 		heCount += inFaces[i].v.size();
 
 	hes.resize(heCount);
 
-	for(size_t i=0;i<vertsCount;i++)
+	for (size_t i = 0; i < vertsCount; i++)
 	{
 		verts[i] = new vert_t(inVerts[i]);
 	}
 
-	for(size_t i=0;i<facesCount;i++)
+	for (size_t i = 0; i < facesCount; i++)
 	{
 		faces[i] = new face_t;
 	}
@@ -189,7 +193,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 	map<pair<hdsid_t, hdsid_t>, he_t*> heMap;
 	heMap.clear();
 
-	for(size_t i=0, heIdx = 0;i<facesCount;i++)
+	for (size_t i = 0, heIdx = 0; i < facesCount; i++)
 	{
 
 		auto& Fi = inFaces[i];
@@ -287,6 +291,148 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(const vector<MeshLoader::face_t> &inFac
 		if (he->isNegCurve) negCount++;
 	}
 	cout << "negative edge count :::"<< negCount/2.0<<endl;
+
+	thismesh->setMesh(faces, verts, hes);
+	cout << "finished building halfedge structure." << endl;
+	cout << "halfedge count = " << thismesh->halfedges().size() << endl;
+
+
+	return thismesh;
+}
+*/
+HDS_Mesh * MeshManager::buildHalfEdgeMesh(
+	const floats_t &inVerts, const vector<PolyIndex*> &inFaces)
+{
+	mesh_t *thismesh = new mesh_t;
+
+
+	cout << "building the half edge mesh ..." << endl;
+	int ss = 0;
+	size_t vertsCount = inVerts.size() / 3;
+	size_t facesCount = inFaces.size();
+	size_t curFaceCount = facesCount;
+	size_t heCount = 0;
+	for (size_t i = 0; i < inFaces.size(); i++)
+		heCount += inFaces[i]->size;
+
+	vector<vert_t*> verts(vertsCount, nullptr);
+	vector<face_t*> faces(facesCount, nullptr);
+	vector<he_t*> hes(heCount, nullptr);
+
+	for (size_t i = 0; i < vertsCount; i++)
+	{
+		size_t vid = i * 3;
+		verts[i] = new vert_t(
+			QVector3D(inVerts[i], inVerts[i + 1], inVerts[i + 2]));
+	}
+
+	for (size_t i = 0; i < facesCount; i++)
+	{
+		faces[i] = new face_t;
+	}
+
+	map<pair<hdsid_t, hdsid_t>, he_t*> heMap;
+	heMap.clear();
+
+	for (size_t i = 0, heIdx = 0; i < facesCount; i++)
+	{
+
+		auto& Fi = inFaces[i];
+		face_t* curFace = faces[i];
+
+		for (size_t j = 0; j < Fi->size; j++)
+		{
+			he_t* curHe = new he_t;
+			vert_t* curVert = verts[Fi->v[j]];
+			curHe->v = curVert;
+			curHe->f = curFace;
+
+			if (curVert->he == nullptr)
+				curVert->he = curHe;
+
+			hes[heIdx + j] = curHe;
+		}
+
+		// link the half edge of the face
+		for (int j = 0; j < Fi->size; j++)
+		{
+			int jp = j - 1;
+			if (jp < 0) jp += Fi->size;
+			int jn = j + 1;
+			if (jn >= Fi->size) jn -= Fi->size;
+
+			hes[heIdx + j]->prev = hes[heIdx + jp];
+			hes[heIdx + j]->next = hes[heIdx + jn];
+
+			int vj = Fi->v[j];
+			//     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
+			int vjn = Fi->v[jn];
+			//      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
+			pair<int, int> vPair = make_pair(vj, vjn);
+			//cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
+			//cout<<"vPair.sencond = "<<vPair.second<<endl;
+			if (heMap.find(vPair) == heMap.end())
+			//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
+			{
+				heMap[vPair] = hes[heIdx + j];
+				//address transport; hes[heIdx + j] = curHe; *****critical******
+				//      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
+				//      ss+=1;  //later added;
+			}
+			else
+			{
+				return thismesh;
+			}
+		}
+		//    cout<<"ss = "<<ss<<endl;    //later added;
+		curFace->he = hes[heIdx];
+		curFace->computeNormal();
+
+		heIdx += Fi->size;
+	}
+
+	set<pair<int, int> > pairedHESet;
+
+	// for each half edge, find its flip
+	for (auto heit = heMap.begin(); heit != heMap.end(); heit++)
+	{
+		int from, to;
+
+		pair<int, int> hePair = (*heit).first;
+
+		if (pairedHESet.find(hePair) == pairedHESet.end())
+		{
+
+			from = hePair.first;
+			to = hePair.second;
+			pair<int, int> invPair = make_pair(to, from);
+
+			auto invItem = heMap.find(invPair);
+
+			if (invItem != heMap.end())
+			{
+				he_t* he = (*heit).second;
+				he_t* hef = (*invItem).second;
+
+				he->flip = hef;
+				hef->flip = he;
+			}
+
+			pairedHESet.insert(hePair);
+			pairedHESet.insert(invPair);
+		}
+	}
+
+	for (auto &v : verts) {
+		v->computeCurvature();
+		v->computeNormal();
+	}
+	int negCount = 0;
+	for (auto &he : hes) {
+		he->computeCurvature();
+		if (he->isNegCurve) negCount++;
+	}
+	cout << "negative edge count :::" << negCount / 2.0 << endl;
 
 	thismesh->setMesh(faces, verts, hes);
 	cout << "finished building halfedge structure." << endl;
