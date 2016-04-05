@@ -23,11 +23,11 @@ void main()
 	normal = normalize(cross(v1.xyz, v2.xyz));
 	
 	uint flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
-	if (bool(flag & + uint(16)) && bool(hl_comp & + uint(4)))// Bridger
+	if (bool(flag & 16u) && bool(hl_comp & 4u))// Bridger
 	{
 		Kd = vec3(0.0f, 0.8f, 1.f);
 	}
-	else if (bool(flag & uint(2)))
+	else if (bool(flag & 2u))
 	{
 		Kd = vec3(1.f, 0.f, 0.f);
 	}

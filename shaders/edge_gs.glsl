@@ -14,13 +14,13 @@ void main()
 	vec4 p1 = gl_in[1].gl_Position;
 	
 	uint flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
-	if (bool(flag & + uint(4)) && bool(hl_comp & + uint(1)))// Cut Edge
+	if (bool(flag & 4u) && bool(hl_comp & 1u))// Cut Edge
 	{
 		p0.z -= 0.00125f;
 		p1.z -= 0.00125f;
 		color = vec3(0.f, 1.f, 0.2f);
 	}
-	else if (bool(flag & uint(2)))
+	else if (bool(flag & 2u))
 	{
 		color = vec3(1.f, 0.f, 0.f);
 	}

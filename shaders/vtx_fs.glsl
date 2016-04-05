@@ -4,7 +4,7 @@ out vec4 frag_color; // final colour of surface
 flat in uint flag;
 void main()
 {
-	if (flag == uint(2))
+	if (flag == 2u)
 	{
 		frag_color = vec4(color, 1.f);
 	}
