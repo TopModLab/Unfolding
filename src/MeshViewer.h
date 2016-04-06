@@ -139,20 +139,6 @@ private: // paint function
 
 	void initShader();
 public:
-	enum SelectionState
-	{
-		SingleSelect = 0,
-		MultiSelect
-	};
-	enum InteractionState : size_t
-	{
-		Camera = 0,
-		Camera_Translation = 1,
-		Camera_Zoom = 2,
-		SelectVertex = 4,
-		SelectFace = 5,
-		SelectEdge = 6
-	};
 	enum ShadingState : uint8_t
 	{
 		SHADE_NONE = 0,
@@ -160,6 +146,19 @@ public:
 		SHADE_WF = 1 << 1,
 		SHADE_WF_FLAT = SHADE_FLAT | SHADE_WF,
 		SHADE_VERT = 1 << 2
+	};
+	/*enum SelectionState
+	{
+	SingleSelect = 0,
+	MultiSelect
+	};*/
+	enum InteractionState : uint32_t
+	{
+		ROAM_CAMERA = 0,
+		SEL_MULTI = 2,
+		SEL_VERT = 4,
+		SEL_FACE = 8,
+		SEL_EDGE = 16
 	};
 	enum DataTypeMark : uint8_t
 	{
@@ -212,7 +211,7 @@ public:
 	void setCutLocusMethod(int midx);
 
 	void setInteractionMode(InteractionState state);
-	void setSelectionMode(SelectionState mode);
+	//void setSelectionMode(SelectionState mode);
 
 	void showCriticalPoints();
 	void showCutLocusCut();
@@ -228,7 +227,7 @@ private://interaction ie selection
 	
 	InteractionState interactionState;
 	stack<InteractionState> interactionStateStack;
-	SelectionState selectionState;
+	//SelectionState selectionState;
 	queue<int> selVTX, selHE, selFACE;
 
 	MouseState mouseState;

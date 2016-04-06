@@ -4,8 +4,8 @@
 MeshViewer::MeshViewer(QWidget *parent)
 	: QOpenGLWidget(parent)
 	//, vtx_vbo(oglBuffer::Type::VertexBuffer)
-	, interactionState(Camera)
-	, selectionState(SingleSelect)
+	, interactionState(ROAM_CAMERA)
+	//, selectionState(SingleSelect)
 	, heMesh(nullptr)
 	, dispComp(DispComp::DISP_GRID)
 	, hlComp(HighlightComp::HIGHLIGHT_NONE)
@@ -50,10 +50,11 @@ void MeshViewer::setInteractionMode(InteractionState state)
 	}*/
 }
 
+/*
 void MeshViewer::setSelectionMode(SelectionState mode)
 {
 	selectionState = mode;
-}
+}*/
 
 void MeshViewer::showShading(ShadingState shading)
 {
@@ -228,7 +229,7 @@ void MeshViewer::drawMeshToFBO()
 
 	switch (interactionState)
 	{
-	case InteractionState::SelectVertex:
+	case InteractionState::SEL_VERT:
 	{
 		if (shadingSate & ShadingState::SHADE_FLAT)
 		{
@@ -247,7 +248,7 @@ void MeshViewer::drawMeshToFBO()
 		//draw vertices
 		break;
 	}
-	case InteractionState::SelectFace:
+	case InteractionState::SEL_FACE:
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -266,7 +267,7 @@ void MeshViewer::drawMeshToFBO()
 		//draw faces
 		break;
 	}
-	case InteractionState::SelectEdge:
+	case InteractionState::SEL_EDGE:
 	{
 		if (shadingSate & ShadingState::SHADE_FLAT)
 		{
@@ -309,7 +310,7 @@ void MeshViewer::drawMeshToFBO()
 	
 	switch (interactionState)
 	{
-	case InteractionState::SelectVertex:
+	case InteractionState::SEL_VERT:
 		if (selected)
 		{
 			selVTX.push(renderID);
@@ -327,7 +328,7 @@ void MeshViewer::drawMeshToFBO()
 		vRBO.destroyTextures();
 		bindTBO(vRBO, 1);
 		break;
-	case InteractionState::SelectFace:
+	case InteractionState::SEL_FACE:
 		if (selected)
 		{
 			selFACE.push(renderID);
@@ -345,7 +346,7 @@ void MeshViewer::drawMeshToFBO()
 		fRBO.destroyTextures();
 		bindTBO(fRBO);
 		break;
-	case InteractionState::SelectEdge:
+	case InteractionState::SEL_EDGE:
 		if (selected)
 		{
 			selHE.push(renderID);
@@ -408,12 +409,16 @@ void MeshViewer::paintGL()
 		// Draw Mesh
 		//if (true)
 		{
+			auto oglUniLoc = [&](const oglShaderP& p, const char* str)->bool
+			{
+				return glGetUniformLocation(p.programId(), str);
+			};
 			if (mesh_changed)
 			{
 				bind();
 			}
 			// Draw Vertices
-			if (shadingSate & SHADE_VERT || interactionState == SelectVertex)
+			if (shadingSate & SHADE_VERT || interactionState == SEL_VERT)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 				glPointSize(10);
@@ -433,7 +438,7 @@ void MeshViewer::paintGL()
 			
 
 			// Draw Faces
-			if (shadingSate & SHADE_FLAT || interactionState == SelectFace)
+			if (shadingSate & SHADE_FLAT || interactionState & SEL_FACE)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				
@@ -442,8 +447,8 @@ void MeshViewer::paintGL()
 				face_solid_shader.bind();
 				face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-				face_solid_shader.setUniformValue("hl_comp", hlComp);
-				//glUniform1ui(glGetUniformLocation(face_solid_shader.programId(), "hl_comp"), hlComp);
+				//face_solid_shader.setUniformValue("hl_comp", hlComp);
+				glUniform1ui(oglUniLoc(face_solid_shader, "hl_comp"), hlComp);
 				// Bind Texture Buffer
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
@@ -456,7 +461,7 @@ void MeshViewer::paintGL()
 			}
 			
 			// Draw Edges
-			if (shadingSate & SHADE_WF || interactionState == SelectEdge)
+			if (shadingSate & SHADE_WF || interactionState == SEL_EDGE)
 			{
 				// Draw edge
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -465,8 +470,8 @@ void MeshViewer::paintGL()
 				edge_solid_shader.bind();
 				edge_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-				edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
-				//glUniform1ui(glGetUniformLocation(edge_solid_shader.programId(), "hl_comp"), hlComp);
+				//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
+				glUniform1ui(oglUniLoc(edge_solid_shader, "hl_comp"), hlComp);
 				// Bind Texture Buffer
 				glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
@@ -601,7 +606,7 @@ void MeshViewer::mousePressEvent(QMouseEvent* e)
 	mouseState.y = e->y();
 
 	if (e->buttons() == Qt::LeftButton && e->modifiers() == Qt::NoModifier
-		&& interactionState != Camera)
+		&& interactionState != ROAM_CAMERA)
 	{
 		drawMeshToFBO();
 		update();
@@ -748,15 +753,15 @@ void MeshViewer::selectAll()
 {
 	switch (interactionState) {
 
-	case SelectFace:
+	case SEL_FACE:
 		for (auto f : heMesh->faces())
 			f->setPicked(true);
 		break;
-	case SelectEdge:
+	case SEL_EDGE:
 		for (auto e : heMesh->halfedges())
 			e->setPicked(true);
 		break;
-	case SelectVertex:
+	case SEL_VERT:
 		for (auto v : heMesh->verts())
 			v->setPicked(true);
 		break;
@@ -770,13 +775,13 @@ void MeshViewer::selectInverse()
 {
 	switch (interactionState)
 	{
-	case SelectFace:
+	case SEL_FACE:
 	{
 		for (auto f : heMesh->faces())
 			heMesh->selectFace(f->index);
 		break;
 	}
-	case SelectEdge:
+	case SEL_EDGE:
 	{
 		unordered_set<HDS_HalfEdge*> selected = heMesh->getSelectedHalfEdges();
 
@@ -789,7 +794,7 @@ void MeshViewer::selectInverse()
 		}
 		break;
 	}
-	case SelectVertex:
+	case SEL_VERT:
 	{
 		for (auto v : heMesh->verts())
 			heMesh->selectVertex(v->index);

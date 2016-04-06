@@ -46,7 +46,6 @@ public:
 	double curvature;
 	double colorVal;
 	bool isPicked;
-	uint16_t flag;
 
 	enum ReebsPointType{
 		Minimum,

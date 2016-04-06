@@ -115,7 +115,7 @@ public:
 	Camera_Translation,
 	Camera_Zoom,
 	SelectVertex,
-	SelectFace,
+	SEL_FACE,
 	SelectEdge
 	};
 	void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdxQueue.empty()) selectedElementsIdxQueue.pop();}

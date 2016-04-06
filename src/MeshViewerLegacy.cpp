@@ -86,7 +86,7 @@ void MeshViewerLegacy::selectAll()
 {
 	switch (interactionState) {
 
-	case SelectFace:
+	case SEL_FACE:
 		for (auto f : heMesh->faces())
 			f->setPicked(true);
 		break;
@@ -107,7 +107,7 @@ void MeshViewerLegacy::selectAll()
 void MeshViewerLegacy::selectInverse()
 {
 	switch (interactionState) {
-	case SelectFace: {
+	case SEL_FACE: {
 		for (auto f : heMesh->faces())
 			heMesh->selectFace(f->index);
 		break;
@@ -141,7 +141,7 @@ void MeshViewerLegacy::selectCC()
 {
 	switch (interactionState) {
 
-	case SelectFace:
+	case SEL_FACE:
 
 		break;
 	case SelectEdge:
@@ -250,7 +250,7 @@ void MeshViewerLegacy::selectGrow()
 	//get all neighbours
 	switch (interactionState) {
 
-	case SelectFace:
+	case SEL_FACE:
 		for (auto f : heMesh->getSelectedFaces()) {
 			for (auto face : heMesh->incidentFaces(f)) {
 				face->setPicked(true);
@@ -283,7 +283,7 @@ void MeshViewerLegacy::selectShrink()
 {
 	//BFS to get all neighbours that are selected
 	switch (interactionState) {
-	case SelectFace:
+	case SEL_FACE:
 		for (auto f : heMesh->getSelectedFaces()) {
 
 		}
@@ -487,7 +487,7 @@ void MeshViewerLegacy::mousePressEvent(QMouseEvent *e)
 	case Camera_Zoom:
 		mouseState.prev_pos = QVector2D(e->pos());
 		break;
-	case SelectFace:
+	case SEL_FACE:
 	case SelectEdge:
 	case SelectVertex: {
 		sbox.corner_win[0] = e->x();
@@ -557,7 +557,7 @@ void MeshViewerLegacy::mouseMoveEvent(QMouseEvent *e)
 		updateGL();
 		break;
 		//selection box
-	case SelectFace:
+	case SEL_FACE:
 	case SelectEdge:
 	case SelectVertex: {
 		if (mouseState.isPressed) {
@@ -590,7 +590,7 @@ void MeshViewerLegacy::mouseReleaseEvent(QMouseEvent *e)
 		break;
 
 		//selection box
-	case SelectFace:
+	case SEL_FACE:
 	case SelectEdge:
 	case SelectVertex: {
 		sbox.corner_win[2] = e->x();
@@ -609,7 +609,7 @@ void MeshViewerLegacy::mouseReleaseEvent(QMouseEvent *e)
 			cout<< "select edge's face index: "<<heMesh->heMap[selectedElementIdx]->f->index<<endl;
 			cout<< "select edge flip's face index: "<<heMesh->heMap[selectedElementIdx]->flip->f->index<<endl;
 			}
-			if (interactionState == SelectFace) {
+			if (interactionState == SEL_FACE) {
 				cout<<"select face is cut face? "<<heMesh->faceMap[selectedElementIdx]->isCutFace<<endl;
 				cout<<"select face is bridge? "<<heMesh->faceMap[selectedElementIdx]->isBridger<<endl;
 
@@ -622,7 +622,7 @@ void MeshViewerLegacy::mouseReleaseEvent(QMouseEvent *e)
 					if (selectedElementsIdxQueue.front() != selectedElementsIdxQueue.back()) {
 						if (interactionState == SelectEdge) {
 							heMesh->heMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
-						} else if (interactionState == SelectFace) {
+						} else if (interactionState == SEL_FACE) {
 							heMesh->faceMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
 						} else if (interactionState == SelectVertex){
 							heMesh->vertMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
@@ -636,7 +636,7 @@ void MeshViewerLegacy::mouseReleaseEvent(QMouseEvent *e)
 				if (interactionState == SelectEdge) {
 					heMesh->selectEdge(selectedElementIdx);
 				}
-				else if (interactionState == SelectFace) {
+				else if (interactionState == SEL_FACE) {
 					heMesh->selectFace(selectedElementIdx);
 				}
 				else if (interactionState == SelectVertex){
@@ -1002,7 +1002,7 @@ void MeshViewerLegacy::drawMeshToFBO() {
 	glDisable(GL_BLEND);
 
 	switch (interactionState) {
-	case SelectFace:
+	case SEL_FACE:
 		heMesh->drawFaceIndices();
 		break;
 	case SelectEdge:

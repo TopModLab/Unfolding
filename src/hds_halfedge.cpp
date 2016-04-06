@@ -7,7 +7,7 @@
 hdsid_t HDS_HalfEdge::uid = 0;
 
 HDS_HalfEdge::HDS_HalfEdge()
-	: flag(DEFAULT)
+	//: flag(DEFAULT)
 {
 	isPicked = false;
 	isCutEdge = false;
@@ -35,12 +35,12 @@ HDS_HalfEdge::~HDS_HalfEdge()
 }
 
 HDS_HalfEdge::HDS_HalfEdge(const HDS_HalfEdge &other)
-	: flag(other.flag)
-	, index(other.index), refid(other.refid)
+	: index(other.index), refid(other.refid)
 {
 	isPicked = other.isPicked;
 	isCutEdge = other.isCutEdge;
 	//index = other.index;
+	flag = other.flag;
 	f = nullptr;
 	v = nullptr;
 	flip = nullptr;

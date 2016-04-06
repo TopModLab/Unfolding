@@ -651,7 +651,8 @@ void MainWindow::slot_reset()
 
 void MainWindow::slot_selectMultiple()
 {
-	viewer->setSelectionMode(viewer_t::MultiSelect);
+	//kkkkkkkkkkkkkkkkkkkkkk
+	//viewer->setSelectionMode(viewer_t::MultiSelect);
 }
 
 void MainWindow::slot_toggleEdges()
@@ -700,22 +701,22 @@ void MainWindow::slot_toggleNormals()
 
 void MainWindow::slot_toggleCameraOperation()
 {
-	viewer->setInteractionMode(viewer_t::Camera);
+	viewer->setInteractionMode(viewer_t::ROAM_CAMERA);
 }
 
 void MainWindow::slot_toggleFaceSelection()
 {
-	viewer->setInteractionMode(viewer_t::SelectFace);
+	viewer->setInteractionMode(viewer_t::SEL_FACE);
 }
 
 void MainWindow::slot_toggleEdgeSelection()
 {
-	viewer->setInteractionMode(viewer_t::SelectEdge);
+	viewer->setInteractionMode(viewer_t::SEL_EDGE);
 }
 
 void MainWindow::slot_toggleVertexSelection()
 {
-	viewer->setInteractionMode(viewer_t::SelectVertex);
+	viewer->setInteractionMode(viewer_t::SEL_VERT);
 }
 
 

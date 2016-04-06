@@ -53,7 +53,6 @@ public:
 	bool isCutEdge;
 	bool isExtended;//From hollower
 	bool isNegCurve;
-	int flag;
 };
 
 #endif // HDS_EDGE_H

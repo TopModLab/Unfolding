@@ -261,14 +261,12 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	}
 	case 2://bind
 	{
-		cout<<"binding..."<<endl;
 		cur_mesh->setProcessType(HDS_Mesh::BINDED_PROC);
 		auto curHE = originalHE->next;
 		do
 		{
 			HDS_Vertex* newV = new HDS_Vertex;
 			newV->pos = he_f->scaleCorner(curHE->flip->v);
-			cout<<"new v :"<<newV->pos<<endl;
 			newV->refid = curHE->flip->v->refid;
 			vertices.push_back(newV);
 

@@ -10,7 +10,7 @@ HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
 	, index(idx), refid(rid)
 	, colorVal(0)
 	, isPicked(false), he(nullptr)
-	, flag(FLAG_DEFAULT)
+	//, flag(FLAG_DEFAULT)
 {
 }
 
