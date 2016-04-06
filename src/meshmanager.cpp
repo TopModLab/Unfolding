@@ -54,8 +54,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		qDebug("Load OBJLoader Took %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		QProgressDialog* loadingProgress;
-		loadingProgress = new QProgressDialog("Loading the object...", "", 0, 100);
+		QScopedPointer<QProgressDialog> loadingProgress(new QProgressDialog("Loading the object...", "", 0, 100));
 		loadingProgress->setWindowModality(Qt::WindowModal);
 		loadingProgress->setValue(0);
 		loadingProgress->setAutoClose(true);
@@ -65,7 +64,13 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		/// build a half edge mesh here
 		//hds_mesh->printMesh("original");
 		//operationStack->push(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
-		operationStack->push(buildHalfEdgeMesh(loader.getVerts(), loader.getFaces()));
+		mesh_t* msh = buildHalfEdgeMesh(loader.getVerts(), loader.getFaces()); 
+		if (msh == nullptr)
+		{
+			loadingProgress->close();
+			return false;
+		}
+		operationStack->push(msh);
 		HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 #ifdef _DEBUG
 		qDebug("Clear Operation Takes %d ms In Total.", clock.elapsed());
@@ -107,10 +112,10 @@ bool MeshManager::loadOBJFile(const string &filename) {
 
 
 		}
-		cout << "smoothed meshes computed finished." << endl;
 		
 		loadingProgress->setValue(80);
 #ifdef _DEBUG
+		cout << "smoothed meshes computed finished." << endl;
 		qDebug("Smoothing Mesh Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
@@ -305,8 +310,10 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 {
 	mesh_t *thismesh = new mesh_t;
 
-
+#ifdef _DEBUG
 	cout << "building the half edge mesh ..." << endl;
+#endif // _DEBUG
+
 	int ss = 0;
 	size_t vertsCount = inVerts.size() / 3;
 	size_t facesCount = inFaces.size();
@@ -427,7 +434,28 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 	// Check Holes and Fill with Null Faces
 	if (unvisitedHESet.size() > 0)
 	{
-		//heMap = unvisitedHESet;
+		QMessageBox msgBox(QMessageBox::Warning, QString("Warning"),
+			QString("Current mesh has holes and can cause critical problems!\n"
+				"Do you still want to load it?"),
+			QMessageBox::Yes | QMessageBox::Cancel);
+		msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
+		if (msgBox.exec() == QMessageBox::Cancel)
+		{
+			for (auto v : verts)
+			{
+				delete v;
+			}
+			for (auto f : faces)
+			{
+				delete f;
+			}
+			for (auto he : hes)
+			{
+				delete he;
+			}
+			delete thismesh;
+			return nullptr;
+		}
 		while (unvisitedHESet.size() > 0)
 		{
 			auto heit = unvisitedHESet.begin();

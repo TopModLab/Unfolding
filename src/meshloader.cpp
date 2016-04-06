@@ -161,10 +161,12 @@ bool OBJLoader::load(const string &filename)
 		if (filename[0] == ':')// resource file
 		{
 			cout << "Using file from qrc\n";
+			clear();
 			load_from_string(filename);
 		}
 		else
 		{
+			clear();
 			load_from_file(filename);
 		}
 		/*QFile file(filename.c_str());

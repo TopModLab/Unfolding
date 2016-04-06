@@ -9,6 +9,8 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 #include <QProgressDialog>
+#include <QString>
+#include <QMessageBox>
 #include <QTime>
 
 #include "meshloader.h"

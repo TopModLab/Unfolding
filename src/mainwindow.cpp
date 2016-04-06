@@ -433,7 +433,8 @@ void MainWindow::slot_newFile()
 		qDebug("Clear ObjectStack Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
+		if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
+			return;
 		
 		//kkkkkkkk
 #ifdef _DEBUG
