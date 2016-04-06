@@ -3,6 +3,8 @@
 
 #include <QFile>
 #include <QString>
+#include <QTextStream>
+
 
 void MeshLoader::clear() {
 	/*verts.clear();
@@ -159,8 +161,13 @@ bool OBJLoader::load(const string &filename)
 		if (filename[0] == ':')// resource file
 		{
 			cout << "Using file from qrc\n";
+			load_from_string(filename);
 		}
-		QFile file(filename.c_str());
+		else
+		{
+			load_from_file(filename);
+		}
+		/*QFile file(filename.c_str());
 		if (!file.open(QFile::ReadOnly | QFile::Text)) {
 			cerr << "Failed to open file " << filename << endl;
 			return false;
@@ -169,116 +176,8 @@ bool OBJLoader::load(const string &filename)
 		if (fileHandle == -1)
 		{
 			return false;
-		}
-		FILE* fp = fdopen(fileHandle, "r");
-		//FILE* fp = fopen(filename.c_str(), "rb");
-		if (fp == nullptr)
-		{
-			return false;
-		}
-		int err;
-		char buff[255] = {};
-		char lineHeader[2] = {};
-		float val[3] = {};
-		uint32_t indices[3];
-		char endflg;
-
-		while (true)
-		{
-			lineHeader[0] = lineHeader[1] = 0;
-			err = fscanf(fp, "%2s", &lineHeader);
-			if (err == EOF)
-			{
-				break;
-			}
-			// Vertex
-			if (strcmp(lineHeader, "v") == 0)
-			{
-				fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
-				vertices.insert(vertices.end(), val, val + 3);
-			}
-			// Texture Coordinate
-			else if (strcmp(lineHeader, "vt") == 0)
-			{
-				fscanf(fp, "%f %f\n", val, val + 1);
-				uvs.insert(uvs.end(), val, val + 2);
-			}
-			// Vertex Normal
-			else if (strcmp(lineHeader, "vn") == 0)
-			{
-				//float val[3];
-				fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
-				normals.insert(normals.end(), val, val + 3);
-			}
-			// Face Index
-			else if (strcmp(lineHeader, "f") == 0)
-			{
-				//cout << "loading face\n";
-				PolyIndex* fid = new PolyIndex;
-				err = fscanf(fp, "%s", &buff);
-				indices[1] = indices[2] = 0;
-				index_t ft = facetype(buff, indices);
-				fid->push_back(indices);
-				endflg = fgetc(fp);
-				switch (ft)
-				{
-				case VTN://111
-					while (endflg != '\n' && endflg != '\r' && endflg != '\0')
-					{
-						ungetc(endflg, fp);
-						fscanf(fp, "%d/%d/%d", indices, indices + 1, indices + 2);
-						fid->push_back(indices);
-						endflg = fgetc(fp);
-					}
-					break;
-				case VT://011
-					while (endflg != '\n' && endflg != '\r' && endflg != '\0')
-					{
-						ungetc(endflg, fp);
-						fscanf(fp, "%d/%d", indices, indices + 1);
-						fid->push_back(indices);
-						endflg = fgetc(fp);
-					}
-					break;
-				case VN://101
-					while (endflg != '\n' && endflg != '\r' && endflg != '\0')
-					{
-						ungetc(endflg, fp);
-						fscanf(fp, "%d//%d", indices, indices + 2);
-						fid->push_back(indices);
-						endflg = fgetc(fp);
-					}
-					break;
-				case V://001
-					while (endflg != '\n' && endflg != '\r' && endflg != '\0')
-					{
-						ungetc(endflg, fp);
-						fscanf(fp, "%d", indices);
-						fid->push_back(indices);
-						endflg = fgetc(fp);
-					}
-					break;
-				default:
-					break;
-				}
-				fid->size = fid->v.size();
-				polys.push_back(fid);
-			}
-			// Comment
-			else if (strcmp(lineHeader, "#") == 0)
-			{
-				fscanf(fp, "%[^\r\n]", &buff);
-			}
-			// Others
-			else
-			{
-				// skip everything except \n or \r
-				fscanf(fp, "%[^\r\n]", &buff);
-			}
-
-		}
-
-		fclose(fp);
+		}*/
+		
 
 		cout << "finish loading file " << filename << endl;
 		cout << "# faces = " << polys.size() << endl;
@@ -313,6 +212,245 @@ OBJLoader::index_t OBJLoader::facetype(const char * str, uint32_t * val)
 			return V;//001
 		}
 	}
+}
+
+bool OBJLoader::load_from_string(const string &filename)
+{
+	QFile f(filename.c_str());
+	if (!f.open(QFile::ReadOnly))
+		return false;
+	auto str = QTextStream(&f).readAll().toUtf8().toStdString();
+	const char* srcStr = str.c_str();
+	f.close();
+	cout << "finish reading file\n";
+	if (srcStr != nullptr)
+	{
+		auto subStr = srcStr;
+		int err;
+		int offset = 0;
+		char trash[255] = {};
+		char lineHeader[2] = {};
+		float val[3] = {};
+		uint32_t indices[3];
+
+		do
+		{
+			// Skip end of line
+			if (*subStr == '\n' || *subStr == '\r')
+			{
+				subStr++;
+				continue;
+			}
+			lineHeader[0] = lineHeader[1] = 0;
+			sscanf(subStr, "%s%n", &lineHeader, &offset);
+			subStr += offset;
+			// Vertex
+			if (strcmp(lineHeader, "v") == 0)
+			{
+				sscanf(subStr, "%f %f %f%n", val, val + 1, val + 2, &offset);
+				vertices.insert(vertices.end(), val, val + 3);
+
+				subStr += offset + 1;
+			}
+			// Texture Coordinate
+			else if (strcmp(lineHeader, "vt") == 0)
+			{
+				err = sscanf(subStr, "%f %f%n", val, val + 1, &offset); uvs.insert(uvs.end(), val, val + 2);
+				subStr += offset + 1;
+			}
+			// Vertex Normal
+			else if (strcmp(lineHeader, "vn") == 0)
+			{
+				//float val[3];
+				err = sscanf(subStr, "%f %f %f%n", val, val + 1, val + 2, &offset);
+				normals.insert(normals.end(), val, val + 3);
+
+				subStr += offset + 1;
+			}
+			// Face Index
+			else if (strcmp(lineHeader, "f") == 0)
+			{
+				cout << "loading face\n";
+				PolyIndex* fid = new PolyIndex;
+				err = sscanf(subStr, "%s%n", &trash, &offset);
+				indices[1] = indices[2] = 0;
+				index_t ft = facetype(trash, indices);
+				fid->push_back(indices);
+				subStr += offset;
+
+				switch (ft)
+				{
+				case VTN://111
+					while (*subStr != '\n' && *subStr != '\r' && *subStr != '\0')
+					{
+						err = sscanf(subStr, "%s%n", &trash, &offset);
+						sscanf(trash, "%d/%d/%d", indices, indices + 1, indices + 2);
+						fid->push_back(indices);
+						subStr += offset;
+					}
+					break;
+				case VT://011
+					while (*subStr != '\n' && *subStr != '\r' && *subStr != '\0')
+					{
+						err = sscanf(subStr, "%s%n", &trash, &offset);
+						sscanf(trash, "%d/%d", indices, indices + 1);
+						fid->push_back(indices);
+						subStr += offset;
+					}
+					break;
+				case VN://101
+					while (*subStr != '\n' && *subStr != '\r' && *subStr != '\0')
+					{
+						err = sscanf(subStr, "%s%n", &trash, &offset);
+						sscanf(trash, "%d//%d", indices, indices + 2);
+						fid->push_back(indices);
+						subStr += offset;
+					}
+					break;
+				case V://001
+					while (*subStr != '\n' && *subStr != '\r' && *subStr != '\0')
+					{
+						err = sscanf(subStr, "%s%n", &trash, &offset);
+						sscanf(trash, "%d", indices);
+						fid->push_back(indices);
+						subStr += offset;
+					}
+					break;
+				default:
+					break;
+				}
+				fid->size = fid->v.size();
+				polys.push_back(fid);
+				subStr++;
+			}
+			// Comment
+			else if (strcmp(lineHeader, "#") == 0)
+			{
+				err = sscanf(subStr, "%[^\r\n]%n", &trash, &offset);
+				subStr += offset + 1;
+			}
+			// Others
+			else
+			{
+				// skip everything except \n and \r
+				err = sscanf(subStr, "%[^\r\n]%n", &trash, &offset);
+				subStr += offset + 1;
+			}
+
+		} while (*subStr != '\0');
+		cout << "hehe\n";
+		//delete[] srcStr;
+	}
+}
+
+bool OBJLoader::load_from_file(const string &filename)
+{
+	FILE* fp = fopen(filename.c_str(), "r");
+	if (fp == nullptr)
+	{
+		return false;
+	}
+	int err;
+	char buff[255] = {};
+	char lineHeader[2] = {};
+	float val[3] = {};
+	uint32_t indices[3];
+	char endflg;
+
+	while (true)
+	{
+		lineHeader[0] = lineHeader[1] = 0;
+		err = fscanf(fp, "%2s", &lineHeader);
+		if (err == EOF)
+		{
+			break;
+		}
+		// Vertex
+		if (strcmp(lineHeader, "v") == 0)
+		{
+			fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
+			vertices.insert(vertices.end(), val, val + 3);
+		}
+		// Texture Coordinate
+		else if (strcmp(lineHeader, "vt") == 0)
+		{
+			fscanf(fp, "%f %f\n", val, val + 1);
+			uvs.insert(uvs.end(), val, val + 2);
+		}
+		// Vertex Normal
+		else if (strcmp(lineHeader, "vn") == 0)
+		{
+			//float val[3];
+			fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
+			normals.insert(normals.end(), val, val + 3);
+		}
+		// Face Index
+		else if (strcmp(lineHeader, "f") == 0)
+		{
+			//cout << "loading face\n";
+			PolyIndex* fid = new PolyIndex;
+			err = fscanf(fp, "%s", &buff);
+			indices[1] = indices[2] = 0;
+			index_t ft = facetype(buff, indices);
+			fid->push_back(indices);
+			endflg = fgetc(fp);
+			switch (ft)
+			{
+			case VTN://111
+				while (endflg != '\n' && endflg != '\r' && endflg != '\0')
+				{
+					ungetc(endflg, fp);
+					fscanf(fp, "%d/%d/%d", indices, indices + 1, indices + 2);
+					fid->push_back(indices);
+					endflg = fgetc(fp);
+				}
+				break;
+			case VT://011
+				while (endflg != '\n' && endflg != '\r' && endflg != '\0')
+				{
+					ungetc(endflg, fp);
+					fscanf(fp, "%d/%d", indices, indices + 1);
+					fid->push_back(indices);
+					endflg = fgetc(fp);
+				}
+				break;
+			case VN://101
+				while (endflg != '\n' && endflg != '\r' && endflg != '\0')
+				{
+					ungetc(endflg, fp);
+					fscanf(fp, "%d//%d", indices, indices + 2);
+					fid->push_back(indices);
+					endflg = fgetc(fp);
+				}
+				break;
+			case V://001
+				while (endflg != '\n' && endflg != '\r' && endflg != EOF)
+				{
+					ungetc(endflg, fp);
+					fscanf(fp, "%d", indices);
+					fid->push_back(indices);
+					endflg = fgetc(fp);
+				}
+				break;
+			default:
+				break;
+			}
+			fid->size = fid->v.size();
+			polys.push_back(fid);
+		}
+		// Comment
+		else if (strcmp(lineHeader, "#") == 0)
+		{
+			fscanf(fp, "%[^\r\n]", &buff);
+		}
+		// Others
+		else
+		{
+			// skip everything except \n or \r
+			fscanf(fp, "%[^\r\n]", &buff);
+		}
+	}
+	fclose(fp);
 }
 
 bool PLYLoader::load(const string& filename) {

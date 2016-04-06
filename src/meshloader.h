@@ -105,6 +105,8 @@ private:
 	};
 	index_t facetype(const char* str, uint32_t* val);
 private:
+	bool load_from_string(const string &filename);
+	bool load_from_file(const string &filename);
 };
 
 

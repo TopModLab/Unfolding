@@ -323,7 +323,7 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 	{
 		size_t vid = i * 3;
 		verts[i] = new vert_t(
-			QVector3D(inVerts[i], inVerts[i + 1], inVerts[i + 2]));
+			QVector3D(inVerts[vid], inVerts[vid + 1], inVerts[vid + 2]));
 	}
 
 	for (size_t i = 0; i < facesCount; i++)
@@ -390,36 +390,90 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 
 		heIdx += Fi->size;
 	}
-
-	set<pair<int, int> > pairedHESet;
-
+	using hepair_t = pair<hdsid_t, hdsid_t>;
+	set<hepair_t> visitedHESet;
+	auto unvisitedHESet = heMap;
 	// for each half edge, find its flip
-	for (auto heit = heMap.begin(); heit != heMap.end(); heit++)
+	for (auto heit : heMap)
 	{
 		int from, to;
 
-		pair<int, int> hePair = (*heit).first;
+		hepair_t hePair = heit.first;
 
-		if (pairedHESet.find(hePair) == pairedHESet.end())
+		if (visitedHESet.find(hePair) == visitedHESet.end())
 		{
 
 			from = hePair.first;
 			to = hePair.second;
-			pair<int, int> invPair = make_pair(to, from);
+			hepair_t invPair = make_pair(to, from);
 
 			auto invItem = heMap.find(invPair);
 
 			if (invItem != heMap.end())
 			{
-				he_t* he = (*heit).second;
-				he_t* hef = (*invItem).second;
+				he_t* he = heit.second;
+				he_t* hef = invItem->second;
 
 				he->flip = hef;
 				hef->flip = he;
+				unvisitedHESet.erase(hePair);
+				unvisitedHESet.erase(invPair);
 			}
 
-			pairedHESet.insert(hePair);
-			pairedHESet.insert(invPair);
+			visitedHESet.insert(hePair);
+			visitedHESet.insert(invPair);
+		}
+	}
+	// Check Holes and Fill with Null Faces
+	if (unvisitedHESet.size() > 0)
+	{
+		//heMap = unvisitedHESet;
+		while (unvisitedHESet.size() > 0)
+		{
+			auto heit = unvisitedHESet.begin();
+			he_t* he = heit->second;
+			unvisitedHESet.erase(heit);
+			// Skip checked edges, won't skip in first check
+			if (he->flip != nullptr) continue;
+			//he_t* hef = new he_t;
+			face_t* nullface = new face_t;
+
+			auto curHE = he;
+			vector<he_t*> null_hes, null_hefs;
+			do 
+			{
+				null_hes.push_back(curHE);
+				null_hefs.push_back(new he_t);
+				
+				// Loop adjacent edges to find the exposed edge
+				while (curHE->flip != nullptr)
+				{
+					curHE = curHE->flip->next;
+				}
+			} while (curHE != he);
+			// Assign Null Edges
+			auto size = null_hes.size();
+			for (int i = 0; i < size; i++)
+			{
+				he = null_hes[i];
+				he_t* hef = null_hefs[i];
+				he->isCutEdge = hef->isCutEdge = true;
+				he->flip = hef;
+				hef->flip = he;
+				hef->v = he->next->v;
+				hef->f = nullface;
+
+				he_t* hef_prev = null_hefs[(i + 1) % size];
+				hef->prev = hef_prev;
+				hef_prev->next = hef;
+			}
+			// Insert Null Edges
+			hes.insert(hes.end(), null_hefs.begin(), null_hefs.end());
+			// Assign Null Face
+			nullface->isCutFace = true;
+			nullface->he = he;
+			nullface->he = null_hefs[0];
+			faces.push_back(nullface);
 		}
 	}
 
