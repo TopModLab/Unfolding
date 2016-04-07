@@ -54,12 +54,12 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		qDebug("Load OBJLoader Took %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		QScopedPointer<QProgressDialog> loadingProgress(new QProgressDialog("Loading the object...", "", 0, 100));
-		loadingProgress->setWindowModality(Qt::WindowModal);
-		loadingProgress->setValue(0);
-		loadingProgress->setAutoClose(true);
-		loadingProgress->setCancelButton(0);
-		loadingProgress->setMinimumDuration(1000);
+		QProgressDialog loadingProgress("Loading the object...", "", 0, 100);
+		loadingProgress.setWindowModality(Qt::WindowModal);
+		loadingProgress.setValue(0);
+		loadingProgress.setAutoClose(true);
+		loadingProgress.setCancelButton(0);
+		loadingProgress.setMinimumDuration(1000);
 
 		/// build a half edge mesh here
 		//hds_mesh->printMesh("original");
@@ -67,7 +67,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		mesh_t* msh = buildHalfEdgeMesh(loader.getVerts(), loader.getFaces()); 
 		if (msh == nullptr)
 		{
-			loadingProgress->close();
+			loadingProgress.close();
 			return false;
 		}
 		operationStack->push(msh);
@@ -77,7 +77,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		clock.restart();
 #endif
 		/// save the half edge mesh out to a temporary file
-		loadingProgress->setValue(30);
+		loadingProgress.setValue(30);
 		///*
 		/// preprocess the mesh with smoothing
 		const int nsmooth = 10;
@@ -86,7 +86,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
 		hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
 		for (int i = 0; i < nsmooth; ++i) {
-			loadingProgress->setValue(30+(double)i/(double)nsmooth*50);
+			loadingProgress.setValue(30+(double)i/(double)nsmooth*50);
 
 			const int stepsize = 10;
 			string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
@@ -113,7 +113,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 
 		}
 		
-		loadingProgress->setValue(80);
+		loadingProgress.setValue(80);
 #ifdef _DEBUG
 		cout << "smoothed meshes computed finished." << endl;
 		qDebug("Smoothing Mesh Takes %d ms In Total.", clock.elapsed());
@@ -128,7 +128,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 				//    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
 
 				//cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
-				loadingProgress->setValue(80+(double)i/(double)smoothed_mesh_filenames.size()*20);
+				loadingProgress.setValue(80+(double)i/(double)smoothed_mesh_filenames.size()*20);
 
 			}
 			cout << "SVGs computed." << endl;
@@ -138,7 +138,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 			cout<<"dis gcomp set."<<endl;
 		}
 		else {
-			loadingProgress->setValue(100);
+			loadingProgress.setValue(100);
 
 			return true;
 		}
@@ -147,7 +147,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		qDebug("Sparsing Graph Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		loadingProgress->setValue(100);
+		loadingProgress.setValue(100);
 
 
 		return true;
