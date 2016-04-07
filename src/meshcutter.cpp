@@ -236,13 +236,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 				}
 
 			} while( curHE != he );
-
+#ifdef _DEBUG
 			for (int i = 0; i < cutSize; ++i)
 			{
 				cout << "Group #" << i << " has " << heGroup[i].size() << " half edges." << endl;
 				for(auto x : heGroup[i])
 					cout << x->index << endl;
 			}
+#endif // _DEBUG
 
 			/// k-way split the vertex, assign new vertex to the k groups, k = cutSize
 			for (int i = 0; i<cutSize; ++i)
@@ -482,6 +483,8 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 			} while( curHE != he );
 		}
 	}
+#ifdef _DEBUG
 	cout << "#cut edges = " << cutEdges.size() << endl;
+#endif // _DEBUG
 	return cutEdges;
 }

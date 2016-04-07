@@ -560,11 +560,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 
 	while( !isUnfoldable )
 	{
-		bool cutSucceeded;
-
-		cutSucceeded = MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges);
-
-		if( cutSucceeded )
+		if(MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges))
 		{
 			/// cutting performed successfully
 			//cutted_mesh->printInfo("cutted mesh:");

@@ -116,10 +116,10 @@ public:
 
 	void setCurrentOpFlag(OperationStack::Flag curFlag){operationStack->setCurrentFlag(curFlag);}
 private:
-	typedef HDS_Mesh mesh_t;
+	typedef HDS_Vertex vert_t;
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Face face_t;
-	typedef HDS_Vertex vert_t;
+	typedef HDS_Mesh mesh_t;
 
 	OperationStack* operationStack;
 
