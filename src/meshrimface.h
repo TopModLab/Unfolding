@@ -14,10 +14,12 @@ public:
 	~MeshRimFace();
 
 	static void projectFaceCenter(vert_t* v, he_t* he, QVector3D &vn, QVector3D &vp);
+	static void projectEdgeVertices(vert_t* v, he_t* he, QVector3D &up_pos, QVector3D &down_pos);
+
 	static void computePlaneCornerOnEdge(vert_t* v, he_t* he, vector<QVector3D> &vpos);
 	static void computePlaneCornerOnFace(vert_t* v, he_t* he, vector<QVector3D> &vmid, vector<QVector3D> &vpos);
 	static void computeDiamondCornerOnFace(he_t* he, vector<QVector3D> &vpos);
-	static void computeDiamondCornerOnEdge(he_t* he, vector<QVector3D> &vpos);
+	static void computeDiamondCornerOnEdge(he_t* he, vector<QVector3D> &vpos, QVector3D &vn_max, QVector3D &vp_max);
 
 private:
     static float planeWidth;

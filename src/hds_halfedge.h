@@ -40,6 +40,7 @@ public:
 	uint16_t getFlag() const;
 
 	void computeCurvature();
+	QVector3D computeNormal();
 public:
 	HDS_Face *f;
 	HDS_Vertex *v;

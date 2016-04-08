@@ -66,3 +66,17 @@ void HDS_HalfEdge::computeCurvature()
 	if (isNegCurve) angle = 2* M_PI - angle;
 	//cout<<"edge curvature angle"<<angle/3.14*180<<endl;
 }
+
+QVector3D HDS_HalfEdge::computeNormal()
+{
+	///get planes on the edge
+	HDS_Vertex* vp = flip->prev->v;
+	HDS_Vertex* v1 = flip->v;
+	HDS_Vertex* vn = prev->v;
+	//get normals for plane prev and plane next
+	QVector3D np = QVector3D::normal(v->pos, vp->pos, v1->pos);
+	QVector3D nn = QVector3D::normal(v->pos, v1->pos, vn->pos);
+	QVector3D n = np + nn;
+	n.normalize();
+	return n;
+}

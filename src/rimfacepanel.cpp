@@ -29,14 +29,10 @@ RimFacePanel::RimFacePanel(QWidget *parent) :
 			[=](int id){
 		if (id == 1) {
 			ui->pieceSizeGrpBox->hide();
-			ui->bezierGrpBox->hide();
 			ui->quaBtn->setChecked(true);
-			ui->roundGrpBox->hide();
 			ui->optionsGrpBox->hide();
 		}else {
 			ui->pieceSizeGrpBox->show();
-			ui->bezierGrpBox->show();
-			ui->roundGrpBox->show();
 			ui->optionsGrpBox->show();
 			ui->optionsGrpBox->show();
 
