@@ -9,7 +9,7 @@ MorseSmaleComplex::MorseSmaleComplex(const unordered_set<HDS_Vertex*> &criticalP
 		if (cp->rtype == HDS_Vertex::Saddle) {
 			// trace lines in each segment
 			auto neighbors = cp->neighbors();
-			vector<double> diffs;
+			doubles_t diffs;
 			for (auto n : neighbors) {
 				diffs.push_back(n->morseFunctionVal - cp->morseFunctionVal);
 			}

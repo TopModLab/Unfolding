@@ -8,7 +8,8 @@
 using namespace std;
 
 HDS_Mesh::HDS_Mesh()
-	: showFace(true), showVert(true)
+	: showComponent(SHOW_FACE | SHOW_EDGE)
+	, showFace(true), showVert(true)
 	, showEdge(true), showNormals(false)
 	, processType(REGULAR_PROC)
 	, bound(nullptr)
@@ -607,26 +608,91 @@ void HDS_Mesh::flipShowNormals()
 	showNormals = !showNormals;
 }
 
-void HDS_Mesh::exportVBO(vector<float>* vtx_array,
-	vector<uint32_t>* fib_array, vector<uint32_t>* fid_array,
-	vector<uint16_t>* fflag_array,
-	vector<uint32_t>* heib_array, vector<uint32_t>* heid_array,
-	vector<uint16_t>* heflag_array) const
+void HDS_Mesh::exportVertVBO(
+	floats_t* verts, ui16s_t* vFLAGs) const
 {
 	// vertex object buffer
-	if (vtx_array != nullptr)
+	if (verts != nullptr)
 	{
-		vtx_array->clear();
-		vtx_array->reserve(vertSet.size());
+		verts->clear();
+		verts->reserve(vertSet.size());
+		vFLAGs->clear();
+		vFLAGs->reserve(vertSet.size());
 		for (int i = 0; i < vertMap.size(); i++)
 		{
 			auto vert = vertMap.at(i);
 			auto& pos = vert->pos;
-			vtx_array->push_back(pos.x());
-			vtx_array->push_back(pos.y());
-			vtx_array->push_back(pos.z());
+			verts->push_back(pos.x());
+			verts->push_back(pos.y());
+			verts->push_back(pos.z());
+			vFLAGs->push_back(vert->getFlag());
 		}
 	}
+	else
+	{
+		vFLAGs->clear();
+		vFLAGs->reserve(vertSet.size());
+		for (int i = 0; i < vertMap.size(); i++)
+		{
+			vFLAGs->push_back(vertMap.at(i)->getFlag());
+		}
+	}
+}
+
+void HDS_Mesh::exportEdgeVBO(
+	ui32s_t* heIBOs, ui32s_t* heIDs, ui16s_t* heFLAGs) const
+{
+	size_t heSetSize = heSet.size() / 2;
+	if (heIBOs != nullptr)
+	{
+		unordered_set<he_t*> visitiedHE;
+		visitiedHE.reserve(heSet.size());
+
+
+		heIBOs->clear();
+		heIBOs->reserve(heSetSize >> 1);
+		heFLAGs->clear();
+		heFLAGs->reserve(heSetSize >> 1);
+
+		for (auto he : heSet)
+		{
+			if (visitiedHE.find(he) == visitiedHE.end())
+			{
+				visitiedHE.insert(he);
+				visitiedHE.insert(he->flip);
+
+				heIBOs->push_back(he->v->index);
+				heIBOs->push_back(he->flip->v->index);
+
+				heIDs->push_back(static_cast<uint32_t>(he->index));
+				heFLAGs->push_back(he->getFlag());
+			}
+		}
+	}
+	else if (heFLAGs != nullptr)
+	{
+		unordered_set<he_t*> visitiedHE;
+		visitiedHE.reserve(heSet.size());
+
+		heFLAGs->clear();
+		heFLAGs->reserve(heSetSize >> 1);
+
+		for (auto he : heSet)
+		{
+			if (visitiedHE.find(he) == visitiedHE.end())
+			{
+				visitiedHE.insert(he);
+				visitiedHE.insert(he->flip);
+
+				heFLAGs->push_back(he->getFlag());
+			}
+		}
+	}
+}
+
+void HDS_Mesh::exportFaceVBO(
+	ui32s_t* fIBOs, ui32s_t* fIDs, ui16s_t* fFLAGs) const
+{
 	// face index buffer
 	auto inTriangle = [](const QVector3D& p, const QVector3D& v0, const QVector3D& v1, const QVector3D& v2)->bool {
 		auto area = QVector3D::crossProduct(v1 - v0, v2 - v0);
@@ -647,25 +713,25 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 		}
 		return true;
 	};
-	
+
 	size_t fSetSize = faceSet.size();
-	if (fib_array != nullptr)
+	if (fIBOs != nullptr)
 	{
 		// triangulated face index buffer
-		fib_array->clear();
-		fib_array->reserve(fSetSize * 3);
+		fIBOs->clear();
+		fIBOs->reserve(fSetSize * 3);
 		// original face idex, for query
-		fid_array->clear();
-		fid_array->reserve(fSetSize * 2);
-		fflag_array->clear();
-		fflag_array->reserve(fSetSize * 2);
+		fIDs->clear();
+		fIDs->reserve(fSetSize * 2);
+		fFLAGs->clear();
+		fFLAGs->reserve(fSetSize * 2);
 		for (auto face : faceSet)
 		{
 			if (face->isCutFace)
 			{
 				continue;
 			}
-			vector<uint32_t> vid_array;
+			ui32s_t vid_array;
 			auto fid = static_cast<uint32_t>(face->index);
 			uint16_t flag = face->getFlag();
 			auto he = face->he;
@@ -683,7 +749,7 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 			case 3:
 			{
 				// Index buffer
-				fib_array->insert(fib_array->end(), vid_array.begin(), vid_array.end());
+				fIBOs->insert(fIBOs->end(), vid_array.begin(), vid_array.end());
 				// face attribute
 				//fid_array->push_back(fid);
 				//fflag_array->push_back(flag);
@@ -691,59 +757,59 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 			}
 			/*case 4:
 			{
-				// P3 in Triangle012
-				if (inTriangle(
-					vertMap.at(vid_array[3])->pos,
-					vertMap.at(vid_array[0])->pos,
-					vertMap.at(vid_array[1])->pos,
-					vertMap.at(vid_array[2])->pos))
-				{
-					// Index buffer 013
-					fib_array->insert(fib_array->end(),
-						vid_array.begin(), vid_array.begin() + 2);
-					fib_array->push_back(vid_array.back());
+			// P3 in Triangle012
+			if (inTriangle(
+			vertMap.at(vid_array[3])->pos,
+			vertMap.at(vid_array[0])->pos,
+			vertMap.at(vid_array[1])->pos,
+			vertMap.at(vid_array[2])->pos))
+			{
+			// Index buffer 013
+			fib_array->insert(fib_array->end(),
+			vid_array.begin(), vid_array.begin() + 2);
+			fib_array->push_back(vid_array.back());
 
-					// Index buffer 123
-					fib_array->insert(fib_array->end(),
-						vid_array.begin() + 1, vid_array.end());
-				}
-				else// P3 outside Triangle012
-				{
-					// Index buffer 012
-					fib_array->insert(fib_array->end(),
-						vid_array.begin(), vid_array.begin() + 3);
+			// Index buffer 123
+			fib_array->insert(fib_array->end(),
+			vid_array.begin() + 1, vid_array.end());
+			}
+			else// P3 outside Triangle012
+			{
+			// Index buffer 012
+			fib_array->insert(fib_array->end(),
+			vid_array.begin(), vid_array.begin() + 3);
 
-					// Index buffer 230
-					fib_array->insert(fib_array->end(),
-						vid_array.begin() + 2, vid_array.end());
-					fib_array->push_back(vid_array.front());
-					
-				}
-				// face attribute
-				//fid_array->insert(fid_array->end(), 2, fid);
-				//fflag_array->insert(fflag_array->end(), 2, flag);
+			// Index buffer 230
+			fib_array->insert(fib_array->end(),
+			vid_array.begin() + 2, vid_array.end());
+			fib_array->push_back(vid_array.front());
+
+			}
+			// face attribute
+			//fid_array->insert(fid_array->end(), 2, fid);
+			//fflag_array->insert(fflag_array->end(), 2, flag);
 			}*/
 			default: // n-gons
 			{
 				// Triangle Fan
 				for (size_t i = 1; i < vidCount - 1; i++)
 				{
-					fib_array->push_back(vid_array[0]);
-					fib_array->push_back(vid_array[i]);
-					fib_array->push_back(vid_array[i + 1]);
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[i]);
+					fIBOs->push_back(vid_array[i + 1]);
 				}
 				break;
 			}
 			}
-			fid_array->insert(fid_array->end(), vidCount - 2, fid);
-			fflag_array->insert(fflag_array->end(), vidCount - 2, flag);
+			fIDs->insert(fIDs->end(), vidCount - 2, fid);
+			fFLAGs->insert(fFLAGs->end(), vidCount - 2, flag);
 		}
 	}
-	else if (fflag_array != nullptr)
+	else if (fFLAGs != nullptr)
 	{
 		// re-export face flag
-		fflag_array->clear();
-		fflag_array->reserve(fSetSize * 2);
+		fFLAGs->clear();
+		fFLAGs->reserve(fSetSize * 2);
 		for (auto face : faceSet)
 		{
 			if (face->isCutFace)
@@ -759,54 +825,7 @@ void HDS_Mesh::exportVBO(vector<float>* vtx_array,
 				vidCount++;
 				curHE = curHE->next;
 			} while (curHE != he);
-			fflag_array->insert(fflag_array->end(), vidCount - 2, flag);
-		}
-	}
-
-	size_t heSetSize = heSet.size() / 2;
-	if (heib_array != nullptr)
-	{
-		unordered_set<he_t*> visitiedHE;
-		visitiedHE.reserve(heSet.size());
-
-		
-		heib_array->clear();
-		heib_array->reserve(heSetSize >> 1);
-		heflag_array->clear();
-		heflag_array->reserve(heSetSize >> 1);
-
-		for (auto he : heSet)
-		{
-			if (visitiedHE.find(he) == visitiedHE.end())
-			{
-				visitiedHE.insert(he);
-				visitiedHE.insert(he->flip);
-
-				heib_array->push_back(he->v->index);
-				heib_array->push_back(he->flip->v->index);
-
-				heid_array->push_back(static_cast<uint32_t>(he->index));
-				heflag_array->push_back(he->getFlag());
-			}
-		}
-	}
-	else if (heflag_array != nullptr)
-	{
-		unordered_set<he_t*> visitiedHE;
-		visitiedHE.reserve(heSet.size());
-
-		heflag_array->clear();
-		heflag_array->reserve(heSetSize >> 1);
-
-		for (auto he : heSet)
-		{
-			if (visitiedHE.find(he) == visitiedHE.end())
-			{
-				visitiedHE.insert(he);
-				visitiedHE.insert(he->flip);
-
-				heflag_array->push_back(he->getFlag());
-			}
+			fFLAGs->insert(fFLAGs->end(), vidCount - 2, flag);
 		}
 	}
 }
@@ -1035,9 +1054,8 @@ unordered_set<HDS_Mesh::face_t*> HDS_Mesh::getSelectedFaces()
 }
 
 
-unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &funcval, const QVector3D &normdir)
+unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
 {
-
 	auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
 		if (!funcval.empty()) {
 			// assign the function value to the vertex
@@ -1101,7 +1119,7 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
 			//   cout<<" moorseFunc("<<v->index<<", a, b, c) = "<< moorseFunc(v, a, b, c);
 			// if this is a saddle point
 			bool isSaddle = false;
-			vector<double> diffs;
+			doubles_t diffs;
 
 			if(!allSmaller&&!allLarger)                 //later added;
 			{
@@ -1186,8 +1204,6 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
 				v->rtype = HDS_Vertex::Regular;
 				return false;
 			}
-
-
 		}
 		if(s1==3)s11+=v->sdegree;
 		if(s2==3)s22+=1;
@@ -1199,17 +1215,14 @@ unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const vector<double> &f
 		return true;
 	};
 
-
-
 	return Utils::filter_set(vertSet, isReebPoint);
 
 }
 
-void HDS_Mesh::colorVertices(const vector<double> &val)
+void HDS_Mesh::colorVertices(const doubles_t &val)
 {
 #if 1
-	int nverts = vertSet.size();
-	for (int i = 0; i < nverts; ++i) {
+	for (int i = 0; i < vertSet.size(); ++i) {
 		vertMap[i]->colorVal = val[i];
 	}
 

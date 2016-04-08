@@ -143,7 +143,6 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
             double flip_t = getT(flip_v, vp_of_flap_next, v);
             // assign (he_flap, t)to holePosRefMap
             (*refMapPointer)[flap_cur.flap_he->index] = t;
-            cout<<"face "<<f->index<<" edge "<<curHE->index<<" t "<<t<<endl;
 
             //repeat for (he_flap->flip, t)
             (*refMapPointer)[flap_cur.flap_he->flip->index] = flip_t;
@@ -262,14 +261,12 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	}
 	case 2://bind
 	{
-		cout<<"binding..."<<endl;
 		cur_mesh->setProcessType(HDS_Mesh::BINDED_PROC);
 		auto curHE = originalHE->next;
 		do
 		{
 			HDS_Vertex* newV = new HDS_Vertex;
 			newV->pos = he_f->scaleCorner(curHE->flip->v);
-			cout<<"new v :"<<newV->pos<<endl;
 			newV->refid = curHE->flip->v->refid;
 			vertices.push_back(newV);
 

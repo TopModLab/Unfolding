@@ -21,7 +21,7 @@
 #include "Graph.hpp"
 #include "morsesmalecomplex.h"
 
-class MeshViewerModern;
+class MeshViewer;
 struct RenderBufferObject;
 
 struct MouseState {
@@ -35,7 +35,6 @@ struct RenderBufferObject// : protected oglFuncs
 	RenderBufferObject(oglFuncs* f)
 		: funcs(f)
 		, ibo(oglBuffer::Type::IndexBuffer)
-		//, flag_tbo(0), flag_tex(0), id_tbo(0), id_tex(0)
 		, tbo{}, tex{}
 	{
 	}
@@ -45,11 +44,22 @@ struct RenderBufferObject// : protected oglFuncs
 	{
 		vao.destroy();
 		ibo.destroy();
+		destroyTextures();
+	}
+	void destroyTextures()
+	{
 		funcs->glDeleteTextures(2, tex);
 		funcs->glDeleteBuffers(2, tbo);
 	}
+	void releaseAll()
+	{
+		vao.release();
+		ibo.release();
+		vbo->release();
+	}
 
 	oglFuncs* funcs;
+	shared_ptr<oglBuffer> vbo;
 	oglVAO vao;
 	oglBuffer ibo;
 	union
@@ -65,15 +75,15 @@ struct RenderBufferObject// : protected oglFuncs
 
 	vector<GLuint> ibos;// he ibo data
 	vector<GLuint> ids;// he id, for querying
-	vector<uint16_t> flags;// he flag data
+	ui16s_t flags;// he flag data
 };
-class MeshViewerModern
+class MeshViewer
 	: public QOpenGLWidget, oglFuncs
 {
 	Q_OBJECT
 public:
-	explicit MeshViewerModern(QWidget *parent = nullptr);
-	~MeshViewerModern();
+	explicit MeshViewer(QWidget *parent = nullptr);
+	~MeshViewer();
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	
@@ -123,35 +133,34 @@ private: // paint function
 	void resetCamera();
 	void bind();
 	void initialVBO();
-	void bindVertexVBO();
-	void bindEdgesVAO();
-	void bindEdgesTBO();
-	void bindFaceVAO();
-	void bindFaceTBO();
+	void bindVertices();
+	void bindPrimitive(RenderBufferObject &RBO);
+	void bindTBO(RenderBufferObject &RBO, int nTBO = 2);
 
 	void initShader();
 public:
-	enum SelectionState
+	enum ShadingState : uint8_t
 	{
-		SingleSelect = 0,
-		MultiSelect
+		SHADE_NONE = 0,
+		SHADE_FLAT = 1 << 0,
+		SHADE_WF = 1 << 1,
+		SHADE_WF_FLAT = SHADE_FLAT | SHADE_WF,
+		SHADE_VERT = 1 << 2
 	};
-	enum InteractionState : size_t
+	/*enum SelectionState
 	{
-		Camera = 0,
-		Camera_Translation = 1,
-		Camera_Zoom = 2,
-		SelectVertex = 4,
-		SelectFace = 5,
-		SelectEdge = 6
-	};
-	enum ShadingState
+	SingleSelect = 0,
+	MultiSelect
+	};*/
+	enum InteractionState : uint32_t
 	{
-		SMOOTH = 0,
-		FLAT = 1,
-		WIREFRAME = 2
+		ROAM_CAMERA = 0,
+		SEL_MULTI = 2,
+		SEL_VERT = 4,
+		SEL_FACE = 8,
+		SEL_EDGE = 16
 	};
-	enum DataTypeMark : size_t
+	enum DataTypeMark : uint8_t
 	{
 		NULL_MARK = 0,
 		VERTEX_MARK = 1,
@@ -173,25 +182,25 @@ public:
 		GraphDist = 0,
 		GeodesicsDist = 1
 	}lmode;
-	enum class DispComp : uint32_t// Display Compoment
+	enum DispComp : uint32_t// Display Compoment
 	{
-		NONE = 0,
-		GRID = 1 << 0,
-		CLDistance = 1 << 1, //show cut locus dists
-		CPDistance = 1 << 2, //show critical points dists
+		DISP_NONE = 0,
+		DISP_GRID = 1 << 0,
+		DISP_CLDistance = 1 << 1, //show cut locus dists
+		DISP_CPDistance = 1 << 2, //show critical points dists
 		
-		MULT_CUT = 1 << 4,
-		ONE_CUT = 1 << 5,
-		REEB_POINTS = 1 << 6,
-		TEXT = 1 << 7,
-		V_INDEX = 1 << 8
+		DISP_MULT_CUT = 1 << 4,
+		DISP_ONE_CUT = 1 << 5,
+		DISP_REEB_POINTS = 1 << 6,
+		DISP_TEXT = 1 << 7,
+		DISP_V_INDEX = 1 << 8
 	};
-	enum class HighlightComp : uint32_t
+	enum HighlightComp : uint32_t
 	{
-		NONE = 0,
-		CUT_EDGE = 1 << 0,// related to shader
-		NON_PLANAR_FACE = 1 << 1,
-		BRIDGER_FACE = 1 << 2
+		HIGHLIGHT_NONE = 0,
+		HIGHLIGHT_CUTEDGE = 1 << 0,// related to shader
+		HIGHLIGHT_NON_PLANAR_FACE = 1 << 1,
+		HIGHLIGHT_BRIDGER = 1 << 2
 	};
 public:
 	void selectCutLocusEdges();
@@ -202,12 +211,13 @@ public:
 	void setCutLocusMethod(int midx);
 
 	void setInteractionMode(InteractionState state);
-	void setSelectionMode(SelectionState mode);
+	//void setSelectionMode(SelectionState mode);
 
 	void showCriticalPoints();
 	void showCutLocusCut();
 	void showCutLocusPoints();
 
+	void showShading(ShadingState shading);
 	void showComp(DispComp comp);
 	void highlightComp(HighlightComp comp);
 private://interaction ie selection
@@ -217,10 +227,9 @@ private://interaction ie selection
 	
 	InteractionState interactionState;
 	stack<InteractionState> interactionStateStack;
-	SelectionState selectionState;
+	//SelectionState selectionState;
 	queue<int> selVTX, selHE, selFACE;
 
-	ShadingState shadingSate;
 	MouseState mouseState;
 
 	union SelectionID{
@@ -243,6 +252,7 @@ private:
 	bool showText;
 	bool showVIndex; // show vertex index
 
+	uint8_t shadingSate;
 	uint32_t dispComp;//Display Components Flag
 	uint32_t hlComp;// Highlight Components Flag
 private://viewer status
@@ -258,8 +268,10 @@ private://Mesh Data
 
 	// VBOs and VAOs
 	// Vertices data and vao
-	oglBuffer vtx_vbo;
-	vector<GLfloat> vtx_array;
+	/*oglBuffer vtx_vbo;
+	oglVAO vtx_vao;*/
+	RenderBufferObject vRBO;
+	floats_t vtx_array;
 
 	// Face indices and vao
 	RenderBufferObject fRBO;
@@ -268,5 +280,6 @@ private://Mesh Data
 
 	// Shader Programs
 	oglShaderP face_solid_shader, edge_solid_shader;
+	oglShaderP vtx_solid_shader;
 	oglShaderP uid_shader, he_uid_shader, face_uid_shader;
 };

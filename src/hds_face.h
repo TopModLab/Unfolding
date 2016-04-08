@@ -1,15 +1,12 @@
 #ifndef HDS_FACE_H
 #define HDS_FACE_H
 
-#include "common.h"
 #include "hds_common.h"
 #include "BBox.h"
-#include <QVector3D>
 
-class HDS_HalfEdge;
-class HDS_Vertex;
 
-class HDS_Face
+
+class HDS_Face : public HDS_Common
 {
 private:
 	static hdsid_t uid;

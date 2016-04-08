@@ -9,6 +9,8 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 #include <QProgressDialog>
+#include <QString>
+#include <QMessageBox>
 #include <QTime>
 
 #include "meshloader.h"
@@ -56,16 +58,16 @@ public:
 
 
 #if USE_REEB_GRAPH
-	void updateReebGraph(const vector<double> &fvals = vector<double>());
+	void updateReebGraph(const doubles_t &fvals = doubles_t());
 	SimpleGraph* getReebGraph() {
 		return &rbGraph;
 	}
 #endif
 
-	vector<double> getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha);
-	vector<double> getInterpolatedCurvature(int lev0, int lev1, double alpha);
-	vector<double> getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal);
-	vector<double> getInterpolatedZValue(int lev0, int lev1, double alpha);
+	doubles_t getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha);
+	doubles_t getInterpolatedCurvature(int lev0, int lev1, double alpha);
+	doubles_t getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal);
+	doubles_t getInterpolatedZValue(int lev0, int lev1, double alpha);
 
 	void colorMeshByGeoDistance(int vidx);
 	void colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ratio);
@@ -89,14 +91,15 @@ private:
 
 	static MeshManager* instance;
 
+	friend class MeshViewerLegacy;
 	friend class MeshViewer;
-	friend class MeshViewerModern;
 	friend class MeshConnector;
 
 public:
 
 	bool loadOBJFile(const string& filename);
-	HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);
+	/*HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);*/
+	HDS_Mesh* buildHalfEdgeMesh(const floats_t &inVerts, const vector<PolyIndex*> &inFaces);
 	void cutMeshWithSelectedEdges();
 	//void mapToExtendedMesh();
 	void unfoldMesh();

@@ -5,14 +5,14 @@
 //#include "glutils.hpp"
 #include "mathutils.hpp"
 #include "utils.hpp"
-#include "meshviewer.h"
+#include "MeshViewerLegacy.h"
 #include "morsesmalecomplex.h"
 
 #include <QMouseEvent>
 
 using namespace std;
 
-MeshViewer::MeshViewer(QWidget *parent) :
+MeshViewerLegacy::MeshViewerLegacy(QWidget *parent) :
 	QGLWidget(qglformat_3d, parent)
 {
 	interactionState = SelectVertex;
@@ -48,25 +48,25 @@ MeshViewer::MeshViewer(QWidget *parent) :
 
 }
 
-MeshViewer::~MeshViewer()
+MeshViewerLegacy::~MeshViewerLegacy()
 {
 
 }
 
-void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh)
+void MeshViewerLegacy::bindHalfEdgeMesh(HDS_Mesh *mesh)
 {
 	heMesh = mesh;
 	//findReebPoints();
 	updateGL();
 }
 
-void MeshViewer::setCurvatureColormap(ColorMap cmap)
+void MeshViewerLegacy::setCurvatureColormap(ColorMap cmap)
 {
 	colormap = cmap;
 	updateGL();
 }
 
-bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
+bool MeshViewerLegacy::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 {
 	bool isInvertible;
 	QMatrix4x4 proj_modelview_inv = view_cam.projectionModelView().inverted(&isInvertible);//not understood
@@ -82,11 +82,11 @@ bool MeshViewer::QtUnProject(const QVector3D& pos_screen, QVector3D& pos_world)
 
 	return isInvertible;
 }
-void MeshViewer::selectAll()
+void MeshViewerLegacy::selectAll()
 {
 	switch (interactionState) {
 
-	case SelectFace:
+	case SEL_FACE:
 		for (auto f : heMesh->faces())
 			f->setPicked(true);
 		break;
@@ -104,10 +104,10 @@ void MeshViewer::selectAll()
 	updateGL();
 }
 
-void MeshViewer::selectInverse()
+void MeshViewerLegacy::selectInverse()
 {
 	switch (interactionState) {
-	case SelectFace: {
+	case SEL_FACE: {
 		for (auto f : heMesh->faces())
 			heMesh->selectFace(f->index);
 		break;
@@ -137,11 +137,11 @@ void MeshViewer::selectInverse()
 
 }
 
-void MeshViewer::selectCC()
+void MeshViewerLegacy::selectCC()
 {
 	switch (interactionState) {
 
-	case SelectFace:
+	case SEL_FACE:
 
 		break;
 	case SelectEdge:
@@ -157,7 +157,7 @@ void MeshViewer::selectCC()
 
 }
 
-void MeshViewer::selectTwinPair()
+void MeshViewerLegacy::selectTwinPair()
 {
 	switch (interactionState) {
 	case SelectEdge:
@@ -179,7 +179,7 @@ void MeshViewer::selectTwinPair()
 	updateGL();
 }
 
-void MeshViewer::selectNextEdge()
+void MeshViewerLegacy::selectNextEdge()
 {
 	switch (interactionState) {
 	case SelectEdge:
@@ -196,7 +196,7 @@ void MeshViewer::selectNextEdge()
 	updateGL();
 }
 
-void MeshViewer::selectCP()
+void MeshViewerLegacy::selectCP()
 {
 	for (auto p : reebPoints) {
 		p->setPicked(true);
@@ -207,7 +207,7 @@ void MeshViewer::selectCP()
 
 
 
-void MeshViewer::selectMSTEdges()
+void MeshViewerLegacy::selectMSTEdges()
 {
 	selectClear();
 
@@ -245,12 +245,12 @@ void MeshViewer::selectMSTEdges()
 	}
 }
 
-void MeshViewer::selectGrow()
+void MeshViewerLegacy::selectGrow()
 {
 	//get all neighbours
 	switch (interactionState) {
 
-	case SelectFace:
+	case SEL_FACE:
 		for (auto f : heMesh->getSelectedFaces()) {
 			for (auto face : heMesh->incidentFaces(f)) {
 				face->setPicked(true);
@@ -279,11 +279,11 @@ void MeshViewer::selectGrow()
 
 }
 
-void MeshViewer::selectShrink()
+void MeshViewerLegacy::selectShrink()
 {
 	//BFS to get all neighbours that are selected
 	switch (interactionState) {
-	case SelectFace:
+	case SEL_FACE:
 		for (auto f : heMesh->getSelectedFaces()) {
 
 		}
@@ -309,7 +309,7 @@ void MeshViewer::selectShrink()
 	updateGL();
 }
 
-void MeshViewer::selectClear()
+void MeshViewerLegacy::selectClear()
 {
 	resetEdges();
 	resetFaces();
@@ -318,14 +318,14 @@ void MeshViewer::selectClear()
 
 }
 
-void MeshViewer::resetEdges()
+void MeshViewerLegacy::resetEdges()
 {
 	//reset all edges
 	for (auto he: heMesh->halfedges())
 		he->setPicked(false);
 }
 
-void MeshViewer::resetVertices()
+void MeshViewerLegacy::resetVertices()
 {
 	//reset all vertices
 	for (auto v: heMesh->verts())
@@ -333,7 +333,7 @@ void MeshViewer::resetVertices()
 
 }
 
-void MeshViewer::resetFaces()
+void MeshViewerLegacy::resetFaces()
 {
 	//reset all faces
 	for (auto f: heMesh->faces())
@@ -341,7 +341,7 @@ void MeshViewer::resetFaces()
 }
 
 
-void MeshViewer::disablecpp()
+void MeshViewerLegacy::disablecpp()
 {
 	isCriticalPointModeSet = false;
 	showVIndex = true;
@@ -349,7 +349,7 @@ void MeshViewer::disablecpp()
 	updateGL();
 }
 
-void MeshViewer::disableclp()
+void MeshViewerLegacy::disableclp()
 {
 	isCutLocusModeset = false;
 	showVIndex = true;
@@ -359,7 +359,7 @@ void MeshViewer::disableclp()
 	updateGL();
 }
 
-int MeshViewer::getSelectedElementIndex(const QPoint &p)
+int MeshViewerLegacy::getSelectedElementIndex(const QPoint &p)
 {
 	int winX = p.x(), winY = height() - p.y();
 
@@ -461,7 +461,7 @@ void MeshViewer::computeGlobalSelectionBox()
 	// cout<<"EF"<<endl<<EF<<endl;
 }
 */
-void MeshViewer::mousePressEvent(QMouseEvent *e)
+void MeshViewerLegacy::mousePressEvent(QMouseEvent *e)
 {
 	mouseState.isPressed = true;
 
@@ -487,7 +487,7 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 	case Camera_Zoom:
 		mouseState.prev_pos = QVector2D(e->pos());
 		break;
-	case SelectFace:
+	case SEL_FACE:
 	case SelectEdge:
 	case SelectVertex: {
 		sbox.corner_win[0] = e->x();
@@ -502,7 +502,7 @@ void MeshViewer::mousePressEvent(QMouseEvent *e)
 	}
 }
 
-void MeshViewer::mouseMoveEvent(QMouseEvent *e)
+void MeshViewerLegacy::mouseMoveEvent(QMouseEvent *e)
 {
 	switch (interactionState) {
 	case Camera: {
@@ -557,7 +557,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 		updateGL();
 		break;
 		//selection box
-	case SelectFace:
+	case SEL_FACE:
 	case SelectEdge:
 	case SelectVertex: {
 		if (mouseState.isPressed) {
@@ -579,7 +579,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent *e)
 	}
 }
 
-void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
+void MeshViewerLegacy::mouseReleaseEvent(QMouseEvent *e)
 {
 	switch (interactionState) {
 	case Camera:
@@ -590,7 +590,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 		break;
 
 		//selection box
-	case SelectFace:
+	case SEL_FACE:
 	case SelectEdge:
 	case SelectVertex: {
 		sbox.corner_win[2] = e->x();
@@ -609,7 +609,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 			cout<< "select edge's face index: "<<heMesh->heMap[selectedElementIdx]->f->index<<endl;
 			cout<< "select edge flip's face index: "<<heMesh->heMap[selectedElementIdx]->flip->f->index<<endl;
 			}
-			if (interactionState == SelectFace) {
+			if (interactionState == SEL_FACE) {
 				cout<<"select face is cut face? "<<heMesh->faceMap[selectedElementIdx]->isCutFace<<endl;
 				cout<<"select face is bridge? "<<heMesh->faceMap[selectedElementIdx]->isBridger<<endl;
 
@@ -622,7 +622,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 					if (selectedElementsIdxQueue.front() != selectedElementsIdxQueue.back()) {
 						if (interactionState == SelectEdge) {
 							heMesh->heMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
-						} else if (interactionState == SelectFace) {
+						} else if (interactionState == SEL_FACE) {
 							heMesh->faceMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
 						} else if (interactionState == SelectVertex){
 							heMesh->vertMap[selectedElementsIdxQueue.front()]->setPicked(false);//deselect
@@ -636,7 +636,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 				if (interactionState == SelectEdge) {
 					heMesh->selectEdge(selectedElementIdx);
 				}
-				else if (interactionState == SelectFace) {
+				else if (interactionState == SEL_FACE) {
 					heMesh->selectFace(selectedElementIdx);
 				}
 				else if (interactionState == SelectVertex){
@@ -668,7 +668,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent *e)
 	updateGL();
 }
 
-void MeshViewer::keyPressEvent(QKeyEvent *e)
+void MeshViewerLegacy::keyPressEvent(QKeyEvent *e)
 {
 	switch (e->key()) {
 	case Qt::Key_C:
@@ -755,12 +755,12 @@ void MeshViewer::keyPressEvent(QKeyEvent *e)
 	updateGL();
 }
 
-void MeshViewer::keyReleaseEvent(QKeyEvent *e)
+void MeshViewerLegacy::keyReleaseEvent(QKeyEvent *e)
 {
 
 }
 
-void MeshViewer::wheelEvent(QWheelEvent *e)
+void MeshViewerLegacy::wheelEvent(QWheelEvent *e)
 {
 
 	switch (interactionState) {
@@ -804,20 +804,20 @@ void MeshViewer::wheelEvent(QWheelEvent *e)
 
 }
 
-void MeshViewer::enterEvent(QEvent *e)
+void MeshViewerLegacy::enterEvent(QEvent *e)
 {
 	QGLWidget::enterEvent(e);
 	grabKeyboard();
 	setFocus();
 }
 
-void MeshViewer::leaveEvent(QEvent *e)
+void MeshViewerLegacy::leaveEvent(QEvent *e)
 {
 	QGLWidget::leaveEvent(e);
 	releaseKeyboard();
 }
 
-void MeshViewer::initializeGL()
+void MeshViewerLegacy::initializeGL()
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -835,12 +835,12 @@ void MeshViewer::initializeGL()
 	initializeFBO();
 }
 
-void MeshViewer::initializeFBO() {
+void MeshViewerLegacy::initializeFBO() {
 	fbo.reset(new QGLFramebufferObject(width(), height(), QGLFramebufferObject::Depth));
 	selectionBuffer.resize(width()*height() * 4);
 }
 
-void MeshViewer::resizeGL(int w, int h)
+void MeshViewerLegacy::resizeGL(int w, int h)
 {
 	initializeFBO();
 
@@ -854,7 +854,7 @@ void MeshViewer::resizeGL(int w, int h)
 	glMultMatrixf(view_cam.projection.constData());
 }
 
-void MeshViewer::paintGL()
+void MeshViewerLegacy::paintGL()
 {
 
 	glClearColor(1., 1., 1., 0);
@@ -974,7 +974,7 @@ static QImage toQImage(const unsigned char* data, int w, int h) {
 	return qimg;
 }
 
-void MeshViewer::drawMeshToFBO() {
+void MeshViewerLegacy::drawMeshToFBO() {
 	fbo->bind();
 
 #if 0
@@ -1002,7 +1002,7 @@ void MeshViewer::drawMeshToFBO() {
 	glDisable(GL_BLEND);
 
 	switch (interactionState) {
-	case SelectFace:
+	case SEL_FACE:
 		heMesh->drawFaceIndices();
 		break;
 	case SelectEdge:
@@ -1030,7 +1030,7 @@ void MeshViewer::drawMeshToFBO() {
 	//img.save("fbo.png");
 }
 
-void MeshViewer::drawSelectionBox() {
+void MeshViewerLegacy::drawSelectionBox() {
 	if (!isSelecting) return;
 
 	cout<<"drawingSelectionBox mousestate"<<mouseState.isPressed<<endl;
@@ -1069,7 +1069,7 @@ void MeshViewer::drawSelectionBox() {
 #endif
 }
 
-void MeshViewer::enableLights()
+void MeshViewerLegacy::enableLights()
 {
 	GLfloat light_position[] = { 100.0, 40.0, 100.0, 1.0 };
 	GLfloat mat_specular[] = { 0.8, 0.8, 0.8, 1.0 };
@@ -1098,14 +1098,14 @@ void MeshViewer::enableLights()
 	glEnable(GL_LIGHT1);
 }
 
-void MeshViewer::disableLights()
+void MeshViewerLegacy::disableLights()
 {
 	glDisable(GL_LIGHT0);
 	glDisable(GL_LIGHT1);
 	glDisable(GL_LIGHTING);
 }
 
-void MeshViewer::drawReebPoints()
+void MeshViewerLegacy::drawReebPoints()
 {
 	//cout << "nReebPoints = " << reebPoints.size() << endl;
 	glPointSize(10.0);
@@ -1148,13 +1148,13 @@ void MeshViewer::drawReebPoints()
 
 }
 
-void MeshViewer::findReebPoints()
+void MeshViewerLegacy::findReebPoints()
 {
-	auto laplacianSmoother = [&](const vector<double> &val, HDS_Mesh *mesh) {
+	auto laplacianSmoother = [&](const doubles_t &val, HDS_Mesh *mesh) {
 		const double lambda = 0.25;
 		const double sigma = 1.0;
 		unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
-		vector<double> newval(mesh->verts().size());
+		doubles_t newval(mesh->verts().size());
 		for (auto vi : mesh->verts()) {
 			auto neighbors = vi->neighbors();
 
@@ -1186,11 +1186,11 @@ void MeshViewer::findReebPoints()
 	// find the seeds of the laplacian smoothing
 	// pick a few vertices based on their curvatures
 
-	auto dists = vector<double>();
+	auto dists = doubles_t();
 	int isSmoothingOnActualMeshChecked = cp_smoothing_type;
 	/* if(isSmoothingOnActualMeshChecked==NULL)        //later added;
 	{
-		dists = vector<double>(heMesh->verts().size());
+		dists = doubles_t(heMesh->verts().size());
 		QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;
 		for (auto v : heMesh->verts()) {
 		dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
@@ -1229,7 +1229,7 @@ void MeshViewer::findReebPoints()
 		}
 		case Random:
 		{
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto &x : dists) {
 				x= rand()/ (double)RAND_MAX - 0.5;
 			}
@@ -1255,7 +1255,7 @@ void MeshViewer::findReebPoints()
 		}
 		case Z: {
 			cout<<"Z value method..."<<endl;
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto v : heMesh->verts()) {
 				dists[v->index] = v->pos.z();//here pos.z() can be changed to pos.y(); later
 			}
@@ -1264,7 +1264,7 @@ void MeshViewer::findReebPoints()
 		case PointNormal: {
 			cout<<"Point normal method..."<<endl;
 
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			QVector3D pnormal = heMesh->vertMap[lastSelectedIndex]->normal;//last selected point normal dotproduct other points vector;
 			for (auto v : heMesh->verts()) {
 				dists[v->index] = QVector3D::dotProduct(v->pos, pnormal);
@@ -1274,7 +1274,7 @@ void MeshViewer::findReebPoints()
 		case Curvature: {
 			cout<<"Curvature method..."<<endl;
 
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto v : heMesh->verts()) {
 				dists[v->index] = v->curvature;
 			}
@@ -1284,12 +1284,12 @@ void MeshViewer::findReebPoints()
 		{
 			cout<<"Random method..."<<endl;
 
-			/*   dists = vector<double>(heMesh->verts().size());
+			/*   dists = doubles_t(heMesh->verts().size());
 		for (auto &x : dists) {
 			x= rand()/ (double)RAND_MAX - 0.5;
 		}
 	*/
-			//vector<double> y(heMesh->verts().size());
+			//doubles_t y(heMesh->verts().size());
 			int ty=0;
 			int tt=0;
 			int ts=0;
@@ -1297,14 +1297,14 @@ void MeshViewer::findReebPoints()
 			int tq;
 			tq=ta;
 			int id=0;
-			vector<double> memo(ta);
+			doubles_t memo(ta);
 			for(int i=0;i<ta;i++){
 				memo[i]=(double)i;
 
 			}
 
 
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto &x : dists) {
 
 
@@ -1400,7 +1400,7 @@ void MeshViewer::findReebPoints()
 			}
 			c /= heMesh->vertSet.size();
 			// compute per-vertex distance
-			dists = vector<double>(heMesh->verts().size());
+			dists = doubles_t(heMesh->verts().size());
 			for (auto &v : heMesh->vertSet) {
 				dists[v->index] = heMesh->vertMap[0]->pos.distanceToPoint(v->pos);
 			}
@@ -1440,9 +1440,9 @@ void MeshViewer::findReebPoints()
 	CPdistances = dists;
 }
 
-void MeshViewer::findCutLocusPoints()
+void MeshViewerLegacy::findCutLocusPoints()
 {
-	auto dists = vector<double>();
+	auto dists = doubles_t();
 
 	if(heMesh->verts().size()>10){
 		switch (lmode) {
@@ -1482,7 +1482,7 @@ void MeshViewer::findCutLocusPoints()
 	CLdistances = dists;
 }
 
-void MeshViewer::selectCutLocusEdges()
+void MeshViewerLegacy::selectCutLocusEdges()
 {
 
 	resetEdges();
@@ -1543,35 +1543,35 @@ void MeshViewer::selectCutLocusEdges()
 #endif
 }
 
-void MeshViewer::toggleLightingSmooth()
+void MeshViewerLegacy::toggleLightingSmooth()
 {
 	lightingState = Smooth;
 }
 
-void MeshViewer::toggleLightingFlat()
+void MeshViewerLegacy::toggleLightingFlat()
 {
 	lightingState = Flat;
 }
 
-void MeshViewer::toggleLightingWireframe()
+void MeshViewerLegacy::toggleLightingWireframe()
 {
 	lightingState = Wireframe;
 }
 
-void MeshViewer::toggleText()
+void MeshViewerLegacy::toggleText()
 {
 	showText = !showText;
 }
 
 
-void MeshViewer::toggleCriticalPoints() {
+void MeshViewerLegacy::toggleCriticalPoints() {
 
 	showReebPoints = !showReebPoints;
 	updateGL();
 
 }
 
-void MeshViewer::toggleCutLocusPoints(int state) {
+void MeshViewerLegacy::toggleCutLocusPoints(int state) {
 	if(state == Qt::Unchecked) {
 		showReebPoints = false;
 	}else {
@@ -1580,7 +1580,7 @@ void MeshViewer::toggleCutLocusPoints(int state) {
 	updateGL();
 }
 
-void MeshViewer::toggleCutLocusCut() {
+void MeshViewerLegacy::toggleCutLocusCut() {
 	showCut = !showCut;
 	resetEdges();
 	if (showCut)
@@ -1589,40 +1589,40 @@ void MeshViewer::toggleCutLocusCut() {
 	updateGL();
 }
 
-void MeshViewer::toggleCutLocusCutMode() {
+void MeshViewerLegacy::toggleCutLocusCutMode() {
 	showMultCut = !showMultCut;
 	selectCutLocusEdges();
 	updateGL();
 }
 
 
-void MeshViewer::showCriticalPoints() {
+void MeshViewerLegacy::showCriticalPoints() {
 	showReebPoints = true;
 	showCPDistance = true;
 	showVIndex = false;
 
 }
 
-void MeshViewer::showCutLocusPoints() {
+void MeshViewerLegacy::showCutLocusPoints() {
 	showReebPoints = true;
 	showCLDistance = true;
 	showVIndex = false;
 
 }
 
-void MeshViewer::showCutLocusCut() {
+void MeshViewerLegacy::showCutLocusCut() {
 	showCut = true;
 	selectCutLocusEdges();
 
 	updateGL();
 }
 
-void MeshViewer::hideCriticalPoints() {
+void MeshViewerLegacy::hideCriticalPoints() {
 	showReebPoints = false;
 
 }
 
-void MeshViewer::setCriticalPointsMethod(int midx)
+void MeshViewerLegacy::setCriticalPointsMethod(int midx)
 {
 	cmode = (CriticalPointMode)midx;
 	isCriticalPointModeSet = true;
@@ -1631,20 +1631,20 @@ void MeshViewer::setCriticalPointsMethod(int midx)
 	findReebPoints();
 }
 
-void MeshViewer::setCriticalPointsSmoothingTimes(int times)
+void MeshViewerLegacy::setCriticalPointsSmoothingTimes(int times)
 {
 	cp_smoothing_times = times;
 	findReebPoints();
 }
 
-void MeshViewer::setCriticalPointsSmoothingType(int t)
+void MeshViewerLegacy::setCriticalPointsSmoothingType(int t)
 {
 	cp_smoothing_type = t;
 	cout<<"setCriticalPointssmoothingtype cp_smoothing_type"<<cp_smoothing_type<<endl;
 	findReebPoints();
 }
 
-void MeshViewer::setCutLocusMethod(int midx)
+void MeshViewerLegacy::setCutLocusMethod(int midx)
 {
 	lmode = (CutLocusMode)midx;
 	isCutLocusModeset = true;
@@ -1656,7 +1656,7 @@ void MeshViewer::setCutLocusMethod(int midx)
 
 
 
-void MeshViewer::bindReebGraph(SimpleGraph *g)
+void MeshViewerLegacy::bindReebGraph(SimpleGraph *g)
 {
 	rbgraph = g;
 }

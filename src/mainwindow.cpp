@@ -77,8 +77,8 @@ bool MainWindow::createComponents()
 
 bool MainWindow::layoutComponents()
 {
-	setCentralWidget(viewer);
-
+	//setCentralWidget(viewer);
+	ui->viewerLayout->addWidget(viewer);
 	return true;
 }
 
@@ -164,11 +164,28 @@ void MainWindow::createActions()
 
 		//display menu
 		connect(ui->actionDispGrid, &QAction::triggered,
-			[&] { viewer->showComp(viewer_t::DispComp::GRID); });
+			[&] { viewer->showComp(viewer_t::DISP_GRID); });
+		// Shading State
+		QActionGroup *shadingGroup = new QActionGroup(ui->menuShading);
+		shadingGroup->addAction(ui->actWireframe);
+		shadingGroup->addAction(ui->actShaded);
+		shadingGroup->addAction(ui->actWfShaded);
+		shadingGroup->setExclusive(true);
+		connect(ui->actShaded, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::SHADE_FLAT); });
+		connect(ui->actWireframe, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::SHADE_WF); });
+		connect(ui->actWfShaded, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::SHADE_WF_FLAT); });
+		connect(ui->actDispVert, &QAction::triggered,
+			[&] { viewer->showShading(viewer_t::SHADE_VERT); });
+		
+
+		// Higlight
 		connect(ui->actHL_CutEdge, &QAction::triggered,
-			[&] { viewer->highlightComp(viewer_t::HighlightComp::CUT_EDGE); });
+			[&] { viewer->highlightComp(viewer_t::HIGHLIGHT_CUTEDGE); });
 		connect(ui->actHL_Bridger, &QAction::triggered,
-			[&] { viewer->highlightComp(viewer_t::HighlightComp::BRIDGER_FACE); });
+			[&] { viewer->highlightComp(viewer_t::HIGHLIGHT_BRIDGER); });
 		//"E: edges  V : vertices  F : faces  N: Normals L : lighting  C : critical points"
 		QAction *showEdgesAct = new QAction(tr("Show Edges"), this);
 		showEdgesAct->setShortcut(Qt::Key_E);
@@ -416,7 +433,8 @@ void MainWindow::slot_newFile()
 		qDebug("Clear ObjectStack Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData()));
+		if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
+			return;
 		
 		//kkkkkkkk
 #ifdef _DEBUG
@@ -497,10 +515,10 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 {
 	if (MeshManager::getInstance()->getMeshStack()->canHollow)
 	{
-	hmpanel->show();
-	hmpanel->activateWindow();
+		hmpanel->show();
+		hmpanel->activateWindow();
 
-	ui->actionHollow->setChecked(false);
+		ui->actionHollow->setChecked(false);
 	}
 }
 
@@ -636,7 +654,8 @@ void MainWindow::slot_reset()
 
 void MainWindow::slot_selectMultiple()
 {
-	viewer->setSelectionMode(viewer_t::MultiSelect);
+	//kkkkkkkkkkkkkkkkkkkkkk
+	//viewer->setSelectionMode(viewer_t::MultiSelect);
 }
 
 void MainWindow::slot_toggleEdges()
@@ -685,22 +704,22 @@ void MainWindow::slot_toggleNormals()
 
 void MainWindow::slot_toggleCameraOperation()
 {
-	viewer->setInteractionMode(viewer_t::Camera);
+	viewer->setInteractionMode(viewer_t::ROAM_CAMERA);
 }
 
 void MainWindow::slot_toggleFaceSelection()
 {
-	viewer->setInteractionMode(viewer_t::SelectFace);
+	viewer->setInteractionMode(viewer_t::SEL_FACE);
 }
 
 void MainWindow::slot_toggleEdgeSelection()
 {
-	viewer->setInteractionMode(viewer_t::SelectEdge);
+	viewer->setInteractionMode(viewer_t::SEL_EDGE);
 }
 
 void MainWindow::slot_toggleVertexSelection()
 {
-	viewer->setInteractionMode(viewer_t::SelectVertex);
+	viewer->setInteractionMode(viewer_t::SEL_VERT);
 }
 
 

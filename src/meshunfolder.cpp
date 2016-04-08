@@ -244,12 +244,12 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
 {
 	//progress dialog
-	QProgressDialog* unfoldingProgress = new QProgressDialog("Unfolding...", "", 0, 100);
-	unfoldingProgress->setWindowModality(Qt::WindowModal);
-	unfoldingProgress->setValue(0);
-	unfoldingProgress->setAutoClose(true);
-	unfoldingProgress->setCancelButton(0);
-	unfoldingProgress->setMinimumDuration(0);
+	QProgressDialog unfoldingProgress("Unfolding...", "", 0, 100);
+	unfoldingProgress.setWindowModality(Qt::WindowModal);
+	unfoldingProgress.setValue(0);
+	unfoldingProgress.setAutoClose(true);
+	unfoldingProgress.setCancelButton(0);
+	unfoldingProgress.setMinimumDuration(0);
 	
 	// Check if model is properly cut and unfoldable
 	if( !unfoldable(ref_mesh) )
@@ -294,7 +294,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 					visitedFaces.insert(cf->index);
 				}
 			}
-			unfoldingProgress->setValue((double)progressIndex/(double)ref_mesh->faceSet.size()*10);
+			unfoldingProgress.setValue((double)progressIndex/(double)ref_mesh->faceSet.size()*10);
 		}
 
 #if _DEBUG
@@ -303,7 +303,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 #endif
 	}
 
-	unfoldingProgress->setValue(10);
+	unfoldingProgress.setValue(10);
 
 	int progressIndex = 0; // Qt display progress
 	for (auto piece : ref_mesh->pieceSet)
@@ -320,7 +320,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		//unfolded_mesh->printInfo();
 		Q.push(unfolded_mesh->faceMap[fid]);
 
-		vector<int> expSeq;     // sequence of expansion
+		int32s_t expSeq;     // sequence of expansion
 		map<int, int> parentMap;
 		set<int> visited;
 		set<int> frontier;
@@ -352,7 +352,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		}
 		
 		// Qt display progress
-		unfoldingProgress->setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
+		unfoldingProgress.setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
 
 		// Print out the sequence of performing unfolding
 		//Utils::print(expSeq);
@@ -391,14 +391,14 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 
 		}
 		// Qt display progress
-		unfoldingProgress->setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
+		unfoldingProgress.setValue(10+((double)++progressIndex/(double)(fixedFaces.size()*2)*90));
 	}
 
 	//unfolded_mesh->updatePieceSet();
 	// Layout pieces
 	reset_layout(unfolded_mesh);
 	// Qt display progress
-	unfoldingProgress->setValue(100);
+	unfoldingProgress.setValue(100);
 
 	return true;
 }

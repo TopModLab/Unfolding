@@ -9,19 +9,19 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
 
-	QProgressDialog* cuttingProgress = new QProgressDialog("Cutting...", "", 0, 100);
-	cuttingProgress->setWindowModality(Qt::WindowModal);
-	cuttingProgress->setValue(0);
-	cuttingProgress->setAutoClose(true);
-	cuttingProgress->setCancelButton(0);
-	cuttingProgress->setMinimumDuration(0);
+	QProgressDialog cuttingProgress("Cutting...", "", 0, 100);
+	cuttingProgress.setWindowModality(Qt::WindowModal);
+	cuttingProgress.setValue(0);
+	cuttingProgress.setAutoClose(true);
+	cuttingProgress.setCancelButton(0);
+	cuttingProgress.setMinimumDuration(0);
 
 	cout << "edge data" << edges.size() << endl;
 	if( edges.empty() ) {
 		//if no edge is selected, find cuttable edges
 		edges = findCutEdges(mesh);
 	}
-	cuttingProgress->setValue(20);
+	cuttingProgress.setValue(20);
 
 
 	/// vertices connected to cut edges
@@ -127,7 +127,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		he_new_flip->cutTwin = hef_new_flip;
 		hef_new_flip->cutTwin = he_new_flip;
 	}
-	cuttingProgress->setValue(30);
+	cuttingProgress.setValue(30);
 
 	mesh->printInfo();
 	mesh->validate();
@@ -277,7 +277,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		}
 
 		progressIndex++;
-		cuttingProgress->setValue(30+((double)progressIndex/(double)cutVerts.size()*65));
+		cuttingProgress.setValue(30+((double)progressIndex/(double)cutVerts.size()*65));
 	}
 
 
@@ -327,7 +327,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		cout << v->index << ": " << (*v) << endl;
 	}
 
-	cuttingProgress->setValue(100);
+	cuttingProgress.setValue(100);
 	mesh->updateSortedFaces();
 	mesh->updatePieceSet();
 	return true;

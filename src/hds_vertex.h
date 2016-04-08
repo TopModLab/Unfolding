@@ -1,31 +1,34 @@
 #ifndef HDS_VERTEX_H
 #define HDS_VERTEX_H
 
-#include "common.h"
 #include "hds_common.h"
 
-#include <QtGui/QVector3D>
-
-class HDS_HalfEdge;
-
-class HDS_Vertex
+class HDS_Vertex : public HDS_Common
 {
 private:
 	static hdsid_t uid;
 
 public:
+	enum EDGE_FLAG : uint16_t
+	{
+		FLAG_DEFAULT = 0,
+		PICKED = 1 << 1
+	};
+
 	static void resetIndex() { uid = 0; }
 	static hdsid_t assignIndex() { return uid++; }
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_VERTEX; }
 
-	HDS_Vertex();
-	HDS_Vertex(const QVector3D &pos, int idx = -1, int refid = 0);
+	HDS_Vertex(const QVector3D &pos = QVector3D(),
+		int idx = -1, int refid = 0);
+	HDS_Vertex(const HDS_Vertex &other);
 	~HDS_Vertex();
 
-	HDS_Vertex(const HDS_Vertex &other);
 	HDS_Vertex operator=(const HDS_Vertex &other);
 
 	void setPicked(bool v) { isPicked = v; }
+	uint16_t getFlag() const;
+
 	void computeCurvature();
 	void computeNormal();
 	vector<HDS_Vertex *> neighbors() const;
@@ -41,8 +44,8 @@ public:
 	int index;
 	int refid;
 	double curvature;
-	bool isPicked;
 	double colorVal;
+	bool isPicked;
 
 	enum ReebsPointType{
 		Minimum,

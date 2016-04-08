@@ -1,5 +1,6 @@
-#ifndef MESHVIEWER_H
-#define MESHVIEWER_H
+#pragma once
+#ifndef MESH_VIEWER_LEGACY_H
+#define MESH_VIEWER_LEGACY_H
 
 #ifndef OPENGL_LEGACY
 #define OPENGL_LEGACY
@@ -36,13 +37,13 @@ const QGLFormat qglformat_3d(
 	);
 
 
-class MeshViewer : public QGLWidget, protected QGLFunctions
+class MeshViewerLegacy : public QGLWidget, protected QGLFunctions
 	//, public QOpenGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 public:
-	explicit MeshViewer(QWidget *parent = 0);
-	virtual ~MeshViewer();
+	explicit MeshViewerLegacy(QWidget *parent = 0);
+	virtual ~MeshViewerLegacy();
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	void bindReebGraph(SimpleGraph *g);
@@ -114,7 +115,7 @@ public:
 	Camera_Translation,
 	Camera_Zoom,
 	SelectVertex,
-	SelectFace,
+	SEL_FACE,
 	SelectEdge
 	};
 	void setInteractionMode(InteractionState state) { interactionState = state; while(!selectedElementsIdxQueue.empty()) selectedElementsIdxQueue.pop();}
@@ -202,7 +203,7 @@ public slots:
 	void resetFaces();
 private:
 	bool showReebPoints;
-	vector<double> CPdistances;
+	doubles_t CPdistances;
 	bool isCriticalPointModeSet = false;
 	enum CriticalPointMode {
 		Geodesics = 0,
@@ -224,7 +225,7 @@ private:
 	bool showCut;
 	bool showOneCut;
 	bool showMultCut;
-	vector<double> CLdistances;
+	doubles_t CLdistances;
 
 	bool isCutLocusModeset = false;
 	enum CutLocusMode {

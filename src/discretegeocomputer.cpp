@@ -16,15 +16,15 @@ DiscreteGeoComputer::~DiscreteGeoComputer()
 
 }
 
-vector<double> DiscreteGeoComputer::discreteDistanceTo(unordered_set<HDS_Vertex*> initSet) const
+doubles_t DiscreteGeoComputer::discreteDistanceTo(unordered_set<HDS_Vertex*> initSet) const
 {
-	auto dists = vector<double>();
-	dists = vector<double>(hds_mesh->verts().size());
+	auto dists = doubles_t();
+	dists = doubles_t(hds_mesh->verts().size());
 	for (int i = 0; i < dists.size();i++) {
 		dists[i] = numeric_limits<double>::infinity();
 	}
 	for (auto i: initSet) {
-		vector<double> curDists = computeDistanceTo(i);
+		doubles_t curDists = computeDistanceTo(i);
 		for (int index = 0; index < curDists.size();index++) {
 			dists[index] = min(curDists[index], dists[index]);
 		}
@@ -32,11 +32,11 @@ vector<double> DiscreteGeoComputer::discreteDistanceTo(unordered_set<HDS_Vertex*
 	return dists;
 }
 
-vector<double> DiscreteGeoComputer::computeDistanceTo(HDS_Vertex* init) const
+doubles_t DiscreteGeoComputer::computeDistanceTo(HDS_Vertex* init) const
 {
-	auto dists = vector<double>();
+	auto dists = doubles_t();
 	cout<<hds_mesh->verts().size()<<endl;
-	dists = vector<double>(hds_mesh->verts().size());
+	dists = doubles_t(hds_mesh->verts().size());
 	//use BFS to traverse graph from init vertex
 	cout<<"dists initialized"<<endl;
 

@@ -10,8 +10,8 @@
 #include "meshviewer.h"
 using viewer_t = MeshViewer;
 #else*/
-#include "MeshViewerModern.h"
-using viewer_t = MeshViewerModern;
+#include "MeshViewer.h"
+using viewer_t = MeshViewer;
 /*#endif*/
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"

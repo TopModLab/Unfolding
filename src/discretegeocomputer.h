@@ -13,8 +13,8 @@ public:
 	DiscreteGeoComputer(HDS_Mesh* hds_mesh);
 	~DiscreteGeoComputer();
 
-	vector<double> computeDistanceTo(HDS_Vertex* init) const;
-	vector<double> discreteDistanceTo(unordered_set<HDS_Vertex*> initSet) const;
+	doubles_t computeDistanceTo(HDS_Vertex* init) const;
+	doubles_t discreteDistanceTo(unordered_set<HDS_Vertex*> initSet) const;
 
 private:
 

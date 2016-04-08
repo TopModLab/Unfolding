@@ -1,30 +1,17 @@
 #include "hds_vertex.h"
 #include "hds_halfedge.h"
+#include "hds_face.h"
 #include "mathutils.hpp"
 
-#include <iostream>
-using namespace std;
-
 hdsid_t HDS_Vertex::uid = 0;
-
-HDS_Vertex::HDS_Vertex()
-{
-	isPicked = false;
-	index = -1;
-	refid = 0;
-	colorVal = 0;
-	he = nullptr;
-}
 
 HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
 	: pos(pos)
 	, index(idx), refid(rid)
+	, colorVal(0)
+	, isPicked(false), he(nullptr)
+	//, flag(FLAG_DEFAULT)
 {
-	isPicked = false;
-	/*index = -1;
-	refid = 0;*/
-	he = nullptr;
-
 }
 
 HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
@@ -56,6 +43,12 @@ vector<HDS_Vertex*> HDS_Vertex::neighbors() const {
 		curHE = curHE->flip->next;
 	} while( curHE != he );
 	return neighbors;
+}
+
+uint16_t HDS_Vertex::getFlag() const
+{
+	return (uint16_t)(-(int16_t)isPicked) & PICKED;
+
 }
 
 void HDS_Vertex::computeCurvature()
