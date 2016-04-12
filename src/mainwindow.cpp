@@ -563,6 +563,8 @@ void MainWindow::slot_triggerRimmed3DMesh()
 {
 	HDS_Bridger::setSamples(16);
 	QObject* obj = sender();
+	MeshManager::getInstance()->getMeshStack()->reset();
+
     if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
 		rmpanel->show();

@@ -70,6 +70,7 @@ public:
 	bool isBridger;
 	bool isPlanar;
 
+private:
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	double scalingFactor;
 	vector<QVector3D> scaledCorners;
