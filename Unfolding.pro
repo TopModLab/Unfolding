@@ -62,7 +62,7 @@ SOURCES += src/main.cpp\
     src/OperationStack.cpp \
     src/rimfacepanel.cpp \
     src/Camera.cpp \
-    src/MeshViewerModern.cpp \
+    src/MeshViewer.cpp \
 	src/ViewerGrid.cpp \
     src/MeshWeaver.cpp \
     src/ViewerRuler.cpp
@@ -116,7 +116,7 @@ HEADERS  += src/mainwindow.h \
     src/OperationStack.h \
     src/rimfacepanel.h \
     src/Camera.h \
-    src/MeshViewerModern.h \
+    src/MeshViewer.h \
     src/CameraLegacy.h \
     src/ViewerGrid.h \
     src/MeshWeaver.h \
