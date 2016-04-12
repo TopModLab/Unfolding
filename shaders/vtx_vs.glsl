@@ -9,8 +9,10 @@ flat out uint flag;
 
 void main()
 {
-	gl_Position = proj_matrix * view_matrix * vec4(scale * vp, 1.0f);
-	gl_Position.z -= 0.0075f;
+	vec4 vCam = view_matrix * vec4(scale * vp, 1.0f);
+	vCam -= vec4(0.03125 * normalize(vCam.xyz), 0.f);
+	gl_Position = proj_matrix * vCam;
+
 	flag = texelFetch(flag_tex, gl_VertexID).r;
 	/*if (vf == uint(2))
 	{
