@@ -7,12 +7,13 @@ MeshViewer::MeshViewer(QWidget *parent)
 	, interactionState(ROAM_CAMERA)
 	//, selectionState(SingleSelect)
 	, heMesh(nullptr)
+	, shadingSate(SHADE_WF_FLAT)
 	, dispComp(DispComp::DISP_GRID)
 	, hlComp(HighlightComp::HIGHLIGHT_NONE)
-	, shadingSate(SHADE_WF_FLAT)
+	, grid(4, 6.0f, this)
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
 	, 54.3, 1.67, 1, 100)
-	, grid(4, 6.0f, this)
+	, mesh_changed(false), scale(1.0)
 	, vRBO(this), fRBO(this), heRBO(this)
 {
 	// Set surface format for current widget
@@ -44,17 +45,7 @@ void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh)
 void MeshViewer::setInteractionMode(InteractionState state)
 {
 	interactionState = state;
-	/*while (!selectedElementsIdxQueue.empty())
-	{
-		selectedElementsIdxQueue.pop();
-	}*/
 }
-
-/*
-void MeshViewer::setSelectionMode(SelectionState mode)
-{
-	selectionState = mode;
-}*/
 
 void MeshViewer::showShading(ShadingState shading)
 {
@@ -425,7 +416,8 @@ void MeshViewer::paintGL()
 				vRBO.vao.bind();
 				vtx_solid_shader.bind();
 				vtx_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
-				vtx_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+				vtx_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera); 
+				vtx_solid_shader.setUniformValue("scale", static_cast<float>(scale));
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, vRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, vRBO.flag_tbo);
@@ -449,6 +441,7 @@ void MeshViewer::paintGL()
 				face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 				//face_solid_shader.setUniformValue("hl_comp", hlComp);
 				glUniform1ui(oglUniLoc(face_solid_shader, "hl_comp"), hlComp);
+				face_solid_shader.setUniformValue("scale", static_cast<float>(scale));
 				// Bind Texture Buffer
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
@@ -472,6 +465,7 @@ void MeshViewer::paintGL()
 				edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 				//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
 				glUniform1ui(oglUniLoc(edge_solid_shader, "hl_comp"), hlComp);
+				edge_solid_shader.setUniformValue("scale", static_cast<float>(scale));
 				// Bind Texture Buffer
 				glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);

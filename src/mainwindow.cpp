@@ -396,6 +396,16 @@ void MainWindow::createToolBar()
 		//QActionGroup *unfoldGroup = new QActionGroup(ui->mainToolBar);
 		//unfoldGroup->addAction(actionsMap["mesh unfold"]);
 		//unfoldGroup->addAction(actionsMap["mesh fold"]);
+
+		QDoubleSpinBox* scaleValBox = new QDoubleSpinBox;
+		scaleValBox->setPrefix("Scale: ");
+		scaleValBox->setValue(1.);
+
+		connect(scaleValBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			[&](double val) {
+			viewer->scale = val; viewer->update(); });
+		ui->displayToolBar->addWidget(scaleValBox);
+		ui->displayToolBar->addSeparator();
 	}
 	catch(...) {
 		throw UnfoldingAppException("Failed to create status bar!");

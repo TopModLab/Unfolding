@@ -259,27 +259,26 @@ private://viewer status
 	perspCamera view_cam;
 
 private://Mesh Data
-	// Ground Grid VBO & VAO
+	// Ground Grid
 	ViewerGrid grid;
 
 	HDS_Mesh* heMesh;   /// not own
 	bool mesh_changed;
-	float scale;
+	double scale;
+	//QMatrix4x4 model_matrix;
 
 	// VBOs and VAOs
 	// Vertices data and vao
-	/*oglBuffer vtx_vbo;
-	oglVAO vtx_vao;*/
-	RenderBufferObject vRBO;
 	floats_t vtx_array;
 
-	// Face indices and vao
+	RenderBufferObject vRBO;
 	RenderBufferObject fRBO;
-	// Edge indices and vao
 	RenderBufferObject heRBO;
 
 	// Shader Programs
 	oglShaderP face_solid_shader, edge_solid_shader;
 	oglShaderP vtx_solid_shader;
 	oglShaderP uid_shader, he_uid_shader, face_uid_shader;
+
+	friend class MainWindow;
 };

@@ -1,5 +1,7 @@
 #version 330
-
+/*
+* Face Geometry Shader
+*/
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
@@ -23,7 +25,7 @@ void main()
 	normal = normalize(cross(v1.xyz, v2.xyz));
 	
 	uint flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
-	if (bool(flag & 16u) && bool(hl_comp & 4u))// Bridger
+	if (bool(flag & 16u) && bool(hl_comp & 4u))// Bridger Face
 	{
 		Kd = vec3(0.0f, 0.8f, 1.f);
 	}

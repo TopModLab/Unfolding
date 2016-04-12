@@ -306,6 +306,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MeshViewer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ViewerRuler.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -468,6 +471,9 @@
       <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ViewerGrid.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ViewerRuler.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>

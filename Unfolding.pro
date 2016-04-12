@@ -64,7 +64,8 @@ SOURCES += src/main.cpp\
     src/Camera.cpp \
     src/MeshViewerModern.cpp \
 	src/ViewerGrid.cpp \
-    src/MeshWeaver.cpp
+    src/MeshWeaver.cpp \
+    src/ViewerRuler.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_common.h \
@@ -118,7 +119,8 @@ HEADERS  += src/mainwindow.h \
     src/MeshViewerModern.h \
     src/CameraLegacy.h \
     src/ViewerGrid.h \
-    src/MeshWeaver.h
+    src/MeshWeaver.h \
+    src/ViewerRuler.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \

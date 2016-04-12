@@ -325,6 +325,7 @@
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp" />
     <ClCompile Include="..\src\unionfind.cpp" />
     <ClCompile Include="..\src\ViewerGrid.cpp" />
+    <ClCompile Include="..\src\ViewerRuler.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_bindingmeshpanel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -522,6 +523,7 @@
     </CustomBuild>
     <ClInclude Include="..\src\CameraLegacy.h" />
     <ClInclude Include="..\src\ViewerGrid.h" />
+    <ClInclude Include="..\src\ViewerRuler.h" />
     <ClInclude Include="GeneratedFiles\ui_bindingmeshpanel.h" />
     <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h" />
     <ClInclude Include="GeneratedFiles\ui_rimfacepanel.h" />

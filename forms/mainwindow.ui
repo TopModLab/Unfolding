@@ -77,14 +77,9 @@
        <property name="title">
         <string>Display</string>
        </property>
-       <addaction name="actionShow_Edges"/>
-       <addaction name="actionShow_Vertices"/>
-       <addaction name="actionShow_All_Vertices"/>
        <addaction name="actionShow_Mins"/>
        <addaction name="actionShow_Maxs"/>
        <addaction name="actionShow_Saddles"/>
-       <addaction name="actionShow_Faces"/>
-       <addaction name="actionShow_Vertices_2"/>
        <addaction name="actionShow_Vertex_Index"/>
       </widget>
       <addaction name="menuView"/>
@@ -498,30 +493,6 @@
     <string>Ctrl+Backspace</string>
    </property>
   </action>
-  <action name="actionShow_Edges">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Edges</string>
-   </property>
-  </action>
-  <action name="actionShow_Vertices">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Vertices</string>
-   </property>
-  </action>
-  <action name="actionShow_All_Vertices">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show All Vertices</string>
-   </property>
-  </action>
   <action name="actionShow_Mins">
    <property name="checkable">
     <bool>true</bool>
@@ -544,22 +515,6 @@
    </property>
    <property name="text">
     <string>Show Saddles</string>
-   </property>
-  </action>
-  <action name="actionShow_Faces">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Faces</string>
-   </property>
-  </action>
-  <action name="actionShow_Vertices_2">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Normals</string>
    </property>
   </action>
   <action name="actionShow_Vertex_Index">
