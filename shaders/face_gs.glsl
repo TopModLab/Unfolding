@@ -12,6 +12,7 @@ uniform usamplerBuffer flag_tex;
 flat out vec3 Kd;
 out vec3 normal;
 out vec3 pos;
+flat out uint flag;
 
 void main()
 {
@@ -24,15 +25,15 @@ void main()
 
 	normal = normalize(cross(v1.xyz, v2.xyz));
 	
-	uint flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
+	flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
 	if (bool(flag & 16u) && bool(hl_comp & 4u))// Bridger Face
 	{
 		Kd = vec3(0.0f, 0.8f, 1.f);
 	}
-	else if (bool(flag & 2u))
+	/*else if (bool(flag & 2u))// Selected Face
 	{
-		Kd = vec3(1.f, 0.f, 0.f);
-	}
+		Kd = vec3(0.88f, 0.667f, 0.471f);
+	}*/
 	else// Regular color
 	{
 		Kd = vec3(0.6, 0.8, 1.f);

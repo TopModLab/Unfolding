@@ -34,6 +34,7 @@ struct RenderBufferObject// : protected oglFuncs
 {
 	RenderBufferObject(oglFuncs* f)
 		: funcs(f)
+		, vao(nullptr)
 		, ibo(oglBuffer::Type::IndexBuffer)
 		, tbo{}, tex{}
 	{

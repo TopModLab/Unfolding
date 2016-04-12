@@ -217,6 +217,7 @@ void MeshViewer::drawMeshToFBO()
 	uid_shader.bind();
 	uid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 	uid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
+	uid_shader.setUniformValue("scale", static_cast<float>(scale));
 
 	switch (interactionState)
 	{
@@ -400,7 +401,7 @@ void MeshViewer::paintGL()
 		// Draw Mesh
 		//if (true)
 		{
-			auto oglUniLoc = [&](const oglShaderP& p, const char* str)->bool
+			auto oglUniLoc = [&](const oglShaderP &p, const char* str)
 			{
 				return glGetUniformLocation(p.programId(), str);
 			};
@@ -439,7 +440,6 @@ void MeshViewer::paintGL()
 				face_solid_shader.bind();
 				face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-				//face_solid_shader.setUniformValue("hl_comp", hlComp);
 				glUniform1ui(oglUniLoc(face_solid_shader, "hl_comp"), hlComp);
 				face_solid_shader.setUniformValue("scale", static_cast<float>(scale));
 				// Bind Texture Buffer
@@ -750,14 +750,30 @@ void MeshViewer::selectAll()
 	case SEL_FACE:
 		for (auto f : heMesh->faces())
 			f->setPicked(true);
+		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
+		fRBO.destroy();
+		bindPrimitive(fRBO);
+		bindTBO(fRBO);
 		break;
 	case SEL_EDGE:
 		for (auto e : heMesh->halfedges())
 			e->setPicked(true);
+		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
+		heRBO.destroy();
+		bindPrimitive(heRBO);
+		bindTBO(heRBO);
 		break;
 	case SEL_VERT:
 		for (auto v : heMesh->verts())
 			v->setPicked(true);
+		heMesh->exportVertVBO(nullptr, &vRBO.flags);
+		initialVBO();
+		bindVertices();
+		bindTBO(vRBO, 1);// Bind only flag tbo
+		bindPrimitive(fRBO);
+		bindTBO(fRBO);
+		bindPrimitive(heRBO);
+		bindTBO(heRBO);
 		break;
 	default:
 		break;

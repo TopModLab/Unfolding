@@ -4,7 +4,7 @@ in layout(location = 0) vec3 vp;
 uniform int mode = 0;
 
 uniform mat4 view_matrix, proj_matrix;
-uniform float scale;
+uniform float scale = 1.f;
 
 void main()
 {

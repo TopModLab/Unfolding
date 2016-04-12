@@ -113,6 +113,7 @@ using oglBuffer		= QOpenGLBuffer;
 using oglFBO		= QOpenGLFramebufferObject;
 using oglTexture	= QOpenGLTexture;
 using oglFuncs		= QOpenGLFunctions_3_3_Core;
+
 #endif
 
 #endif // GLUTILS_HPP
