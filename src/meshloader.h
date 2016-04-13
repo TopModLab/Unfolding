@@ -37,10 +37,15 @@ public:
 	virtual bool load(const string &filename) = 0;
 
 	virtual ui32s_t* getTriangulatedIndices() const;
-	const doubles_t& getVerts() const { return vertices; }
-	const vector<PolyIndex*>& getFaces() const { return polys; }
-	const doubles_t& getNormals() const { return normals; }
-	const doubles_t& getTexcoords() const { return uvs; }
+	const doubles_t& getVerts() const { return m_verts; }
+	const vector<PolyIndex*>& getFaces() const { return m_polys; }
+	const doubles_t& getNormals() const { return m_norms; }
+	const doubles_t& getTexcoords() const { return m_uvs; }
+
+protected:
+	void clear();
+	void triangulate();
+	void estimateNormals();
 
 protected:
 
@@ -48,15 +53,12 @@ protected:
 	bool hasVertexTexCoord;
 	bool hasVertexNormal;
 
-	doubles_t vertices;
-	doubles_t uvs;
-	doubles_t normals;
-	vector<PolyIndex*> polys;
+	doubles_t m_verts;
+	doubles_t m_uvs;
+	doubles_t m_norms;
+	vector<PolyIndex*> m_polys;
 
-protected:
-	void clear();
-	void triangulate();
-	void estimateNormals();
+	string m_filename;
 };
 
 class PLYLoader : public MeshLoader

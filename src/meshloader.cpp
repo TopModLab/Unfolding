@@ -9,8 +9,8 @@
 ui32s_t* MeshLoader::getTriangulatedIndices() const
 {
 	ui32s_t* ret = new ui32s_t;
-	ret->reserve(polys.size() * 3);
-	for (auto Fi : polys)
+	ret->reserve(m_polys.size() * 3);
+	for (auto Fi : m_polys)
 	{
 		if (Fi->size > 3)
 		{
@@ -41,14 +41,14 @@ void MeshLoader::clear() {
 	normals.reserve(131076);
 	texcoords.reserve(131076);
 	faces.reserve(131076*2);*/
-	vertices.clear();
-	uvs.clear();
-	normals.clear();
-	for (auto poly : polys)
+	m_verts.clear();
+	m_uvs.clear();
+	m_norms.clear();
+	for (auto poly : m_polys)
 	{
 		delete poly;
 	}
-	polys.clear();
+	m_polys.clear();
 }
 
 void MeshLoader::triangulate()
@@ -56,8 +56,8 @@ void MeshLoader::triangulate()
 	cout << "Triangulating the mesh ..." << endl;
 	vector<PolyIndex*> newFaces, usedFases;
 
-	usedFases.reserve(polys.size());
-	for (auto Fi : polys)
+	usedFases.reserve(m_polys.size());
+	for (auto Fi : m_polys)
 	{
 		if( Fi->v.size() > 3 )
 		{
@@ -93,7 +93,7 @@ void MeshLoader::triangulate()
 	}
 	usedFases.clear();
 
-	polys = newFaces;
+	m_polys = newFaces;
 
 	triangulated = true;
 
@@ -200,21 +200,12 @@ bool OBJLoader::load(const string &filename)
 			clear();
 			load_from_file(filename);
 		}
-		/*QFile file(filename.c_str());
-		if (!file.open(QFile::ReadOnly | QFile::Text)) {
-			cerr << "Failed to open file " << filename << endl;
-			return false;
-		}
-		int fileHandle = file.handle();
-		if (fileHandle == -1)
-		{
-			return false;
-		}*/
+		m_filename = filename;
 		
 
-		cout << "finish loading file " << filename << endl;
-		cout << "# faces = " << polys.size() << endl;
-		cout << "# vertices = " << vertices.size() << endl;
+		cout << "finish loading file " << m_filename << endl;
+		cout << "# faces = " << m_polys.size() << endl;
+		cout << "# vertices = " << m_verts.size() << endl;
 
 		return true;
 	}
@@ -281,14 +272,14 @@ bool OBJLoader::load_from_string(const string &filename)
 			if (strcmp(lineHeader, "v") == 0)
 			{
 				sscanf(subStr, "%lf %lf %lf%n", val, val + 1, val + 2, &offset);
-				vertices.insert(vertices.end(), val, val + 3);
+				m_verts.insert(m_verts.end(), val, val + 3);
 
 				subStr += offset + 1;
 			}
 			// Texture Coordinate
 			else if (strcmp(lineHeader, "vt") == 0)
 			{
-				err = sscanf(subStr, "%lf %lf%n", val, val + 1, &offset); uvs.insert(uvs.end(), val, val + 2);
+				err = sscanf(subStr, "%lf %lf%n", val, val + 1, &offset); m_uvs.insert(m_uvs.end(), val, val + 2);
 				subStr += offset + 1;
 			}
 			// Vertex Normal
@@ -296,7 +287,7 @@ bool OBJLoader::load_from_string(const string &filename)
 			{
 				//float val[3];
 				err = sscanf(subStr, "%lf %lf %lf%n", val, val + 1, val + 2, &offset);
-				normals.insert(normals.end(), val, val + 3);
+				m_norms.insert(m_norms.end(), val, val + 3);
 
 				subStr += offset + 1;
 			}
@@ -353,7 +344,7 @@ bool OBJLoader::load_from_string(const string &filename)
 					break;
 				}
 				fid->size = fid->v.size();
-				polys.push_back(fid);
+				m_polys.push_back(fid);
 				subStr++;
 			}
 			// Comment
@@ -402,20 +393,20 @@ bool OBJLoader::load_from_file(const string &filename)
 		if (strcmp(lineHeader, "v") == 0)
 		{
 			fscanf(fp, "%lf %lf %lf\n", val, val + 1, val + 2);
-			vertices.insert(vertices.end(), val, val + 3);
+			m_verts.insert(m_verts.end(), val, val + 3);
 		}
 		// Texture Coordinate
 		else if (strcmp(lineHeader, "vt") == 0)
 		{
 			fscanf(fp, "%lf %lf\n", val, val + 1);
-			uvs.insert(uvs.end(), val, val + 2);
+			m_uvs.insert(m_uvs.end(), val, val + 2);
 		}
 		// Vertex Normal
 		else if (strcmp(lineHeader, "vn") == 0)
 		{
 			//float val[3];
 			fscanf(fp, "%lf %lf %lf\n", val, val + 1, val + 2);
-			normals.insert(normals.end(), val, val + 3);
+			m_norms.insert(m_norms.end(), val, val + 3);
 		}
 		// Face Index
 		else if (strcmp(lineHeader, "f") == 0)
@@ -469,7 +460,7 @@ bool OBJLoader::load_from_file(const string &filename)
 				break;
 			}
 			fid->size = fid->v.size();
-			polys.push_back(fid);
+			m_polys.push_back(fid);
 		}
 		// Comment
 		else if (strcmp(lineHeader, "#") == 0)
