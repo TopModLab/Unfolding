@@ -33,7 +33,7 @@
 class MeshManager
 {
 private:
-	MeshManager() : operationStack(new OperationStack) {}
+	MeshManager() : operationStack(new OperationStack), meshloader(new OBJLoader) {}
 	MeshManager(const MeshManager &) = delete;
 	MeshManager& operator=(const MeshManager &) = delete;
 public:

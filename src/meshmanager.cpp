@@ -178,7 +178,10 @@ bool MeshManager::loadOBJFile(const string &filename) {
 #endif
 		/// initialize the sparse graph
 		if(hds_mesh->verts().size()>10){                         //later added;
-			gcomp.reset(new GeodesicComputer(filename));
+			ui32s_t* triFids = meshloader->getTriangulatedIndices();
+			//auto data = &triFids->data();
+			gcomp.reset(new GeodesicComputer(filename, &meshloader->getVerts(), triFids));
+			delete triFids;
 			gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
 			for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
 				// compute or load SVG for smoothed meshes
