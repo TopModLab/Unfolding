@@ -214,6 +214,7 @@
    <addaction name="actionHollow"/>
    <addaction name="actionBinding"/>
    <addaction name="actionRim"/>
+   <addaction name="actWeave"/>
    <addaction name="actionCut"/>
    <addaction name="actionUnfold"/>
    <addaction name="separator"/>
@@ -799,6 +800,18 @@
    </property>
    <property name="toolTip">
     <string>Display Vertices</string>
+   </property>
+  </action>
+  <action name="actWeave">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/weaving.png</normaloff>:/icons/weaving.png</iconset>
+   </property>
+   <property name="text">
+    <string>Weave</string>
+   </property>
+   <property name="toolTip">
+    <string>Weaving</string>
    </property>
   </action>
  </widget>

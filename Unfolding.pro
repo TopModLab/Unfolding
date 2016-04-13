@@ -66,6 +66,8 @@ SOURCES += src/main.cpp\
 	src/ViewerGrid.cpp \
     src/MeshWeaver.cpp \
     src/ViewerRuler.cpp
+    src/WeavePanel.cpp
+
 
 HEADERS  += src/mainwindow.h \
 	src/UnfoldingAppException.h \
@@ -122,6 +124,7 @@ HEADERS  += src/mainwindow.h \
     src/ViewerGrid.h \
     src/MeshWeaver.h \
     src/ViewerRuler.h
+    src/WeavePanel.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
@@ -131,7 +134,8 @@ FORMS    += forms/mainwindow.ui \
     forms/hollowmeshpanel.ui \
     forms/bindingmeshpanel.ui \
     forms/ConnectorPanel.ui \
-    forms/rimfacepanel.ui
+    forms/rimfacepanel.ui \
+    forms/WeavePanel.ui
 
 RESOURCES += \
     resources.qrc
@@ -146,3 +150,7 @@ DISTFILES += \
     shaders/face_fs.glsl \
     shaders/face_gs.glsl \
     shaders/face_vs.glsl \
+    shaders/vtx_fs.glsl \
+	shaders/vtx_vs.glsl \
+	shaders/uid_fs.glsl \
+	shaders/uid_vs.glsl

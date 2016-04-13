@@ -14,6 +14,7 @@ using viewer_t = MeshViewer;
 #include "hollowmeshpanel.h"
 #include "bindingmeshpanel.h"
 #include "rimfacepanel.h"
+#include "WeavePanel.h"
 
 
 namespace Ui {
@@ -77,14 +78,14 @@ private slots:
 	void slot_triggerRimmedMesh(bool);
 	void slot_triggerRimmed3DMesh();
 	void slot_triggerBindingMesh(bool);
+	void slot_triggerWeaveMesh();
 
 	void slot_setBridger();
 	void slot_extendMesh();
 	void slot_hollowMesh();
 	void slot_bindingMesh();
 	void slot_rimmed3DMesh();
-
-	void slot_rimMesh();
+	void slot_weaveMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
@@ -127,6 +128,7 @@ private:
 	HollowMeshPanel *hmpanel;
 	BindingMeshPanel *bmpanel;
 	RimFacePanel *rmpanel;
+	WeavePanel * wmpanel;
 
 private:
 

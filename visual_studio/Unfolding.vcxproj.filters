@@ -309,6 +309,18 @@
     <ClCompile Include="..\src\ViewerRuler.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_WeavePanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_WeavePanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\WeavePanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshWeaver.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -419,6 +431,9 @@
     <ClInclude Include="..\src\common.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\UnfoldingAppException.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\unionfind.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
@@ -476,8 +491,11 @@
     <ClInclude Include="..\src\ViewerRuler.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\UnfoldingAppException.h">
+    <ClInclude Include="GeneratedFiles\ui_WeavePanel.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshWeaver.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -537,6 +555,12 @@
     </CustomBuild>
     <CustomBuild Include="..\src\MeshViewer.h">
       <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\WeavePanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\WeavePanel.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

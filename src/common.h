@@ -1,3 +1,4 @@
+#pragma once
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -27,6 +28,17 @@
 
 using namespace std;
 
+#if !defined(NDEBUG) && !defined(_DEBUG)
+#	define _DEBUG
+#endif
+
+class UnfoldingAppException: public exception {
+public:
+	UnfoldingAppException(const string& msg):msg(msg) {}
+	virtual ~UnfoldingAppException() throw() {}
+	virtual const char* what() const throw() {
+		return msg.c_str();
+	}
 
 
 using floats_t = vector<float>;
@@ -37,5 +49,7 @@ using ui32s_t = vector<uint32_t>;
 using int8s_t = vector<int8_t>;
 using int16s_t = vector<int16_t>;
 using int32s_t = vector<int32_t>;
+
+
 
 #endif // COMMON_H

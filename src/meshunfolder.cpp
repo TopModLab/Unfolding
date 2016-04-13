@@ -261,7 +261,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 	/// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
-#if _DEBUG
+#ifdef _DEBUG
 		cout << "No face is selected, finding fixed faces..." << endl;
 #endif
 		/// find all fixed faces
@@ -297,7 +297,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 			unfoldingProgress.setValue((double)progressIndex/(double)ref_mesh->faceSet.size()*10);
 		}
 
-#if _DEBUG
+#ifdef _DEBUG
 		cout << "Fixed faces found: ";
 		Utils::print(fixedFaces);
 #endif
