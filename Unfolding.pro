@@ -64,7 +64,8 @@ SOURCES += src/main.cpp\
     src/Camera.cpp \
 	src/MeshViewer.cpp \
 	src/ViewerGrid.cpp \
-    src/MeshWeaver.cpp
+    src/MeshWeaver.cpp \
+    src/WeavePanel.cpp
 
 HEADERS  += src/mainwindow.h \
     src/hds_common.h \
@@ -118,7 +119,8 @@ HEADERS  += src/mainwindow.h \
 	src/MeshViewer.h \
     src/CameraLegacy.h \
     src/ViewerGrid.h \
-    src/MeshWeaver.h
+    src/MeshWeaver.h \
+    src/WeavePanel.h
 
 FORMS    += forms/mainwindow.ui \
     extras/colormap_editor/colormapeditor.ui \
@@ -128,7 +130,8 @@ FORMS    += forms/mainwindow.ui \
     forms/hollowmeshpanel.ui \
     forms/bindingmeshpanel.ui \
     forms/ConnectorPanel.ui \
-    forms/rimfacepanel.ui
+    forms/rimfacepanel.ui \
+    forms/WeavePanel.ui
 
 RESOURCES += \
     resources.qrc

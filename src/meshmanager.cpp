@@ -781,14 +781,15 @@ void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 
 }
 
-void MeshManager::setWeaveMesh()
+void MeshManager::setWeaveMesh(std::map<QString,float> config)
 {
 	MeshWeaver::setOriMesh(operationStack->getOriMesh());
 
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-	MeshWeaver::weaveMesh(outMesh, 0.7, 0.1);
+	MeshWeaver::configWeaveMesh(config);
+	MeshWeaver::weaveMesh(outMesh);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 }

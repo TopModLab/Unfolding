@@ -1,12 +1,15 @@
 #include "MeshWeaver.h"
 
+float MeshWeaver::size = 0.3;
+float MeshWeaver::roundness = 0.5;
+float MeshWeaver::depth = 0.01;
 
-void MeshWeaver::weaveMesh(HDS_Mesh *mesh, float size, float depth)
+void MeshWeaver::weaveMesh(HDS_Mesh *mesh)
 {
 	initiate();
 	cur_mesh = mesh;
 	planeHeight = size;
-
+	cout<<size<<"' "<<roundness<<"  "<<depth<<endl;
 	unordered_map<int, face_t*> top_pieces;
 	unordered_map<int, pair<QVector3D, QVector3D>> top_piece_bounds;
 	//get top pieces

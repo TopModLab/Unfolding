@@ -6,7 +6,7 @@
 class MeshWeaver : public MeshRimFace
 {
 public:
-	static void configWeaveMesh(std::map<QString, bool> config);
+	static void configWeaveMesh(std::map<QString, float> config);
 
 	static void weaveMesh(HDS_Mesh* mesh);
 
@@ -19,8 +19,8 @@ private:
 };
 
 inline void
-MeshRimFace::configWeaveMesh(std::map<QString, bool> config) {
-	size = config["size"];
+MeshWeaver::configWeaveMesh(std::map<QString, float> config) {
+	size = config["thickness"];
 	depth = config["depth"];
 	roundness = config["roundness"];
 }
