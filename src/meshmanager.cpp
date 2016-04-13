@@ -5,6 +5,7 @@
 #include "MeshExtender.h"
 #include "meshhollower.h"
 #include "meshrimface.h"
+#include "MeshWeaver.h"
 #include "MeshIterator.h"
 #include "MeshConnector.h"
 
@@ -774,6 +775,19 @@ void MeshManager::setHollowMesh(double flapSize, int type, double shift)
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
+}
+
+void MeshManager::setWeaveMesh(std::map<QString,float> config)
+{
+	MeshWeaver::setOriMesh(operationStack->getOriMesh());
+
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
+
+	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
+	MeshWeaver::configWeaveMesh(config);
+	MeshWeaver::weaveMesh(outMesh);
+	outMesh->updateSortedFaces();
+	operationStack->push(outMesh);
 }
 
 void MeshManager::exportXMLFile()

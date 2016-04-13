@@ -173,7 +173,7 @@ void MeshViewer::initShader()
 	//////////////////////////////////////////////////////////////////////////
 	// Grid Shader
 	grid.initShader();
-#if _DEBUG
+#ifdef _DEBUG
 	QString rcDir = "";
 #else
 	QString rcDir = ":";
@@ -191,8 +191,8 @@ void MeshViewer::initShader()
 	edge_solid_shader.link();
 
 	//////////////////////////////////////////////////////////////////////////
-	vtx_solid_shader.addShaderFromSourceFile(oglShader::Vertex, "shaders/vtx_vs.glsl");
-	vtx_solid_shader.addShaderFromSourceFile(oglShader::Fragment, "shaders/vtx_fs.glsl");
+	vtx_solid_shader.addShaderFromSourceFile(oglShader::Vertex, rcDir + "shaders/vtx_vs.glsl");
+	vtx_solid_shader.addShaderFromSourceFile(oglShader::Fragment, rcDir + "shaders/vtx_fs.glsl");
 	vtx_solid_shader.link();
 	//////////////////////////////////////////////////////////////////////////
 	uid_shader.addShaderFromSourceFile(oglShader::Vertex, rcDir + "shaders/uid_vs.glsl");

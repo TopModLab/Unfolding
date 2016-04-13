@@ -62,6 +62,7 @@ bool MainWindow::createComponents()
 		hmpanel = new HollowMeshPanel;
 		bmpanel = new BindingMeshPanel;
 		rmpanel = new RimFacePanel;
+		wmpanel = new WeavePanel;
 
 		createActions();
 		createMenus();
@@ -118,6 +119,10 @@ bool MainWindow::connectComponents()
 
 	connect(rmpanel, &RimFacePanel::sig_saved, this, &MainWindow::slot_rimmed3DMesh);
 	connect(rmpanel, &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+
+	connect(wmpanel, &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
+	connect(wmpanel, &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+
 	return true;
 }
 
@@ -315,6 +320,8 @@ void MainWindow::createActions()
 
 		ui->actionRim->setChecked(false);
 		connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+
+		connect(ui->actWeave, &QAction::triggered, this, &MainWindow::slot_triggerWeaveMesh);
 
 		ui->actionCut->setChecked(false);
 		connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
@@ -562,7 +569,6 @@ void MainWindow::slot_triggerRimmedMesh(bool checked)
 void MainWindow::slot_triggerRimmed3DMesh()
 {
 	HDS_Bridger::setSamples(16);
-	QObject* obj = sender();
 	MeshManager::getInstance()->getMeshStack()->reset();
 
     if (MeshManager::getInstance()->getMeshStack()->canRim)
@@ -574,12 +580,17 @@ void MainWindow::slot_triggerRimmed3DMesh()
 	ui->actionRim->setChecked(false);
 }
 
-void MainWindow::slot_rimmed3DMesh()
+void MainWindow::slot_triggerWeaveMesh()
 {
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
+	HDS_Bridger::setSamples(16);
+	MeshManager::getInstance()->getMeshStack()->reset();
 
-	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig(), rmpanel->getW(), rmpanel->getH());
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	if (MeshManager::getInstance()->getMeshStack()->canRim)
+	{
+		wmpanel->show();
+		wmpanel->activateWindow();
+	}
+
 }
 
 void MainWindow::slot_hollowMesh()
@@ -601,6 +612,24 @@ void MainWindow::slot_bindingMesh()
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 
+void MainWindow::slot_rimmed3DMesh()
+{
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
+
+	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig(), rmpanel->getW(), rmpanel->getH());
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+}
+
+void MainWindow::slot_weaveMesh()
+{
+	HDS_Bridger::setSamples(8);
+
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
+
+	MeshManager::getInstance()->setWeaveMesh(wmpanel->getConfig());
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+}
+
 void MainWindow::slot_setBridger()
 {
 	HDS_Bridger::setBridger(conpanel->getConfigValues());
@@ -617,10 +646,6 @@ void MainWindow::slot_extendMesh()
 
 }
 
-void MainWindow::slot_rimMesh()
-{
-
-}
 
 void MainWindow::slot_smoothMesh() {
 	MeshManager::getInstance()->smoothMesh();
@@ -794,7 +819,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 void MainWindow::updateCurrentMesh()
 {
 	curMesh = meshStack.top();
-#if _DEBUG
+#ifdef _DEBUG
 	cout << "current mesh mode:::" << curMesh << endl;
 #endif
 }

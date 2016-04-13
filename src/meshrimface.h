@@ -21,7 +21,7 @@ public:
 	static void computeDiamondCornerOnFace(he_t* he, vector<QVector3D> &vpos);
 	static void computeDiamondCornerOnEdge(he_t* he, vector<QVector3D> &vpos, QVector3D &vn_max, QVector3D &vp_max);
 
-private:
+protected:
     static float planeWidth;
     static float planeHeight;
 
