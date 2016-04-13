@@ -68,12 +68,12 @@ SOURCES += src/main.cpp\
     src/ViewerRuler.cpp
 
 HEADERS  += src/mainwindow.h \
+	src/UnfoldingAppException.h \
     src/hds_common.h \
     src/hds_vertex.h \
     src/hds_halfedge.h \
     src/hds_face.h \
     src/hds_mesh.h \
-    src/MeshViewerLegacy.h \
     src/common.h \
     src/glutils.hpp \
     src/meshmanager.h \
@@ -115,8 +115,9 @@ HEADERS  += src/mainwindow.h \
     src/meshrimface.h \
     src/OperationStack.h \
     src/rimfacepanel.h \
-    src/Camera.h \
     src/MeshViewer.h \
+    src/MeshViewerLegacy.h \
+    src/Camera.h \
     src/CameraLegacy.h \
     src/ViewerGrid.h \
     src/MeshWeaver.h \

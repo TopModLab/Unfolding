@@ -3,7 +3,8 @@
 GeodesicComputer::GeodesicComputer()
 {}
 
-GeodesicComputer::GeodesicComputer(const string &filename)
+GeodesicComputer::GeodesicComputer(const string &filename,
+	const doubles_t* verts, const ui32s_t* faces)
 {
 	cout << "computing geodesics ..." << endl;
 	const int fixed_K = 50;
@@ -30,3 +31,7 @@ vector<double> GeodesicComputer::distanceTo(int vIdx) const
 	return dists;
 }
 
+void svg_precompute(const string & input_obj_name, int fixed_k, string & svg_file_name, const doubles_t * verts, const vector<PolyIndex*>* faces)
+{
+
+}

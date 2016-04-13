@@ -5,6 +5,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "UnfoldingAppException.h"
 
 #include <QMessageBox>
 #include <QString>

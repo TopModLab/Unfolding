@@ -24,6 +24,67 @@
 #endif
 
 MeshManager* MeshManager::instance = nullptr;
+doubles_t MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
+{
+	auto dist0 = gcomp_smoothed[lev0]->distanceTo(vidx);
+	auto dist1 = gcomp_smoothed[lev1]->distanceTo(vidx);
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
+
+doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
+{
+	auto m0 = hds_mesh_smoothed[lev0];
+	auto m1 = hds_mesh_smoothed[lev1];
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
+	for (auto v : m0->verts()) {
+		dist0[v->index] = v->pos.z();
+	}
+	for (auto v : m1->verts()) {
+		dist1[v->index] = v->pos.z();
+	}
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
+doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
+{
+	auto m0 = hds_mesh_smoothed[lev0];
+	auto m1 = hds_mesh_smoothed[lev1];
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
+	for (auto v : m0->verts()) {
+		dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+	}
+	for (auto v : m1->verts()) {
+		dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+	}
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
+doubles_t MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
+{
+	auto m0 = hds_mesh_smoothed[lev0];
+	auto m1 = hds_mesh_smoothed[lev1];
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
+	for (auto v : m0->verts()) {
+		dist0[v->index] = v->curvature;
+	}
+	for (auto v : m1->verts()) {
+		dist1[v->index] = v->curvature;
+	}
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
 
 bool MeshManager::loadOBJFile(const string &filename) {
 #if USE_REEB_GRAPH
@@ -43,17 +104,16 @@ bool MeshManager::loadOBJFile(const string &filename) {
 	}
 #endif
 
-	OBJLoader loader;
+	//OBJLoader loader;
 #ifdef _DEBUG
 	QTime clock;
 	clock.start();
 #endif
-	if( loader.load(filename) ) {
+	// Check if file is successfully loaded
+	if(meshloader->load(filename))
+	{
 		cout << "file " << filename << " loaded." << endl;
-#ifdef _DEBUG
-		qDebug("Load OBJLoader Took %d ms In Total.", clock.elapsed());
-		clock.restart();
-#endif
+
 		QProgressDialog loadingProgress("Loading the object...", "", 0, 100);
 		loadingProgress.setWindowModality(Qt::WindowModal);
 		loadingProgress.setValue(0);
@@ -62,9 +122,7 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		loadingProgress.setMinimumDuration(1000);
 
 		/// build a half edge mesh here
-		//hds_mesh->printMesh("original");
-		//operationStack->push(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
-		mesh_t* msh = buildHalfEdgeMesh(loader.getVerts(), loader.getFaces()); 
+		mesh_t* msh = buildHalfEdgeMesh(meshloader->getVerts(), meshloader->getFaces());
 		if (msh == nullptr)
 		{
 			loadingProgress.close();
@@ -97,7 +155,6 @@ bool MeshManager::loadOBJFile(const string &filename) {
 				// load the mesh directly
 				OBJLoader tmploader;
 				tmploader.load(smesh_filename);
-				//tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
 				tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getVerts(), tmploader.getFaces()));
 				//  cout<<"load mesh directly"<<endl;
 			}
@@ -157,156 +214,8 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		return false;
 	}
 }
-/*
-HDS_Mesh* MeshManager::buildHalfEdgeMesh(
-	const vector<MeshLoader::face_t> &inFaces,
-	const vector<MeshLoader::vert_t> &inVerts)
-{
-
-	mesh_t *thismesh = new mesh_t;
-
-
-	cout << "building the half edge mesh ..." << endl;
-	int ss=0;
-	size_t vertsCount = inVerts.size();
-	size_t facesCount = inFaces.size();
-	size_t curFaceCount = facesCount;
-	size_t heCount = 0;
-
-	vector<vert_t*> verts;
-	vector<face_t*> faces;
-	vector<he_t*> hes;
-
-	verts.resize(vertsCount);
-	faces.resize(facesCount);
-
-	for (size_t i = 0; i < inFaces.size(); i++)
-		heCount += inFaces[i].v.size();
-
-	hes.resize(heCount);
-
-	for (size_t i = 0; i < vertsCount; i++)
-	{
-		verts[i] = new vert_t(inVerts[i]);
-	}
-
-	for (size_t i = 0; i < facesCount; i++)
-	{
-		faces[i] = new face_t;
-	}
-
-	map<pair<hdsid_t, hdsid_t>, he_t*> heMap;
-	heMap.clear();
-
-	for (size_t i = 0, heIdx = 0; i < facesCount; i++)
-	{
-
-		auto& Fi = inFaces[i];
-		face_t* curFace = faces[i];
-
-		for(size_t j=0;j<Fi.v.size();j++)
-		{
-			he_t* curHe = new he_t;
-			vert_t* curVert = verts[Fi.v[j]];
-			curHe->v = curVert;
-			curHe->f = curFace;
-
-			if( curVert->he == nullptr )
-				curVert->he = curHe;
-
-			hes[heIdx + j] = curHe;
-		}
-
-		// link the half edge of the face
-		for(int j=0;j<Fi.v.size();j++)
-		{
-			int jp = j-1;
-			if( jp < 0 ) jp += Fi.v.size();
-			int jn = j+1;
-			if( jn >= Fi.v.size() ) jn -= Fi.v.size();
-
-			hes[heIdx+j]->prev = hes[heIdx+jp];
-			hes[heIdx+j]->next = hes[heIdx+jn];
-
-			int vj = Fi.v[j];
-			//     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
-			int vjn = Fi.v[jn];
-			//      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
-			pair<int, int> vPair = make_pair(vj, vjn);
-			//cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
-			//cout<<"vPair.sencond = "<<vPair.second<<endl;
-			if( heMap.find(vPair) == heMap.end() )//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
-			{
-
-				heMap[vPair] = hes[heIdx+j];  //address transport; hes[heIdx + j] = curHe; *****critical******
-				//      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
-				//      ss+=1;  //later added;
-			}
-			else
-			{
-				return thismesh;
-			}
-		}
-		//    cout<<"ss = "<<ss<<endl;    //later added;
-		curFace->he = hes[heIdx];
-		curFace->computeNormal();
-
-		heIdx += Fi.v.size();
-	}
-
-	set<pair<int, int> > pairedHESet;
-
-	// for each half edge, find its flip
-	for(auto heit = heMap.begin();heit!=heMap.end();heit++)
-	{
-		int from, to;
-
-		pair<int, int> hePair = (*heit).first;
-
-		if( pairedHESet.find(hePair) == pairedHESet.end() )
-		{
-
-			from = hePair.first;
-			to = hePair.second;
-			pair<int, int> invPair = make_pair(to, from);
-
-			auto invItem = heMap.find(invPair);
-
-			if( invItem != heMap.end() )
-			{
-				he_t* he = (*heit).second;
-				he_t* hef = (*invItem).second;
-
-				he->flip = hef;
-				hef->flip = he;
-			}
-
-			pairedHESet.insert( hePair );
-			pairedHESet.insert( invPair );
-		}
-	}
-
-	for( auto &v : verts ) {
-		v->computeCurvature();
-		v->computeNormal();
-	}
-	int negCount = 0;
-	for (auto &he: hes) {
-		he->computeCurvature();
-		if (he->isNegCurve) negCount++;
-	}
-	cout << "negative edge count :::"<< negCount/2.0<<endl;
-
-	thismesh->setMesh(faces, verts, hes);
-	cout << "finished building halfedge structure." << endl;
-	cout << "halfedge count = " << thismesh->halfedges().size() << endl;
-
-
-	return thismesh;
-}
-*/
 HDS_Mesh * MeshManager::buildHalfEdgeMesh(
-	const floats_t &inVerts, const vector<PolyIndex*> &inFaces)
+	const doubles_t &inVerts, const vector<PolyIndex*> &inFaces)
 {
 	mesh_t *thismesh = new mesh_t;
 
@@ -330,7 +239,9 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 	{
 		size_t vid = i * 3;
 		verts[i] = new vert_t(
-			QVector3D(inVerts[vid], inVerts[vid + 1], inVerts[vid + 2]));
+			QVector3D(static_cast<float>(inVerts[vid]),
+				static_cast<float>(inVerts[vid + 1]),
+				static_cast<float>(inVerts[vid + 2])));
 	}
 
 	for (size_t i = 0; i < facesCount; i++)
@@ -585,50 +496,51 @@ void MeshManager::cutMeshWithSelectedEdges()
 	cout << ".........................." << endl;
 }
 
-//void MeshManager::mapToExtendedMesh()
-//{
-//	QScopedPointer<HDS_Mesh> ref_mesh;
-//	QScopedPointer<HDS_Mesh> des_mesh;
-//	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-//	des_mesh.reset(new HDS_Mesh(*extended_mesh));
+/*
+void MeshManager::mapToExtendedMesh()
+{
+	QScopedPointer<HDS_Mesh> ref_mesh;
+	QScopedPointer<HDS_Mesh> des_mesh;
+	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+	des_mesh.reset(new HDS_Mesh(*extended_mesh));
 
 
 
-//	//mark out all cut edges
+	//mark out all cut edges
 
-//	//get cut edges in cutted mesh
-//	set<int> cutEdges;
-//	for(auto he : ref_mesh->halfedges()) {
-//		if (he->isCutEdge) {
-//			if( cutEdges.find(he->index) == cutEdges.end() )
-//			{
-//				cutEdges.insert(he->index);
-//			}
-//		}
-//	}
+	//get cut edges in cutted mesh
+	set<int> cutEdges;
+	for(auto he : ref_mesh->halfedges()) {
+		if (he->isCutEdge) {
+			if( cutEdges.find(he->index) == cutEdges.end() )
+			{
+				cutEdges.insert(he->index);
+			}
+		}
+	}
 
-//	//find original cut edges in extended mesh and mark out its face
-//	for(auto f : des_mesh->faces()) {
-//		if (f->isHole) {
-//			HDS_HalfEdge* edge = f->he;
-//			do {
-//				//edge->setPicked(true);
-//				edge->setCutEdge(true);
-//				edge = edge->next;
-//			}while(edge != f->he);
-//		}
+	//find original cut edges in extended mesh and mark out its face
+	for(auto f : des_mesh->faces()) {
+		if (f->isHole) {
+			HDS_HalfEdge* edge = f->he;
+			do {
+				//edge->setPicked(true);
+				edge->setCutEdge(true);
+				edge = edge->next;
+			}while(edge != f->he);
+		}
 
-//		if (f->isBridger) {
-//			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
-//				f->he->setPicked(true);
+		if (f->isBridger) {
+			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
+				f->he->setPicked(true);
 
-//			}
-//		}
-//	}
+			}
+		}
+	}
 
-//	extended_mesh.reset(new HDS_Mesh(*des_mesh));
+	extended_mesh.reset(new HDS_Mesh(*des_mesh));
 
-//}
+}*/
 
 void MeshManager::unfoldMesh()
 {
@@ -945,65 +857,4 @@ void MeshManager::updateReebGraph(const doubles_t &fvals)
 	}
 }
 #endif
-
-doubles_t MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
-{
-	auto dist0 = gcomp_smoothed[lev0]->distanceTo(vidx);
-	auto dist1 = gcomp_smoothed[lev1]->distanceTo(vidx);
-	return Utils::interpolate(dist0, dist1, alpha);
-}
-
-
-doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
-{
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
-
-	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-
-	auto dist0 = doubles_t(hds_mesh->verts().size());
-	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = v->pos.z();
-	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = v->pos.z();
-	}
-	return Utils::interpolate(dist0, dist1, alpha);
-}
-
-doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
-{
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
-
-	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-
-	auto dist0 = doubles_t(hds_mesh->verts().size());
-	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
-	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
-	}
-	return Utils::interpolate(dist0, dist1, alpha);
-}
-
-doubles_t MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
-{
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
-
-	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-	auto dist0 = doubles_t(hds_mesh->verts().size());
-	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = v->curvature;
-	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = v->curvature;
-	}
-	return Utils::interpolate(dist0, dist1, alpha);
-}
 

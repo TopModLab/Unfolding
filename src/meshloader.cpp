@@ -6,6 +6,31 @@
 #include <QTextStream>
 
 
+ui32s_t* MeshLoader::getTriangulatedIndices() const
+{
+	ui32s_t* ret = new ui32s_t;
+	ret->reserve(polys.size() * 3);
+	for (auto Fi : polys)
+	{
+		if (Fi->size > 3)
+		{
+			// triangulate this face
+			for (size_t j = 1; j < Fi->size - 1; j++)
+			{
+				ret->push_back(Fi->v[0]);
+				ret->push_back(Fi->v[j]);
+				ret->push_back(Fi->v[j + 1]);
+			}
+		}
+		else
+		{
+			ret->insert(ret->end(), Fi->v.begin(), Fi->v.end());
+		}
+	}
+	ret->shrink_to_fit();
+	return ret;
+}
+
 void MeshLoader::clear() {
 	/*verts.clear();
 	faces.clear();
@@ -25,44 +50,50 @@ void MeshLoader::clear() {
 	}
 	polys.clear();
 }
-/*
-void MeshLoader::triangulate(){
+
+void MeshLoader::triangulate()
+{
 	cout << "Triangulating the mesh ..." << endl;
-	vector<face_t> newFaces;
+	vector<PolyIndex*> newFaces, usedFases;
 
-	for(size_t i=0;i<faces.size();i++)
+	usedFases.reserve(polys.size());
+	for (auto Fi : polys)
 	{
-		const face_t& Fi = faces[i];
-
-		if( Fi.v.size() > 3 )
+		if( Fi->v.size() > 3 )
 		{
 			// triangulate this face
-
-			for(size_t j=1;j<Fi.v.size()-1;j++)
+			for(size_t j=1;j<Fi->v.size()-1;j++)
 			{
-				face_t f;
-				f.v.push_back(Fi.v[0]);
-				f.v.push_back(Fi.v[j]);
-				f.v.push_back(Fi.v[j+1]);
+				PolyIndex* f = new PolyIndex;
+				f->v.push_back(Fi->v[0]);
+				f->v.push_back(Fi->v[j]);
+				f->v.push_back(Fi->v[j+1]);
 
-				f.t.push_back(Fi.t[0]);
-				f.t.push_back(Fi.t[j]);
-				f.t.push_back(Fi.t[j+1]);
+				f->uv.push_back(Fi->uv[0]);
+				f->uv.push_back(Fi->uv[j]);
+				f->uv.push_back(Fi->uv[j+1]);
 
-				f.n.push_back(Fi.n[0]);
-				f.n.push_back(Fi.n[j]);
-				f.n.push_back(Fi.n[j+1]);
+				f->n.push_back(Fi->n[0]);
+				f->n.push_back(Fi->n[j]);
+				f->n.push_back(Fi->n[j+1]);
 
 				newFaces.push_back(f);
 			}
+			usedFases.push_back(Fi);
 		}
 		else
 		{
 			newFaces.push_back(Fi);
 		}
 	}
+	// Clear Non-Triangular Faces
+	for (auto used : usedFases)
+	{
+		delete used;
+	}
+	usedFases.clear();
 
-	faces = newFaces;
+	polys = newFaces;
 
 	triangulated = true;
 
@@ -71,7 +102,7 @@ void MeshLoader::triangulate(){
 
 	cout << "done.";
 }
-
+/*
 void MeshLoader::estimateNormals()
 {
 	if( hasVertexNormal )
@@ -232,7 +263,7 @@ bool OBJLoader::load_from_string(const string &filename)
 		int offset = 0;
 		char trash[255] = {};
 		char lineHeader[2] = {};
-		float val[3] = {};
+		double val[3] = {};
 		uint32_t indices[3];
 
 		do
@@ -249,7 +280,7 @@ bool OBJLoader::load_from_string(const string &filename)
 			// Vertex
 			if (strcmp(lineHeader, "v") == 0)
 			{
-				sscanf(subStr, "%f %f %f%n", val, val + 1, val + 2, &offset);
+				sscanf(subStr, "%lf %lf %lf%n", val, val + 1, val + 2, &offset);
 				vertices.insert(vertices.end(), val, val + 3);
 
 				subStr += offset + 1;
@@ -257,14 +288,14 @@ bool OBJLoader::load_from_string(const string &filename)
 			// Texture Coordinate
 			else if (strcmp(lineHeader, "vt") == 0)
 			{
-				err = sscanf(subStr, "%f %f%n", val, val + 1, &offset); uvs.insert(uvs.end(), val, val + 2);
+				err = sscanf(subStr, "%lf %lf%n", val, val + 1, &offset); uvs.insert(uvs.end(), val, val + 2);
 				subStr += offset + 1;
 			}
 			// Vertex Normal
 			else if (strcmp(lineHeader, "vn") == 0)
 			{
 				//float val[3];
-				err = sscanf(subStr, "%f %f %f%n", val, val + 1, val + 2, &offset);
+				err = sscanf(subStr, "%lf %lf %lf%n", val, val + 1, val + 2, &offset);
 				normals.insert(normals.end(), val, val + 3);
 
 				subStr += offset + 1;
@@ -355,7 +386,7 @@ bool OBJLoader::load_from_file(const string &filename)
 	int err;
 	char buff[255] = {};
 	char lineHeader[2] = {};
-	float val[3] = {};
+	double val[3] = {};
 	uint32_t indices[3];
 	char endflg;
 
@@ -370,20 +401,20 @@ bool OBJLoader::load_from_file(const string &filename)
 		// Vertex
 		if (strcmp(lineHeader, "v") == 0)
 		{
-			fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
+			fscanf(fp, "%lf %lf %lf\n", val, val + 1, val + 2);
 			vertices.insert(vertices.end(), val, val + 3);
 		}
 		// Texture Coordinate
 		else if (strcmp(lineHeader, "vt") == 0)
 		{
-			fscanf(fp, "%f %f\n", val, val + 1);
+			fscanf(fp, "%lf %lf\n", val, val + 1);
 			uvs.insert(uvs.end(), val, val + 2);
 		}
 		// Vertex Normal
 		else if (strcmp(lineHeader, "vn") == 0)
 		{
 			//float val[3];
-			fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
+			fscanf(fp, "%lf %lf %lf\n", val, val + 1, val + 2);
 			normals.insert(normals.end(), val, val + 3);
 		}
 		// Face Index

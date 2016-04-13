@@ -5,14 +5,8 @@
 #include <QTime>
 
 #include <tchar.h>
-/*
-#ifdef OPENGL_LEGACY
-#include "meshviewer.h"
-using viewer_t = MeshViewer;
-#else*/
 #include "MeshViewer.h"
 using viewer_t = MeshViewer;
-/*#endif*/
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
@@ -20,6 +14,7 @@ using viewer_t = MeshViewer;
 #include "hollowmeshpanel.h"
 #include "bindingmeshpanel.h"
 #include "rimfacepanel.h"
+
 
 namespace Ui {
 class MainWindow;

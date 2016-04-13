@@ -32,6 +32,10 @@
 
 class MeshManager
 {
+private:
+	MeshManager() : operationStack(new OperationStack) {}
+	MeshManager(const MeshManager &) = delete;
+	MeshManager& operator=(const MeshManager &) = delete;
 public:
 	static MeshManager* getInstance()
 	{
@@ -50,7 +54,7 @@ public:
 	}
 
 	OperationStack* getMeshStack() {
-		return operationStack;
+		return operationStack.data();
 	}
 	HDS_Mesh* getSmoothedMesh() {
 		return smoothed_mesh.data();
@@ -71,35 +75,9 @@ public:
 
 	void colorMeshByGeoDistance(int vidx);
 	void colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ratio);
-	bool saveMeshes();
-
-protected:
-	/// should not be externally accessible
-	static void drop()
-	{
-		static QMutex mutex;
-		mutex.lock();
-		delete instance;
-		instance = nullptr;
-		mutex.unlock();
-	}
-
-private:
-	MeshManager() {operationStack = new OperationStack;}
-	MeshManager(const MeshManager &) = delete;
-	MeshManager& operator=(const MeshManager &) = delete;
-
-	static MeshManager* instance;
-
-	friend class MeshViewerLegacy;
-	friend class MeshViewer;
-	friend class MeshConnector;
-
-public:
 
 	bool loadOBJFile(const string& filename);
-	/*HDS_Mesh* buildHalfEdgeMesh(const vector<MeshLoader::face_t> &faces, const vector<MeshLoader::vert_t> &verts);*/
-	HDS_Mesh* buildHalfEdgeMesh(const floats_t &inVerts, const vector<PolyIndex*> &inFaces);
+	HDS_Mesh* buildHalfEdgeMesh(const doubles_t &inVerts, const vector<PolyIndex*> &inFaces);
 	void cutMeshWithSelectedEdges();
 	//void mapToExtendedMesh();
 	void unfoldMesh();
@@ -112,17 +90,31 @@ public:
 	void set3DRimMesh(std::map<QString, bool> config, float width, float height);
 
 	// Export as SVG files
-    void exportXMLFile();
+	void exportXMLFile();
+	bool saveMeshes();
 
-	void setCurrentOpFlag(OperationStack::Flag curFlag){operationStack->setCurrentFlag(curFlag);}
+	void setCurrentOpFlag(OperationStack::Flag curFlag) { operationStack->setCurrentFlag(curFlag); }
+protected:
+	/// should not be externally accessible
+	static void drop()
+	{
+		static QMutex mutex;
+		mutex.lock();
+		delete instance;
+		instance = nullptr;
+		mutex.unlock();
+	}
+	
 private:
 	typedef HDS_Vertex vert_t;
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Face face_t;
 	typedef HDS_Mesh mesh_t;
 
-	OperationStack* operationStack;
+	static MeshManager* instance;
 
+	QScopedPointer<OperationStack> operationStack;
+	QScopedPointer<OBJLoader> meshloader;
 	QScopedPointer<HDS_Mesh> smoothed_mesh;
 	QScopedPointer<GeodesicComputer> gcomp;
 	QScopedPointer<DiscreteGeoComputer> dis_gcomp;
@@ -134,6 +126,10 @@ private:
 	vtkSmartPointer<vtkPolyData> vtkMesh;
 	SimpleGraph rbGraph;
 #endif
+
+	friend class MeshViewerLegacy;
+	friend class MeshViewer;
+	friend class MeshConnector;
 };
 
 #endif // MESHMANAGER_H

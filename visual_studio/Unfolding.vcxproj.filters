@@ -476,6 +476,9 @@
     <ClInclude Include="..\src\ViewerRuler.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\UnfoldingAppException.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
