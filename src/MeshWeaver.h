@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MESHWEAVER_H
 #define MESHWEAVER_H
 

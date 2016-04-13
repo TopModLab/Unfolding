@@ -1,8 +1,8 @@
 #include "MeshWeaver.h"
 
-float MeshWeaver::size = 0.3;
-float MeshWeaver::roundness = 0.5;
-float MeshWeaver::depth = 0.01;
+float MeshWeaver::size = 0.3f;
+float MeshWeaver::roundness = 0.5f;
+float MeshWeaver::depth = 0.01f;
 
 void MeshWeaver::weaveMesh(HDS_Mesh *mesh)
 {
