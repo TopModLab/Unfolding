@@ -20,7 +20,8 @@ public:
 		Binded = 3,
 		Rimmed = 4,
 		Hollowed = 5,
-		Unfolded = 6
+		Woven = 6,
+		Unfolded
 	};
 
 	struct Operation{

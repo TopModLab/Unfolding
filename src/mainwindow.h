@@ -88,8 +88,7 @@ private slots:
 	void slot_hollowMesh();
 	void slot_bindingMesh();
 	void slot_rimmed3DMesh();
-
-	void slot_rimMesh();
+	void slot_weaveMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);

@@ -316,6 +316,8 @@ void MainWindow::createActions()
 		ui->actionRim->setChecked(false);
 		connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
 
+		connect(ui->actWeave, &QAction::triggered, this, &MainWindow::slot_weaveMesh);
+
 		ui->actionCut->setChecked(false);
 		connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
 		
@@ -564,14 +566,6 @@ void MainWindow::slot_triggerRimmed3DMesh()
 	ui->actionRim->setChecked(false);
 }
 
-void MainWindow::slot_rimmed3DMesh()
-{
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
-
-	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig(), rmpanel->getW(), rmpanel->getH());
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
-}
-
 void MainWindow::slot_hollowMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Hollowed);
@@ -591,6 +585,23 @@ void MainWindow::slot_bindingMesh()
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 
+void MainWindow::slot_rimmed3DMesh()
+{
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
+
+	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig(), rmpanel->getW(), rmpanel->getH());
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+}
+
+void MainWindow::slot_weaveMesh()
+{
+	HDS_Bridger::setSamples(8);
+
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Woven);
+	MeshManager::getInstance()->setWeaveMesh();
+	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+}
+
 void MainWindow::slot_setBridger()
 {
 	HDS_Bridger::setBridger(conpanel->getConfigValues());
@@ -607,10 +618,6 @@ void MainWindow::slot_extendMesh()
 
 }
 
-void MainWindow::slot_rimMesh()
-{
-
-}
 
 void MainWindow::slot_smoothMesh() {
 	MeshManager::getInstance()->smoothMesh();
@@ -784,7 +791,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 void MainWindow::updateCurrentMesh()
 {
 	curMesh = meshStack.top();
-#if _DEBUG
+#ifdef _DEBUG
 	cout << "current mesh mode:::" << curMesh << endl;
 #endif
 }

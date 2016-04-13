@@ -150,7 +150,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 					});
 
 
-#if _DEBUG
+#ifdef _DEBUG
 			/// test if we are merging the same face
 			//set<face_t*> cutFacesSet(cutFaces.begin(), cutFaces.end());
 			//if( cutFacesSet.size() == 1 ) {
@@ -189,7 +189,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 			/// the degree of the cut vertex
 			int cutSize = cutFaces.size();
-#if _DEBUG
+#ifdef _DEBUG
 			cout << "cut vertex degree = " << cutSize << endl;
 			cout << "cut faces number = " << cutFaces.size() << endl;
 			cout << "incident edges = " << incidentHEs.size() << endl;
@@ -270,7 +270,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 				cout << "inserting vertex " << v->index << endl;
 				mesh->addVertex(v);
 			}
-#if _DEBUG
+#ifdef _DEBUG
 			mesh->printInfo("merged");
 			mesh->validate();
 #endif
