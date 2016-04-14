@@ -6,11 +6,22 @@
 
 #include <QDebug>
 
-//BBox3* MeshUnfolder::bound = nullptr;
+MeshUnfolder* MeshUnfolder::instance = nullptr;
 
 MeshUnfolder::MeshUnfolder()
 {
 }
+
+MeshUnfolder* MeshUnfolder::getInstance()
+{
+	if (!instance)
+	{
+		instance = new MeshUnfolder;
+	}
+
+	return instance;
+}
+
 void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
 	const QVector3D &uvec, const QVector3D &vvec)
@@ -104,18 +115,16 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	} while( curHE != he );
 }
 
-bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
-{
-	/// for each vertex in the cut_mesh, check the condition
+bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
+	/// for each vertex in the cutted_mesh, check the condition
 	auto isBadVertex = [](HDS_Vertex* v) -> bool {
+		vector<double> sums;
 		double sum = 0;
 		auto he = v->he;
 		auto curHE = he->flip->next;
 		bool hasCutFace = false;
-		do
-		{
-			if( !curHE->f->isCutFace )
-			{
+		do {
+			if( !curHE->f->isCutFace ) {
 				QVector3D v1 = he->flip->v->pos - he->v->pos;
 				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
 				double nv1pnv2 = v1.length() * v2.length();
@@ -124,28 +133,36 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
 				double angle = acos(cosVal);
 				sum += angle;
 			}
-			else
-			{
-				hasCutFace = true;
-			}
+			else hasCutFace = true;
 
 			he = curHE;
 			curHE = he->flip->next;
 		}while( he != v->he ) ;
-		
-		// The sum of angles of an unfoldable vertex is smaller than pi*2 with cutface,
+
+		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
-		return sum > PI2 || (sum < PI2 && !hasCutFace);
+		if (sums.size() > 1)
+		{
+			return any_of(sums.begin(), sums.end(),
+				[](double val)->bool { return val > (PI2 + 1.0E-6); });
+		}
+		else
+		{
+			return !FuzzyEqual(sums.front(), PI2, PI_EPS);
+		}
+		//return sum > (PI2 + 1.0E-6) || (sum < (PI2 - 1.0E-6) && !hasCutFace);
 	};
-	
-	if (any_of(cut_mesh->vertSet.begin(), cut_mesh->vertSet.end(), isBadVertex))
+	for (auto vert : cutted_mesh->vertSet)
 	{
-		return false;
+		if (isBadVertex(vert))
+		{
+			cout << "\tbad vertex\n";
+			isBadVertex(vert);
+		}
+		else cout << "\tgood vertex\n";
 	}
-	else
-	{
-		return true;
-	}
+	if( any_of(cutted_mesh->vertSet.begin(), cutted_mesh->vertSet.end(), isBadVertex) ) return false;
+	else return true;
 }
 
 void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
@@ -240,6 +257,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		bound->Union(curBound);
 	}
 }
+
 
 bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
 {
@@ -396,7 +414,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 
 	//unfolded_mesh->updatePieceSet();
 	// Layout pieces
-	reset_layout(unfolded_mesh);
+	//reset_layout(unfolded_mesh);
 	// Qt display progress
 	unfoldingProgress.setValue(100);
 

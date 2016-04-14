@@ -32,13 +32,6 @@ using namespace std;
 #	define _DEBUG
 #endif
 
-class UnfoldingAppException: public exception {
-public:
-	UnfoldingAppException(const string& msg):msg(msg) {}
-	virtual ~UnfoldingAppException() throw() {}
-	virtual const char* what() const throw() {
-		return msg.c_str();
-	}
 
 
 using floats_t = vector<float>;

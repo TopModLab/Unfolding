@@ -240,13 +240,15 @@ OBJLoader::index_t OBJLoader::facetype(const char * str, uint32_t * val)
 
 bool OBJLoader::load_from_string(const string &filename)
 {
+	// Read Entire File Into String
 	QFile f(filename.c_str());
 	if (!f.open(QFile::ReadOnly))
 		return false;
 	auto str = QTextStream(&f).readAll().toUtf8().toStdString();
 	const char* srcStr = str.c_str();
 	f.close();
-	cout << "finish reading file\n";
+
+	// Parsing String
 	if (srcStr != nullptr)
 	{
 		auto subStr = srcStr;
@@ -294,7 +296,6 @@ bool OBJLoader::load_from_string(const string &filename)
 			// Face Index
 			else if (strcmp(lineHeader, "f") == 0)
 			{
-				cout << "loading face\n";
 				PolyIndex* fid = new PolyIndex;
 				err = sscanf(subStr, "%s%n", &trash, &offset);
 				indices[1] = indices[2] = 0;
@@ -362,8 +363,6 @@ bool OBJLoader::load_from_string(const string &filename)
 			}
 
 		} while (*subStr != '\0');
-		cout << "hehe\n";
-		//delete[] srcStr;
 	}
 }
 
@@ -411,7 +410,6 @@ bool OBJLoader::load_from_file(const string &filename)
 		// Face Index
 		else if (strcmp(lineHeader, "f") == 0)
 		{
-			//cout << "loading face\n";
 			PolyIndex* fid = new PolyIndex;
 			err = fscanf(fp, "%s", &buff);
 			indices[1] = indices[2] = 0;

@@ -79,6 +79,7 @@ public:
 	bool loadOBJFile(const string& filename);
 	HDS_Mesh* buildHalfEdgeMesh(const doubles_t &inVerts, const vector<PolyIndex*> &inFaces);
 	void cutMeshWithSelectedEdges();
+	bool initSparseGraph();
 	//void mapToExtendedMesh();
 	void unfoldMesh();
 	void smoothMesh();

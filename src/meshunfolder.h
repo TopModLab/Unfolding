@@ -15,7 +15,7 @@ class HDS_Face;
 class MeshUnfolder
 {
 public:
-	MeshUnfolder();
+	static MeshUnfolder* getInstance();
 
 	static bool unfold(HDS_Mesh *mesh, HDS_Mesh *ref, set<int> fixedFaces = set<int>());
 	static bool unfoldable(HDS_Mesh *ref_mesh);
@@ -27,9 +27,8 @@ private:
 	
 public:
 private:
-	//static BBox3* bound;// Bounding box for unfolded mesh
-	
-
+	MeshUnfolder();
+	static MeshUnfolder* instance;
 };
 
 #endif // MESHUNFOLDER_H

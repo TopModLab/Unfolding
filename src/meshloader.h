@@ -37,10 +37,11 @@ public:
 	virtual bool load(const string &filename) = 0;
 
 	virtual ui32s_t* getTriangulatedIndices() const;
-	const doubles_t& getVerts() const { return m_verts; }
-	const vector<PolyIndex*>& getFaces() const { return m_polys; }
-	const doubles_t& getNormals() const { return m_norms; }
-	const doubles_t& getTexcoords() const { return m_uvs; }
+	virtual const string& getFilename() const { return m_filename; }
+	virtual const doubles_t& getVerts() const { return m_verts; }
+	virtual const vector<PolyIndex*>& getFaces() const { return m_polys; }
+	virtual const doubles_t& getNormals() const { return m_norms; }
+	virtual const doubles_t& getTexcoords() const { return m_uvs; }
 
 protected:
 	void clear();
