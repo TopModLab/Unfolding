@@ -141,26 +141,8 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
 
 		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
-		if (sums.size() > 1)
-		{
-			return any_of(sums.begin(), sums.end(),
-				[](double val)->bool { return val > (PI2 + 1.0E-6); });
-		}
-		else
-		{
-			return !FuzzyEqual(sums.front(), PI2, PI_EPS);
-		}
-		//return sum > (PI2 + 1.0E-6) || (sum < (PI2 - 1.0E-6) && !hasCutFace);
+		return sum > (PI2 + PI_EPS) || (sum < (PI2 - PI_EPS) && !hasCutFace);
 	};
-	for (auto vert : cutted_mesh->vertSet)
-	{
-		if (isBadVertex(vert))
-		{
-			cout << "\tbad vertex\n";
-			isBadVertex(vert);
-		}
-		else cout << "\tgood vertex\n";
-	}
 	if( any_of(cutted_mesh->vertSet.begin(), cutted_mesh->vertSet.end(), isBadVertex) ) return false;
 	else return true;
 }
@@ -178,7 +160,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
-		vector<HDS_Vertex *> verts;
+		unordered_set<HDS_Vertex *> verts;
 		/************************************************************************/
 		/* Calculate Piece Orientation                                          */
 		/************************************************************************/
@@ -188,12 +170,9 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		for (auto fid : piece)
 		{
 			auto face = unfolded_mesh->faceMap[fid];
-			if (face->isCutFace)
-			{
-				verts = face->corners();
-			}
-			// inside faces
-			else if (!checkedOrientation)
+			auto corners = face->corners();
+			verts.insert(corners.begin(), corners.end());
+			if (!face->isCutFace && !checkedOrientation)
 			{
 				auto he = face->he;
 				auto curHE = he;
@@ -275,7 +254,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
 	}
-	//ref_mesh->updatePieceSet();
+	ref_mesh->updatePieceSet();
 	/// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
@@ -414,7 +393,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 
 	//unfolded_mesh->updatePieceSet();
 	// Layout pieces
-	//reset_layout(unfolded_mesh);
+	reset_layout(unfolded_mesh);
 	// Qt display progress
 	unfoldingProgress.setValue(100);
 

@@ -120,15 +120,15 @@ private:
 	Ui::MainWindow *ui;
 	QMap<QString, QAction*> actionsMap;
 
-	viewer_t *viewer;
-	ColormapEditor *ceditor;
-	CriticalPointsPanel *cppanel;
-	CutLocusPanel *clpanel;
-	BridgerPanel *conpanel;
-	HollowMeshPanel *hmpanel;
-	BindingMeshPanel *bmpanel;
-	RimFacePanel *rmpanel;
-	WeavePanel * wmpanel;
+	viewer_t* viewer;
+	ColormapEditor* ceditor;
+	CriticalPointsPanel* cppanel;
+	CutLocusPanel* clpanel;
+	BridgerPanel* conpanel;
+	HollowMeshPanel* hmpanel;
+	BindingMeshPanel* bmpanel;
+	RimFacePanel* rmpanel;
+	WeavePanel* wmpanel;
 
 private:
 
