@@ -280,7 +280,7 @@
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/undo.png</normaloff>:/icons/undo.png</iconset>
+     <normaloff>:/icons/undo.svg</normaloff>:/icons/undo.svg</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -295,7 +295,7 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/redo.png</normaloff>:/icons/redo.png</iconset>
+     <normaloff>:/icons/redo.svg</normaloff>:/icons/redo.svg</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -310,7 +310,7 @@
   <action name="actionReset">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/reset.png</normaloff>:/icons/reset.png</iconset>
+     <normaloff>:/icons/reset.svg</normaloff>:/icons/reset.svg</iconset>
    </property>
    <property name="text">
     <string>Reset</string>
@@ -604,7 +604,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/extend.png</normaloff>:/icons/extend.png</iconset>
+     <normaloff>:/icons/extend.svg</normaloff>:/icons/extend.svg</iconset>
    </property>
    <property name="text">
     <string>Extend Mesh</string>
@@ -682,7 +682,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/unfold.png</normaloff>:/icons/unfold.png</iconset>
+     <normaloff>:/icons/unfolding.png</normaloff>:/icons/unfolding.png</iconset>
    </property>
    <property name="text">
     <string>Unfold Mesh</string>

@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/">
+    <file>icons/redo.svg</file>
+    <file>icons/undo.svg</file>
     <file>icons/camRoam.svg</file>
     <file>icons/selEdge.svg</file>
     <file>icons/selFace.svg</file>
@@ -26,32 +28,20 @@
     <file>icons/bezier.png</file>
     <file>icons/bind.png</file>
     <file>icons/cl.png</file>
-    <file>icons/close.png</file>
     <file>icons/colormap.png</file>
     <file>icons/cp.png</file>
     <file>icons/cube.png</file>
-    <file>icons/cut.png</file>
-    <file>icons/edge.png</file>
-    <file>icons/export.png</file>
-    <file>icons/extend.png</file>
-    <file>icons/face.png</file>
     <file>icons/flat.png</file>
+    <file>icons/extend.svg</file>
     <file>icons/fold.png</file>
     <file>icons/hollow_multFlap.png</file>
     <file>icons/hollow_oneFlap.png</file>
     <file>icons/HollowSphere.png</file>
     <file>icons/move.png</file>
-    <file>icons/open.png</file>
     <file>icons/original.png</file>
-    <file>icons/redo.png</file>
-    <file>icons/save.png</file>
-    <file>icons/select.png</file>
     <file>icons/smooth.png</file>
-    <file>icons/undo.png</file>
-    <file>icons/unfold.png</file>
-    <file>icons/vertex.png</file>
     <file>icons/rimface_3d.png</file>
-    <file>icons/reset.png</file>
+    <file>icons/reset.svg</file>
     <file>shaders/edge_fs.glsl</file>
     <file>shaders/edge_vs.glsl</file>
     <file>shaders/face_fs.glsl</file>
