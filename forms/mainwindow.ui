@@ -235,7 +235,7 @@
   <action name="actionImport">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/open.png</normaloff>:/icons/open.png</iconset>
+     <normaloff>:/icons/open.svg</normaloff>:/icons/open.svg</iconset>
    </property>
    <property name="text">
     <string>Import</string>
@@ -250,7 +250,7 @@
   <action name="actionExport">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/export.png</normaloff>:/icons/export.png</iconset>
+     <normaloff>:/icons/export.svg</normaloff>:/icons/export.svg</iconset>
    </property>
    <property name="text">
     <string>Export</string>
@@ -265,7 +265,7 @@
   <action name="actionExit">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
+     <normaloff>:/icons/close.svg</normaloff>:/icons/close.svg</iconset>
    </property>
    <property name="text">
     <string>Exit</string>
@@ -385,7 +385,7 @@
   <action name="actionSave">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
+     <normaloff>:/icons/save.svg</normaloff>:/icons/save.svg</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -532,7 +532,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/select.png</normaloff>:/icons/select.png</iconset>
+     <normaloff>:/icons/camRoam.svg</normaloff>:/icons/camRoam.svg</iconset>
    </property>
    <property name="text">
     <string>Camera operation</string>
@@ -547,7 +547,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/face.png</normaloff>:/icons/face.png</iconset>
+     <normaloff>:/icons/selFace.svg</normaloff>:/icons/selFace.svg</iconset>
    </property>
    <property name="text">
     <string>Select Faces</string>
@@ -562,7 +562,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/edge.png</normaloff>:/icons/edge.png</iconset>
+     <normaloff>:/icons/selEdge.svg</normaloff>:/icons/selEdge.svg</iconset>
    </property>
    <property name="text">
     <string>Select Edges</string>
@@ -577,7 +577,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/vertex.png</normaloff>:/icons/vertex.png</iconset>
+     <normaloff>:/icons/selVert.svg</normaloff>:/icons/selVert.svg</iconset>
    </property>
    <property name="text">
     <string>Select Vertices</string>
@@ -664,7 +664,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/cut.png</normaloff>:/icons/cut.png</iconset>
+     <normaloff>:/icons/cut.svg</normaloff>:/icons/cut.svg</iconset>
    </property>
    <property name="text">
     <string>Cut Mesh</string>
