@@ -28,7 +28,7 @@
 
 using namespace std;
 
-#if !defined(NDEBUG) && !defined(_DEBUG)
+#if !defined(QT_NO_DEBUG) && !defined(QT_DEBUG)
 #	define _DEBUG
 #endif
 
