@@ -85,6 +85,8 @@ class MeshViewer
 public:
 	explicit MeshViewer(QWidget *parent = nullptr);
 	~MeshViewer();
+public:
+	//void getInstance();
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	
@@ -256,10 +258,12 @@ private:
 	uint8_t shadingSate;
 	uint32_t dispComp;//Display Components Flag
 	uint32_t hlComp;// Highlight Components Flag
-private://viewer status
+private:
+	//static MeshViewer* instance;
+	//viewer status
 	perspCamera view_cam;
 
-private://Mesh Data
+	//Mesh Data
 	// Ground Grid
 	ViewerGrid grid;
 

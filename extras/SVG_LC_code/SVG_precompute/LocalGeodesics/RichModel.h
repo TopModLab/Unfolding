@@ -9,8 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 #include "BaseModel.h"
-#include <cstdlib>
-#include <cmath>
+#include "common.h"
 
 class CRichModel : virtual public CBaseModel 
 {
@@ -45,7 +44,7 @@ protected:
 public:
 	//void LoadBunny();
 	CRichModel(const string &filename);
-	void Preprocess();	
+	void Preprocess(const doubles_t* verts = nullptr, const ui32s_t* fids = nullptr);
 	inline int GetSubindexToVert(int root, int neigh) const;
 	inline const CEdge& Edge(int edgeIndex) const;	
 	inline const vector<pair<int, double> >& Neigh(int root) const;	

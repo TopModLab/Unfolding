@@ -26,6 +26,68 @@
 
 MeshManager* MeshManager::instance = nullptr;
 
+doubles_t MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
+{
+	auto dist0 = gcomp_smoothed[lev0]->distanceTo(vidx);
+	auto dist1 = gcomp_smoothed[lev1]->distanceTo(vidx);
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
+
+doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
+{
+	auto m0 = hds_mesh_smoothed[lev0];
+	auto m1 = hds_mesh_smoothed[lev1];
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
+	for (auto v : m0->verts()) {
+		dist0[v->index] = v->pos.z();
+	}
+	for (auto v : m1->verts()) {
+		dist1[v->index] = v->pos.z();
+	}
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
+doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
+{
+	auto m0 = hds_mesh_smoothed[lev0];
+	auto m1 = hds_mesh_smoothed[lev1];
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
+	for (auto v : m0->verts()) {
+		dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+	}
+	for (auto v : m1->verts()) {
+		dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+	}
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
+doubles_t MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
+{
+	auto m0 = hds_mesh_smoothed[lev0];
+	auto m1 = hds_mesh_smoothed[lev1];
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+	auto dist0 = doubles_t(hds_mesh->verts().size());
+	auto dist1 = doubles_t(hds_mesh->verts().size());
+	for (auto v : m0->verts()) {
+		dist0[v->index] = v->curvature;
+	}
+	for (auto v : m1->verts()) {
+		dist1[v->index] = v->curvature;
+	}
+	return Utils::interpolate(dist0, dist1, alpha);
+}
+
+
 bool MeshManager::loadOBJFile(const string &filename) {
 #if USE_REEB_GRAPH
 	try {
@@ -44,17 +106,16 @@ bool MeshManager::loadOBJFile(const string &filename) {
 	}
 #endif
 
-	OBJLoader loader;
+	//OBJLoader loader;
 #ifdef _DEBUG
 	QTime clock;
 	clock.start();
 #endif
-	if( loader.load(filename) ) {
+	// Check if file is successfully loaded
+	if(meshloader->load(filename))
+	{
 		cout << "file " << filename << " loaded." << endl;
-#ifdef _DEBUG
-		qDebug("Load OBJLoader Took %d ms In Total.", clock.elapsed());
-		clock.restart();
-#endif
+
 		QProgressDialog loadingProgress("Loading the object...", "", 0, 100);
 		loadingProgress.setWindowModality(Qt::WindowModal);
 		loadingProgress.setValue(0);
@@ -63,93 +124,20 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		loadingProgress.setMinimumDuration(1000);
 
 		/// build a half edge mesh here
-		//hds_mesh->printMesh("original");
-		//operationStack->push(buildHalfEdgeMesh(loader.getFaces(), loader.getVerts()));
-		mesh_t* msh = buildHalfEdgeMesh(loader.getVerts(), loader.getFaces()); 
+		mesh_t* msh = buildHalfEdgeMesh(meshloader->getVerts(), meshloader->getFaces());
 		if (msh == nullptr)
 		{
 			loadingProgress.close();
 			return false;
 		}
 		operationStack->push(msh);
-		HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 #ifdef _DEBUG
 		qDebug("Clear Operation Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		/// save the half edge mesh out to a temporary file
-		loadingProgress.setValue(30);
-		///*
-		/// preprocess the mesh with smoothing
-		const int nsmooth = 10;
-		QScopedPointer<HDS_Mesh> tmp_mesh;
-		vector<string> smoothed_mesh_filenames;
-		tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
-		hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
-		for (int i = 0; i < nsmooth; ++i) {
-			loadingProgress.setValue(30+(double)i/(double)nsmooth*50);
-
-			const int stepsize = 10;
-			string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
-			smoothed_mesh_filenames.push_back(smesh_filename);
-			//cout<<" smesh_filename is "<< smesh_filename<<endl;
-
-			if (Utils::exists(smesh_filename)) {
-				// load the mesh directly
-				OBJLoader tmploader;
-				tmploader.load(smesh_filename);
-				//tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getFaces(), tmploader.getVerts()));
-				tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getVerts(), tmploader.getFaces()));
-				//  cout<<"load mesh directly"<<endl;
-			}
-			else {
-				for (int j = 0; j < stepsize; ++j) {
-					MeshSmoother::smoothMesh_Laplacian(tmp_mesh.data());
-					//      cout<<"smoothMesh_Laplacian"<<endl;
-				}
-				//tmp_mesh->save(smesh_filename); //commented out exporting smoothes objs
-			}
-			hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
-
-
-		}
-		
-		loadingProgress.setValue(80);
-#ifdef _DEBUG
-		cout << "smoothed meshes computed finished." << endl;
-		qDebug("Smoothing Mesh Takes %d ms In Total.", clock.elapsed());
-		clock.restart();
-#endif
-		/// initialize the sparse graph
-		if(hds_mesh->verts().size()>10){                         //later added;
-			gcomp.reset(new GeodesicComputer(filename));
-			gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
-			for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
-				// compute or load SVG for smoothed meshes
-				//    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
-
-				//cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
-				loadingProgress.setValue(80+(double)i/(double)smoothed_mesh_filenames.size()*20);
-
-			}
-			cout << "SVGs computed." << endl;
-
-			//set the graph for discrete geodesics computer
-			dis_gcomp.reset(new DiscreteGeoComputer(hds_mesh));
-			cout<<"dis gcomp set."<<endl;
-		}
-		else {
-			loadingProgress.setValue(100);
-
-			return true;
-		}
-		//*/
-#ifdef _DEBUG
-		qDebug("Sparsing Graph Takes %d ms In Total.", clock.elapsed());
-		clock.restart();
-#endif
+		initSparseGraph();
+//////////////////////////////////////////////////////////////////////////
 		loadingProgress.setValue(100);
-
 
 		return true;
 	}
@@ -158,163 +146,14 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		return false;
 	}
 }
-/*
-HDS_Mesh* MeshManager::buildHalfEdgeMesh(
-	const vector<MeshLoader::face_t> &inFaces,
-	const vector<MeshLoader::vert_t> &inVerts)
-{
-
-	mesh_t *thismesh = new mesh_t;
-
-
-	cout << "building the half edge mesh ..." << endl;
-	int ss=0;
-	size_t vertsCount = inVerts.size();
-	size_t facesCount = inFaces.size();
-	size_t curFaceCount = facesCount;
-	size_t heCount = 0;
-
-	vector<vert_t*> verts;
-	vector<face_t*> faces;
-	vector<he_t*> hes;
-
-	verts.resize(vertsCount);
-	faces.resize(facesCount);
-
-	for (size_t i = 0; i < inFaces.size(); i++)
-		heCount += inFaces[i].v.size();
-
-	hes.resize(heCount);
-
-	for (size_t i = 0; i < vertsCount; i++)
-	{
-		verts[i] = new vert_t(inVerts[i]);
-	}
-
-	for (size_t i = 0; i < facesCount; i++)
-	{
-		faces[i] = new face_t;
-	}
-
-	map<pair<hdsid_t, hdsid_t>, he_t*> heMap;
-	heMap.clear();
-
-	for (size_t i = 0, heIdx = 0; i < facesCount; i++)
-	{
-
-		auto& Fi = inFaces[i];
-		face_t* curFace = faces[i];
-
-		for(size_t j=0;j<Fi.v.size();j++)
-		{
-			he_t* curHe = new he_t;
-			vert_t* curVert = verts[Fi.v[j]];
-			curHe->v = curVert;
-			curHe->f = curFace;
-
-			if( curVert->he == nullptr )
-				curVert->he = curHe;
-
-			hes[heIdx + j] = curHe;
-		}
-
-		// link the half edge of the face
-		for(int j=0;j<Fi.v.size();j++)
-		{
-			int jp = j-1;
-			if( jp < 0 ) jp += Fi.v.size();
-			int jn = j+1;
-			if( jn >= Fi.v.size() ) jn -= Fi.v.size();
-
-			hes[heIdx+j]->prev = hes[heIdx+jp];
-			hes[heIdx+j]->next = hes[heIdx+jn];
-
-			int vj = Fi.v[j];
-			//     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
-			int vjn = Fi.v[jn];
-			//      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
-			pair<int, int> vPair = make_pair(vj, vjn);
-			//cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
-			//cout<<"vPair.sencond = "<<vPair.second<<endl;
-			if( heMap.find(vPair) == heMap.end() )//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
-			{
-
-				heMap[vPair] = hes[heIdx+j];  //address transport; hes[heIdx + j] = curHe; *****critical******
-				//      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
-				//      ss+=1;  //later added;
-			}
-			else
-			{
-				return thismesh;
-			}
-		}
-		//    cout<<"ss = "<<ss<<endl;    //later added;
-		curFace->he = hes[heIdx];
-		curFace->computeNormal();
-
-		heIdx += Fi.v.size();
-	}
-
-	set<pair<int, int> > pairedHESet;
-
-	// for each half edge, find its flip
-	for(auto heit = heMap.begin();heit!=heMap.end();heit++)
-	{
-		int from, to;
-
-		pair<int, int> hePair = (*heit).first;
-
-		if( pairedHESet.find(hePair) == pairedHESet.end() )
-		{
-
-			from = hePair.first;
-			to = hePair.second;
-			pair<int, int> invPair = make_pair(to, from);
-
-			auto invItem = heMap.find(invPair);
-
-			if( invItem != heMap.end() )
-			{
-				he_t* he = (*heit).second;
-				he_t* hef = (*invItem).second;
-
-				he->flip = hef;
-				hef->flip = he;
-			}
-
-			pairedHESet.insert( hePair );
-			pairedHESet.insert( invPair );
-		}
-	}
-
-	for( auto &v : verts ) {
-		v->computeCurvature();
-		v->computeNormal();
-	}
-	int negCount = 0;
-	for (auto &he: hes) {
-		he->computeCurvature();
-		if (he->isNegCurve) negCount++;
-	}
-	cout << "negative edge count :::"<< negCount/2.0<<endl;
-
-	thismesh->setMesh(faces, verts, hes);
-	cout << "finished building halfedge structure." << endl;
-	cout << "halfedge count = " << thismesh->halfedges().size() << endl;
-
-
-	return thismesh;
-}
-*/
 HDS_Mesh * MeshManager::buildHalfEdgeMesh(
-	const floats_t &inVerts, const vector<PolyIndex*> &inFaces)
+	const doubles_t &inVerts, const vector<PolyIndex*> &inFaces)
 {
-	mesh_t *thismesh = new mesh_t;
-
 #ifdef _DEBUG
-	cout << "building the half edge mesh ..." << endl;
+	cout << "Building the half edge mesh ..." << endl;
 #endif // _DEBUG
 
+	mesh_t *thismesh = new mesh_t;
 	int ss = 0;
 	size_t vertsCount = inVerts.size() / 3;
 	size_t facesCount = inFaces.size();
@@ -323,24 +162,28 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 	for (size_t i = 0; i < inFaces.size(); i++)
 		heCount += inFaces[i]->size;
 
+	// Half-Edge Data in Mesh
 	vector<vert_t*> verts(vertsCount, nullptr);
 	vector<face_t*> faces(facesCount, nullptr);
 	vector<he_t*> hes(heCount, nullptr);
+	// Temporary Half-Edge Pair Recorder
+	using hepair_t = pair<hdsid_t, hdsid_t>;
+	map<hepair_t, he_t*> heMap;
 
+	// Malloc Vertices
 	for (size_t i = 0; i < vertsCount; i++)
 	{
 		size_t vid = i * 3;
-		verts[i] = new vert_t(
-			QVector3D(inVerts[vid], inVerts[vid + 1], inVerts[vid + 2]));
+		verts[i] = new vert_t(QVector3D(
+					static_cast<float>(inVerts[vid]),
+					static_cast<float>(inVerts[vid + 1]),
+					static_cast<float>(inVerts[vid + 2])));
 	}
-
+	// Malloc Faces
 	for (size_t i = 0; i < facesCount; i++)
 	{
 		faces[i] = new face_t;
 	}
-
-	map<pair<hdsid_t, hdsid_t>, he_t*> heMap;
-	heMap.clear();
 
 	for (size_t i = 0, heIdx = 0; i < facesCount; i++)
 	{
@@ -398,7 +241,6 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 
 		heIdx += Fi->size;
 	}
-	using hepair_t = pair<hdsid_t, hdsid_t>;
 	set<hepair_t> visitedHESet;
 	auto unvisitedHESet = heMap;
 	// for each half edge, find its flip
@@ -515,12 +357,13 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 		he->computeCurvature();
 		if (he->isNegCurve) negCount++;
 	}
-	cout << "negative edge count :::" << negCount / 2.0 << endl;
-
 	thismesh->setMesh(faces, verts, hes);
-	cout << "finished building halfedge structure." << endl;
-	cout << "halfedge count = " << thismesh->halfedges().size() << endl;
 
+#ifdef _DEBUG
+	cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;
+	cout << "\tFinished Building Half-Edge Structure." << endl;
+	cout << "\tHalf-Edge Count = " << thismesh->halfedges().size() << endl;
+#endif
 
 	return thismesh;
 }
@@ -586,50 +429,143 @@ void MeshManager::cutMeshWithSelectedEdges()
 	cout << ".........................." << endl;
 }
 
-//void MeshManager::mapToExtendedMesh()
-//{
-//	QScopedPointer<HDS_Mesh> ref_mesh;
-//	QScopedPointer<HDS_Mesh> des_mesh;
-//	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-//	des_mesh.reset(new HDS_Mesh(*extended_mesh));
+bool MeshManager::initSparseGraph()
+{
+	QProgressDialog loadingProgress("Loading the object...", "", 0, 100);
+	loadingProgress.setWindowModality(Qt::WindowModal);
+	loadingProgress.setValue(0);
+	loadingProgress.setAutoClose(true);
+	loadingProgress.setCancelButton(0);
+	loadingProgress.setMinimumDuration(1000);
+#ifdef _DEBUG
+	QTime clock;
+	clock.start();
+#endif
+	// save the half edge mesh out to a temporary file
+	loadingProgress.setValue(30);
+
+	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
+	auto filename = meshloader->getFilename();
+
+	// preprocess the mesh with smoothing
+	const int nsmooth = 10;
+	QScopedPointer<HDS_Mesh> tmp_mesh;
+	vector<string> smoothed_mesh_filenames;
+	tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
+	hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
+	for (int i = 0; i < nsmooth; ++i)
+	{
+		loadingProgress.setValue(30 + (double)i / (double)nsmooth * 50);
+
+		const int stepsize = 10;
+		string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
+		smoothed_mesh_filenames.push_back(smesh_filename);
+		//cout<<" smesh_filename is "<< smesh_filename<<endl;
+
+		if (Utils::exists(smesh_filename)) {
+			// load the mesh directly
+			OBJLoader tmploader;
+			tmploader.load(smesh_filename);
+			tmp_mesh.reset(buildHalfEdgeMesh(tmploader.getVerts(), tmploader.getFaces()));
+			//  cout<<"load mesh directly"<<endl;
+		}
+		else {
+			for (int j = 0; j < stepsize; ++j) {
+				MeshSmoother::smoothMesh_Laplacian(tmp_mesh.data());
+			}
+			//tmp_mesh->save(smesh_filename); //commented out exporting smoothes objs
+		}
+		hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
+
+
+	}
+	cout << "Smoothed Mesh Filename:\t" << smoothed_mesh_filenames.size() << endl;
+	loadingProgress.setValue(80);
+	//////////////////////////////////////////////////////////////////////////
+#ifdef _DEBUG
+	cout << "smoothed meshes computed finished." << endl;
+	qDebug("Smoothing Mesh Takes %d ms In Total.", clock.elapsed());
+	clock.restart();
+#endif
+	// initialize the sparse graph
+	if (hds_mesh->verts().size()>10)
+	{
+		ui32s_t* triFids = meshloader->getTriangulatedIndices();
+		gcomp.reset(new GeodesicComputer(filename, &meshloader->getVerts(), triFids));
+		delete triFids;
+		gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
+		for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
+			// compute or load SVG for smoothed meshes
+			//    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
+
+			//cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
+			loadingProgress.setValue(80 + (double)i / (double)smoothed_mesh_filenames.size() * 20);
+
+		}
+		cout << "SVGs computed." << endl;
+
+		//set the graph for discrete geodesics computer
+		dis_gcomp.reset(new DiscreteGeoComputer(hds_mesh));
+		cout << "dis gcomp set." << endl;
+	}
+	else {
+		loadingProgress.setValue(100);
+
+		return true;
+	}
+	//*/
+#ifdef _DEBUG
+	qDebug("Sparsing Graph Takes %d ms In Total.", clock.elapsed());
+	clock.restart();
+#endif
+	return false;
+}
+
+/*
+void MeshManager::mapToExtendedMesh()
+{
+	QScopedPointer<HDS_Mesh> ref_mesh;
+	QScopedPointer<HDS_Mesh> des_mesh;
+	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
+	des_mesh.reset(new HDS_Mesh(*extended_mesh));
 
 
 
-//	//mark out all cut edges
+	//mark out all cut edges
 
-//	//get cut edges in cutted mesh
-//	set<int> cutEdges;
-//	for(auto he : ref_mesh->halfedges()) {
-//		if (he->isCutEdge) {
-//			if( cutEdges.find(he->index) == cutEdges.end() )
-//			{
-//				cutEdges.insert(he->index);
-//			}
-//		}
-//	}
+	//get cut edges in cutted mesh
+	set<int> cutEdges;
+	for(auto he : ref_mesh->halfedges()) {
+		if (he->isCutEdge) {
+			if( cutEdges.find(he->index) == cutEdges.end() )
+			{
+				cutEdges.insert(he->index);
+			}
+		}
+	}
 
-//	//find original cut edges in extended mesh and mark out its face
-//	for(auto f : des_mesh->faces()) {
-//		if (f->isHole) {
-//			HDS_HalfEdge* edge = f->he;
-//			do {
-//				//edge->setPicked(true);
-//				edge->setCutEdge(true);
-//				edge = edge->next;
-//			}while(edge != f->he);
-//		}
+	//find original cut edges in extended mesh and mark out its face
+	for(auto f : des_mesh->faces()) {
+		if (f->isHole) {
+			HDS_HalfEdge* edge = f->he;
+			do {
+				//edge->setPicked(true);
+				edge->setCutEdge(true);
+				edge = edge->next;
+			}while(edge != f->he);
+		}
 
-//		if (f->isBridger) {
-//			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
-//				f->he->setPicked(true);
+		if (f->isBridger) {
+			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
+				f->he->setPicked(true);
 
-//			}
-//		}
-//	}
+			}
+		}
+	}
 
-//	extended_mesh.reset(new HDS_Mesh(*des_mesh));
+	extended_mesh.reset(new HDS_Mesh(*des_mesh));
 
-//}
+}*/
 
 void MeshManager::unfoldMesh()
 {
@@ -644,7 +580,8 @@ void MeshManager::unfoldMesh()
 
 	/// cut the mesh using the selected edges
 	set<int> selectedFaces;
-	for (auto f : ref_mesh->faces()) {
+	for (auto f : ref_mesh->faces())
+	{
 		if (f->isPicked) {
 			/// use picked edges as cut edges
 			f->setPicked(false);
@@ -959,65 +896,4 @@ void MeshManager::updateReebGraph(const doubles_t &fvals)
 	}
 }
 #endif
-
-doubles_t MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
-{
-	auto dist0 = gcomp_smoothed[lev0]->distanceTo(vidx);
-	auto dist1 = gcomp_smoothed[lev1]->distanceTo(vidx);
-	return Utils::interpolate(dist0, dist1, alpha);
-}
-
-
-doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
-{
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
-
-	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-
-	auto dist0 = doubles_t(hds_mesh->verts().size());
-	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = v->pos.z();
-	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = v->pos.z();
-	}
-	return Utils::interpolate(dist0, dist1, alpha);
-}
-
-doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
-{
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
-
-	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-
-	auto dist0 = doubles_t(hds_mesh->verts().size());
-	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
-	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
-	}
-	return Utils::interpolate(dist0, dist1, alpha);
-}
-
-doubles_t MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
-{
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
-
-	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-	auto dist0 = doubles_t(hds_mesh->verts().size());
-	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = v->curvature;
-	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = v->curvature;
-	}
-	return Utils::interpolate(dist0, dist1, alpha);
-}
 

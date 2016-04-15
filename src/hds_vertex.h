@@ -14,6 +14,13 @@ public:
 		FLAG_DEFAULT = 0,
 		PICKED = 1 << 1
 	};
+	enum ReebsPointType : uint16_t
+	{
+		Minimum,
+		Maximum,
+		Saddle,
+		Regular
+	} rtype;
 
 	static void resetIndex() { uid = 0; }
 	static hdsid_t assignIndex() { return uid++; }
@@ -41,18 +48,13 @@ public:
 	QVector3D normal;
 	HDS_HalfEdge *he;
 
-	int index;
-	int refid;
+	uint32_t index;
+	uint32_t refid;
 	double curvature;
 	double colorVal;
 	bool isPicked;
+	uint16_t flag;
 
-	enum ReebsPointType{
-		Minimum,
-		Maximum,
-		Saddle,
-		Regular
-	} rtype;
 	int sdegree;  // the degree of saddle point
 	double morseFunctionVal;
 };

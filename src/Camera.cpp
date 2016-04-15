@@ -8,34 +8,11 @@ perspCamera::perspCamera(const QVector3D& eyePos, const QVector3D& targetPos,
 	WorldToCamera.lookAt(eyePos, targetPos, upVec);
 	CameraToWorld = WorldToCamera.inverted();
 	CameraToScreen.perspective(verticalAngle, aspectRatio, nearPlane, farPlane);
-	//setPerspective(verticalAngle, aspectRatio, nearPlane, farPlane);
 }
 
 QVector3D perspCamera::getTarget() const
 {
 	return target;
-}
-
-void perspCamera::lookAt(const QVector3D& eyePos,
-	const QVector3D& targetPos, const QVector3D& upVec)
-{
-	//
-}
-
-void perspCamera::setPerspective(Float verticalAngle, Float aspectRatio,
-	Float nearPlane, Float farPlane)
-{
-	//
-}
-
-const float* perspCamera::oglViewMatrix() const
-{
-	return WorldToCamera.constData();
-}
-
-const float* perspCamera::oglProjectionMatrix() const
-{
-	return CameraToScreen.constData();
 }
 
 void perspCamera::zoom(Float x_val, Float y_val, Float z_val)
@@ -79,7 +56,5 @@ void perspCamera::rotate(Float x_rot, Float y_rot, Float z_rot)
 
 void perspCamera::resizeViewport(Float aspr)
 {
-	//QMatrix4x4 newProj= CameraToScreen;
 	CameraToScreen(0, 0) = -CameraToScreen(1, 1) / aspr;
-	//CameraToScreen = newProj;
 }

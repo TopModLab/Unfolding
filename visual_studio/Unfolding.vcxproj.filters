@@ -494,6 +494,9 @@
     <ClInclude Include="..\src\MeshWeaver.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\UnfoldingAppException.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">

@@ -3,21 +3,18 @@
 GeodesicComputer::GeodesicComputer()
 {}
 
-GeodesicComputer::GeodesicComputer(const string &filename)
+GeodesicComputer::GeodesicComputer(const string &filename,
+	const doubles_t* verts, const ui32s_t* faces)
 {
 	cout << "computing geodesics ..." << endl;
 	const int fixed_K = 50;
 	string svg_file_name = "svg.binary";
-	svg_precompute(filename, fixed_K, svg_file_name);
+	svg_precompute(filename, fixed_K, svg_file_name, verts, faces);
 	cout<<"svg_precompute finished"<<endl;
 	s_graph.reset(new LC_LLL<float>());
 
 	s_graph->read_svg_file_binary(svg_file_name);
 	cout << "computing geodesics done." << endl;
-}
-
-GeodesicComputer::~GeodesicComputer()
-{
 }
 
 vector<double> GeodesicComputer::distanceTo(int vIdx) const
@@ -29,4 +26,3 @@ vector<double> GeodesicComputer::distanceTo(int vIdx) const
 	}
 	return dists;
 }
-

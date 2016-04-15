@@ -5,14 +5,8 @@
 #include <QTime>
 
 #include <tchar.h>
-/*
-#ifdef OPENGL_LEGACY
-#include "meshviewer.h"
-using viewer_t = MeshViewer;
-#else*/
 #include "MeshViewer.h"
 using viewer_t = MeshViewer;
-/*#endif*/
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
@@ -21,6 +15,7 @@ using viewer_t = MeshViewer;
 #include "bindingmeshpanel.h"
 #include "rimfacepanel.h"
 #include "WeavePanel.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -125,15 +120,15 @@ private:
 	Ui::MainWindow *ui;
 	QMap<QString, QAction*> actionsMap;
 
-	viewer_t *viewer;
-	ColormapEditor *ceditor;
-	CriticalPointsPanel *cppanel;
-	CutLocusPanel *clpanel;
-	BridgerPanel *conpanel;
-	HollowMeshPanel *hmpanel;
-	BindingMeshPanel *bmpanel;
-	RimFacePanel *rmpanel;
-	WeavePanel * wmpanel;
+	viewer_t* viewer;
+	ColormapEditor* ceditor;
+	CriticalPointsPanel* cppanel;
+	CutLocusPanel* clpanel;
+	BridgerPanel* conpanel;
+	HollowMeshPanel* hmpanel;
+	BindingMeshPanel* bmpanel;
+	RimFacePanel* rmpanel;
+	WeavePanel* wmpanel;
 
 private:
 

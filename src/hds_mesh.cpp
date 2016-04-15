@@ -132,12 +132,12 @@ void HDS_Mesh::updatePieceSet()
 	// Find all faces
 	for (auto f : this->faceSet)
 	{
-		/// If f has not been visited yet
-		/// Add to selected faces
+		// If f has not been visited yet
+		// Add to selected faces
 		if (visitedFaces.find(f->index) == visitedFaces.end())
 		{
 			visitedFaces.insert(f->index);
-			/// Find all linked faces except cut face
+			// Find all linked faces except cut face
 			set<HDS_Face*> linkedFaces = f->linkedFaces();
 
 			set<hdsid_t> curPiece;
@@ -149,6 +149,11 @@ void HDS_Mesh::updatePieceSet()
 			pieceSet.insert(curPiece);
 		}
 	}
+#ifdef _DEBUG
+	cout << "Piece Set Info:\n\t" << pieceSet.size()
+		<< " pieces\n\tTotal faces " << faceSet.size()
+		<< "\n\tface in pieces" << pieceSet.begin()->size() << endl;
+#endif // _DEBUG
 }
 
 bool HDS_Mesh::validateEdge(he_t *e) {
@@ -634,6 +639,10 @@ void HDS_Mesh::exportVertVBO(
 		vFLAGs->reserve(vertSet.size());
 		for (int i = 0; i < vertMap.size(); i++)
 		{
+			if (vertMap.at(i)->isPicked)
+			{
+				cout << "already picked!" << endl;
+			}
 			vFLAGs->push_back(vertMap.at(i)->getFlag());
 		}
 	}

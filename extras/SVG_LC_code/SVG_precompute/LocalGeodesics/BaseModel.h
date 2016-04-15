@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Point3d.h"
+#include "common.h"
 #include <algorithm>
 
 class CBaseModel  
@@ -14,12 +15,8 @@ public:
 	struct CFace
 	{
 		int verts[3];
-		CFace(){}
-		CFace(int x, int y, int z)
+		CFace(int x = 0, int y = 0, int z = 0) : verts{x, y, z}
 		{
-			verts[0] = x;
-			verts[1] = y;
-			verts[2] = z;
 		}
 		int& operator[](int index)
 		{
@@ -43,7 +40,8 @@ public:
 	};
 	
 	
-protected:	
+protected:
+	void LoadFromBuffer(const doubles_t* verts = nullptr, const ui32s_t* fids = nullptr);
 	void FastReadObjFile(const string& filename);
 	void ReadMFile(const string& filename);
 	void ReadFile(const string& filename);
@@ -60,7 +58,7 @@ public:
 
 	inline int GetNumOfVerts() const;
 	inline int GetNumOfFaces() const;
-	void LoadModel();
+	void LoadModel(const doubles_t* verts = nullptr, const ui32s_t* fids = nullptr);
 	string GetFileName() const;
 	string GetFullPathAndFileName() const;
 	inline const CPoint3D& Vert(int vertIndex) const;
