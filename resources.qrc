@@ -35,7 +35,6 @@
         <file>icons/open.png</file>
         <file>icons/original.png</file>
         <file>icons/redo.png</file>
-        <file>icons/rimface.png</file>
         <file>icons/save.png</file>
         <file>icons/select.png</file>
         <file>icons/smooth.png</file>
@@ -55,5 +54,7 @@
         <file>shaders/edge_gs.glsl</file>
         <file>shaders/vtx_fs.glsl</file>
         <file>shaders/vtx_vs.glsl</file>
+        <file>icons/unfolding.png</file>
+        <file>icons/unfolding_large.png</file>
     </qresource>
 </RCC>
