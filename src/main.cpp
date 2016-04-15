@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	//QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QApplication a(argc, argv);
 	MainWindow w;
-
+	w.setWindowIcon(QIcon(":/icons/unfolding.png"));
 	w.show();
 	a.setStyle(QStyleFactory::create("Fusion"));
 	return a.exec();

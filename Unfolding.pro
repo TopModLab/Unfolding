@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Unfolding
 TEMPLATE = app
 
+RC_FILE = Unfolding.rc
+
 CONFIG += c++11
 #CONFIG += console
 
@@ -65,7 +67,7 @@ SOURCES += src/main.cpp\
     src/MeshViewer.cpp \
 	src/ViewerGrid.cpp \
     src/MeshWeaver.cpp \
-    src/ViewerRuler.cpp
+    src/ViewerRuler.cpp \
     src/WeavePanel.cpp
 
 
@@ -122,7 +124,7 @@ HEADERS  += src/mainwindow.h \
     src/CameraLegacy.h \
     src/ViewerGrid.h \
     src/MeshWeaver.h \
-    src/ViewerRuler.h
+    src/ViewerRuler.h \
     src/WeavePanel.h
 
 FORMS    += forms/mainwindow.ui \
