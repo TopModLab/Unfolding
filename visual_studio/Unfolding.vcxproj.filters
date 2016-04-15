@@ -564,51 +564,9 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\icons\cl.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\colormap.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\cp.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\cut.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\edge.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\extend.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\face.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\fold.png">
-      <Filter>Resource Files</Filter>
-    </None>
     <CustomBuild Include="..\resources.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <None Include="..\icons\open.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\save.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\smooth.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\unfold.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\icons\vertex.png">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\shaders\edge_fs.glsl">
       <Filter>Shader Files</Filter>
     </None>
