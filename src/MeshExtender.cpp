@@ -189,7 +189,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			refidMap.insert(make_pair(he->refid, he));
 		else {
 			he->flip->setBridgeTwin(refidMap[he->refid]->flip);
-
 		}
 	}
 
