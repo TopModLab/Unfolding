@@ -6,11 +6,22 @@
 
 #include <QDebug>
 
-//BBox3* MeshUnfolder::bound = nullptr;
+MeshUnfolder* MeshUnfolder::instance = nullptr;
 
 MeshUnfolder::MeshUnfolder()
 {
 }
+
+MeshUnfolder* MeshUnfolder::getInstance()
+{
+	if (!instance)
+	{
+		instance = new MeshUnfolder;
+	}
+
+	return instance;
+}
+
 void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
 	const QVector3D &uvec, const QVector3D &vvec)
@@ -104,18 +115,16 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	} while( curHE != he );
 }
 
-bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
-{
-	/// for each vertex in the cut_mesh, check the condition
+bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
+	/// for each vertex in the cutted_mesh, check the condition
 	auto isBadVertex = [](HDS_Vertex* v) -> bool {
+		vector<double> sums;
 		double sum = 0;
 		auto he = v->he;
 		auto curHE = he->flip->next;
 		bool hasCutFace = false;
-		do
-		{
-			if( !curHE->f->isCutFace )
-			{
+		do {
+			if( !curHE->f->isCutFace ) {
 				QVector3D v1 = he->flip->v->pos - he->v->pos;
 				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
 				double nv1pnv2 = v1.length() * v2.length();
@@ -124,28 +133,18 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cut_mesh)
 				double angle = acos(cosVal);
 				sum += angle;
 			}
-			else
-			{
-				hasCutFace = true;
-			}
+			else hasCutFace = true;
 
 			he = curHE;
 			curHE = he->flip->next;
 		}while( he != v->he ) ;
-		
-		// The sum of angles of an unfoldable vertex is smaller than pi*2 with cutface,
+
+		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
-		return sum > PI2 || (sum < PI2 && !hasCutFace);
+		return sum > (PI2 + PI_EPS) || (sum < (PI2 - PI_EPS) && !hasCutFace);
 	};
-	
-	if (any_of(cut_mesh->vertSet.begin(), cut_mesh->vertSet.end(), isBadVertex))
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+	if( any_of(cutted_mesh->vertSet.begin(), cutted_mesh->vertSet.end(), isBadVertex) ) return false;
+	else return true;
 }
 
 void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
@@ -161,7 +160,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
-		vector<HDS_Vertex *> verts;
+		unordered_set<HDS_Vertex *> verts;
 		/************************************************************************/
 		/* Calculate Piece Orientation                                          */
 		/************************************************************************/
@@ -171,12 +170,9 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		for (auto fid : piece)
 		{
 			auto face = unfolded_mesh->faceMap[fid];
-			if (face->isCutFace)
-			{
-				verts = face->corners();
-			}
-			// inside faces
-			else if (!checkedOrientation)
+			auto corners = face->corners();
+			verts.insert(corners.begin(), corners.end());
+			if (!face->isCutFace && !checkedOrientation)
 			{
 				auto he = face->he;
 				auto curHE = he;
@@ -241,6 +237,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 	}
 }
 
+
 bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
 {
 	//progress dialog
@@ -257,7 +254,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
 	}
-	//ref_mesh->updatePieceSet();
+	ref_mesh->updatePieceSet();
 	/// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{

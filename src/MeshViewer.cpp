@@ -1,5 +1,8 @@
 #include "MeshViewer.h"
 #include <QFileDialog>
+#include "meshunfolder.h"
+//MeshViewer* MeshViewer::instance = nullptr;
+
 
 MeshViewer::MeshViewer(QWidget *parent)
 	: QOpenGLWidget(parent)

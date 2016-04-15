@@ -193,13 +193,13 @@ void CRichModel::ComputePlanarCoordsOfIncidentVertForEdges()
 	}
 }
 
-void CRichModel::Preprocess()
+void CRichModel::Preprocess(const doubles_t* verts, const ui32s_t* fids)
 {
 	if (fBePreprocessed)
 		return;	
 	if (!m_fBeLoaded)
 	{
-		LoadModel();
+		LoadModel(verts, fids);
 	}
 
 	if (!fLocked)

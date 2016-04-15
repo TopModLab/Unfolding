@@ -75,10 +75,12 @@ void generate_output(const string& output_file_name,stringstream& output_str,boo
 
 
 
-void svg_precompute(const string& input_obj_name, const int fixed_k, string& svg_file_name) {
+void svg_precompute(const string& input_obj_name, const int fixed_k, string& svg_file_name,
+	const doubles_t* verts, const ui32s_t* faces)
+{
 	//Step 1. Initialize models
 	CRichModel model(input_obj_name);
-	model.Preprocess();
+	model.Preprocess(verts, faces);
 
 	int begin_vertex_index = 0;
 

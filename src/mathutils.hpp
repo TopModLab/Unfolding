@@ -2,6 +2,7 @@
 #define MATHUTILS_HPP
 
 #include <math.h>
+#include <limits>
 
 //#include <QtGui/QColor>
 #include <QColor>
@@ -9,9 +10,10 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-static const double Pi = 3.14159265358979323846;
-static const double PI2 = Pi * 2.0;
-static const double M_HALFPI = Pi * 0.5;
+const double Pi = 3.14159265358979323846;
+const double PI2 = 6.283185307179586476925286766559;//Pi * 2.0;
+const double M_HALFPI = 1.570796326794896619231321691640;// Pi * 0.5;
+const double PI_EPS = 1.0E-6;
 
 
 template <typename T>
@@ -74,4 +76,9 @@ inline T DegreeToRadian(T degree)
 	return degree * M_PI / 180.0;
 }
 
+template <typename T>
+__forceinline bool FuzzyEqual(T val, T target, T eps = std::numeric_limits<T>::epsilon())
+{
+	return val > (target + eps) && val < (target + eps);
+}
 #endif // MATHUTILS_HPP

@@ -134,12 +134,19 @@ void CBaseModel::AdjustScaleAndComputeNormalsToVerts()
 
 }
 
-void CBaseModel::LoadModel()
+void CBaseModel::LoadModel(const doubles_t* verts, const ui32s_t* fids)
 {
 	if (m_fBeLoaded)
 		return;
 
-	ReadFile(m_filename);
+	if (!verts || !fids)
+	{
+		ReadFile(m_filename);
+	}
+	else
+	{
+		LoadFromBuffer(verts, fids);
+	}
 	AdjustScaleAndComputeNormalsToVerts();
 	m_fBeLoaded = true;
 }
@@ -217,6 +224,28 @@ void CBaseModel::ReadObjFile(const string& filename)
 #endif
 	//printf("file %s num of verts %d num of faces %d\n" , filename.c_str() , m_Verts.size(),m_Faces.size());
 	in.close();
+}
+void CBaseModel::LoadFromBuffer(const doubles_t * verts, const ui32s_t * fids)
+{
+	m_Verts.assign(verts->size() / 3, CPoint3D());
+	for (size_t i = 0; i < verts->size();)
+	{
+		auto& vert = m_Verts[i / 3];
+		vert.x = (*verts)[i++];
+		vert.y = (*verts)[i++];
+		vert.z = (*verts)[i++];
+	}
+	m_Faces.assign(fids->size() / 3, CFace());
+	for (size_t i = 0; i < fids->size();)
+	{
+		auto& face = m_Faces[i / 3];
+		face.verts[0] = (*fids)[i++];
+		face.verts[1] = (*fids)[i++];
+		face.verts[2] = (*fids)[i++];
+	}
+
+	m_Verts.shrink_to_fit();
+	m_Faces.shrink_to_fit();
 }
 void CBaseModel::FastReadObjFile(const string& filename)
 {

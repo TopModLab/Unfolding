@@ -12,64 +12,54 @@
 
 struct PolyIndex
 {
-	size_t size;
-	ui32s_t v, uv, n;
+	PolyIndex(size_t sz = 3) : size(sz)
+	{
+		v.reserve(sz);
+		uv.reserve(sz);
+		n.reserve(sz);
+	}
 	void push_back(uint32_t* ids)
 	{
 		v.push_back(ids[0] - 1);
 		if (ids[1] > 0) uv.push_back(ids[1] - 1);
 		if (ids[2] > 0) uv.push_back(ids[2] - 1);
 	}
+
+	size_t size;
+	ui32s_t v, uv, n;
 };
 
 class MeshLoader
 {
 public:
-	typedef QVector3D vert_t;
-	/*struct face_t {
-		face_t() {
-			// at least 3 vertices
-			v.reserve(8);
-			n.reserve(8);
-			t.reserve(8);
-		}
-		vector<int> v, n, t;
-		QVector3D normal;
-	};*/
-	/*typedef QVector2D texcoord_t;
-	typedef QVector3D norm_t;*/
-
+	MeshLoader() : triangulated(false),
+		hasVertexTexCoord(false), hasVertexNormal(false) {}
 	virtual bool load(const string &filename) = 0;
 
-	/*const vector<vert_t>& getVerts() const { return verts; }
-	const vector<face_t>& getFaces() const { return faces; }
-	const vector<norm_t>& getNormals() const { return normals; }
-	const vector<texcoord_t>& getTexcoords() const { return texcoords; }*/
-	const floats_t& getVerts() const { return vertices; }
-	const vector<PolyIndex*>& getFaces() const { return polys; }
-	const floats_t& getNormals() const { return normals; }
-	const floats_t& getTexcoords() const { return uvs; }
+	virtual ui32s_t* getTriangulatedIndices() const;
+	virtual const string& getFilename() const { return m_filename; }
+	virtual const doubles_t& getVerts() const { return m_verts; }
+	virtual const vector<PolyIndex*>& getFaces() const { return m_polys; }
+	virtual const doubles_t& getNormals() const { return m_norms; }
+	virtual const doubles_t& getTexcoords() const { return m_uvs; }
+
+protected:
+	void clear();
+	void triangulate();
+	void estimateNormals();
 
 protected:
 
 	bool triangulated;
 	bool hasVertexTexCoord;
 	bool hasVertexNormal;
-	/*vector<vert_t> verts;
-	vector<face_t> faces;
-	vector<texcoord_t> texcoords;
-	vector<norm_t> normals;*/
 
+	doubles_t m_verts;
+	doubles_t m_uvs;
+	doubles_t m_norms;
+	vector<PolyIndex*> m_polys;
 
-	floats_t vertices;
-	floats_t uvs;
-	floats_t normals;
-	vector<PolyIndex*> polys;
-
-protected:
-	void clear();
-	void triangulate();
-	void estimateNormals();
+	string m_filename;
 };
 
 class PLYLoader : public MeshLoader
