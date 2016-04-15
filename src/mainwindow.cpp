@@ -622,8 +622,6 @@ void MainWindow::slot_rimmed3DMesh()
 
 void MainWindow::slot_weaveMesh()
 {
-	HDS_Bridger::setSamples(8);
-
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
 	MeshManager::getInstance()->setWeaveMesh(wmpanel->getConfig());
