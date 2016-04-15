@@ -71,14 +71,14 @@ void ViewerGrid::bind()
 
 void ViewerGrid::draw(const QMatrix4x4 &proj, const QMatrix4x4 &view)
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glLineWidth(1.0);
+	funcs->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	funcs->glLineWidth(1.0);
 	vao.bind();
 	shader.bind();
 	shader.setUniformValue("proj", proj);
 	shader.setUniformValue("view", view);
 	shader.setUniformValue("size", size);
-	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_SHORT, 0);
+	funcs->glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_SHORT, 0);
 
 	vao.release();
 	shader.release();

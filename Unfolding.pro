@@ -27,7 +27,6 @@ SOURCES += src/main.cpp\
     src/hds_halfedge.cpp \
     src/hds_face.cpp \
     src/hds_mesh.cpp \
-    src/MeshViewerLegacy.cpp \
     src/meshmanager.cpp \
     src/meshloader.cpp \
     src/stringutils.cpp \
@@ -120,7 +119,6 @@ HEADERS  += src/mainwindow.h \
     src/OperationStack.h \
     src/rimfacepanel.h \
     src/MeshViewer.h \
-    src/MeshViewerLegacy.h \
     src/Camera.h \
     src/CameraLegacy.h \
     src/ViewerGrid.h \

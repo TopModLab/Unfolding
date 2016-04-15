@@ -7,7 +7,7 @@
 
 #ifdef WIN32
 #define _AFXDLL
-#include <afx.h>
+//#include <afx.h>
 #include <Windows.h>
 #include "targetver.h"
 #include <stdio.h>
