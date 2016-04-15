@@ -60,15 +60,6 @@ void BridgerPanel::slot_restrainSliders(int index)
 		ui->convergeLabel->hide();
 		ui->image->setPixmap(QPixmap(":icons/original.png"));
 		break;
-	case 2: // flat
-		ui->curvSlider->hide();
-		ui->samplesSlider->hide();
-		ui->convergeSlider->hide();
-		ui->curvLabel->hide();
-		ui->sampleLabel->hide();
-		ui->convergeLabel->hide();
-		ui->image->setPixmap(QPixmap(":icons/flat.png"));
-		break;
 	}
 }
 
@@ -79,7 +70,6 @@ void BridgerPanel::slot_saved()
 	 bridgerConfig["samples"] = ui->samplesSlider->value();
 	 bridgerConfig["size"] = (double)ui->sizeSlider->value()/(double)ui->sizeSlider->maximum();
 	 bridgerConfig["cp"] = (double)ui->convergeSlider->value()/(double)ui->convergeSlider->maximum();
-	 bridgerConfig["opening"] = ui->adhesiveComboBox->currentIndex();
 
 }
 
