@@ -1043,6 +1043,9 @@ endlocal
     <None Include="..\shaders\vtx_fs.glsl" />
     <None Include="..\shaders\vtx_vs.glsl" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\Unfolding.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
