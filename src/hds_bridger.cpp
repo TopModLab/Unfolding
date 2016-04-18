@@ -115,11 +115,11 @@ QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
 
 //	///quadratic bezier curve calculator
 //	///
-//	///           _________p0'
-//	///         p0      c2/__\
-//	///      c1/__\      /    \
-//	///       /    \    p1'    p2'
-//	///      p1    p2
+//	//           _________p0'
+//	//         p0      c2/__\
+//	//      c1/__\      /    \
+//	//       /    \    p1'    p2'
+//	//      p1    p2
 //	///
 // ///
 // ///

@@ -24,14 +24,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	cuttingProgress.setValue(20);
 
 
-	/// vertices connected to cut edges
+	// vertices connected to cut edges
 	
-	/// cut vertices with number of connected cut edges
+	// cut vertices with number of connected cut edges
 	map<vert_t*, int> cutVerts;
 	unordered_set<int> cutEdgesFlips;//new flip edges of cut edges
 	unordered_set<int> cutFacesTotal;//all temporatry cut faces
 
-	/// handle hole face
+	// handle hole face
 	for (auto f: mesh->faces()) {
 		if (f->isHole) {
 			f->isCutFace = true;
@@ -46,7 +46,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			cutVerts.insert(make_pair(edge->v, 1));
 		}
 	}
-	/// split each cut edge into 2 edges
+	// split each cut edge into 2 edges
 	for(auto heIdx : edges)
 	{
 		auto he = mesh->heMap[heIdx];
@@ -54,7 +54,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		auto vs = he->v;
 		auto ve = hef->v;
 
-		/// record the number of cut edges the cut vertices is connected to
+		// record the number of cut edges the cut vertices is connected to
 		if (cutVerts.find(vs) == cutVerts.end())
 		{
 			cutVerts.insert(make_pair(vs, 1));
@@ -72,15 +72,15 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			++cutVerts[ve];
 		}
 
-		/// create a new face (invisible face between cut)
+		// create a new face (invisible face between cut)
 		face_t *nf = new face_t;
 
-		/// duplicate half edges
+		// duplicate half edges
 		he_t *he_new_flip = new he_t;
 		he_t *hef_new_flip = new he_t;
 
-		/// set two new edges to be cut edges and assign pointers(next, prev) to match two cut edges
-		/// the flip of he
+		// set two new edges to be cut edges and assign pointers(next, prev) to match two cut edges
+		// the flip of he
 		he_new_flip->flip = he;
 		he_new_flip->f = nf;
 		//he_new_flip->f = he->f;
@@ -96,7 +96,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		mesh->addHalfEdge(he_new_flip);
 		cutEdgesFlips.insert(he_new_flip->index);//record new half-edge
 
-		/// the flip of hef
+		// the flip of hef
 		hef_new_flip->flip = hef;
 		hef_new_flip->f = nf;
 		//hef_new_flip->f = hef->f;
@@ -116,14 +116,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		mesh->addHalfEdge(hef_new_flip);
 		cutEdgesFlips.insert(hef_new_flip->index);//record new half-edge
 
-		/// fix the new face
+		// fix the new face
 		nf->he = he_new_flip;
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = true;
 		mesh->addFace(nf);
 		cutFacesTotal.insert(nf->index);
 
-		/// record this cut event using twin
+		// record this cut event using twin
 		he_new_flip->cutTwin = hef_new_flip;
 		hef_new_flip->cutTwin = he_new_flip;
 	}
@@ -134,16 +134,16 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 	int progressIndex = 0;
 
-	/// check each cut vertices, merge faces if necessary
+	// check each cut vertices, merge faces if necessary
 	for(auto cv : cutVerts)
 	{
-		/// when a vertex is connected to more than one cut edge
+		// when a vertex is connected to more than one cut edge
 		if( cv.second > 1 )
 		{
-			/// merge all incident faces
+			// merge all incident faces
 			cout << "merging cut faces incident to vertex #" << cv.first->index << endl;
 
-			/// get all incident faces
+			// get all incident faces
 			vector<face_t*> incidentFaces = mesh->incidentFaces(cv.first);
 			vector<face_t*> cutFaces = Utils::filter(incidentFaces, [](face_t* f) {
 					return f->isCutFace;
@@ -151,7 +151,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 
 #ifdef _DEBUG
-			/// test if we are merging the same face
+			// test if we are merging the same face
 			//set<face_t*> cutFacesSet(cutFaces.begin(), cutFaces.end());
 			//if( cutFacesSet.size() == 1 ) {
 			if (cutFaces.size() == 1)
@@ -172,22 +172,22 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 					});
 
 
-			/// merge them
-			/// since they are discovered in a given order (CW or CCW), just glue them together
-			/// each cut vertex is splitted into n vertices, depending on the number of cut faces
-			/// it is connected to. non-cut vertices are not splitted.
-			/// as shown below
+			// merge them
+			// since they are discovered in a given order (CW or CCW), just glue them together
+			// each cut vertex is splitted into n vertices, depending on the number of cut faces
+			// it is connected to. non-cut vertices are not splitted.
+			// as shown below
 			///
-			///            ncv
-			///            / \
-			///           /cf \
-			///           cv----(cv)           <--- cut vertex is splitted into 2 vertices
-			///            \ cf /
-			///             \  /
-			///              \/
-			///             ncv
+			//            ncv
+			//            / \
+			//           /cf \
+			//           cv----(cv)           <--- cut vertex is splitted into 2 vertices
+			//            \ cf /
+			//             \  /
+			//              \/
+			//             ncv
 
-			/// the degree of the cut vertex
+			// the degree of the cut vertex
 			int cutSize = cutFaces.size();
 #ifdef _DEBUG
 			cout << "cut vertex degree = " << cutSize << endl;
@@ -197,7 +197,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 #endif
 
 #if 0
-			/// verify incident edges
+			// verify incident edges
 			for(int i=0;i<incidentHEs.size();++i) {
 				int j = (i+1) % incidentHEs.size();
 				if( incidentHEs[i]->flip->next != incidentHEs[j] ) cout << "failed @" << i << endl;
@@ -210,13 +210,13 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 				cv_new[i] = new vert_t(*cv.first);
 				cv_new[i]->he = cutEdges[i];
 
-				/// assign a new id to the vertex
+				// assign a new id to the vertex
 				cv_new[i]->index = HDS_Vertex::assignIndex();
 				cv_new[i]->refid = cv.first->refid;
 				//HDS_Common::assignRef_ID(cv.first->index, HDS_Common::FROM_VERTEX);
 			}
 
-			/// divide all incident half edges into k groups, k = cutSize
+			// divide all incident half edges into k groups, k = cutSize
 			vector<vector<he_t*>> heGroup(cutSize);
 			int groupIdx = 0, nextGroup = 1;
 			he_t *he = cutEdges[groupIdx];
@@ -224,13 +224,13 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			do
 			{
 				cout << "gid = " << groupIdx << endl;
-				/// put curHE into current group
+				// put curHE into current group
 				heGroup[groupIdx].push_back(curHE);
 
 				curHE = curHE->flip->next;
 				if( curHE == cutEdges[nextGroup] )
 				{
-					/// switch to the next group
+					// switch to the next group
 					++groupIdx;
 					nextGroup = (groupIdx + 1) % cutSize;
 				}
@@ -245,7 +245,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			}
 #endif // _DEBUG
 
-			/// k-way split the vertex, assign new vertex to the k groups, k = cutSize
+			// k-way split the vertex, assign new vertex to the k groups, k = cutSize
 			for (int i = 0; i<cutSize; ++i)
 			{
 				for(auto x : heGroup[i])
@@ -256,12 +256,12 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 							<< x->flip->v->pos.z() << endl;*/
 				}
 
-				/// for this group, connect its tail with head
+				// for this group, connect its tail with head
 				heGroup[i].front()->prev = heGroup[i].back()->flip;
 				heGroup[i].back()->flip->next = heGroup[i].front();
 			}
 
-			/// remove the old vertex and add new vertices
+			// remove the old vertex and add new vertices
 			cout << "removing vertex " << cv.first->index << endl;
 			mesh->vertSet.erase(mesh->vertSet.find(cv.first));
 			//mesh->vertMap.erase(cv.first->index);
@@ -282,7 +282,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	}
 
 
-	/// delete old cut face, create new cut face depending on edge loop
+	// delete old cut face, create new cut face depending on edge loop
 	while (!cutFacesTotal.empty())
 	{
 		auto f = mesh->faceMap[*cutFacesTotal.begin()];
@@ -297,7 +297,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		}
 	}
 
-	/// create face for new created half-edge
+	// create face for new created half-edge
 	while (!cutEdgesFlips.empty())
 	{
 		face_t *nf = new face_t;
@@ -317,7 +317,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		} while (curHE != he);
 	}
 
-	/// update the curvature of each vertex
+	// update the curvature of each vertex
 	mesh->vertMap.clear();
 	HDS_Vertex::resetIndex();
 	for( auto &v : mesh->vertSet )
@@ -347,7 +347,7 @@ MeshCutter::PathInfo MeshCutter::allPairShortestPath(HDS_Mesh *mesh) {
 		x.resize(mesh->vertSet.size(), pair<double, int>(realmax, -1));
 	}
 
-	/// floyd-warshall
+	// floyd-warshall
 	for(auto e : mesh->heSet) {
 		auto u = e->v;
 		auto v = e->flip->v;
@@ -424,16 +424,16 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 			curHE = he->flip->next;
 		}while( he != v->he ) ;
 
-		/// either sums up roughly 2 * Pi, or has a cut face connected.
+		// either sums up roughly 2 * Pi, or has a cut face connected.
 		return (sum > PI2) || (sum < PI2 && !hasCutFace);
 	};
 
 	set<int> cutEdges;
 
-	/// find out all bad vertices
+	// find out all bad vertices
 	unordered_set<HDS_Vertex*> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
 	unordered_map<HDS_Vertex*, int> cutVerticesIndex;
-	/// label the bad vertices
+	// label the bad vertices
 	int vidx = 0;
 	for(auto x : cutVertices) {
 		cutVerticesIndex[x] = vidx;
@@ -462,12 +462,12 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 		mstEdges.push_back(path);
 	}
 
-	/// generate a tree connecting all bad vertices using shortest path
-	/// this basically becomes a minimum spanning tree.
+	// generate a tree connecting all bad vertices using shortest path
+	// this basically becomes a minimum spanning tree.
 	///
 	for(auto &path : mstEdges) {
-		/// if this edge is connected to a non-planar vertex, cut this edge,
-		/// and form a cut edge tree starting from this edge
+		// if this edge is connected to a non-planar vertex, cut this edge,
+		// and form a cut edge tree starting from this edge
 		for(int i=0;i<path.size()-1;++i) {
 			int u = path[i], v = path[i+1];
 			auto vu = mesh->vertMap[u], vv = mesh->vertMap[v];

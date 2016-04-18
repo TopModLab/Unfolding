@@ -36,8 +36,8 @@ doubles_t MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, do
 
 doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
 {
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
+	auto m0 = hds_mesh_smoothed[lev0].data();
+	auto m1 = hds_mesh_smoothed[lev1].data();
 
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 
@@ -54,8 +54,8 @@ doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
 
 doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, double alpha, const QVector3D &pnormal)
 {
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
+	auto m0 = hds_mesh_smoothed[lev0].data();
+	auto m1 = hds_mesh_smoothed[lev1].data();
 
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 
@@ -72,8 +72,8 @@ doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, doubl
 
 doubles_t MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha)
 {
-	auto m0 = hds_mesh_smoothed[lev0];
-	auto m1 = hds_mesh_smoothed[lev1];
+	auto m0 = hds_mesh_smoothed[lev0].data();
+	auto m1 = hds_mesh_smoothed[lev1].data();
 
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 	auto dist0 = doubles_t(hds_mesh->verts().size());
@@ -111,31 +111,33 @@ bool MeshManager::loadOBJFile(const string &filename) {
 	QTime clock;
 	clock.start();
 #endif
+
+	QProgressDialog loadingProgress("Loading the object...", "", 0, 100);
+	loadingProgress.setWindowModality(Qt::WindowModal);
+	loadingProgress.setValue(0);
+	loadingProgress.setAutoClose(true);
+	loadingProgress.setCancelButton(0);
+	loadingProgress.setMinimumDuration(1000);
 	// Check if file is successfully loaded
 	if(meshloader->load(filename))
 	{
 		cout << "file " << filename << " loaded." << endl;
 
-		QProgressDialog loadingProgress("Loading the object...", "", 0, 100);
-		loadingProgress.setWindowModality(Qt::WindowModal);
-		loadingProgress.setValue(0);
-		loadingProgress.setAutoClose(true);
-		loadingProgress.setCancelButton(0);
-		loadingProgress.setMinimumDuration(1000);
 
-		/// build a half edge mesh here
+		// build a half edge mesh here
 		mesh_t* msh = buildHalfEdgeMesh(meshloader->getVerts(), meshloader->getFaces());
 		if (msh == nullptr)
 		{
 			loadingProgress.close();
 			return false;
 		}
+		//operationStack->reset();
 		operationStack->push(msh);
 #ifdef _DEBUG
 		qDebug("Clear Operation Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		initSparseGraph();
+		//initSparseGraph();
 //////////////////////////////////////////////////////////////////////////
 		loadingProgress.setValue(100);
 
@@ -379,13 +381,13 @@ void MeshManager::cutMeshWithSelectedEdges()
 	//cout << "validating reference mesh" << endl;
 	//ref_mesh->validate();
 
-	/// cut the mesh using the selected edges
+	// cut the mesh using the selected edges
 	set<int> selectedEdges;
 	for(auto he : ref_mesh->halfedges())
 	{
 		if( he->isPicked )
 		{
-			/// use picked edges as cut edges
+			// use picked edges as cut edges
 			he->setPicked(false);
 			he->setCutEdge(true);
 
@@ -406,23 +408,23 @@ void MeshManager::cutMeshWithSelectedEdges()
 	{
 		if(MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges))
 		{
-			/// cutting performed successfully
+			// cutting performed successfully
 			//cutted_mesh->printInfo("cutted mesh:");
 			//cutted_mesh->printMesh("cutted mesh:");
 			cout<<"cut succeed!"<<endl;
 		}
 		else
 		{
-			/// can not cut it
+			// can not cut it
 		}
 
 		isUnfoldable = true;// MeshUnfolder::unfoldable(cutted_mesh.data());
-		/// replace the ref mesh with the cutted mesh
-		/// commented out due to bug when cutting all edges
+		// replace the ref mesh with the cutted mesh
+		// commented out due to bug when cutting all edges
 		//ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
 		//cout<<"ref_mesh reset"<<endl;
 
-		/// discard the selected edges now
+		// discard the selected edges now
 		selectedEdges.clear();
 	}
 	operationStack->push(outMesh);
@@ -452,6 +454,7 @@ bool MeshManager::initSparseGraph()
 	QScopedPointer<HDS_Mesh> tmp_mesh;
 	vector<string> smoothed_mesh_filenames;
 	tmp_mesh.reset(new HDS_Mesh(*hds_mesh));
+	hds_mesh_smoothed.clear();
 	hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
 	for (int i = 0; i < nsmooth; ++i)
 	{
@@ -578,12 +581,12 @@ void MeshManager::unfoldMesh()
 	ref_mesh->validate();
 	cout << "unfolded mesh set" << endl;
 
-	/// cut the mesh using the selected edges
+	// cut the mesh using the selected edges
 	set<int> selectedFaces;
 	for (auto f : ref_mesh->faces())
 	{
 		if (f->isPicked) {
-			/// use picked edges as cut edges
+			// use picked edges as cut edges
 			f->setPicked(false);
 			if (selectedFaces.find(f->index) == selectedFaces.end()) {
 				selectedFaces.insert(f->index);
@@ -593,13 +596,13 @@ void MeshManager::unfoldMesh()
 	HDS_Mesh* outMesh = new HDS_Mesh(*ref_mesh);
 
 	if (MeshUnfolder::unfold(outMesh, ref_mesh.take(), selectedFaces)) {
-		/// unfolded successfully
+		// unfolded successfully
 		outMesh->printInfo("unfolded mesh:");
 		operationStack->push(outMesh);
 		//unfolded_mesh->printMesh("unfolded mesh:");
 	}
 	else {
-		/// failed to unfold
+		// failed to unfold
 		cout << "Failed to unfold." << endl;
 	}
 
@@ -624,14 +627,13 @@ void MeshManager::smoothMesh()
 
 bool MeshManager::saveMeshes()
 {
-	/// save only the cutted and unfolded
+	// save only the cutted and unfolded
 	return true;
 }
 
 
 void MeshManager::extendMesh(map<QString, double> config)
 {
-
 	HDS_Bridger::setBridger(config);
 	MeshExtender::setOriMesh(operationStack->getOriMesh());
 
@@ -642,7 +644,6 @@ void MeshManager::extendMesh(map<QString, double> config)
 	//update sorted faces
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
-
 }
 
 void MeshManager::rimMesh(double rimSize)
@@ -667,7 +668,7 @@ void MeshManager::rimMesh(double rimSize)
 	}
 
 	bool rimSucceeded;
-	/// make a copy of the mesh with selected edges
+	// make a copy of the mesh with selected edges
 	HDS_Mesh* outMesh = new HDS_Mesh(*ref_mesh);
 	rimSucceeded = MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges);
 
@@ -675,12 +676,12 @@ void MeshManager::rimMesh(double rimSize)
 	{
 		//cutted_mesh->isHollowed
 		outMesh->processType = HDS_Mesh::RIMMED_PROC;
-		/// cutting performed successfully
+		// cutting performed successfully
 		cout << "Rimming succeed!" << endl;
 		operationStack->push(outMesh);
 	}
 
-	/// discard the selected edges now
+	// discard the selected edges now
 	selectedEdges.clear();
 }
 

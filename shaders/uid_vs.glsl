@@ -8,9 +8,11 @@ uniform float scale = 1.f;
 
 void main()
 {
-	gl_Position = proj_matrix * view_matrix * vec4(scale * vp, 1.f);
+	vec4 vCam = view_matrix * vec4(scale * vp, 1.0f);
 	if (mode > 0)
 	{
-		gl_Position.z -= 0.0075f;
+		vCam -= vec4(0.03125 * normalize(vCam.xyz), 0.f);
 	}
+	gl_Position = proj_matrix * vCam;
+	
 }

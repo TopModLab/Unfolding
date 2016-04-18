@@ -233,7 +233,7 @@ vector<QVector3D> HDS_Face::getScaledCorners()
 	checkPlanar();
 
 	if(isPlanar) {
-		/// update the vertex position
+		// update the vertex position
 		auto vertices = corners();
 		for (auto v : vertices) {
 			scaledCorners.insert(scaledCorners.end(), scaleCorner(v));

@@ -42,8 +42,9 @@ void MainWindow::initMesh(const string& filename)
 	if (!filename.empty())
 	{
 		auto manager = MeshManager::getInstance();
-		manager->getMeshStack()->clear();
-		manager->getMeshStack()->setCurrentFlag(OperationStack::Original);
+		auto mstack = manager->getMeshStack();
+		mstack->clear();
+		//manager->getMeshStack()->setCurrentFlag(OperationStack::Original);
 		if (manager->loadOBJFile(filename))
 		{
 			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
@@ -54,16 +55,16 @@ void MainWindow::initMesh(const string& filename)
 bool MainWindow::createComponents()
 {
 	try {
-		viewer = new viewer_t(this);
+		viewer.reset(new viewer_t(this));
 		viewer->setFocusPolicy(Qt::StrongFocus);
-		ceditor = new ColormapEditor;
-		cppanel = new CriticalPointsPanel;
-		clpanel = new CutLocusPanel;
-		conpanel = new BridgerPanel;
-		hmpanel = new HollowMeshPanel;
-		bmpanel = new BindingMeshPanel;
-		rmpanel = new RimFacePanel;
-		wmpanel = new WeavePanel;
+		ceditor.reset(new ColormapEditor);
+		cppanel.reset(new CriticalPointsPanel);
+		clpanel.reset(new CutLocusPanel);
+		conpanel.reset(new BridgerPanel);
+		hmpanel.reset(new HollowMeshPanel);
+		bmpanel.reset(new BindingMeshPanel);
+		rmpanel.reset(new RimFacePanel);
+		wmpanel.reset(new WeavePanel);
 
 		createActions();
 		createMenus();
@@ -80,20 +81,20 @@ bool MainWindow::createComponents()
 bool MainWindow::layoutComponents()
 {
 	//setCentralWidget(viewer);
-	ui->viewerLayout->addWidget(viewer);
+	ui->viewerLayout->addWidget(viewer.data());
 	return true;
 }
 
 bool MainWindow::connectComponents()
 {
-	connect(ceditor, &ColormapEditor::colorChanged, this, &MainWindow::slot_updateViewerColormap);
+	connect(ceditor.data(), &ColormapEditor::colorChanged, this, &MainWindow::slot_updateViewerColormap);
 	//kkkkkkkkkkkkkkkkkkkkkkkkkkk
 	/*connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int)));
 	connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int, int, int, double)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int, int, int, double)));*/
 
-	connect(cppanel, &CriticalPointsPanel::sig_methodChanged, this, &MainWindow::slot_updateCriticalPointsMethod);
-	connect(cppanel, &CriticalPointsPanel::sig_smoothingTimesChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingTimes);
-	connect(cppanel, &CriticalPointsPanel::sig_smoothingTypeChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingType);
+	connect(cppanel.data(), &CriticalPointsPanel::sig_methodChanged, this, &MainWindow::slot_updateCriticalPointsMethod);
+	connect(cppanel.data(), &CriticalPointsPanel::sig_smoothingTimesChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingTimes);
+	connect(cppanel.data(), &CriticalPointsPanel::sig_smoothingTypeChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingType);
 
 	//kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
 	/*connect(cppanel, SIGNAL(closedSignal()), viewer, &viewer_t::disablecpp()));
@@ -107,22 +108,22 @@ bool MainWindow::connectComponents()
 
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, &viewer_t::disableclp()));
 	*/
-	connect(clpanel, &CutLocusPanel::sig_closedSignal, this, &MainWindow::slot_disableclp);
+	connect(clpanel.data(), &CutLocusPanel::sig_closedSignal, this, &MainWindow::slot_disableclp);
 
-	connect(conpanel, &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
-	connect(conpanel, &BridgerPanel::sig_save2extend, this, &MainWindow::slot_extendMesh);
+	connect(conpanel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
+	connect(conpanel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_extendMesh);
 
-	connect(hmpanel, &HollowMeshPanel::sig_saved, this, &MainWindow::slot_hollowMesh);
-	connect(hmpanel, &HollowMeshPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(hmpanel.data(), &HollowMeshPanel::sig_saved, this, &MainWindow::slot_hollowMesh);
+	connect(hmpanel.data(), &HollowMeshPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
 
-	connect(bmpanel, &BindingMeshPanel::sig_saved, this, &MainWindow::slot_bindingMesh);
-	connect(bmpanel, &BindingMeshPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(bmpanel.data(), &BindingMeshPanel::sig_saved, this, &MainWindow::slot_bindingMesh);
+	connect(bmpanel.data(), &BindingMeshPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
 
-	connect(rmpanel, &RimFacePanel::sig_saved, this, &MainWindow::slot_rimmed3DMesh);
-	connect(rmpanel, &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(rmpanel.data(), &RimFacePanel::sig_saved, this, &MainWindow::slot_rimmed3DMesh);
+	connect(rmpanel.data(), &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
 
-	connect(wmpanel, &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
-	connect(wmpanel, &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(wmpanel.data(), &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
+	connect(wmpanel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
 
 	return true;
 }
@@ -144,8 +145,8 @@ void MainWindow::createActions()
 		/************************************************************************/
 		connect(ui->actGenCube, &QAction::triggered,
 			[&] { this->initMesh(":meshes/cube.obj"); });
-		/*connect(ui->actGenTorus, &QAction::triggered,
-			[&] { this->initMesh(":meshes/torus.obj"); });*/
+		connect(ui->actGenTorus, &QAction::triggered,
+			[&] { this->initMesh(":meshes/torus.obj"); });
 		connect(ui->actGenTetra, &QAction::triggered,
 			[&] { this->initMesh(":meshes/tetrahedron.obj"); });
 		//////////////////////////////////////////////////////////////////////////
@@ -154,8 +155,8 @@ void MainWindow::createActions()
 		connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::slot_redo);
 
 		//selection menu
-		connect(ui->actionSelAll, &QAction::triggered, viewer, &viewer_t::selectAll);
-		connect(ui->actionSelInv, &QAction::triggered, viewer, &viewer_t::selectInverse);
+		connect(ui->actionSelAll, &QAction::triggered, viewer.data(), &viewer_t::selectAll);
+		connect(ui->actionSelInv, &QAction::triggered, viewer.data(), &viewer_t::selectInverse);
 		connect(ui->actionSelMulti, &QAction::triggered, this, &MainWindow::slot_selectMultiple);
 		//kkkkkkkkkkk
 		/*connect(ui->actionSelTwinP, &QAction::triggered, viewer, &viewer_t::selectTwinPair()));
@@ -445,7 +446,7 @@ void MainWindow::slot_newFile()
 		clock.start();
 #endif
 		MeshManager::getInstance()->getMeshStack()->clear();
-		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Original);
+		//MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Original);
 		cout<<"loading obj file: "<<string(filename.toUtf8().constData())<<"..."<<endl;
 #ifdef _DEBUG
 		qDebug("Clear ObjectStack Takes %d ms In Total.", clock.elapsed());

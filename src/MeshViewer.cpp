@@ -15,7 +15,7 @@ MeshViewer::MeshViewer(QWidget *parent)
 	, hlComp(HighlightComp::HIGHLIGHT_NONE)
 	, grid(4, 6.0f, this)
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
-	, 54.3, 1.67, 1, 100)
+	, 54.3, 1.67, 0.1, 100)
 	, mesh_changed(false), scale(1.0)
 	, vRBO(this), fRBO(this), heRBO(this)
 {
@@ -90,49 +90,82 @@ void MeshViewer::initializeGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glFrontFace(GL_CCW); // set counter-clock-wise vertex order to mean the front
 //	glEnable(GL_CULL_FACE);
-}
 
-
-void MeshViewer::bind()
-{
-	heMesh->exportVertVBO(&vtx_array, &vRBO.flags);
-	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
-	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
-
-	initialVBO();
-	bindVertices();
-	bindTBO(vRBO, 1);// Bind only flag tbo
-	bindPrimitive(fRBO);
-	bindTBO(fRBO);
-	bindPrimitive(heRBO);
-	bindTBO(heRBO);
-
-	mesh_changed = false;
-}
-
-void MeshViewer::initialVBO()
-{
-	vRBO.destroy();
-	heRBO.destroy();
-	fRBO.destroy();
-}
-
-void MeshViewer::bindVertices()
-{
+	//////////////////////////////////////////////////////////////////////////
+	// Init Vertex VAO
 	vRBO.vao.create();
 	vRBO.vao.bind();
 
 	vRBO.vbo->create();
-	vRBO.vbo->setUsagePattern(oglBuffer::StaticDraw);
+	vRBO.vbo->setUsagePattern(oglBuffer::StreamDraw);
 	vRBO.vbo->bind();
-	vRBO.vbo->allocate(&vtx_array[0], sizeof(GLfloat) * vtx_array.size());
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 	glEnableVertexAttribArray(0);
 
-	vRBO.releaseAll();	
+	vRBO.releaseAll();
+
+	// Init face & edge VAO
+	auto createPrimitiveBuffers = [this](RenderBufferObject &RBO)
+	{
+		// Bind VAO
+		RBO.vao.create();
+		RBO.vao.bind();
+
+		RBO.vbo->bind();
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+		glEnableVertexAttribArray(0);
+
+		RBO.ibo.create();
+		RBO.ibo.setUsagePattern(oglBuffer::StaticDraw);
+		RBO.ibo.bind();
+
+		RBO.releaseAll();
+	};
+	createPrimitiveBuffers(fRBO);
+	createPrimitiveBuffers(heRBO);
+	//////////////////////////////////////////////////////////////////////////
+	// TBO
+	glGenTextures(1, vRBO.tex);
+	glGenBuffers(1, vRBO.tbo);
+	glGenTextures(2, heRBO.tex);
+	glGenBuffers(2, heRBO.tbo);
+	glGenTextures(2, fRBO.tex);
+	glGenBuffers(2, fRBO.tbo);
 }
 
-void MeshViewer::bindPrimitive(RenderBufferObject &RBO)
+
+void MeshViewer::allocateGL()
+{
+	heMesh->exportVertVBO(&vtx_array, &vRBO.flags);
+	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
+	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
+	vtx_array.shrink_to_fit();
+	vRBO.shrink_to_fit();
+	heRBO.shrink_to_fit();
+	fRBO.shrink_to_fit();
+
+	// Bind Vertices Buffer
+	vRBO.vbo->bind();
+	if (!vtx_array.empty())
+	{
+		vRBO.vbo->allocate(&vtx_array[0], sizeof(GLfloat) * vtx_array.size());
+	}
+	vRBO.vbo->release();
+	vRBO.allocateTBO(1);// Bind only flag tbo
+	
+	// Bind Face Buffers
+	fRBO.allocateIBO();
+	fRBO.allocateTBO();
+	
+	// Bind Edge Buffers
+	heRBO.allocateIBO();
+	heRBO.allocateTBO();
+
+	mesh_changed = false;
+}
+
+/*
+void MeshViewer::createPrimitiveBuffers(RenderBufferObject &RBO)
 {
 	// Bind VAO
 	RBO.vao.create();
@@ -146,30 +179,8 @@ void MeshViewer::bindPrimitive(RenderBufferObject &RBO)
 	RBO.ibo.setUsagePattern(oglBuffer::StaticDraw);
 	RBO.ibo.bind();
 
-	RBO.ibo.allocate(&RBO.ibos[0], sizeof(GLuint) * RBO.ibos.size());
-
 	RBO.releaseAll();
-}
-
-void MeshViewer::bindTBO(RenderBufferObject &RBO, int nTBO)
-{
-	// nTBO: number of tbos to be generated
-	if (nTBO > 0)
-	{
-		glGenTextures(nTBO, RBO.tex);
-		glGenBuffers(nTBO, RBO.tbo);
-
-		// Bind flag TBO
-		glBindBuffer(GL_TEXTURE_BUFFER, RBO.tbo[0]);
-		glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * RBO.flags.size(), &RBO.flags[0], GL_STATIC_DRAW);
-		if (nTBO > 1)
-		{
-			glBindBuffer(GL_TEXTURE_BUFFER, RBO.tbo[1]);
-			glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * RBO.ids.size(), &RBO.ids[0], GL_STATIC_DRAW);
-		}
-		glBindBuffer(GL_TEXTURE_BUFFER, 0);
-	}
-}
+}*/
 
 void MeshViewer::initShader()
 {
@@ -272,16 +283,16 @@ void MeshViewer::drawMeshToFBO()
 			glDrawElements(GL_TRIANGLES, fRBO.ibos.size(), GL_UNSIGNED_INT, 0);
 		}
 
-		glLineWidth(16.0);
-		heRBO.vao.bind();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glLineWidth(2);
+		heRBO.vao.bind();
 
-		uid_shader.setUniformValue("mode", 2);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_BUFFER, heRBO.id_tex);
 		glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, heRBO.id_tbo);
 		uid_shader.setUniformValue("id_tex", 0);
+		uid_shader.setUniformValue("mode", 2);
 
 
 		glDrawElements(GL_LINES, heRBO.ibos.size(), GL_UNSIGNED_INT, 0);
@@ -301,11 +312,12 @@ void MeshViewer::drawMeshToFBO()
 	//fboRes.save("fbo.png");
 	QRgb pixel = fboRes.pixel(mouseState.x, mouseState.y);
 	bool selected = pixel >> 24;
-	size_t renderID = pixel & 0xFFFFFF;
+	uint32_t renderID = pixel & 0xFFFFFF;
 	
 	switch (interactionState)
 	{
 	case InteractionState::SEL_VERT:
+	{
 		if (selected)
 		{
 			selVTX.push(renderID);
@@ -320,15 +332,16 @@ void MeshViewer::drawMeshToFBO()
 			}
 		}
 		heMesh->exportVertVBO(nullptr, &vRBO.flags);
-		vRBO.destroyTextures();
-		bindTBO(vRBO, 1);
+		vRBO.allocateTBO(1);
 		break;
+	}
 	case InteractionState::SEL_FACE:
+	{
 		if (selected)
 		{
 			selFACE.push(renderID);
 			heMesh->faceMap.at(renderID)->isPicked = true;
-		} 
+		}
 		else
 		{
 			while (!selFACE.empty())
@@ -338,15 +351,17 @@ void MeshViewer::drawMeshToFBO()
 			}
 		}
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
-		fRBO.destroyTextures();
-		bindTBO(fRBO);
+		fRBO.allocateTBO();
 		break;
+	}
 	case InteractionState::SEL_EDGE:
+	{
 		if (selected)
 		{
+			//renderID = heRBO.flags[renderID];
 			selHE.push(renderID);
 			heMesh->heMap.at(renderID)->isPicked = true;
-		} 
+		}
 		else
 		{
 			while (!selHE.empty())
@@ -356,9 +371,9 @@ void MeshViewer::drawMeshToFBO()
 			}
 		}
 		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
-		heRBO.destroyTextures();
-		bindTBO(heRBO);
+		heRBO.allocateTBO();
 		break;
+	}
 	}
 	
 	cout << "draw primitive id:" << renderID << endl;
@@ -410,7 +425,7 @@ void MeshViewer::paintGL()
 			};
 			if (mesh_changed)
 			{
-				bind();
+				allocateGL();
 			}
 			// Draw Vertices
 			if (shadingSate & SHADE_VERT || interactionState == SEL_VERT)
@@ -625,7 +640,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent* e)
 	{
 		if (dx != e->x() && dy != e->y())
 		{
-			view_cam.zoom(0.0, 0.0, -dx * 0.05);
+			view_cam.zoom(0.0, 0.0, -dx * 0.01);
 			update();
 		}
 	}
@@ -633,7 +648,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent* e)
 	{
 		if (dx != e->x() && dy != e->y())
 		{
-			view_cam.zoom(dx * 0.05, dy * 0.05, 0.0);
+			view_cam.zoom(dx * 0.01, dy * 0.01, 0.0);
 			update();
 		}
 	}
@@ -730,7 +745,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent* e)
 	}
 	mouseState.isPressed = false;
 	//cout<<"releasing mousestate"<<mouseState.isPressed<<endl; //later added;
-	/// reset interaction mode if in camera mode triggered by holding alt
+	// reset interaction mode if in camera mode triggered by holding alt
 	if (e->modifiers() & Qt::AltModifier) {
 		interactionState = interactionStateStack.top();
 		interactionStateStack.pop();
@@ -754,29 +769,25 @@ void MeshViewer::selectAll()
 		for (auto f : heMesh->faces())
 			f->setPicked(true);
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
-		fRBO.destroy();
-		bindPrimitive(fRBO);
-		bindTBO(fRBO);
+		//fRBO.destroy();
+		//createPrimitiveBuffers(fRBO);
+		fRBO.allocateTBO();
 		break;
 	case SEL_EDGE:
 		for (auto e : heMesh->halfedges())
 			e->setPicked(true);
 		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
-		heRBO.destroy();
-		bindPrimitive(heRBO);
-		bindTBO(heRBO);
+		//heRBO.destroy();
+		//createPrimitiveBuffers(heRBO);
+		heRBO.allocateTBO();
 		break;
 	case SEL_VERT:
 		for (auto v : heMesh->verts())
 			v->setPicked(true);
 		heMesh->exportVertVBO(nullptr, &vRBO.flags);
-		initialVBO();
-		bindVertices();
-		bindTBO(vRBO, 1);// Bind only flag tbo
-		bindPrimitive(fRBO);
-		bindTBO(fRBO);
-		bindPrimitive(heRBO);
-		bindTBO(heRBO);
+		//initialVBO();
+		//allocateVertices();
+		vRBO.allocateTBO(1);// Bind only flag tbo
 		break;
 	default:
 		break;

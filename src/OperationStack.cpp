@@ -2,20 +2,14 @@
 #include <cstdlib>
 
 OperationStack::OperationStack()
+	: curFlag(Undefined)
+	, canUnfold(false)
+	, canExtend(true)
+	, canCut(true)
+	, canBind(true)
+	, canRim(true)
+	, canHollow(true)
 {
-	curFlag = Undefined;
-
-	canUnfold = false;
-	canExtend = true;
-	canCut = true;
-	canBind = true;
-	canRim = true;
-	canHollow = true;
-}
-
-OperationStack::~OperationStack()
-{
-
 }
 
 void OperationStack::undo()
@@ -46,20 +40,28 @@ void OperationStack::redo()
 /*call push in meshManger*/
 void OperationStack::push(HDS_Mesh* curMesh)
 {
+	opStack.push(QSharedPointer<Operation>(new Operation(curMesh, curFlag)));
+
 	if (curFlag == Original)
-		ori_mesh.reset(new HDS_Mesh(*curMesh));
+		ori_mesh = opStack.top()->mesh;
 	if (curFlag == Unfolded)
-		unfolded_mesh.reset(new HDS_Mesh(*curMesh));
-	Operation* op = new Operation(curMesh, curFlag);
-	opStack.push(op);
-	while(!redoStack.empty()) redoStack.pop();
+		unfolded_mesh = opStack.top()->mesh;
+	
+	while (!redoStack.empty())
+	{
+		//delete redoStack.top();
+		redoStack.pop();
+	}
+
 	curFlag = Undefined;
 }
 
 void OperationStack::reset()
 {
-	while(!redoStack.empty()) redoStack.pop();
-	while(opStack.size() > 1) opStack.pop();
+	while (!redoStack.empty())
+		redoStack.pop();
+	while (opStack.size() > 1)
+		opStack.pop();
 	unfolded_mesh.reset();
 
 	canUnfold = false;
@@ -72,11 +74,14 @@ void OperationStack::reset()
 
 void OperationStack::clear()
 {
-	while(!redoStack.empty()) redoStack.pop();
-	while(!opStack.empty()) opStack.pop();
+	while (!redoStack.empty())
+		redoStack.pop();
+	while (!opStack.empty())
+		opStack.pop();
 	ori_mesh.reset();
 	unfolded_mesh.reset();
 
+	setCurrentFlag(OperationStack::Original);
 	canUnfold = false;
 	canExtend = true;
 	canCut = true;
@@ -123,12 +128,10 @@ void OperationStack::setCurrentFlag(Flag flag)
 
 HDS_Mesh* OperationStack::getCurrentMesh()
 {
-	Operation* op = opStack.top();
-	return op->mesh.data();
+	return opStack.top()->mesh.data();
 }
 
 OperationStack::Flag OperationStack::getCurrentFlag()
 {
-	Operation* op = opStack.top();
-	return op->flag;
+	return opStack.top()->flag;
 }
