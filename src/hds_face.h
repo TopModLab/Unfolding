@@ -33,7 +33,6 @@ public:
 	vector<HDS_Vertex*> corners() const;
 	QVector3D computeNormal();
 	void checkPlanar();
-	static void LineLineIntersect(QVector3D p1,QVector3D p2,QVector3D p3,QVector3D p4,QVector3D *pa);
 
 	// Check if 
 	bool isConnected(const HDS_Face *other);

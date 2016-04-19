@@ -17,6 +17,7 @@ WeavePanel::WeavePanel(QWidget *parent) :
 
 	connect(ui->roundSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setRoundness(int)));
 	connect(ui->thickSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setThickness(int)));
+	connect(ui->pivotSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setPivot(int)));
 
 }
 
@@ -35,9 +36,16 @@ void WeavePanel::slot_setThickness(int value)
 	ui->thickLabel->setText(QString::number((float)value/ui->thickSlider->maximum(), 'f', 2));
 }
 
+void WeavePanel::slot_setPivot(int value)
+{
+	ui->pivotLabel->setText(QString::number((float)value/ui->pivotSlider->maximum(), 'f', 2));
+}
+
 void WeavePanel::slot_setType()
 {
+	config["scaleBilinear"] = ui->scaleBilinearBtn->isChecked()? 1:0;
 	config["roundness"] = (float)ui->roundSlider->value()/ui->roundSlider->maximum();
 	config["thickness"] = (float)ui->thickSlider->value()/ui->thickSlider->maximum();
 	config["depth"] = (float)ui->depthSpinBox->value();
+	config["pivot"] = ((float)ui->pivotSlider->value()/ui->pivotSlider->maximum() +1.0 )/2.0;
 }

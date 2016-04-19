@@ -26,6 +26,7 @@ public slots:
 	void slot_setType();
 	void slot_setThickness(int);
 	void slot_setRoundness(int);
+	void slot_setPivot(int);
 
 private:
 	Ui::WeavePanel *ui;

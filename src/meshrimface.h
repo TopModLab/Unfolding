@@ -1,7 +1,6 @@
 #ifndef MESHRIMFACE_H
 #define MESHRIMFACE_H
 
-#include "common.h"
 #include "MeshExtender.h"
 
 

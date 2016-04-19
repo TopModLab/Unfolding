@@ -583,7 +583,6 @@ void MainWindow::slot_triggerRimmed3DMesh()
 
 void MainWindow::slot_triggerWeaveMesh()
 {
-	HDS_Bridger::setSamples(16);
 	MeshManager::getInstance()->getMeshStack()->reset();
 
 	if (MeshManager::getInstance()->getMeshStack()->canRim)

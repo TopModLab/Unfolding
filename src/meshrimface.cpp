@@ -91,7 +91,7 @@ void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<QVector3D
 	vert_t* vp = he->flip->v;
 
 	QVector3D bot;
-	HDS_Face::LineLineIntersect(v->pos, center,vn->pos, vp->pos, &bot);
+	Utils::LineLineIntersect(v->pos, center,vn->pos, vp->pos, &bot);
 
 	QVector3D v_up = ( planeHeight * top + (1 - planeHeight) * center);
 	QVector3D v_down;
@@ -112,18 +112,18 @@ void MeshRimFace::computePlaneCornerOnFace(vert_t* v, he_t* he, vector<QVector3D
 
 	//get v_up_prev, v_down_prev, v_up_next, v_down_next boundaries on edge
 	QVector3D v_up_prev_max;
-	HDS_Face::LineLineIntersect(v->pos, vp->pos, v_up, v_up - cross, &v_up_prev_max);
+	Utils::LineLineIntersect(v->pos, vp->pos, v_up, v_up - cross, &v_up_prev_max);
 	QVector3D v_down_prev_max;
 	if (isHalf)
-		HDS_Face::LineLineIntersect(v->pos, vp->pos, v_down, v_down - cross, &v_down_prev_max);
+		Utils::LineLineIntersect(v->pos, vp->pos, v_down, v_down - cross, &v_down_prev_max);
 	else
 		v_down_prev_max = v_up_prev_max - (v_up - v_down);
 
 	QVector3D v_up_next_max;
-	HDS_Face::LineLineIntersect(v->pos, vn->pos, v_up, v_up + cross, &v_up_next_max);
+	Utils::LineLineIntersect(v->pos, vn->pos, v_up, v_up + cross, &v_up_next_max);
 	QVector3D v_down_next_max;
 	if (isHalf)
-		HDS_Face::LineLineIntersect(v->pos, vn->pos, v_down, v_down + cross, &v_down_next_max);
+		Utils::LineLineIntersect(v->pos, vn->pos, v_down, v_down + cross, &v_down_next_max);
 	else
 		v_down_next_max = v_up_next_max - (v_up - v_down);
 
@@ -268,10 +268,10 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 						if (!isQuadratic) {
 							//calculate control points
 							QVector3D vp_up, vp_down, vn_up, vn_down;
-							HDS_Face::LineLineIntersect(vpos[0], vpos[3], he->v->pos, vp_max, &vp_up);
-							HDS_Face::LineLineIntersect(vpos[1], vpos[2], he->v->pos, vp_max, &vp_down);
-							HDS_Face::LineLineIntersect(vpos[0], vpos[1], he->v->pos, vn_max, &vn_up);
-							HDS_Face::LineLineIntersect(vpos[3], vpos[2], he->v->pos, vn_max, &vn_down);
+							Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, vp_max, &vp_up);
+							Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, vp_max, &vp_down);
+							Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, vn_max, &vn_up);
+							Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, vn_max, &vn_down);
 
 							control_points_n.push_back(vn_up* planeWidth + (1- planeWidth)* vpos[0]);
 							control_points_n.push_back(vn_down* planeWidth + (1- planeWidth)* vpos[3]);
@@ -347,10 +347,10 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 						if (!isQuadratic) {
 							//calculate control points
 							QVector3D vp_up, vp_down, vn_up, vn_down;
-							HDS_Face::LineLineIntersect(vpos[0], vpos[3], he->v->pos, he->next->v->pos, &vp_up);
-							HDS_Face::LineLineIntersect(vpos[1], vpos[2], he->v->pos, he->next->v->pos, &vp_down);
-							HDS_Face::LineLineIntersect(vpos[0], vpos[1], he->v->pos, he->prev->v->pos, &vn_up);
-							HDS_Face::LineLineIntersect(vpos[3], vpos[2], he->v->pos, he->prev->v->pos, &vn_down);
+							Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, he->next->v->pos, &vp_up);
+							Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, he->next->v->pos, &vp_down);
+							Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, he->prev->v->pos, &vn_up);
+							Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, he->prev->v->pos, &vn_down);
 
 
 							control_points_n.push_back(vn_up* planeWidth + (1- planeWidth)* vpos[0]);
@@ -442,9 +442,9 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 						nxtCorners.erase(nxtCorners.begin());
 					}
 					QVector3D v1;
-					HDS_Face::LineLineIntersect(nxtCorners[0]->pos, nxtCorners[3]->pos, curCorners[3]->pos, curCorners[0]->pos, &v1);
+					Utils::LineLineIntersect(nxtCorners[0]->pos, nxtCorners[3]->pos, curCorners[3]->pos, curCorners[0]->pos, &v1);
 					QVector3D v2;
-					HDS_Face::LineLineIntersect(nxtCorners[1]->pos, nxtCorners[2]->pos, curCorners[2]->pos, curCorners[1]->pos, &v2);
+					Utils::LineLineIntersect(nxtCorners[1]->pos, nxtCorners[2]->pos, curCorners[2]->pos, curCorners[1]->pos, &v2);
 
 					vpos.push_back(v1);
 					vpos.push_back(v2);
