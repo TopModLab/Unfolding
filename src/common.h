@@ -28,11 +28,10 @@
 
 using namespace std;
 
-#if !defined(QT_NO_DEBUG) && !defined(QT_DEBUG)
+//#if !defined(QT_NO_DEBUG) && !defined(QT_DEBUG)
+#if !defined(NDEBUG) && !defined(_DEBUG)
 #	define _DEBUG
 #endif
-
-
 
 using floats_t = vector<float>;
 using doubles_t = vector<double>;

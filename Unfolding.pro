@@ -11,12 +11,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Unfolding
 TEMPLATE = app
 
-RC_FILE = Unfolding.rc
+RC_FILE = icons/_Unfolding.rc
 
 CONFIG += c++11
+CONFIG(release): DEFINES += NDEBUG
 #CONFIG += console
 
 QMAKE_CXXFLAGS += -std=c++11
+
+Release:DESTDIR = bin/Release
+Debug:DESTDIR = bin/Debug
+OBJECTS_DIR = $${DESTDIR}/.obj
+MOC_DIR = $${DESTDIR}/.moc
+RCC_DIR = $${DESTDIR}/.rcc
+UI_DIR = $${DESTDIR}/.ui
 
 INCLUDEPATH += extras/colormap_editor src
 
@@ -126,8 +134,8 @@ HEADERS  += src/mainwindow.h \
     src/ViewerRuler.h \
     src/WeavePanel.h
 
-FORMS    += forms/mainwindow.ui \
-    extras/colormap_editor/colormapeditor.ui \
+FORMS    += extras/colormap_editor/colormapeditor.ui \
+    forms/mainwindow.ui \
     forms/criticalpointspanel.ui \
     forms/cutlocuspanel.ui \
 	forms/bridgerpanel.ui \
@@ -140,9 +148,9 @@ FORMS    += forms/mainwindow.ui \
 RESOURCES += \
     resources.qrc
 
-OTHER_FILES +=
-LIBS += -glut32
-LIBS += -Lc:\glut
+#OTHER_FILES +=
+#LIBS += -glut32
+#LIBS += -Lc:\glut
 
 DISTFILES += \
     shaders/edge_fs.glsl \
@@ -154,3 +162,11 @@ DISTFILES += \
 	shaders/vtx_vs.glsl \
 	shaders/uid_fs.glsl \
 	shaders/uid_vs.glsl
+
+#To make it work, add make install in Build Step
+debug {
+install_shader.path = $${DESTDIR}/shaders
+install_shader.files += shaders/*
+
+INSTALLS += install_shader
+}
