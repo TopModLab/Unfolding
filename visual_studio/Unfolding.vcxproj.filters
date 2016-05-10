@@ -312,6 +312,9 @@
     <ClCompile Include="..\src\MeshWeaver.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MeshDFormer.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -484,6 +487,9 @@
     </ClInclude>
     <ClInclude Include="..\src\UnfoldingAppException.h">
       <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshDFormer.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

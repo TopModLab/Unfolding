@@ -216,6 +216,7 @@
    <addaction name="actionBinding"/>
    <addaction name="actionRim"/>
    <addaction name="actWeave"/>
+   <addaction name="actDForms"/>
    <addaction name="actionCut"/>
    <addaction name="actionUnfold"/>
    <addaction name="separator"/>
@@ -813,6 +814,14 @@
    </property>
    <property name="toolTip">
     <string>Weaving</string>
+   </property>
+  </action>
+  <action name="actDForms">
+   <property name="text">
+    <string>D-Forms</string>
+   </property>
+   <property name="toolTip">
+    <string>Calculate D-Form Parameters</string>
    </property>
   </action>
  </widget>

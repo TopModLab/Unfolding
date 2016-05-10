@@ -44,11 +44,11 @@ protected:
 	void createStatusBar();
 
 private slots:
-	void slot_newFile();
-	void slot_closeFile();
-	void slot_saveFile();
+	void newFile();
+	void closeFile();
+	void saveFile();
 
-	void slot_exportFile();
+	void exportFile();
 
 	void slot_selectMultiple();
 
@@ -79,6 +79,7 @@ private slots:
 	void slot_triggerRimmed3DMesh();
 	void slot_triggerBindingMesh(bool);
 	void slot_triggerWeaveMesh();
+	void slot_triggerDForms();
 
 	void slot_setBridger();
 	void slot_extendMesh();

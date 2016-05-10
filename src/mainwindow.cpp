@@ -132,13 +132,13 @@ void MainWindow::createActions()
 {
 	try {
 		ui->actionImport->setStatusTip(ui->actionImport->toolTip());
-		connect(ui->actionImport, &QAction::triggered, this, &MainWindow::slot_newFile);
+		connect(ui->actionImport, &QAction::triggered, this, &MainWindow::newFile);
 		ui->actionExport->setStatusTip(ui->actionExport->toolTip());
-		connect(ui->actionExport, &QAction::triggered, this, &MainWindow::slot_exportFile);//need to change
+		connect(ui->actionExport, &QAction::triggered, this, &MainWindow::exportFile);//need to change
 		ui->actionExit->setStatusTip(ui->actionExit->toolTip());
-		connect(ui->actionExit, &QAction::triggered, this, &MainWindow::slot_closeFile);
+		connect(ui->actionExit, &QAction::triggered, this, &MainWindow::closeFile);
 		ui->actionSave->setStatusTip(ui->actionSave->toolTip());
-		connect(ui->actionSave, &QAction::triggered, this, &MainWindow::slot_saveFile);
+		connect(ui->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
 
 		/************************************************************************/
 		/* Create Menu                                                          */
@@ -323,7 +323,11 @@ void MainWindow::createActions()
 		ui->actionRim->setChecked(false);
 		connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
 
+		ui->actWeave->setChecked(false);
 		connect(ui->actWeave, &QAction::triggered, this, &MainWindow::slot_triggerWeaveMesh);
+
+		ui->actDForms->setChecked(false);
+		//connect(ui->actDForms, &QAction::triggered, this, &MainWindow::slot_trge);
 
 		ui->actionCut->setChecked(false);
 		connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
@@ -432,7 +436,7 @@ void MainWindow::createStatusBar()
 }
 
 
-void MainWindow::slot_newFile()
+void MainWindow::newFile()
 {
 #ifdef _DEBUG
 	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)"));
@@ -473,7 +477,7 @@ void MainWindow::slot_newFile()
 	}
 }
 
-void MainWindow::slot_exportFile()
+void MainWindow::exportFile()
 {
 	if (MeshManager::getInstance()->getMeshStack()->getCurrentFlag() != OperationStack::Unfolded)
 	{
@@ -484,13 +488,13 @@ void MainWindow::slot_exportFile()
 	MeshManager::getInstance()->exportXMLFile();
 }
 
-void MainWindow::slot_closeFile()          //later add this function
+void MainWindow::closeFile()          //later add this function
 {
 	QMessageBox::warning(this, tr("Warning"), tr("Do you want to quit?"), QMessageBox::Yes | QMessageBox::No);
 	this->close();
 }
 
-void MainWindow::slot_saveFile()
+void MainWindow::saveFile()
 {
 	QString filename = QFileDialog::getSaveFileName(this, "Input a file name");
 	cout << "saving file " << filename.toStdString() << endl;
@@ -593,6 +597,18 @@ void MainWindow::slot_triggerWeaveMesh()
 		wmpanel->activateWindow();
 	}
 
+}
+
+void MainWindow::slot_triggerDForms()
+{
+	if (MeshManager::getInstance()->getMeshStack()->canCut)
+	{
+		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::DForm);
+
+		MeshManager::getInstance()->cutMeshWithSelectedEdges();
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+
+	}
 }
 
 void MainWindow::slot_hollowMesh()
