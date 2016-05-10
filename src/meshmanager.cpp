@@ -684,14 +684,17 @@ void MeshManager::rimMesh(double rimSize)
 	selectedEdges.clear();
 }
 
-void MeshManager::set3DRimMesh(std::map<QString,bool> config, float w, float h)
+void MeshManager::set3DRimMesh(std::map<QString,float> config)
 {
     MeshRimFace::setOriMesh(operationStack->getOriMesh());
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
     MeshRimFace::configRimMesh(config);
-    MeshRimFace::rimMesh3D(outMesh, w, h);
+	if (config["center"] == 0)
+		MeshRimFace::rimMeshV(outMesh);
+	else
+		MeshRimFace::rimMeshF(outMesh);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 }

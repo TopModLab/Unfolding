@@ -4,9 +4,11 @@
 
 float MeshRimFace::planeWidth = 0.2f;
 float MeshRimFace::planeHeight = 0.2f;
+float MeshRimFace::flapWidth = 0.1f;
+float MeshRimFace::pivotPosition = 0.0f;
+int MeshRimFace::shapeType = 0;
 
 bool MeshRimFace::isHalf = true;
-bool MeshRimFace::isRect = true;
 bool MeshRimFace::isQuadratic = true;
 bool MeshRimFace::onEdge = true;
 bool MeshRimFace::smoothEdge = false;
@@ -167,14 +169,10 @@ void MeshRimFace::computeDiamondCornerOnEdge(he_t* he, vector<QVector3D> &vpos, 
 
 }
 
-void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
+void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 {
 	initiate();
 	cur_mesh = mesh;
-	planeWidth = width;
-	planeHeight = height;
-	if (isQuadratic && onEdge)
-		planeWidth = 1- planeWidth;
 
 
 	unordered_map <hdsid_t, he_t*> ori_map = ori_mesh->hesMap();
@@ -195,7 +193,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 			QVector3D v_mid = (v->pos + v1->pos)/2;
 			vector<QVector3D> vpos;
 			if (onEdge) {
-				if (isRect) {
+				if (shapeType == 0) {
 					computePlaneCornerOnEdge(v, he, vpos);
 					if (isQuadratic) {
 						vert_t* vn_i = new vert_t(vpos[0]);
@@ -245,43 +243,45 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 						hes_new.push_back(he_mid);
 						control_edges.push_back(he_mid);
 					}
-				}else {
+				}else if(shapeType == 1) {
 					QVector3D vn_max, vp_max;
 					computeDiamondCornerOnEdge(he, vpos, vn_max, vp_max);
-						vector<vert_t*> vertices;
-						for (QVector3D pos: vpos) {
-							vert_t* vertex = new vert_t(pos);
-							vertices.push_back(vertex);
-						}
-						vertices[0]->refid = he->v->refid;
-						vertices[1]->refid = he->flip->refid;
-						vertices[2]->refid = he->flip->v->refid;
-						vertices[3]->refid = he->refid;
+					vector<vert_t*> vertices;
+					for (QVector3D pos: vpos) {
+						vert_t* vertex = new vert_t(pos);
+						vertices.push_back(vertex);
+					}
+					vertices[0]->refid = he->v->refid;
+					vertices[1]->refid = he->flip->refid;
+					vertices[2]->refid = he->flip->v->refid;
+					vertices[3]->refid = he->refid;
 
-						verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+					verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
-						face_t* newFace = createFace(vertices, cutFace);
-						newFace->refid = he->refid;
-						faces_new.push_back(newFace);
-						pieces.push_back(newFace);
+					face_t* newFace = createFace(vertices, cutFace);
+					newFace->refid = he->refid;
+					faces_new.push_back(newFace);
+					pieces.push_back(newFace);
 
-						if (!isQuadratic) {
-							//calculate control points
-							QVector3D vp_up, vp_down, vn_up, vn_down;
-							Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, vp_max, &vp_up);
-							Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, vp_max, &vp_down);
-							Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, vn_max, &vn_up);
-							Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, vn_max, &vn_down);
+					if (!isQuadratic) {
+						//calculate control points
+						QVector3D vp_up, vp_down, vn_up, vn_down;
+						Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, vp_max, &vp_up);
+						Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, vp_max, &vp_down);
+						Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, vn_max, &vn_up);
+						Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, vn_max, &vn_down);
 
-							control_points_n.push_back(vn_up* planeWidth + (1- planeWidth)* vpos[0]);
-							control_points_n.push_back(vn_down* planeWidth + (1- planeWidth)* vpos[3]);
-							control_points_p.push_back(vp_up* planeWidth + (1- planeWidth)* vpos[0]);
-							control_points_p.push_back(vp_down* planeWidth + (1- planeWidth)*vpos[1]);
-						}
+						control_points_n.push_back(vn_up* planeWidth + (1- planeWidth)* vpos[0]);
+						control_points_n.push_back(vn_down* planeWidth + (1- planeWidth)* vpos[3]);
+						control_points_p.push_back(vp_up* planeWidth + (1- planeWidth)* vpos[0]);
+						control_points_p.push_back(vp_down* planeWidth + (1- planeWidth)*vpos[1]);
+					}
+				}else if (shapeType == 2) {
+
 				}
 			}
 			else {
-				if (isRect) {
+				if (shapeType == 0) {
 					vector<QVector3D> vmid;
 					computePlaneCornerOnFace(v,he,vmid, vpos);
 					if (isQuadratic) {
@@ -325,39 +325,41 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 
 
 					}
-				}else {
+				}else if(shapeType == 1) {
 					//is diamond shape piece
 					computeDiamondCornerOnFace(he,vpos);
-						he_t* ori_he = he;
-						vector<vert_t*> vertices;
-						for (QVector3D pos: vpos) {
-							vert_t* vertex = new vert_t(pos);
-							vertices.push_back(vertex);
-							vertex->refid = ori_he->v->refid;
-							ori_he = ori_he->next;
-						}
+					he_t* ori_he = he;
+					vector<vert_t*> vertices;
+					for (QVector3D pos: vpos) {
+						vert_t* vertex = new vert_t(pos);
+						vertices.push_back(vertex);
+						vertex->refid = ori_he->v->refid;
+						ori_he = ori_he->next;
+					}
 
-						verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+					verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
-						face_t* newFace = createFace(vertices, cutFace);
-						newFace->refid = he->f->refid;
-						faces_new.push_back(newFace);
-						pieces.push_back(newFace);
+					face_t* newFace = createFace(vertices, cutFace);
+					newFace->refid = he->f->refid;
+					faces_new.push_back(newFace);
+					pieces.push_back(newFace);
 
-						if (!isQuadratic) {
-							//calculate control points
-							QVector3D vp_up, vp_down, vn_up, vn_down;
-							Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, he->next->v->pos, &vp_up);
-							Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, he->next->v->pos, &vp_down);
-							Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, he->prev->v->pos, &vn_up);
-							Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, he->prev->v->pos, &vn_down);
+					if (!isQuadratic) {
+						//calculate control points
+						QVector3D vp_up, vp_down, vn_up, vn_down;
+						Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, he->next->v->pos, &vp_up);
+						Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, he->next->v->pos, &vp_down);
+						Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, he->prev->v->pos, &vn_up);
+						Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, he->prev->v->pos, &vn_down);
 
 
-							control_points_n.push_back(vn_up* planeWidth + (1- planeWidth)* vpos[0]);
-							control_points_n.push_back(vn_down* planeWidth + (1- planeWidth)* vpos[3]);
-							control_points_p.push_back(vp_up* planeWidth + (1- planeWidth)* vpos[0]);
-							control_points_p.push_back(vp_down* planeWidth + (1- planeWidth)*vpos[1]);
-						}
+						control_points_n.push_back(vn_up* planeWidth + (1- planeWidth)* vpos[0]);
+						control_points_n.push_back(vn_down* planeWidth + (1- planeWidth)* vpos[3]);
+						control_points_p.push_back(vp_up* planeWidth + (1- planeWidth)* vpos[0]);
+						control_points_p.push_back(vp_down* planeWidth + (1- planeWidth)*vpos[1]);
+					}
+
+				}else if (shapeType == 2) {
 
 				}
 			}
@@ -366,9 +368,9 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 		///connect pieces
 
 		float angleSum = 0;
-		if (isQuadratic || !isRect) {
+		if (isQuadratic || shapeType == 1) {
 
-			if(!isRect && !isQuadratic) {
+			if(shapeType == 1 && !isQuadratic) {
 				control_points_n.push_back(control_points_n[0]);
 				control_points_n.push_back(control_points_n[1]);
 				control_points_n.erase(control_points_n.begin(), control_points_n.begin()+2);
@@ -423,7 +425,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 				he_t* he1 = curFace->he;
 				//get nextFace he2
 				he_t* he2;
-				if(isRect)
+				if(shapeType == 0)
 					he2 = nextFace->he->next->next;
 				else
 					he2 = nextFace->he->prev;
@@ -437,7 +439,7 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 					curCorners = curFace->corners();
 					nxtCorners = nextFace->corners();
 
-					if (!isRect) {
+					if (shapeType == 1) {
 						nxtCorners.push_back(nxtCorners[0]);
 						nxtCorners.erase(nxtCorners.begin());
 					}
@@ -517,5 +519,150 @@ void MeshRimFace::rimMesh3D(HDS_Mesh *mesh, float width, float height)
 
 	}
 	//cur_mesh->processType = HDS_Mesh::RIMMED_PROC;
+	updateNewMesh();
+}
+
+void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
+{
+	initiate();
+	cur_mesh = mesh;
+
+	for (face_t* f: cur_mesh->faces()) {
+		he_t* he = f->he;
+
+		vector<he_t*> control_edges_n;
+		vector<he_t*> control_edges_p;
+
+		vector<QVector3D> control_points_n;
+		vector<QVector3D> control_points_p;
+
+		face_t* cutFace = new face_t;
+		cutFace->isCutFace = true;
+		faces_new.push_back(cutFace);
+
+		do {
+
+			//get projection plane
+			QVector3D vu_max = he->v->pos;
+			QVector3D vd_max = he->flip->v->pos;
+			QVector3D vp_max, vn_max;
+			projectFaceCenter(he->v, he, vn_max, vp_max);
+
+			//get center point //flap pivot
+			QVector3D flapPivot;
+			Utils::LineLineIntersect(vu_max, vd_max, vp_max, vn_max, &flapPivot);
+
+			//flap control points
+			QVector3D flap_in = Utils::Lerp(flapPivot, vn_max, flapWidth);
+			QVector3D flap_out = Utils::Lerp(flapPivot, vp_max, flapWidth);
+
+			//construct flap edge //WARNING::refid not assigned
+			vert_t* vflap_in = new vert_t(flap_in);
+			vert_t* vflap_out = new vert_t(flap_out);
+			verts_new.push_back(vflap_in);
+			verts_new.push_back(vflap_out);
+			he_t* flap_he = HDS_Mesh::insertEdge(vflap_in, vflap_out);
+			hes_new.push_back(flap_he);
+			flap_he->f = cutFace;
+			flap_he->flip->f = cutFace;
+
+			//get planar piece height pivot
+			QVector3D pieceHeightPivot = Utils::Lerp(flap_in, vn_max, 0.5);
+
+			QVector3D pieceHeight_in = Utils::Lerp(pieceHeightPivot, vn_max, planeWidth);
+			QVector3D pieceHeight_out = Utils::Lerp(pieceHeightPivot, flap_in, planeWidth);
+
+
+			QVector3D v_max;
+			for (int i = 0; i < 2; i++) {
+				if (i == 0)
+					v_max = vd_max;
+				else
+					v_max = vu_max;
+
+				//get planar piece width center //planar width pivot
+				QVector3D pieceWidthPivot = Utils::Lerp(vn_max, v_max, 0.5);
+
+				//set the ratio of planar piece
+				//pieceWidth_in and out are control points for bridger
+				QVector3D pieceWidth_in = Utils::Lerp(pieceWidthPivot, vn_max, planeHeight);
+				QVector3D pieceWidth_out = Utils::Lerp(pieceWidthPivot, v_max, planeHeight);
+
+
+				//get control points for the flap piece
+				QVector3D flap_in_ctl, flap_out_ctl;
+				Utils::LineLineIntersect(flap_in, v_max, vp_max, pieceWidth_in, &flap_in_ctl);
+				Utils::LineLineIntersect(flap_out, v_max, vp_max, pieceWidth_out, &flap_out_ctl);
+
+				//get planar piece vertices postion
+				QVector3D vpos_0, vpos_1, vpos_2, vpos_3;
+				Utils::LineLineIntersect(vp_max, pieceWidth_out, v_max, pieceHeight_in, &vpos_0);
+				Utils::LineLineIntersect(vp_max, pieceWidth_in, v_max, pieceHeight_in, &vpos_1);
+				Utils::LineLineIntersect(vp_max, pieceWidth_in, v_max, pieceHeight_out, &vpos_2);
+				Utils::LineLineIntersect(vp_max, pieceWidth_out, v_max, pieceHeight_in, &vpos_3);
+
+				//construct planar piece //WARNING: refid not assigned
+				vert_t* v0 = new vert_t(vpos_0);
+				vert_t* v1 = new vert_t(vpos_1);
+				vert_t* v2 = new vert_t(vpos_2);
+				vert_t* v3 = new vert_t(vpos_3);
+
+				vector<vert_t*> vertices;
+				if (i == 0) {
+					vertices.push_back(v0);
+					vertices.push_back(v1);
+					vertices.push_back(v2);
+					vertices.push_back(v3);
+				}else {
+					vertices.push_back(v1);
+					vertices.push_back(v0);
+					vertices.push_back(v3);
+					vertices.push_back(v2);
+				}
+				verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+
+				face_t* newFace = createFace(vertices, cutFace);
+				newFace->refid = he->refid;
+				faces_new.push_back(newFace);
+
+				//connect to flap
+				if (i == 0) {
+					vector<QVector3D> vpos = {flap_in_ctl, flap_out_ctl};
+					addBridger(flap_he, newFace->he->next->next->flip, vpos);
+					control_edges_n.push_back(newFace->he->flip);
+					control_points_n.push_back(pieceWidth_in);
+					control_points_n.push_back(pieceWidth_out);
+				}else {
+					vector<QVector3D> vpos = {flap_out_ctl, flap_in_ctl};
+					addBridger(flap_he->flip, newFace->he->next->next->flip, vpos);
+					control_edges_p.push_back(newFace->he->flip);
+					control_points_p.push_back(pieceWidth_out);
+					control_points_p.push_back(pieceWidth_in);
+				}
+
+			}
+			he = he->next;
+		}while(he != f->he);
+
+		//connect pieces
+
+		//shift control p by one
+		control_points_p.push_back(control_points_p[0]);
+		control_points_p.push_back(control_points_p[1]);
+		control_points_p.erase(control_points_p.begin(), control_points_p.begin()+2);
+		control_edges_p.push_back(control_edges_p[0]);
+		control_edges_p.erase(control_edges_p.begin());
+
+
+		int edgeCount = control_edges_n.size();
+		for (int index = 0; index < edgeCount; index++) {
+			vector<QVector3D> vpos;
+			vpos = {control_points_n[2*index], control_points_n[2*index+1],
+					control_points_p[2*index+1], control_points_p[2*index]};
+			addBridger(control_edges_n[index], control_edges_p[index], vpos);
+
+			he = he->next;
+		}
+	}
 	updateNewMesh();
 }
