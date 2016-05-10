@@ -90,7 +90,7 @@ public:
 	void rimMesh(double rimSize = 0.0);
 	void set3DRimMesh(std::map<QString, bool> config, float width, float height);
 	void setWeaveMesh(std::map<QString, float> config);
-
+	void createDFormMesh();
 	// Export as SVG files
 	void exportXMLFile();
 	bool saveMeshes();

@@ -6,6 +6,7 @@
 #include "meshhollower.h"
 #include "meshrimface.h"
 #include "MeshWeaver.h"
+#include "MeshDFormer.h"
 #include "MeshIterator.h"
 #include "MeshConnector.h"
 
@@ -374,8 +375,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
-	QScopedPointer<HDS_Mesh> ref_mesh;
-		ref_mesh.reset(new HDS_Mesh(*inMesh));
+	QScopedPointer<HDS_Mesh> ref_mesh(new HDS_Mesh(*inMesh));
 
 
 	//cout << "validating reference mesh" << endl;
@@ -726,6 +726,11 @@ void MeshManager::setWeaveMesh(std::map<QString,float> config)
 	MeshWeaver::weaveMesh(outMesh);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
+}
+
+void MeshManager::createDFormMesh()
+{
+	operationStack->push(MeshDFormer::generateDForm(operationStack->getCurrentMesh()));
 }
 
 void MeshManager::exportXMLFile()
