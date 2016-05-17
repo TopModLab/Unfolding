@@ -531,6 +531,8 @@ void MainWindow::slot_triggerExtendMesh()
 
 void MainWindow::slot_triggerHollowMesh(bool checked)
 {
+	MeshManager::getInstance()->getMeshStack()->reset();
+
 	if (MeshManager::getInstance()->getMeshStack()->canHollow)
 	{
 		hmpanel->show();
@@ -542,6 +544,8 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 
 void MainWindow::slot_triggerBindingMesh(bool checked)
 {
+	MeshManager::getInstance()->getMeshStack()->reset();
+
 	if (MeshManager::getInstance()->getMeshStack()->canBind)
 	{
 		bmpanel->show();
