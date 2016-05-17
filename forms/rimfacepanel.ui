@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>279</width>
-    <height>480</height>
+    <width>309</width>
+    <height>586</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,54 +18,97 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>249</width>
-     <height>451</height>
+     <width>275</width>
+     <height>568</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Center on</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QRadioButton" name="centerVBtn">
+         <property name="text">
+          <string>Vertex</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">pieceCenterGrp</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="centerFBtn">
+         <property name="text">
+          <string>Face</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">pieceCenterGrp</string>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="pieceGrpBox">
       <property name="title">
        <string>Rim Face Piece</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QRadioButton" name="edgeBtn">
-           <property name="text">
-            <string>Edge Based</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-           <attribute name="buttonGroup">
-            <string notr="true">piecePositionGrp</string>
-           </attribute>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="faceBtn">
-           <property name="text">
-            <string>Face Based</string>
-           </property>
-           <attribute name="buttonGroup">
-            <string notr="true">piecePositionGrp</string>
-           </attribute>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Position</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QRadioButton" name="edgeBtn">
+              <property name="text">
+               <string>Edge Based</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">piecePositionGrp</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="faceBtn">
+              <property name="text">
+               <string>Face Based</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">piecePositionGrp</string>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+         <zorder></zorder>
+         <zorder></zorder>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="pieceShapeGrpBox">
          <property name="title">
-          <string>Piece Shape</string>
+          <string>Shape</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
-           <widget class="QRadioButton" name="rectBtn">
+           <widget class="QRadioButton" name="trapeBtn">
             <property name="text">
-             <string>Rectangle</string>
+             <string>Trapezoid</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -85,13 +128,26 @@
             </attribute>
            </widget>
           </item>
+          <item>
+           <widget class="QRadioButton" name="parallelBtn">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Parallelogram</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">pieceShapeGrp</string>
+            </attribute>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="pieceSizeGrpBox">
          <property name="title">
-          <string>Piece Size</string>
+          <string>Size</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
@@ -280,7 +336,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Thickness</string>
+           <string>Thickness(Piece)</string>
           </property>
          </widget>
         </item>
@@ -313,6 +369,69 @@
        </layout>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QWidget" name="flapGrpBox" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Thickness(Flap)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="flapSlider">
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>99</number>
+         </property>
+         <property name="value">
+          <number>30</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="flapText">
+         <property name="minimumSize">
+          <size>
+           <width>30</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <spacer name="verticalSpacer">
@@ -358,9 +477,10 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="piecePositionGrp"/>
+  <buttongroup name="pieceSizeGrp"/>
   <buttongroup name="bezierGrp"/>
   <buttongroup name="pieceShapeGrp"/>
-  <buttongroup name="pieceSizeGrp"/>
+  <buttongroup name="piecePositionGrp"/>
+  <buttongroup name="pieceCenterGrp"/>
  </buttongroups>
 </ui>

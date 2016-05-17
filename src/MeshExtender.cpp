@@ -32,8 +32,7 @@ vector <QVector3D> MeshExtender::scaleBridgerEdge(he_t* he)
     QVector3D v1 = he->v->pos;
     QVector3D v2 = he->flip->v->pos;
 
-    QVector3D vmid = (v1 + v2)/2;
-
+	QVector3D vmid = (v1 + v2)/2.0;
     vpair.push_back( (1 - scale)* vmid + scale *v1 );
     vpair.push_back( (1 - scale)* vmid + scale *v2 );
 
@@ -178,16 +177,16 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	initiate();
 	cur_mesh = mesh;
 
-	unordered_map<hdsid_t, he_t*> ori_hemap = ori_mesh->heMap;
+	unordered_map<hdsid_t, he_t*> ori_hemap = cur_mesh->heMap;
 
 	scaleFaces();
 
 	//get bridge pairs
 	unordered_map<hdsid_t, he_t*> refidMap;
 	for (auto he: hes_new) {
-		if (refidMap.find(he->refid) == refidMap.end())
+		if (refidMap.find(he->flip->refid) == refidMap.end()) {
 			refidMap.insert(make_pair(he->refid, he));
-		else {
+		}else {
 			he->flip->setBridgeTwin(refidMap[he->refid]->flip);
 		}
 	}

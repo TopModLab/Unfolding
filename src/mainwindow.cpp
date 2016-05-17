@@ -616,7 +616,7 @@ void MainWindow::slot_rimmed3DMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
-	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig(), rmpanel->getW(), rmpanel->getH());
+	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 

@@ -3,7 +3,10 @@
 float MeshWeaver::size = 0.3f;
 float MeshWeaver::roundness = 0.5f;
 float MeshWeaver::depth = 0.01f;
+float MeshWeaver::pivot = 0.5;
+float MeshWeaver::flapSize = 0.0;
 bool MeshWeaver::isBilinear = true;
+bool MeshWeaver::isCone = true;
 
 void MeshWeaver::weaveLinearScaledPiece() {
 	//for linear scaled piece
@@ -102,11 +105,11 @@ void MeshWeaver::weaveLinearScaledPiece() {
 			Utils::LineLineIntersect(startHE->v->pos, startHE->next->v->pos, he->flip->v->pos, bound, &nxt_v_down_max);
 			Utils::LineLineIntersect(startHE->prev->v->pos, startHE->prev->prev->v->pos, he->flip->v->pos, bound, &nxt_v_up_max);
 
-			QVector3D cur_v_down = (1 - roundness)* vpos[2] + roundness* cur_v_down_max;
-			QVector3D cur_v_up = (1 - roundness) * vpos[3] + roundness* cur_v_up_max;
+			QVector3D cur_v_down = Utils::Lerp(vpos[2], cur_v_down_max, roundness);
+			QVector3D cur_v_up = Utils::Lerp(vpos[3], cur_v_up_max, roundness);
 
-			QVector3D nxt_v_down = (1 - roundness)* startHE->v->pos + roundness* nxt_v_down_max;
-			QVector3D nxt_v_up = (1 - roundness) * startHE->prev->v->pos + roundness* nxt_v_up_max;
+			QVector3D nxt_v_down = Utils::Lerp(startHE->v->pos, nxt_v_down_max, roundness);
+			QVector3D nxt_v_up = Utils::Lerp(startHE->prev->v->pos, nxt_v_up_max, roundness);
 
 			//add bridger
 
@@ -146,35 +149,72 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 				projectFaceCenter(v, he, vn_max, vp_max);
 
 				//do bilinear interpolation
-				QVector3D vp_up = (1 - planeHeight)/2 * vp_max + (1 + planeHeight)/2 * v->pos;
-				QVector3D vp_down = (1 - planeHeight)/2 * v->pos + (1 + planeHeight)/2 * vp_max;
-				QVector3D vn_up = (1 - planeHeight)/2 * flip_v->pos + (1 + planeHeight)/2 * vn_max;
-				QVector3D vn_down = (1 - planeHeight)/2 * vn_max + (1 + planeHeight)/2 * flip_v->pos;
+				QVector3D vp_pivot = Utils::Lerp(vp_max, v->pos, pivot);
+				QVector3D vn_pivot = Utils::Lerp(vn_max, flip_v->pos, pivot);
+
+				QVector3D vp_up = Utils::Lerp(vp_pivot, v->pos, planeHeight);
+				QVector3D vp_down = Utils::Lerp(vp_pivot, vp_max, planeHeight);
+				QVector3D vn_up = Utils::Lerp(vn_pivot, vn_max, planeHeight);
+				QVector3D vn_down = Utils::Lerp(vn_pivot, flip_v->pos, planeHeight);
 
 				//get middle edge as control edges
-				QVector3D mid_up = (vp_up + vn_up)/2;
-				QVector3D mid_down = (vp_down + vn_down)/2;
+				QVector3D mid_up, mid_down, vp_up_scaled, vp_down_scaled, vn_up_scaled, vn_down_scaled;
+				if (isCone) {
+					QVector3D vp_scaled = Utils::Lerp(flip_v->pos, vp_max, roundness);
+					QVector3D vn_scaled = Utils::Lerp(v->pos, vn_max, roundness);
 
-				QVector3D vp_up_scaled = (1 - roundness)*mid_up + roundness*vp_up;
-				QVector3D vp_down_scaled = (1 - roundness)*mid_down + roundness*vp_down;
-				QVector3D vn_up_scaled = (1 - roundness)*mid_up + roundness*vn_up;
-				QVector3D vn_down_scaled = (1 - roundness)*mid_down + roundness*vn_down;
+					Utils::LineLineIntersect(v->pos, flip_v->pos, vp_up, vn_up, &mid_up);
+					Utils::LineLineIntersect(v->pos, flip_v->pos, vp_down, vn_down, &mid_down);
 
+					Utils::LineLineIntersect(v->pos, vp_scaled, vp_up, vn_up, &vp_up_scaled);
+					Utils::LineLineIntersect(v->pos, vp_scaled, vp_down, vn_down, &vp_down_scaled);
+					Utils::LineLineIntersect(flip_v->pos, vn_scaled, vp_up, vn_up, &vn_up_scaled);
+					Utils::LineLineIntersect(flip_v->pos, vn_scaled, vp_down, vn_down, &vn_down_scaled);
+
+				}else {
+					mid_up = (vp_up + vn_up)/2;
+					mid_down = (vp_down + vn_down)/2;
+
+					vp_up_scaled = Utils::Lerp(mid_up, vp_up, roundness);
+					vp_down_scaled = Utils::Lerp(mid_down, vp_down, roundness);
+					vn_up_scaled = Utils::Lerp(mid_up, vn_up, roundness);
+					vn_down_scaled = Utils::Lerp(mid_down, vn_down, roundness);
+				}
 
 				//do bilinear interpolation on bottom piece
-				QVector3D bot_vp_up = (1 - planeHeight)/2 * v->pos + (1 + planeHeight)/2 * vn_max;
-				QVector3D bot_vp_down = (1 - planeHeight)/2 * vn_max + (1 + planeHeight)/2 * v->pos;
-				QVector3D bot_vn_up = (1 - planeHeight)/2 * vp_max + (1 + planeHeight)/2 * flip_v->pos;
-				QVector3D bot_vn_down = (1 - planeHeight)/2 * flip_v->pos + (1 + planeHeight)/2 * vp_max;
+				QVector3D bot_vp_pivot = Utils::Lerp(vn_max, v->pos, pivot);
+				QVector3D bot_vn_pivot = Utils::Lerp(vp_max, flip_v->pos, pivot);
+
+				QVector3D bot_vp_up = Utils::Lerp(bot_vp_pivot, vn_max, planeHeight);
+				QVector3D bot_vp_down = Utils::Lerp(bot_vp_pivot, v->pos, planeHeight);
+				QVector3D bot_vn_up = Utils::Lerp(bot_vn_pivot, flip_v->pos, planeHeight);
+				QVector3D bot_vn_down = Utils::Lerp(bot_vn_pivot, vp_max, planeHeight);
 
 				//get middle edge as control edges
-				QVector3D bot_vmid_up = (bot_vp_up + bot_vn_up)/2;
-				QVector3D bot_vmid_down = (bot_vp_down + bot_vn_down)/2;
+				QVector3D bot_vmid_up, bot_vmid_down,
+						  bot_vp_up_scaled, bot_vp_down_scaled, bot_vn_up_scaled, bot_vn_down_scaled;
 
-				QVector3D bot_vp_up_scaled = (1 - roundness)*bot_vmid_up + roundness* bot_vp_up;
-				QVector3D bot_vp_down_scaled = (1 - roundness)*bot_vmid_down + roundness* bot_vp_down;
-				QVector3D bot_vn_up_scaled = (1 - roundness)*bot_vmid_up + roundness* bot_vn_up;
-				QVector3D bot_vn_down_scaled = (1 - roundness)*bot_vmid_down + roundness* bot_vn_down;
+				if (isCone) {
+					QVector3D vp_scaled = Utils::Lerp(flip_v->pos, vn_max, roundness);
+					QVector3D vn_scaled = Utils::Lerp(v->pos, vp_max, roundness);
+
+					Utils::LineLineIntersect(v->pos, flip_v->pos, bot_vp_up, bot_vn_up, &bot_vmid_up);
+					Utils::LineLineIntersect(v->pos, flip_v->pos, bot_vp_down, bot_vn_down, &bot_vmid_down);
+
+					Utils::LineLineIntersect(v->pos, vp_scaled, bot_vp_up, bot_vn_up, &bot_vp_up_scaled);
+					Utils::LineLineIntersect(v->pos, vp_scaled, bot_vp_down, bot_vn_down, &bot_vp_down_scaled);
+					Utils::LineLineIntersect(flip_v->pos, vn_scaled, bot_vp_up, bot_vn_up, &bot_vn_up_scaled);
+					Utils::LineLineIntersect(flip_v->pos, vn_scaled, bot_vp_down, bot_vn_down, &bot_vn_down_scaled);
+
+				}else {
+				 bot_vmid_up = (bot_vp_up + bot_vn_up)/2;
+				 bot_vmid_down = (bot_vp_down + bot_vn_down)/2;
+
+				 bot_vp_up_scaled = Utils::Lerp(bot_vmid_up, bot_vp_up, roundness);
+				 bot_vp_down_scaled = Utils::Lerp(bot_vmid_down, bot_vp_down, roundness);
+				 bot_vn_up_scaled = Utils::Lerp(bot_vmid_up, bot_vn_up, roundness);
+				 bot_vn_down_scaled = Utils::Lerp(bot_vmid_down, bot_vn_down, roundness);
+				}
 
 				control_points_n[he->refid] = make_pair(vn_up_scaled, vn_down_scaled);
 				control_points_p[he->refid] = make_pair(vp_up_scaled, vp_down_scaled);
