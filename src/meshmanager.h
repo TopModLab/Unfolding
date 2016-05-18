@@ -97,7 +97,7 @@ public:
 
 	void setCurrentOpFlag(OperationStack::Flag curFlag) { operationStack->setCurrentFlag(curFlag); }
 protected:
-	/// should not be externally accessible
+	// should not be externally accessible
 	static void drop()
 	{
 		static QMutex mutex;

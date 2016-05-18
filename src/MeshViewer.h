@@ -58,6 +58,29 @@ struct RenderBufferObject// : protected oglFuncs
 		ibo.release();
 		vbo->release();
 	}
+	void allocateIBO()
+	{
+		ibo.bind();
+		ibo.allocate(&ibos[0], sizeof(GLuint) * ibos.size());
+		ibo.release();
+	}
+	void allocateTBO(int nTBO = 2)
+	{
+		funcs->glBindBuffer(GL_TEXTURE_BUFFER, tbo[0]);
+		funcs->glBufferData(GL_TEXTURE_BUFFER, sizeof(uint16_t) * flags.size(), &flags[0], GL_STATIC_DRAW);
+		if (nTBO > 1)
+		{
+			funcs->glBindBuffer(GL_TEXTURE_BUFFER, tbo[1]);
+			funcs->glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * ids.size(), &ids[0], GL_STATIC_DRAW);
+		}
+		funcs->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+	}
+	void shrink_to_fit()
+	{
+		ibos.shrink_to_fit();
+		ids.shrink_to_fit();
+		flags.shrink_to_fit();
+	}
 
 	oglFuncs* funcs;
 	shared_ptr<oglBuffer> vbo;
@@ -75,7 +98,7 @@ struct RenderBufferObject// : protected oglFuncs
 	};
 
 	vector<GLuint> ibos;// he ibo data
-	vector<GLuint> ids;// he id, for querying
+	ui32s_t ids;// he id, for querying
 	ui16s_t flags;// he flag data
 };
 class MeshViewer
@@ -134,11 +157,7 @@ public:// slots functions
 
 private: // paint function
 	void resetCamera();
-	void bind();
-	void initialVBO();
-	void bindVertices();
-	void bindPrimitive(RenderBufferObject &RBO);
-	void bindTBO(RenderBufferObject &RBO, int nTBO = 2);
+	void allocateGL();
 
 	void initShader();
 public:
@@ -231,7 +250,7 @@ private://interaction ie selection
 	InteractionState interactionState;
 	stack<InteractionState> interactionStateStack;
 	//SelectionState selectionState;
-	queue<int> selVTX, selHE, selFACE;
+	queue<uint32_t> selVTX, selHE, selFACE;
 
 	MouseState mouseState;
 
@@ -267,7 +286,7 @@ private:
 	// Ground Grid
 	ViewerGrid grid;
 
-	HDS_Mesh* heMesh;   /// not own
+	HDS_Mesh* heMesh;   // not own
 	bool mesh_changed;
 	double scale;
 	//QMatrix4x4 model_matrix;

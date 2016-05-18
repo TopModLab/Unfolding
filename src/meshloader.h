@@ -22,7 +22,7 @@ struct PolyIndex
 	{
 		v.push_back(ids[0] - 1);
 		if (ids[1] > 0) uv.push_back(ids[1] - 1);
-		if (ids[2] > 0) uv.push_back(ids[2] - 1);
+		if (ids[2] > 0) n.push_back(ids[2] - 1);
 	}
 
 	size_t size;
@@ -45,9 +45,9 @@ public:
 
 protected:
 	void clear();
+	void shrink_to_fit();
 	void triangulate();
 	void estimateNormals();
-
 protected:
 
 	bool triangulated;

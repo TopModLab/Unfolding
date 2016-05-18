@@ -587,6 +587,7 @@
     </property>
     <addaction name="actGenCube"/>
     <addaction name="actGenTetra"/>
+    <addaction name="actGenTorus"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>

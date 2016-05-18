@@ -21,13 +21,13 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	, showVert(other.showVert), showNormals(other.showNormals)
 	, processType(other.processType)
 {
-	/// need a deep copy
+	// need a deep copy
 
-	/// copy the vertices set
+	// copy the vertices set
 	vertSet.clear();
 	vertMap.clear();
 	for( auto v : other.vertSet ) {
-		/// he is not set for this vertex
+		// he is not set for this vertex
 		vert_t *nv = new vert_t(*v);
 		vertSet.insert(nv);
 		vertMap.insert(make_pair(v->index, nv));
@@ -44,13 +44,13 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	heSet.clear();
 	heMap.clear();
 	for( auto he : other.heSet ) {
-		/// face, vertex, prev, next, and flip are not set yet
+		// face, vertex, prev, next, and flip are not set yet
 		he_t *nhe = new he_t(*he);
 		heSet.insert(nhe);
 		heMap.insert(make_pair(he->index, nhe));
 	}
 
-	/// fill in the pointers
+	// fill in the pointers
 	for( auto &he : heSet ) {
 		auto he_ref = other.heMap.at(he->index);
 		//cout << he_ref->index << endl;
@@ -69,13 +69,13 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		if (he_ref->v != nullptr)
 			he->v = vertMap.at(he_ref->v->index);
 	}
-	/// set the half edges for faces
+	// set the half edges for faces
 	for( auto &f : faceSet ) {
 		auto f_ref = other.faceMap.at(f->index);
 		f->he = heMap.at(f_ref->he->index);
 	}
 
-	/// set the half edges for vertices
+	// set the half edges for vertices
 	for( auto &v : vertSet ) {
 		auto v_ref = other.vertMap.at(v->index);
 		v->he = heMap.at(v_ref->he->index);
@@ -95,7 +95,7 @@ HDS_Mesh::~HDS_Mesh()
 
 void HDS_Mesh::updateSortedFaces()
 {
-	/// create the sorted face set
+	// create the sorted face set
 	cout<<"updating sorted faces"<<endl;
 	sortedFaces.assign(faceSet.begin(), faceSet.end());
 	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
@@ -207,7 +207,7 @@ bool HDS_Mesh::validateVertex(vert_t *v) {
 }
 
 void HDS_Mesh::validate() {
-	/// verify that the mesh has good topology, ie has loop
+	// verify that the mesh has good topology, ie has loop
 	for( auto v : vertSet ) {
 		if( !validateVertex(v) ) {
 			cout << "vertex #" << v->index << " is invalid." << endl;
@@ -260,19 +260,16 @@ void HDS_Mesh::printMesh(const string &msg)
 }
 
 void HDS_Mesh::releaseMesh() {
-	for(auto vit=vertSet.begin();vit!=vertSet.end();vit++)
-		if( (*vit) != nullptr )
-			delete (*vit);
+	for(auto v : vertSet)
+		delete v;
 	vertSet.clear();
 
-	for(auto fit=faceSet.begin();fit!=faceSet.end();fit++)
-		if( (*fit) != nullptr )
-			delete (*fit);
+	for(auto f : faceSet)
+		delete f;
 	faceSet.clear();
 
-	for(auto heit=heSet.begin();heit!=heSet.end();heit++)
-		if( (*heit) != nullptr )
-			delete (*heit);
+	for(auto he : heSet)
+		delete he;
 	heSet.clear();
 
 	delete bound;
@@ -376,7 +373,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 		GLfloat face_mat_diffuse_bridger[4] = { 0.75, 0.75, 0.95, 1 };
 
 
-		/// traverse the mesh and render every single face
+		// traverse the mesh and render every single face
 		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
 		{
 			face_t* f = (*fit);
@@ -411,7 +408,7 @@ void HDS_Mesh::draw(ColorMap cmap)
 				++vcount;
 				vert_t* v = curHe->v;
 
-				/// interpolation
+				// interpolation
 				if (!f->isBridger) {
 					//QColor clr = cmap.getColor_discrete(v->colorVal);
 					//GLUtils::setColor(QColor(0.75,0.75,0.75), 0.3); //commented out face color variation
@@ -651,15 +648,15 @@ void HDS_Mesh::exportVertVBO(
 void HDS_Mesh::exportEdgeVBO(
 	ui32s_t* heIBOs, ui32s_t* heIDs, ui16s_t* heFLAGs) const
 {
-	size_t heSetSize = heSet.size() / 2;
+	size_t heSetSize = heSet.size();
 	if (heIBOs != nullptr)
 	{
 		unordered_set<he_t*> visitiedHE;
-		visitiedHE.reserve(heSet.size());
+		visitiedHE.reserve(heSetSize);
 
 
 		heIBOs->clear();
-		heIBOs->reserve(heSetSize >> 1);
+		heIBOs->reserve(heSetSize);
 		heFLAGs->clear();
 		heFLAGs->reserve(heSetSize >> 1);
 
@@ -681,7 +678,7 @@ void HDS_Mesh::exportEdgeVBO(
 	else if (heFLAGs != nullptr)
 	{
 		unordered_set<he_t*> visitiedHE;
-		visitiedHE.reserve(heSet.size());
+		visitiedHE.reserve(heSetSize);
 
 		heFLAGs->clear();
 		heFLAGs->reserve(heSetSize >> 1);
@@ -883,7 +880,7 @@ vector<HDS_Mesh::face_t *> HDS_Mesh::incidentFaces(vert_t *v)
 	return faces;
 }
 
-/// all outgoing half edges of vertex v
+// all outgoing half edges of vertex v
 vector<HDS_Mesh::he_t *> HDS_Mesh::incidentEdges(vert_t *v)
 {
 	he_t *he = v->he;

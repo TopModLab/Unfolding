@@ -1105,7 +1105,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			}
 		}
 
-		/// draw connected faces
+		// draw connected faces
 		set<HDS_Face*> neighbourFaces = face->connectedFaces();
 		for (auto face : neighbourFaces)
 		{
