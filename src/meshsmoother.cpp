@@ -13,7 +13,7 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 		return fabs(a->curvature) > fabs(b->curvature);
 	};
 
-	/// put all non-zero curvature vertices into a heap
+	// put all non-zero curvature vertices into a heap
 	const double CTHRES = 1e-6;
 	vector<HDS_Vertex*> H;
 	for (auto v : mesh->vertSet) {
@@ -22,7 +22,7 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 	}
 	std::make_heap(H.begin(), H.end(), vertex_comp);
 
-	/// modify the curvature of the vertices one by one, making them 0
+	// modify the curvature of the vertices one by one, making them 0
 	double CTHRES2;
 	cout << "threshold:" << endl;
 	cin >> CTHRES2;
@@ -35,10 +35,10 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 			break;
 		}
 
-		/// make the curvature at this vertex 0
+		// make the curvature at this vertex 0
 		auto neighbors = v->neighbors();
 
-		/// update its neighbors
+		// update its neighbors
 		map<HDS_Vertex*, double> entries;
 		double sum_inv_dist = 0.0;
 		for (auto neighbor : neighbors) {
@@ -66,7 +66,7 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 
 			v->curvature = 0;
 
-			/// add back the neighbors if they are not in queue
+			// add back the neighbors if they are not in queue
 			for (auto entry : entries) {
 				if (find(H.begin(), H.end(), entry.first) == H.end()) {
 					H.push_back(entry.first);
@@ -74,7 +74,7 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 			}
 		}
 
-		/// remove zero curvature vertices
+		// remove zero curvature vertices
 		auto newEnd = std::remove_if(H.begin(), H.end(), [=](const HDS_Vertex *a) {
 			return fabs(a->curvature) <= CTHRES;
 		});
@@ -95,22 +95,22 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 // smooth the mesh by minimizing vertex movement and removing as much as possible curvature deficit
 void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 {
-	/// compute the smoothed curvature at each vertex
+	// compute the smoothed curvature at each vertex
 	int nVerts = mesh->vertSet.size();
 
-	/// construct the smoothing matrix
+	// construct the smoothing matrix
 	mat A(nVerts, nVerts, arma::fill::zeros);
 	vec x(nVerts);
 	unordered_map<int, int> vidxMap;
 	int ridx = 0;
 	for(auto v : mesh->vertSet) {
 		vidxMap[v->index] = ridx;
-		/// set the entry in vector x
+		// set the entry in vector x
 		x(ridx) = v->curvature;
 		++ridx;
 	}
 
-	/// assemble the matrix A
+	// assemble the matrix A
 	const double CTHRES = 1e-10;
 	for(auto v : mesh->vertSet) {
 		int ridx = vidxMap[v->index];
@@ -119,8 +119,8 @@ void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 			A(ridx, ridx) = 1.0;
 		}
 		else {
-			/// set the entry in vector x
-			/// get all its neighbors
+			// set the entry in vector x
+			// get all its neighbors
 			auto neighbors = v->neighbors();
 			vector<pair<int, double>> entries;
 			double sum_inv_dist = 0.0;
@@ -146,82 +146,82 @@ void MeshSmoother::smoothMesh(HDS_Mesh *mesh)
 
 	//cout << A << endl;
 
-	/// compute new curvatures
+	// compute new curvatures
 	vec x_hat = A * x;
 	double sum_curvature = 0.0;
 	for(auto v : mesh->vertSet) {
 		int ridx = vidxMap[v->index];
 
-		/// set the entry in vector x
+		// set the entry in vector x
 		v->curvature = x_hat(ridx);
 		sum_curvature += x_hat(ridx);
 	}
 
 	cout << "sum = " << sum_curvature << endl;
 
-	/// compute the new vertex positions using the new curvatures
+	// compute the new vertex positions using the new curvatures
 }
 #endif
 
-/// cost function for computing new vertex positions
+// cost function for computing new vertex positions
 void costfunction_vert(double *p, double *hx, int m, int n, void *adata) {
 	HDS_Mesh *mesh = (HDS_Mesh*)adata;
 
-	/// assemble matrix A with p
+	// assemble matrix A with p
 
-	/// compute the new curvatures
+	// compute the new curvatures
 
-	/// compute the new positions for each vertex
+	// compute the new positions for each vertex
 
-	/// compute the cost vector
+	// compute the cost vector
 }
 
-/// cost function for computing new curvatures
+// cost function for computing new curvatures
 void costfunction(double *p, double *hx, int m, int n, void *adata) {
 	HDS_Mesh *mesh = (HDS_Mesh*)adata;
 
-	/// assemble matrix A with p
+	// assemble matrix A with p
 
-	/// compute the new curvatures
+	// compute the new curvatures
 
-	/// compute the new positions for each vertex
+	// compute the new positions for each vertex
 
-	/// compute the cost vector
+	// compute the cost vector
 }
 
 void MeshSmoother::smoothMesh_wholeMesh(HDS_Mesh *mesh)
 {
-	/// compute the smoothed curvature at each vertex
+	// compute the smoothed curvature at each vertex
 	int nVerts = mesh->vertSet.size();
 
-	/// update curvature and vertex normal
+	// update curvature and vertex normal
 	for (auto v : mesh->vertSet) {
 		v->computeCurvature();
 		v->computeNormal();
 	}
 
-	/// update face normals
+	// update face normals
 	for (auto f : mesh->faceSet) {
 		f->computeNormal();
 	}
 
-	/// find out the set of zero curvature and static curvature
+	// find out the set of zero curvature and static curvature
 	set<int> V0, VS;
 
-	/// find out the coefficients of the manipulation matrix A
+	// find out the coefficients of the manipulation matrix A
 	/*
-	/// interface
+	// interface
 	extern int dlevmar_lec_dif(
 	void(*func)(double *p, double *hx, int m, int n, void *adata),
 	double *p, double *x, int m, int n, double *A, double *b, int k,
 	int itmax, double *opts, double *info, double *work, double *covar, void *adata);
 	*/
 
-	/// compute the new curvatures with A
+	// compute the new curvatures with A
 
-	/// compute the new positions for each vertex
+	// compute the new positions for each vertex
 	/*
-	/// interface
+	// interface
 	extern int dlevmar_dif(
 	void(*func)(double *p, double *hx, int m, int n, void *adata),
 	double *p, double *x, int m, int n, int itmax, double *opts,

@@ -1,12 +1,9 @@
 #ifndef OPERATIONSTACK_H
 #define OPERATIONSTACK_H
 
-#include <stack>
 #include <QScopedPointer>
+#include <QSharedPointer>
 #include "hds_mesh.h"
-
-
-
 
 class OperationStack
 {
@@ -25,7 +22,7 @@ public:
 	};
 
 	struct Operation{
-		QScopedPointer<HDS_Mesh> mesh;
+		QSharedPointer<HDS_Mesh> mesh;
 		Flag flag = Undefined;
 		Operation() = delete;
 		Operation(HDS_Mesh* op_mesh, Flag op_flag){
@@ -35,7 +32,6 @@ public:
 	};
 
 	OperationStack();
-	~OperationStack();
 
 	void undo();
 	void redo();
@@ -60,11 +56,12 @@ public:
 	bool canHollow;
 
 private:
-	stack<Operation*> opStack;
-	stack<Operation*> redoStack;
+	stack<QSharedPointer<Operation>> opStack;
+	stack<QSharedPointer<Operation>> redoStack;
 	Flag curFlag;
 
-	QScopedPointer<HDS_Mesh> ori_mesh, unfolded_mesh;
+	//QSharedPointer<HDS_Mesh> ori_mesh;
+	QSharedPointer<HDS_Mesh> ori_mesh, unfolded_mesh;
 
 };
 

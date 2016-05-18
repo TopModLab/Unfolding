@@ -236,7 +236,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			addBridger(he, he->bridgeTwin, vpair);
 
 		}else {
-			/// for all cut-edge edges, create flaps
+			// for all cut-edge edges, create flaps
 
 			he_t* twin_he = he->bridgeTwin;
 			vert_t* flap_vs = new vert_t;
@@ -334,7 +334,7 @@ void MeshExtender::updateNewMesh()
 	}
 	cur_mesh->validate();
 
-	/// update the curvature of each vertex
+	// update the curvature of each vertex
 	for (auto &v : cur_mesh->vertSet) {
 		v->computeNormal();
 		v->computeCurvature();

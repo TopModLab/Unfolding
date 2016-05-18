@@ -43,7 +43,7 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 		qDebug() << p->index << " @ " << p->pos;
 	}*/
 
-	/// find the shared half edge
+	// find the shared half edge
 	he_t *he_share = face_prev->he;
 	do {
 		if (he_share->flip->f == face_cur)
@@ -53,17 +53,17 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 		he_share = he_share->next;
 	} while( he_share != face_prev->he );
 
-	/// change the position of the vertices in the current face, except for the end points
-	/// of he_share
+	// change the position of the vertices in the current face, except for the end points
+	// of he_share
 	vert_t *vs = he_share->v;
 	vert_t *ve = he_share->flip->v;
 
-	/// compute the spanning vectors for the unfolded mesh
+	// compute the spanning vectors for the unfolded mesh
 	QVector3D xvec = vs->pos - ve->pos;
 	xvec.normalize();
 	QVector3D yvec = uvec - QVector3D::dotProduct(uvec, xvec) * xvec;
 	const qreal eps = 1e-6;
-	/// To avoid precision issue, check if yvec is too short
+	// To avoid precision issue, check if yvec is too short
 	if( yvec.length() < eps )
 	{
 		yvec = vvec - QVector3D::dotProduct(vvec, xvec) * xvec;
@@ -75,13 +75,13 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 		yvec = -yvec;
 	}
 
-	/// shared edge in the reference mesh
+	// shared edge in the reference mesh
 	he_t *he_share_ref = ref_mesh->heMap.at(he_share->index);
 	face_t *face_cur_ref = ref_mesh->faceMap.at(face_cur->index);
 	vert_t *vs_ref = he_share_ref->v;
 	vert_t *ve_ref = he_share_ref->flip->v;
 
-	/// compute the spanning vectors for the face in the reference mesh
+	// compute the spanning vectors for the face in the reference mesh
 	QVector3D cface_ref = face_cur_ref->center();
 
 	QVector3D xvec_ref = vs_ref->pos - ve_ref->pos;
@@ -95,15 +95,15 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 		if( curHE->v == vs || curHE->v == ve )
 		{
 			//continue;
-			/// nothing to do, these two should not be modified
+			// nothing to do, these two should not be modified
 		}
 		else
 		{
-			/// compute the new position of the vertex
+			// compute the new position of the vertex
 			vert_t *v = curHE->v;
 			vert_t *v_ref = ref_mesh->vertMap.at(curHE->v->index);
 
-			/// compute the coordinates of this vertex using the reference mesh
+			// compute the coordinates of this vertex using the reference mesh
 			QVector3D dvec_ref = v_ref->pos - vs_ref->pos;
 			qreal xcoord = QVector3D::dotProduct(dvec_ref, xvec_ref);
 			qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec_ref);
@@ -116,7 +116,7 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 }
 
 bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
-	/// for each vertex in the cutted_mesh, check the condition
+	// for each vertex in the cutted_mesh, check the condition
 	auto isBadVertex = [](HDS_Vertex* v) -> bool {
 		vector<double> sums;
 		double sum = 0;
@@ -255,13 +255,13 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		return false;
 	}
 	ref_mesh->updatePieceSet();
-	/// If no face is selected, find one face in each piece and push into fixedFaces
+	// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
 #ifdef _DEBUG
 		cout << "No face is selected, finding fixed faces..." << endl;
 #endif
-		/// find all fixed faces
+		// find all fixed faces
 		unordered_set<int> visitedFaces;
 
 		int progressIndex = 0;
@@ -273,13 +273,13 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 				continue;
 			}
 
-			/// If f has not been visited yet
-			/// Add to selected faces
+			// If f has not been visited yet
+			// Add to selected faces
 			if( visitedFaces.find(f->index) == visitedFaces.end() )
 			{
 				visitedFaces.insert(f->index);
 				fixedFaces.insert(f->index);
-				/// Find all linked faces except cut face
+				// Find all linked faces except cut face
 				set<HDS_Face*> connectedFaces = Utils::filter_set(f->linkedFaces(), [](HDS_Face* f){
 						return !(f->isCutFace);
 				});

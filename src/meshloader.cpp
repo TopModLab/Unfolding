@@ -51,6 +51,14 @@ void MeshLoader::clear() {
 	m_polys.clear();
 }
 
+void MeshLoader::shrink_to_fit()
+{
+	m_verts.shrink_to_fit();
+	m_uvs.shrink_to_fit();
+	m_norms.shrink_to_fit();
+	m_polys.shrink_to_fit();
+}
+
 void MeshLoader::triangulate()
 {
 	cout << "Triangulating the mesh ..." << endl;
@@ -201,7 +209,7 @@ bool OBJLoader::load(const string &filename)
 			load_from_file(filename);
 		}
 		m_filename = filename;
-		
+		shrink_to_fit();
 
 		cout << "finish loading file " << m_filename << endl;
 		cout << "# faces = " << m_polys.size() << endl;
@@ -245,9 +253,9 @@ bool OBJLoader::load_from_string(const string &filename)
 	if (!f.open(QFile::ReadOnly))
 		return false;
 	auto str = QTextStream(&f).readAll().toUtf8().toStdString();
+	size_t strLen = str.length();
 	const char* srcStr = str.c_str();
 	f.close();
-
 	// Parsing String
 	if (srcStr != nullptr)
 	{
@@ -255,11 +263,11 @@ bool OBJLoader::load_from_string(const string &filename)
 		int err;
 		int offset = 0;
 		char trash[255] = {};
-		char lineHeader[2] = {};
+		char lineHeader[3] = {};
 		double val[3] = {};
 		uint32_t indices[3];
 
-		do
+		while (subStr - srcStr <= strLen)
 		{
 			// Skip end of line
 			if (*subStr == '\n' || *subStr == '\r')
@@ -268,7 +276,7 @@ bool OBJLoader::load_from_string(const string &filename)
 				continue;
 			}
 			lineHeader[0] = lineHeader[1] = 0;
-			sscanf(subStr, "%s%n", &lineHeader, &offset);
+			err = sscanf(subStr, "%s%n", &lineHeader, &offset);
 			subStr += offset;
 			// Vertex
 			if (strcmp(lineHeader, "v") == 0)
@@ -362,7 +370,7 @@ bool OBJLoader::load_from_string(const string &filename)
 				subStr += offset + 1;
 			}
 
-		} while (*subStr != '\0');
+		};
 	}
 }
 
@@ -375,7 +383,7 @@ bool OBJLoader::load_from_file(const string &filename)
 	}
 	int err;
 	char buff[255] = {};
-	char lineHeader[2] = {};
+	char lineHeader[3] = {};
 	double val[3] = {};
 	uint32_t indices[3];
 	char endflg;
