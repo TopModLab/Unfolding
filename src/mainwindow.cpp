@@ -536,6 +536,8 @@ void MainWindow::slot_triggerExtendMesh()
 
 void MainWindow::slot_triggerHollowMesh(bool checked)
 {
+	MeshManager::getInstance()->getMeshStack()->reset();
+
 	if (MeshManager::getInstance()->getMeshStack()->canHollow)
 	{
 		hmpanel->show();
@@ -547,6 +549,8 @@ void MainWindow::slot_triggerHollowMesh(bool checked)
 
 void MainWindow::slot_triggerBindingMesh(bool checked)
 {
+	MeshManager::getInstance()->getMeshStack()->reset();
+
 	if (MeshManager::getInstance()->getMeshStack()->canBind)
 	{
 		bmpanel->show();
@@ -588,7 +592,6 @@ void MainWindow::slot_triggerRimmed3DMesh()
 
 void MainWindow::slot_triggerWeaveMesh()
 {
-	HDS_Bridger::setSamples(16);
 	MeshManager::getInstance()->getMeshStack()->reset();
 
 	if (MeshManager::getInstance()->getMeshStack()->canRim)
@@ -634,7 +637,7 @@ void MainWindow::slot_rimmed3DMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
-	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig(), rmpanel->getW(), rmpanel->getH());
+	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>220</width>
-    <height>172</height>
+    <width>210</width>
+    <height>323</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,11 +18,158 @@
     <rect>
      <x>9</x>
      <y>9</y>
-     <width>201</width>
-     <height>151</height>
+     <width>192</width>
+     <height>303</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Shape</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QRadioButton" name="shapeCylinderBtn">
+         <property name="text">
+          <string>Cylinder</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">shapeBtnGrp</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="shapeConeBtn">
+         <property name="text">
+          <string>Cone</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">shapeBtnGrp</string>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Scaling</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QRadioButton" name="scaleLinearBtn">
+         <property name="text">
+          <string>Linear</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">scaleBtnGrp</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="scaleBilinearBtn">
+         <property name="text">
+          <string>Bilinear</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">scaleBtnGrp</string>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Flap Size</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="flapSlider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="flapLabel">
+        <property name="text">
+         <string>0.00</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Pivot Point</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="pivotSlider">
+        <property name="minimum">
+         <number>-99</number>
+        </property>
+        <property name="maximum">
+         <number>99</number>
+        </property>
+        <property name="singleStep">
+         <number>0</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="pivotLabel">
+        <property name="text">
+         <string>0.00</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -132,8 +279,11 @@
         <property name="maximum">
          <double>10.000000000000000</double>
         </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
         <property name="value">
-         <double>0.100000000000000</double>
+         <double>0.010000000000000</double>
         </property>
        </widget>
       </item>
@@ -175,4 +325,8 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="scaleBtnGrp"/>
+  <buttongroup name="shapeBtnGrp"/>
+ </buttongroups>
 </ui>

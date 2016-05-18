@@ -136,48 +136,6 @@ void HDS_Face::setScaleFactor(double factor)
 	scalingFactor = factor;
 }
 
-//from http://paulbourke.net/geometry/pointlineplane/lineline.c
-/*
-   Calculate the line segment PaPb that is the shortest route between
-   two lines P1P2 and P3P4. Calculate also the values of mua and mub where
-	  Pa = P1 + mua (P2 - P1)
-	  Pb = P3 + mub (P4 - P3)
-   Return FALSE if no solution exists.
-*/
-void HDS_Face::LineLineIntersect(
-   QVector3D p1,QVector3D p2,QVector3D p3,QVector3D p4,QVector3D *pa)
-{
-	//QVector3D *pb;
-   QVector3D p13,p43,p21;
-   double d1343,d4321,d1321,d4343,d2121;
-   double numer,denom;
-//   double EPS = 0.0001;
-
-   p13 = p1 - p3;
-   p43 = p4 - p3;
-   p21 = p2 - p1;
-
-//   if (fabsf(p43.x) < EPS && fabsf(p43.y) < EPS && fabsf(p43.z) < EPS)
-//	  return(false);
-//   if (fabsf(p21.x) < EPS && fabsf(p21.y) < EPS && fabsf(p21.z) < EPS)
-//	  return(false);
-
-   d1343 = QVector3D::dotProduct(p13, p43);
-   d4321 = QVector3D::dotProduct(p43, p21);
-   d1321 = QVector3D::dotProduct(p13, p21);
-   d4343 = QVector3D::dotProduct(p43, p43);
-   d2121 = QVector3D::dotProduct(p21, p21);
-
-   denom = d2121 * d4343 - d4321 * d4321;
-//   if (fabsf(denom) < EPS)
-//	  return(false);
-   numer = d1343 * d4321 - d1321 * d4343;
-
-   double mua = numer / denom;
-   //double mub = (d1343 + d4321 * (mua)) / d4343;
-   *pa = p1 + mua * p21;
-   //*pb = p3 + mub * p43;
-}
 
 QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 {
@@ -221,7 +179,7 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 
    //get intersection point
    QVector3D v0_scaled;
-   HDS_Face::LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
+   Utils::LineLineIntersect(v01_n, v12_p, v01_p, v12_n, &v0_scaled);
    return v0_scaled;*/
 
 }
