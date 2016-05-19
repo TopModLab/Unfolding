@@ -84,8 +84,8 @@ public:
 	void unfoldMesh();
 	void smoothMesh();
 
-	void setBindMesh();
-	void setHollowMesh(double fsize, int type, double shift);
+	void setGRS();
+	void setQuadEdge(double fsize, int type, double shift);
 	void extendMesh(map<QString, double> config);
 	void rimMesh(double rimSize = 0.0);
 	void set3DRimMesh(std::map<QString, float> config);
@@ -96,6 +96,9 @@ public:
 	bool saveMeshes();
 
 	void setCurrentOpFlag(OperationStack::Flag curFlag) { operationStack->setCurrentFlag(curFlag); }
+public slots:
+	static void setPanelType(int type){ panelType = type;}
+
 protected:
 	// should not be externally accessible
 	static void drop()
@@ -115,6 +118,7 @@ private:
 
 	static MeshManager* instance;
 
+	static int panelType;
 	QScopedPointer<OperationStack> operationStack;
 	QScopedPointer<OBJLoader> meshloader;
 	QScopedPointer<HDS_Mesh> smoothed_mesh;

@@ -1,19 +1,19 @@
-#ifndef HOLLOWMESHPANEL_H
-#define HOLLOWMESHPANEL_H
+#ifndef QUADEDGEPANEL_H
+#define QUADEDGEPANEL_H
 
 #include <QWidget>
 
 namespace Ui {
-class HollowMeshPanel;
+class QuadEdgePanel;
 }
 
-class HollowMeshPanel : public QWidget
+class QuadEdgePanel : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit HollowMeshPanel(QWidget *parent = 0);
-	~HollowMeshPanel();
+	explicit QuadEdgePanel(QWidget *parent = 0);
+	~QuadEdgePanel();
 
 	double getFlapSize();
 	double getBridgerSize();
@@ -30,14 +30,14 @@ public slots:
 	void slot_setshiftLabel(int);
 
 	void slot_saved();
-	void slot_restrainSliders(int);
+	void setPanelType(int);
 
 private:
-	Ui::HollowMeshPanel *ui;
+	Ui::QuadEdgePanel *ui;
 	int flapType; //0 for one flap, 1 for extended multiple flaps
 	int flapSize;
 	int bridgerSize;
 	int shiftAmount;
 };
 
-#endif // HOLLOWMESHPANEL_H
+#endif // QUADEDGEPANEL_H

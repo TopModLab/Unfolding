@@ -1,5 +1,5 @@
-#ifndef CONNECTORPANEL_H
-#define CONNECTORPANEL_H
+#ifndef BRIDGERPANEL_H
+#define BRIDGERPANEL_H
 
 #include <QWidget>
 #include <map>
@@ -35,4 +35,4 @@ private:
 
 };
 
-#endif // CONNECTORPANEL_H
+#endif // BRIDGERPANEL_H

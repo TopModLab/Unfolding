@@ -25,6 +25,7 @@
 #endif
 
 MeshManager* MeshManager::instance = nullptr;
+int MeshManager::panelType = 1;
 
 doubles_t MeshManager::getInterpolatedGeodesics(int vidx, int lev0, int lev1, double alpha)
 {
@@ -700,19 +701,26 @@ void MeshManager::set3DRimMesh(std::map<QString,float> config)
 	operationStack->push(outMesh);
 }
 
-void MeshManager::setBindMesh()
+void MeshManager::setGRS()
 {
-	setHollowMesh(1,2,0);
+	if (panelType == 1)
+		setQuadEdge(1,2,0);
+	else
+		cout<<"Operation not defined yet"<<endl;
 }
 
-void MeshManager::setHollowMesh(double flapSize, int type, double shift)
+
+void MeshManager::setQuadEdge(double flapSize, int type, double shift)
 {
 	MeshHollower::setOriMesh(operationStack->getOriMesh());
 
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-	MeshHollower::hollowMesh(outMesh, flapSize, type, shift);
+	if (panelType == 1)
+		MeshHollower::hollowMesh(outMesh, flapSize, type, shift);
+	else
+		cout<<"Operation not defined yet"<<endl;
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 

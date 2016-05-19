@@ -11,6 +11,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QToolButton>
+#include <QComboBox>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -61,8 +62,8 @@ bool MainWindow::createComponents()
 		cppanel.reset(new CriticalPointsPanel);
 		clpanel.reset(new CutLocusPanel);
 		conpanel.reset(new BridgerPanel);
-		hmpanel.reset(new HollowMeshPanel);
-		bmpanel.reset(new BindingMeshPanel);
+		quad_panel.reset(new QuadEdgePanel);
+		grs_panel.reset(new GRSPanel);
 		rmpanel.reset(new RimFacePanel);
 		wmpanel.reset(new WeavePanel);
 
@@ -113,11 +114,11 @@ bool MainWindow::connectComponents()
 	connect(conpanel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
 	connect(conpanel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_extendMesh);
 
-	connect(hmpanel.data(), &HollowMeshPanel::sig_saved, this, &MainWindow::slot_hollowMesh);
-	connect(hmpanel.data(), &HollowMeshPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(quad_panel.data(), &QuadEdgePanel::sig_saved, this, &MainWindow::slot_hollowMesh);
+	connect(quad_panel.data(), &QuadEdgePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
 
-	connect(bmpanel.data(), &BindingMeshPanel::sig_saved, this, &MainWindow::slot_bindingMesh);
-	connect(bmpanel.data(), &BindingMeshPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(grs_panel.data(), &GRSPanel::sig_saved, this, &MainWindow::slot_GRS);
+	connect(grs_panel.data(), &GRSPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
 
 	connect(rmpanel.data(), &RimFacePanel::sig_saved, this, &MainWindow::slot_rimmed3DMesh);
 	connect(rmpanel.data(), &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
@@ -188,7 +189,7 @@ void MainWindow::createActions()
 			[&] { viewer->showShading(viewer_t::SHADE_VERT); });
 		
 
-		// Higlight
+		// Highlight
 		connect(ui->actHL_CutEdge, &QAction::triggered,
 			[&] { viewer->highlightComp(viewer_t::HIGHLIGHT_CUTEDGE); });
 		connect(ui->actHL_Bridger, &QAction::triggered,
@@ -308,29 +309,32 @@ void MainWindow::createActions()
 		ui->actionSelVertex->setChecked(false);
 		connect(ui->actionSelVertex, &QAction::triggered, this, &MainWindow::slot_toggleVertexSelection);
 		
+		///connect panel type to meshManager
+		MeshManager::setPanelType(ui->panelCBox->currentIndex());
+		connect(ui->panelCBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MeshManager::setPanelType);
+
 		connect(ui->actionSmooth, &QAction::triggered, this, &MainWindow::slot_smoothMesh);
 
 		ui->actionExtend->setChecked(false);
 		connect(ui->actionExtend, &QAction::triggered, this, &MainWindow::slot_triggerExtendMesh);
 		
-		ui->actionHollow->setChecked(false);
-		connect(ui->actionHollow, &QAction::triggered, this, &MainWindow::slot_triggerHollowMesh);
+		connect(ui->quadEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerQuadEdge);
+		connect(ui->wingedEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerWingedEdge);
 
-		ui->actionBinding->setChecked(false);
-		connect(ui->actionBinding, &QAction::triggered, this, &MainWindow::slot_triggerBindingMesh);
-		
+		connect(ui->GRSBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerGRS);
 
-		ui->actionRim->setChecked(false);
-		connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmed3DMesh);
+		//ui->actionRim->setChecked(false);
+		//connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmedMesh);
+		connect(ui->FBWBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerRimmedMesh);
 
-		connect(ui->actWeave, &QAction::triggered, this, &MainWindow::slot_triggerWeaveMesh);
+		connect(ui->weaveBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerWeaveMesh);
 
-		ui->actionCut->setChecked(false);
-		connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
-		
-		ui->actionUnfold->setChecked(false);
-		connect(ui->actionUnfold, &QAction::toggled, this, &MainWindow::slot_unfoldMesh);
-		
+		//ui->actionCut->setChecked(false);
+		//connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
+		connect(ui->halfEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_performMeshCut);
+
+		connect(ui->unfoldBtn, &QToolButton::clicked, this, &MainWindow::slot_unfoldMesh);
+
 		connect(ui->actionColormap, &QAction::triggered, this, &MainWindow::slot_triggerColormap);
 		connect(ui->actionCPts, &QAction::triggered, this, &MainWindow::slot_triggerCriticalPoints);
 		connect(ui->actionCutLocus, &QAction::triggered, this, &MainWindow::slot_triggerCutLocusPanel);
@@ -510,7 +514,7 @@ void MainWindow::slot_performMeshCut() {
 
 }
 
-void MainWindow::slot_unfoldMesh(bool checked) {
+void MainWindow::slot_unfoldMesh() {
 
 	if (MeshManager::getInstance()->getMeshStack()->canUnfold)
 	{
@@ -530,49 +534,51 @@ void MainWindow::slot_triggerExtendMesh()
 	}
 }
 
-void MainWindow::slot_triggerHollowMesh(bool checked)
+void MainWindow::slot_triggerQuadEdge()
 {
 	MeshManager::getInstance()->getMeshStack()->reset();
 
-	if (MeshManager::getInstance()->getMeshStack()->canHollow)
+	if (MeshManager::getInstance()->getMeshStack()->canQuad)
 	{
-		hmpanel->show();
-		hmpanel->activateWindow();
+		quad_panel->setPanelType(0);
+		quad_panel->show();
+		quad_panel->activateWindow();
 
 		ui->actionHollow->setChecked(false);
 	}
 }
 
-void MainWindow::slot_triggerBindingMesh(bool checked)
+void MainWindow::slot_triggerWingedEdge()
 {
 	MeshManager::getInstance()->getMeshStack()->reset();
 
-	if (MeshManager::getInstance()->getMeshStack()->canBind)
+	if (MeshManager::getInstance()->getMeshStack()->canQuad)
 	{
-		bmpanel->show();
-		bmpanel->activateWindow();
+		quad_panel->setPanelType(1);
+		quad_panel->show();
+		quad_panel->activateWindow();
+
+		ui->actionHollow->setChecked(false);
+	}
+}
+
+void MainWindow::slot_triggerGRS()
+{
+	MeshManager::getInstance()->getMeshStack()->reset();
+
+	if (MeshManager::getInstance()->getMeshStack()->canGRS)
+	{
+		grs_panel->setPanelType(ui->panelCBox->currentIndex());
+		grs_panel->show();
+		grs_panel->activateWindow();
 
 	}
 
 	ui->actionBinding->setChecked(false);
 }
 
-void MainWindow::slot_triggerRimmedMesh(bool checked)
-{
 
-	if (MeshManager::getInstance()->getMeshStack()->canRim)
-	{
-		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
-
-		MeshManager::getInstance()->rimMesh();
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
-
-	}
-
-	ui->actionRim->setChecked(false);
-}
-
-void MainWindow::slot_triggerRimmed3DMesh()
+void MainWindow::slot_triggerRimmedMesh()
 {
 	HDS_Bridger::setSamples(16);
 	MeshManager::getInstance()->getMeshStack()->reset();
@@ -600,20 +606,20 @@ void MainWindow::slot_triggerWeaveMesh()
 
 void MainWindow::slot_hollowMesh()
 {
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Hollowed);
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::QuadEdge);
 
-	HDS_Bridger::setScale(hmpanel->getBridgerSize());
-	MeshManager::getInstance()->setHollowMesh(hmpanel->getFlapSize(), hmpanel->getType(), hmpanel->getShift());
+	HDS_Bridger::setScale(quad_panel->getBridgerSize());
+	MeshManager::getInstance()->setQuadEdge(quad_panel->getFlapSize(), quad_panel->getType(), quad_panel->getShift());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 }
 
-void MainWindow::slot_bindingMesh()
+void MainWindow::slot_GRS()
 {
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Binded);
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::GRS);
 
-	HDS_Bridger::setScale(bmpanel->getBridgerSize());
-	MeshManager::getInstance()->setBindMesh();
+	HDS_Bridger::setScale(grs_panel->getBridgerSize());
+	MeshManager::getInstance()->setGRS();
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 

@@ -60,11 +60,8 @@ SOURCES += src/main.cpp\
     src/discretegeocomputer.cpp \
     src/cutlocuspanel.cpp \
 	src/hds_bridger.cpp \
-	src/bridgerpanel.cpp \
-    src/hollowmeshpanel.cpp \
     src/meshhollower.cpp \
     src/BBox.cpp \
-    src/bindingmeshpanel.cpp \
     src/ConnectorPanel.cpp \
     src/MeshConnector.cpp \
     src/meshrimface.cpp \
@@ -75,7 +72,10 @@ SOURCES += src/main.cpp\
 	src/ViewerGrid.cpp \
     src/MeshWeaver.cpp \
     src/ViewerRuler.cpp \
-    src/WeavePanel.cpp
+    src/WeavePanel.cpp \
+    src/GRSPanel.cpp \
+    src/QuadEdgePanel.cpp \
+    src/BridgerPanel.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -116,11 +116,8 @@ HEADERS  += src/mainwindow.h \
     src/discretegeocomputer.h \
     src/cutlocuspanel.h \
 	src/hds_bridger.h \
-	src/bridgerpanel.h \
-    src/hollowmeshpanel.h \
     src/meshhollower.h \
     src/BBox.h \
-    src/bindingmeshpanel.h \
     src/ConnectorPanel.h \
     src/MeshConnector.h \
     src/meshrimface.h \
@@ -132,18 +129,21 @@ HEADERS  += src/mainwindow.h \
     src/ViewerGrid.h \
     src/MeshWeaver.h \
     src/ViewerRuler.h \
-    src/WeavePanel.h
+    src/WeavePanel.h \
+    src/GRSPanel.h \
+    src/QuadEdgePanel.h \
+    src/BridgerPanel.h
 
 FORMS    += extras/colormap_editor/colormapeditor.ui \
     forms/mainwindow.ui \
     forms/criticalpointspanel.ui \
     forms/cutlocuspanel.ui \
-	forms/bridgerpanel.ui \
-    forms/hollowmeshpanel.ui \
-    forms/bindingmeshpanel.ui \
     forms/ConnectorPanel.ui \
     forms/rimfacepanel.ui \
-    forms/WeavePanel.ui
+    forms/WeavePanel.ui \
+    forms/GRSPanel.ui \
+    forms/QuadEdgePanel.ui \
+    forms/BridgerPanel.ui
 
 RESOURCES += \
     resources.qrc

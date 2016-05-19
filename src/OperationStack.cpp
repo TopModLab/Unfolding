@@ -6,9 +6,9 @@ OperationStack::OperationStack()
 	, canUnfold(false)
 	, canExtend(true)
 	, canCut(true)
-	, canBind(true)
+	, canGRS(true)
 	, canRim(true)
-	, canHollow(true)
+	, canQuad(true)
 {
 }
 
@@ -67,9 +67,9 @@ void OperationStack::reset()
 	canUnfold = false;
 	canExtend = true;
 	canCut = true;
-	canBind = true;
+	canGRS = true;
 	canRim = true;
-	canHollow = true;
+	canQuad = true;
 }
 
 void OperationStack::clear()
@@ -85,9 +85,9 @@ void OperationStack::clear()
 	canUnfold = false;
 	canExtend = true;
 	canCut = true;
-	canBind = true;
+	canGRS = true;
 	canRim = true;
-	canHollow = true;
+	canQuad = true;
 }
 
 /*call setCurrentFlag in mainWindow before mesh operation*/
@@ -101,27 +101,27 @@ void OperationStack::setCurrentFlag(Flag flag)
 	case Cutted:
 		canUnfold = true;
 		canCut = false;
-		canBind = false;
+		canGRS = false;
 		canRim = false;
-		canHollow = false;
+		canQuad = false;
 		break;
-	case Binded:
+	case GRS:
 	case Rimmed:
-	case Hollowed:
+	case QuadEdge:
 		canUnfold = true;
 		canExtend = false;
 		canCut = false;
-		canBind = false;
+		canGRS = false;
 		canRim = false;
-		canHollow = false;
+		canQuad = false;
 		break;
 	case Unfolded:
 		canUnfold = false;
 		canExtend = false;
 		canCut = false;
-		canBind = false;
+		canGRS = false;
 		canRim = false;
-		canHollow = false;
+		canQuad = false;
 		break;
 	}
 }

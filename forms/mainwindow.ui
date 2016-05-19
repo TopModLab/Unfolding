@@ -44,7 +44,7 @@
       <property name="minimumSize">
        <size>
         <width>940</width>
-        <height>50</height>
+        <height>60</height>
        </size>
       </property>
       <property name="tabPosition">
@@ -82,7 +82,7 @@
            <number>6</number>
           </property>
           <item>
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="panelCBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -98,11 +98,14 @@
             <property name="maximumSize">
              <size>
               <width>150</width>
-              <height>20</height>
+              <height>30</height>
              </size>
             </property>
             <property name="currentText">
-             <string>Single Panel</string>
+             <string>Multi-Panel</string>
+            </property>
+            <property name="currentIndex">
+             <number>1</number>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -125,14 +128,26 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="toolButton_2">
+           <widget class="QToolButton" name="GRSBtn">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
             <property name="text">
              <string>GRS</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="toolButton">
+           <widget class="QToolButton" name="halfEdgeBtn">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
             <property name="text">
              <string>Half Edge</string>
             </property>
@@ -238,7 +253,13 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="toolButton_3">
+           <widget class="QToolButton" name="wingedEdgeBtn">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
             <property name="text">
              <string>Winged Edge</string>
             </property>
@@ -320,9 +341,52 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QToolButton" name="toolButton_4">
+           <widget class="QToolButton" name="weaveBtn">
+            <property name="font">
+             <font>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Plain Weaving</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources.qrc">
+              <normaloff>:/icons/weaving.png</normaloff>:/icons/weaving.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="FBWBtn">
+            <property name="font">
+             <font>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Face Boundary Walk</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources.qrc">
+              <normaloff>:/icons/rimface_3d.png</normaloff>:/icons/rimface_3d.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
             </property>
            </widget>
           </item>
@@ -587,7 +651,6 @@
     </property>
     <addaction name="actGenCube"/>
     <addaction name="actGenTetra"/>
-    <addaction name="actGenTorus"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -763,6 +826,9 @@
   </action>
   <action name="actHL_CutEdge">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="icon">
@@ -1032,6 +1098,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/HollowSphere.png</normaloff>:/icons/HollowSphere.png</iconset>
@@ -1042,10 +1111,16 @@
    <property name="toolTip">
     <string>Generate Hollow Mesh</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionBinding">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
@@ -1056,6 +1131,9 @@
    </property>
    <property name="toolTip">
     <string>Generate Binding Composition Mesh</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionRim">
@@ -1071,6 +1149,9 @@
    </property>
    <property name="toolTip">
     <string>Rim faces</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionCut">
@@ -1090,6 +1171,9 @@
    <property name="shortcut">
     <string>Alt+C</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionUnfold">
    <property name="checkable">
@@ -1107,6 +1191,9 @@
    </property>
    <property name="shortcut">
     <string>Alt+U</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionColormap">
@@ -1227,6 +1314,9 @@
    </property>
    <property name="toolTip">
     <string>Weaving</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

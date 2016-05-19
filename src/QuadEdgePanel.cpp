@@ -1,24 +1,16 @@
-#include "hollowmeshpanel.h"
-#include "ui_hollowmeshpanel.h"
+#include "QuadEdgePanel.h"
+#include "ui_QuadEdgePanel.h"
 
-HollowMeshPanel::HollowMeshPanel(QWidget *parent) :
+QuadEdgePanel::QuadEdgePanel(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::HollowMeshPanel)
+	ui(new Ui::QuadEdgePanel)
 {
 	ui->setupUi(this);
-	setWindowTitle(tr("Hollow Mesh Panel"));
-	ui->shift->hide();
-
 	ui->bridgerSizeLabel->setText(QString::number((float)ui->bridgerSizeSlider->value()/ui->bridgerSizeSlider->maximum()));
 	ui->flapSizeLabel->setText(QString::number((float)ui->flapSizeSlider->value()/ui->flapSizeSlider->maximum()));
 	ui->shiftLabel->setText(QString::number((float)ui->shiftSlider->value()/ui->shiftSlider->maximum()));
 
-	QButtonGroup *flapTypeGroup = new QButtonGroup(this);
-	flapTypeGroup->addButton(ui->oneFlapButton,0);
-	flapTypeGroup->addButton(ui->multFlapButon, 1);
-	flapTypeGroup->setExclusive(true);
 
-	connect(flapTypeGroup, SIGNAL(buttonClicked(int)), this, SLOT(slot_restrainSliders(int)));
 	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(slot_saved()));
 	connect(ui->okButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
 	connect(ui->bridgerPanelButton, SIGNAL(clicked()), this, SIGNAL(sig_setBridger()));
@@ -29,59 +21,62 @@ HollowMeshPanel::HollowMeshPanel(QWidget *parent) :
 
 }
 
-HollowMeshPanel::~HollowMeshPanel()
+QuadEdgePanel::~QuadEdgePanel()
 {
 	delete ui;
 }
 
-void HollowMeshPanel::slot_restrainSliders(int button)
+void QuadEdgePanel::setPanelType(int type)
 {
-	if (button == 0) {
+	if (type == 0) {
 		ui->shift->hide();
+		flapType = 0;
+		setWindowTitle(tr("Quad Edge Panel"));
 	}
 	else {
 		ui->shift->show();
+		flapType = 1;
+		setWindowTitle(tr("Winged Edge Panel"));
 	}
 }
 
-void HollowMeshPanel::slot_setbridgerLabel(int value)
+void QuadEdgePanel::slot_setbridgerLabel(int value)
 {
 	ui->bridgerSizeLabel->setText(QString::number((float)value/ui->bridgerSizeSlider->maximum()));
 }
 
-void HollowMeshPanel::slot_setflapLabel(int value)
+void QuadEdgePanel::slot_setflapLabel(int value)
 {
 	ui->flapSizeLabel->setText(QString::number((float)value/ui->flapSizeSlider->maximum()));
 }
 
-void HollowMeshPanel::slot_setshiftLabel(int value)
+void QuadEdgePanel::slot_setshiftLabel(int value)
 {
 	ui->shiftLabel->setText(QString::number((float)value/ui->shiftSlider->maximum()));
 }
 
-void HollowMeshPanel::slot_saved()
+void QuadEdgePanel::slot_saved()
 {
-	flapType = ui->oneFlapButton->isChecked()? 0:1;
 	flapSize = ui->flapSizeSlider->value();
 	bridgerSize = ui->bridgerSizeSlider->value();
 	shiftAmount = ui->shiftSlider->value();
 	close();
 }
-double HollowMeshPanel::getFlapSize()
+double QuadEdgePanel::getFlapSize()
 {
 	return (double)flapSize / (double)ui->flapSizeSlider->maximum();
 }
-double HollowMeshPanel::getBridgerSize()
+double QuadEdgePanel::getBridgerSize()
 {
 	return (double)bridgerSize / (double)ui->bridgerSizeSlider->maximum();
 }
 
-double HollowMeshPanel::getShift()
+double QuadEdgePanel::getShift()
 {
 	return (double)shiftAmount / (double)ui->shiftSlider->maximum();
 }
 
-int HollowMeshPanel::getType()
+int QuadEdgePanel::getType()
 {
 	return flapType;
 }

@@ -10,9 +10,9 @@ using viewer_t = MeshViewer;
 #include "../extras/colormap_editor/colormapeditor.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
-#include "bridgerpanel.h"
-#include "hollowmeshpanel.h"
-#include "bindingmeshpanel.h"
+#include "BridgerPanel.h"
+#include "QuadEdgePanel.h"
+#include "GRSPanel.h"
 #include "rimfacepanel.h"
 #include "WeavePanel.h"
 #include <QScopedPointer>
@@ -67,23 +67,23 @@ private slots:
 	void slot_toggleVertexSelection();
 
 	void slot_performMeshCut();
-	void slot_unfoldMesh(bool);
+	void slot_unfoldMesh();
 
 	void slot_triggerColormap();
 	void slot_updateViewerColormap();
 
 	void slot_smoothMesh();
 	void slot_triggerExtendMesh();
-	void slot_triggerHollowMesh(bool);
-	void slot_triggerRimmedMesh(bool);
-	void slot_triggerRimmed3DMesh();
-	void slot_triggerBindingMesh(bool);
+	void slot_triggerQuadEdge();
+	void slot_triggerWingedEdge();
+	void slot_triggerRimmedMesh();
+	void slot_triggerGRS();
 	void slot_triggerWeaveMesh();
 
 	void slot_setBridger();
 	void slot_extendMesh();
 	void slot_hollowMesh();
-	void slot_bindingMesh();
+	void slot_GRS();
 	void slot_rimmed3DMesh();
 	void slot_weaveMesh();
 
@@ -125,8 +125,8 @@ private:
 	QScopedPointer<CriticalPointsPanel> cppanel;
 	QScopedPointer<CutLocusPanel> clpanel;
 	QScopedPointer<BridgerPanel> conpanel;
-	QScopedPointer<HollowMeshPanel> hmpanel;
-	QScopedPointer<BindingMeshPanel> bmpanel;
+	QScopedPointer<QuadEdgePanel> quad_panel;
+	QScopedPointer<GRSPanel> grs_panel;
 	QScopedPointer<RimFacePanel> rmpanel;
 	QScopedPointer<WeavePanel> wmpanel;
 

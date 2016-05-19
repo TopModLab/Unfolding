@@ -14,9 +14,9 @@ public:
 		Original = 0,
 		Extended = 1,
 		Cutted = 2,
-		Binded = 3,
+		GRS = 3,
 		Rimmed = 4,
-		Hollowed = 5,
+		QuadEdge = 5,
 		Woven = 6,
 		Unfolded
 	};
@@ -51,9 +51,9 @@ public:
 	bool canUnfold;
 	bool canExtend;
 	bool canCut;
-	bool canBind;
+	bool canGRS;
 	bool canRim;
-	bool canHollow;
+	bool canQuad;
 
 private:
 	stack<QSharedPointer<Operation>> opStack;

@@ -191,7 +191,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	{
 	case 0://one flap
 	{
-		cur_mesh->setProcessType(HDS_Mesh::HOLLOWED_PROC);
+		cur_mesh->setProcessType(HDS_Mesh::QUAD_PROC);
 
 		HDS_Vertex* hv1_flap = new HDS_Vertex(v1_flap);
 		HDS_Vertex* hv2_flap = new HDS_Vertex(v2_flap);
@@ -206,19 +206,18 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	}
 	case 1://mult flap
 	{
-		cur_mesh->setProcessType(HDS_Mesh::HOLLOWED_MF_PROC);
+		cur_mesh->setProcessType(HDS_Mesh::WINGED_PROC);
 
 		QVector3D v0_flap = (1.0 - flapSize) * v0 + flapSize * center;
 		QVector3D v3_flap = (1.0 - flapSize) * v3 + flapSize * center;
 
 
-		float right_scale = (shiftAmount + 1)/2;
+		float right_scale = (shiftAmount + 1)/2.0;
 		float left_scale = 1 - right_scale;
 
 		if(shiftAmount != -1)
 		{
 			//right flap
-
 			HDS_Vertex* hv3_scaled
 				= new HDS_Vertex((1.0 - right_scale) * v2 + right_scale * v3);
 			HDS_Vertex* hv3_flap_scaled
@@ -261,7 +260,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	}
 	case 2://bind
 	{
-		cur_mesh->setProcessType(HDS_Mesh::BINDED_PROC);
+		cur_mesh->setProcessType(HDS_Mesh::GRS_PROC);
 		auto curHE = originalHE->next;
 		do
 		{

@@ -1353,14 +1353,14 @@ void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
 	case HDS_Mesh::REGULAR_PROC:
 		exportRegularPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
 		break;
-	case HDS_Mesh::HOLLOWED_PROC:
+	case HDS_Mesh::QUAD_PROC:
 		exportHollowPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
 		break;
-	case HDS_Mesh::HOLLOWED_MF_PROC:
+	case HDS_Mesh::WINGED_PROC:
 		// new proc
 		exportHollowMFPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
 		break;
-	case HDS_Mesh::BINDED_PROC:
+	case HDS_Mesh::GRS_PROC:
 		exportBindPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
 		break;
 	case HDS_Mesh::RIMMED_PROC:

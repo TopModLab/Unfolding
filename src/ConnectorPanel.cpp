@@ -92,8 +92,8 @@ void ConnectorPanel::initConnectorType()
 		ui->connector_type->addItem("Saw");
 		ui->connector_type->addItem("Advanced Saw");
 		break;
-	case HDS_Mesh::HOLLOWED_PROC:
-	case HDS_Mesh::HOLLOWED_MF_PROC:
+	case HDS_Mesh::QUAD_PROC:
+	case HDS_Mesh::WINGED_PROC:
 		//ui->pinholeunit_label->setDisabled(false);
 		ui->pinholeunit_type->setDisabled(false);
 		ui->pinholesize_label->setDisabled(false);
