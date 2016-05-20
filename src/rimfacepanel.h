@@ -1,6 +1,7 @@
 #ifndef RIMFACEPANEL_H
 #define RIMFACEPANEL_H
 
+#include "common.h"
 #include <QWidget>
 
 namespace Ui {
@@ -16,7 +17,7 @@ public:
 	explicit RimFacePanel(QWidget *parent = 0);
 	~RimFacePanel();
 
-	std::map<QString,float> getConfig() {return config;}
+	confMap getConfig() const { return config; }
 
 signals:
 	void sig_saved();
@@ -34,7 +35,7 @@ private:
 	float width;
 	float height;
 	float flap;
-	std::map<QString,float> config;
+	confMap config;
 };
 
 

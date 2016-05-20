@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>971</width>
+    <width>997</width>
     <height>680</height>
    </rect>
   </property>
@@ -617,7 +617,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>971</width>
+     <width>997</width>
      <height>21</height>
     </rect>
    </property>
@@ -684,7 +684,7 @@
     <enum>LeftToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <addaction name="actionImport"/>
    <addaction name="actionExport"/>
@@ -706,6 +706,7 @@
    <addaction name="actionBinding"/>
    <addaction name="actionRim"/>
    <addaction name="actWeave"/>
+   <addaction name="actDForms"/>
    <addaction name="actionCut"/>
    <addaction name="actionUnfold"/>
    <addaction name="separator"/>
@@ -1330,6 +1331,18 @@
    </property>
    <property name="visible">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actDForms">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/dforms.svg</normaloff>:/icons/dforms.svg</iconset>
+   </property>
+   <property name="text">
+    <string>D-Forms</string>
+   </property>
+   <property name="toolTip">
+    <string>Calculate D-Form Parameters</string>
    </property>
   </action>
  </widget>

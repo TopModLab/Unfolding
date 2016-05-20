@@ -43,5 +43,6 @@ using int16s_t = vector<int16_t>;
 using int32s_t = vector<int32_t>;
 
 
+typedef std::unordered_map<string, double> confMap;
 
 #endif // COMMON_H

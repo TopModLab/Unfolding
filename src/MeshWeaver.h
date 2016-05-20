@@ -7,7 +7,7 @@
 class MeshWeaver : public MeshRimFace
 {
 public:
-	static void configWeaveMesh(std::map<QString, float> config);
+	static void configWeaveMesh(const confMap &config);
 
 	static void weaveMesh(HDS_Mesh* mesh);
 	static void weaveLinearScaledPiece();
@@ -25,14 +25,14 @@ private:
 };
 
 inline void
-MeshWeaver::configWeaveMesh(std::map<QString, float> config) {
-	isCone = config["shapeCone"];
-	isBilinear = config["scaleBilinear"];
-	size = config["thickness"];
-	depth = config["depth"];
-	roundness = config["roundness"];
-	pivot = config["pivot"];
-	flapSize = config["flap"];
+MeshWeaver::configWeaveMesh(const confMap &config) {
+	isCone = config.at("shapeCone");
+	isBilinear = config.at("scaleBilinear");
+	size = config.at("thickness");
+	depth = config.at("depth");
+	roundness = config.at("roundness");
+	pivot = config.at("pivot");
+	flapSize = config.at("flap");
 }
 
 #endif // MESHWEAVER_H

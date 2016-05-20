@@ -228,29 +228,11 @@
     <ClCompile Include="..\src\BBox.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_hollowmeshpanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_hollowmeshpanel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\hollowmeshpanel.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\meshhollower.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\MeshConnector.cpp">
       <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_bindingmeshpanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_bindingmeshpanel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bindingmeshpanel.cpp">
-      <Filter>Source Files\UI</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ConnectorPanel.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -312,6 +294,27 @@
     <ClCompile Include="..\src\MeshWeaver.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MeshDFormer.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_GESPanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_GESPanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GESPanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_QuadEdgePanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_QuadEdgePanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\QuadEdgePanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -331,18 +334,6 @@
     </ClInclude>
     <ClInclude Include="..\src\morsesmalecomplex.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_colormapeditor.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_criticalpointspanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_cutlocuspanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshcutter.h">
       <Filter>Header Files\geometry</Filter>
@@ -428,32 +419,17 @@
     <ClInclude Include="..\src\GeodesicComputer.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\hds_bridger.h">
       <Filter>Header Files\HDS</Filter>
     </ClInclude>
     <ClInclude Include="..\src\BBox.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_hollowmeshpanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\meshhollower.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\MeshConnector.h">
       <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_bindingmeshpanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\hds_common.h">
       <Filter>Header Files\HDS</Filter>
@@ -464,9 +440,6 @@
     <ClInclude Include="..\src\OperationStack.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_rimfacepanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\meshrimface.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
@@ -476,34 +449,52 @@
     <ClInclude Include="..\src\ViewerRuler.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_WeavePanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\MeshWeaver.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\UnfoldingAppException.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\MeshDFormer.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_criticalpointspanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_cutlocuspanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_GESPanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_QuadEdgePanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_rimfacepanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_WeavePanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_colormapeditor.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\criticalpointspanel.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\cutlocuspanel.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\mainwindow.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\src\mainwindow.h">
       <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\bridgerpanel.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\bridgerpanel.h">
       <Filter>Header Files\UI</Filter>
@@ -511,29 +502,8 @@
     <CustomBuild Include="..\src\bridgerpanelviewer.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\hollowmeshpanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\hollowmeshpanel.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\unfoldviewer.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\bindingmeshpanel.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\bindingmeshpanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\src\ConnectorPanel.h">
       <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\ConnectorPanel.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\forms\rimfacepanel.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\rimfacepanel.h">
       <Filter>Header Files\UI</Filter>
@@ -544,7 +514,43 @@
     <CustomBuild Include="..\src\WeavePanel.h">
       <Filter>Header Files\UI</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\src\GESPanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\QuadEdgePanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\bridgerpanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\ConnectorPanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\criticalpointspanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\cutlocuspanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\GESPanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\mainwindow.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\QuadEdgePanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\rimfacepanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\unfoldviewer.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="..\forms\WeavePanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>

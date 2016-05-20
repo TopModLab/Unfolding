@@ -291,7 +291,7 @@ void CBaseModel::FastReadObjFile(const string& filename)
     m_Verts.shrink_to_fit();
     m_Faces.shrink_to_fit();
 #endif
-	printf("read %d verts %d faces from file %s \n" , m_Verts.size(),m_Faces.size(), filename.c_str() );
+	printf("read %d verts %d faces from file %s \n", m_Verts.size(), m_Faces.size(), filename.c_str());
 }
 
 void CBaseModel::ReadFile(const string& filename)

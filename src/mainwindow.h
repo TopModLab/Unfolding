@@ -8,6 +8,7 @@
 #include "MeshViewer.h"
 using viewer_t = MeshViewer;
 #include "../extras/colormap_editor/colormapeditor.h"
+#include "ConnectorPanel.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
 #include "BridgerPanel.h"
@@ -44,11 +45,12 @@ protected:
 	void createStatusBar();
 
 private slots:
-	void slot_newFile();
-	void slot_closeFile();
-	void slot_saveFile();
+	void newFile();
+	void closeFile();
+	void saveFile();
 
-	void slot_exportFile();
+	void triggerExportSVG();
+	void exportSVG();
 
 	void slot_selectMultiple();
 
@@ -79,6 +81,7 @@ private slots:
 	void slot_triggerRimmedMesh();
 	void slot_triggerGES();
 	void slot_triggerWeaveMesh();
+	void slot_triggerDForms();
 
 	void slot_setBridger();
 	void slot_GRS();
@@ -121,14 +124,15 @@ private:
 	QMap<QString, QAction*> actionsMap;
 
 	QScopedPointer<viewer_t> viewer;
-	QScopedPointer<ColormapEditor> ceditor;
-	QScopedPointer<CriticalPointsPanel> cppanel;
-	QScopedPointer<CutLocusPanel> clpanel;
+	QScopedPointer<ColormapEditor> color_editor;
+	QScopedPointer<ConnectorPanel> conn_panel;
+	QScopedPointer<CriticalPointsPanel> cp_panel;
+	QScopedPointer<CutLocusPanel> cl_panel;
 	QScopedPointer<BridgerPanel> grs_panel;
 	QScopedPointer<QuadEdgePanel> quad_panel;
 	QScopedPointer<GESPanel> ges_panel;
-	QScopedPointer<RimFacePanel> rmpanel;
-	QScopedPointer<WeavePanel> wmpanel;
+	QScopedPointer<RimFacePanel> rim_panel;
+	QScopedPointer<WeavePanel> wv_panel;
 
 private:
 

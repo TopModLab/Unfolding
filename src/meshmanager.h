@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MESHMANAGER_H
 #define MESHMANAGER_H
 
@@ -14,6 +15,7 @@
 #include <QTime>
 
 #include "meshloader.h"
+#include "MeshConnector.h"
 #include "OperationStack.h"
 
 #include "hds_mesh.h"
@@ -86,13 +88,13 @@ public:
 
 	void setGES();
 	void setQuadEdge(double fsize, int type, double shift);
-	void setGRS(map<QString, double> config);
+	void setGRS(const confMap &config);
 	void rimMesh(double rimSize = 0.0);
-	void set3DRimMesh(std::map<QString, float> config);
-	void setWeaveMesh(std::map<QString, float> config);
-
+	void set3DRimMesh(const confMap &config);
+	void setWeaveMesh(const confMap &config);
+	void createDFormMesh();
 	// Export as SVG files
-	void exportXMLFile();
+	void exportXMLFile(const QString &filename, const confMap &conf);
 	bool saveMeshes();
 
 	void setCurrentOpFlag(OperationStack::Flag curFlag) { operationStack->setCurrentFlag(curFlag); }

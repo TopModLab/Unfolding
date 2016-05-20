@@ -18,28 +18,22 @@ class ConnectorPanel : public QDialog
 	Q_OBJECT
 
 public:
-	ConnectorPanel(int mesh_process_type = HDS_Mesh::REGULAR_PROC);
-	~ConnectorPanel();
+	ConnectorPanel(int meshProcType = HDS_Mesh::REGULAR_PROC);
 
-	void setMeshConfigure();
 	QString getFilename() const;
-	double getScale() const;
-	int getConnectorType() const;
-	confMap getConfiguration() const;
+	confMap getConfig() const { return conf; }
+
+	void resetParas(int procType);
 
 	static QFont fontfamily;
+signals:
+	void sig_saved();
 private:
-	void initConnectorType();
-private slots:
-	//void slot_setScaleToSpinbox(int val);
-	//void slot_setScaleToSlider(double val);
-	void slot_setFileName();
-	void slot_savePanelData(QAbstractButton* button);
+	void setFileName();
+	void save();
 private:
-	Ui::ConnectorPanel *ui;
-	int meshType;
-	int connectorType;
-	//double scale;
+	QScopedPointer<Ui::ConnectorPanel> ui;
+	confMap conf;
 };
 
 

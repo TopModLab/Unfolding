@@ -18,6 +18,7 @@ public:
 		Rimmed = 4,
 		QuadEdge = 5,
 		Woven = 6,
+		DForm = 7,
 		Unfolded
 	};
 

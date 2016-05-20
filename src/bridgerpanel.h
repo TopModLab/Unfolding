@@ -1,8 +1,9 @@
+#pragma once
 #ifndef BRIDGERPANEL_H
 #define BRIDGERPANEL_H
 
+#include "common.h"
 #include <QWidget>
-#include <map>
 
 namespace Ui {
 class BridgerPanel;
@@ -15,7 +16,8 @@ class BridgerPanel : public QWidget
 public:
 	explicit BridgerPanel(QWidget *parent = 0);
 	~BridgerPanel();
-	std::map<QString, double> getConfigValues();
+	//std::map<QString, double> getConfigValues();
+	confMap getConfigValues() const { return bridgerConfig; }
 	void setSaveMode(bool);
 
 signals:
@@ -29,10 +31,8 @@ public slots:
 
 private:
 	Ui::BridgerPanel *ui;
-	std::map<QString,double> bridgerConfig;
-
-
-
+	//std::map<QString, double> bridgerConfig;
+	confMap bridgerConfig;
 };
 
 #endif // BRIDGERPANEL_H

@@ -23,7 +23,7 @@ MeshViewer::MeshViewer(QWidget *parent)
 	QSurfaceFormat format;
 	format.setDepthBufferSize(32);
 	format.setStencilBufferSize(8);
-//	format.setSamples(16);
+	format.setSamples(9);
 	format.setVersion(3, 3);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
@@ -81,8 +81,6 @@ void MeshViewer::initializeGL()
 
 	// Enable OpenGL features
 	glEnable(GL_MULTISAMPLE);
-//	glEnable(GL_LINE_SMOOTH);
-//	glEnable(GL_POLYGON_SMOOTH);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST); // enable depth-testing
 	glDepthFunc(GL_LEQUAL);

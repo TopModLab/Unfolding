@@ -2,88 +2,30 @@
 
 QFont ConnectorPanel::fontfamily = QFont("Arial");
 
-ConnectorPanel::ConnectorPanel(int mesh_process_type)
+ConnectorPanel::ConnectorPanel(int procType)
 	: ui(new Ui::ConnectorPanel)
-	, meshType(mesh_process_type)
 {
 	ui->setupUi(this);
 
-	//setMeshConfigure();
-	initConnectorType();
-	//setWindowTitle(tr("Mesh Export Panel"));
-	connect(ui->file_button, SIGNAL(clicked()), this, SLOT(slot_setFileName()));
-	connect(ui->save_button, SIGNAL(clicked(QAbstractButton*)), this, SLOT(slot_savePanelData(QAbstractButton*)));
-	//connect(ui->scale_slider, SIGNAL(valueChanged(int)), this, SLOT(slot_setScaleToSpinbox(int)));
-	//connect(ui->scale_val, SIGNAL(valueChanged(double)), this, SLOT(slot_setScaleToSlider(double)));
-}
+	resetParas(procType);
 
-ConnectorPanel::~ConnectorPanel()
-{
-	delete ui;
-}
-
-void ConnectorPanel::setMeshConfigure()
-{
-	//meshType = mt;
-	// Enable connector selection combobox
-	/*switch (meshType)
-	{
-	case HDS_Mesh::REGULAR_PROC:
-		ui->reg_conn_type->setDisabled(false);
-		break;
-	case HDS_Mesh::HOLLOWED_PROC:
-		ui->hollow_conn_type->setDisabled(false);
-		break;
-	case HDS_Mesh::RIMMED_PROC:
-		ui->rim_conn_type->setDisabled(false);
-		break;
-	default:
-		break;
-	}*/
+	connect(ui->file_button, &QAbstractButton::clicked, this, &ConnectorPanel::setFileName);
+	connect(ui->save_button, &QDialogButtonBox::clicked, this, &QDialog::close);
+	connect(ui->save_button, &QDialogButtonBox::clicked, this, &ConnectorPanel::save);
 }
 
 QString ConnectorPanel::getFilename() const
 {
-	//cout << "File name is: " << ui->filename_text->text() << endl;
 	return ui->filename_text->text();
 }
 
-double ConnectorPanel::getScale() const
+
+
+void ConnectorPanel::resetParas(int procType)
 {
-	return ui->scale_val->value();
-}
-
-int ConnectorPanel::getConnectorType() const
-{
-	return ui->connector_type->currentIndex();
-}
-
-confMap ConnectorPanel::getConfiguration() const
-{
-	confMap ret;
-	fontfamily = ui->font_val->currentFont();
-
-	ret.insert(make_pair(ConnectorConf::SCALE, ui->scale_val->value()));
-	ret.insert(make_pair(ConnectorConf::WIDTH, ui->width_val->value()));
-	ret.insert(make_pair(ConnectorConf::LENGTH, ui->length_val->value()));
-
-	ret.insert(make_pair(ConnectorConf::PINHOLE_UNIT, (double)ui->pinholeunit_type->currentIndex()));
-	ret.insert(make_pair(ConnectorConf::PINHOLESIZE, ui->pinholesize_val->value()));
-	ret.insert(make_pair(ConnectorConf::PINHOLECOUNT_TYPE,
-		(double)ui->pinholecount_type->currentIndex()));
-
-	ret.insert(make_pair(ConnectorConf::ETCHSEG, (double)ui->etchseg_val->value()));
-	ret.insert(make_pair(ConnectorConf::SCORE_TYPE, (double)ui->score_type->currentIndex()));
-	ret.insert(make_pair(ConnectorConf::DASH_LEN, ui->scoredash_len->value()));
-	ret.insert(make_pair(ConnectorConf::DASH_GAP, ui->scoredash_gap->value()));
-	ret.insert(make_pair(ConnectorConf::DASH_UNIT, (double)ui->scoredash_unit->currentIndex()));
-	return ret;
-}
-
-void ConnectorPanel::initConnectorType()
-{
-	ui->mesh_type->setCurrentIndex(meshType);
-	switch (meshType)
+	//meshType = procType;
+	ui->mesh_type->setCurrentIndex(procType);
+	switch (procType)
 	{
 	case HDS_Mesh::REGULAR_PROC:
 		ui->connector_type->addItem("Simple");
@@ -110,13 +52,34 @@ void ConnectorPanel::initConnectorType()
 	}
 }
 
-void ConnectorPanel::slot_setFileName()
+void ConnectorPanel::setFileName()
 {
-	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "export/untitled.svg", tr("SVG files (*.svg)"));
-	ui->filename_text->setText(filename);
+	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "", tr("SVG files (*.svg)"));
+	if (!filename.isEmpty())
+	{
+		ui->filename_text->setText(filename);
+	}
 }
 
-void ConnectorPanel::slot_savePanelData(QAbstractButton* button)
+void ConnectorPanel::save()
 {
-	this->close();
+	fontfamily = ui->font_val->currentFont();
+
+	conf["connector"] = (double)ui->connector_type->currentIndex();
+
+	conf["scale"] = ui->scale_val->value();
+	conf["width"] = ui->width_val->value();
+	conf["length"] = ui->length_val->value();
+
+	conf["pinUnit"] = (double)ui->pinholeunit_type->currentIndex();
+	conf["pinSize"] = ui->pinholesize_val->value();
+	conf["pinCount"] = (double)ui->pinholecount_type->currentIndex();
+
+	conf["etchSeg"] = (double)ui->etchseg_val->value();
+	conf["scoreType"] = (double)ui->score_type->currentIndex();
+	conf["dashLen"] = ui->scoredash_len->value();
+	conf["dashGap"] = ui->scoredash_gap->value();
+	conf["dashUnit"] = (double)ui->scoredash_unit->currentIndex();
+
+	emit sig_saved();
 }

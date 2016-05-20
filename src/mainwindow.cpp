@@ -58,14 +58,15 @@ bool MainWindow::createComponents()
 	try {
 		viewer.reset(new viewer_t(this));
 		viewer->setFocusPolicy(Qt::StrongFocus);
-		ceditor.reset(new ColormapEditor);
-		cppanel.reset(new CriticalPointsPanel);
-		clpanel.reset(new CutLocusPanel);
+		color_editor.reset(new ColormapEditor);
+		conn_panel.reset(new ConnectorPanel);
+		cp_panel.reset(new CriticalPointsPanel);
+		cl_panel.reset(new CutLocusPanel);
 		grs_panel.reset(new BridgerPanel);
 		quad_panel.reset(new QuadEdgePanel);
 		ges_panel.reset(new GESPanel);
-		rmpanel.reset(new RimFacePanel);
-		wmpanel.reset(new WeavePanel);
+		rim_panel.reset(new RimFacePanel);
+		wv_panel.reset(new WeavePanel);
 
 		createActions();
 		createMenus();
@@ -88,14 +89,17 @@ bool MainWindow::layoutComponents()
 
 bool MainWindow::connectComponents()
 {
-	connect(ceditor.data(), &ColormapEditor::colorChanged, this, &MainWindow::slot_updateViewerColormap);
+	connect(color_editor.data(), &ColormapEditor::colorChanged, this, &MainWindow::slot_updateViewerColormap);
 	//kkkkkkkkkkkkkkkkkkkkkkkkkkk
 	/*connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int)));
 	connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int, int, int, double)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int, int, int, double)));*/
+	connect(conn_panel.data(), &ConnectorPanel::sig_saved, this, &MainWindow::exportSVG);
+	connect(conn_panel.data(), &ConnectorPanel::sig_saved, this, &MainWindow::exportSVG);
 
-	connect(cppanel.data(), &CriticalPointsPanel::sig_methodChanged, this, &MainWindow::slot_updateCriticalPointsMethod);
-	connect(cppanel.data(), &CriticalPointsPanel::sig_smoothingTimesChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingTimes);
-	connect(cppanel.data(), &CriticalPointsPanel::sig_smoothingTypeChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingType);
+
+	connect(cp_panel.data(), &CriticalPointsPanel::sig_methodChanged, this, &MainWindow::slot_updateCriticalPointsMethod);
+	connect(cp_panel.data(), &CriticalPointsPanel::sig_smoothingTimesChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingTimes);
+	connect(cp_panel.data(), &CriticalPointsPanel::sig_smoothingTypeChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingType);
 
 	//kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
 	/*connect(cppanel, SIGNAL(closedSignal()), viewer, &viewer_t::disablecpp()));
@@ -109,7 +113,7 @@ bool MainWindow::connectComponents()
 
 	connect(clpanel, SIGNAL(sig_closedSignal()), viewer, &viewer_t::disableclp()));
 	*/
-	connect(clpanel.data(), &CutLocusPanel::sig_closedSignal, this, &MainWindow::slot_disableclp);
+	connect(cl_panel.data(), &CutLocusPanel::sig_closedSignal, this, &MainWindow::slot_disableclp);
 
 	connect(grs_panel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
 	connect(grs_panel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_GRS);
@@ -120,11 +124,11 @@ bool MainWindow::connectComponents()
 	connect(ges_panel.data(), &GESPanel::sig_saved, this, &MainWindow::slot_GES);
 	connect(ges_panel.data(), &GESPanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
-	connect(rmpanel.data(), &RimFacePanel::sig_saved, this, &MainWindow::slot_rimmed3DMesh);
-	connect(rmpanel.data(), &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
+	connect(rim_panel.data(), &RimFacePanel::sig_saved, this, &MainWindow::slot_rimmed3DMesh);
+	connect(rim_panel.data(), &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
-	connect(wmpanel.data(), &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
-	connect(wmpanel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
+	connect(wv_panel.data(), &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
+	connect(wv_panel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
 	return true;
 }
@@ -133,13 +137,13 @@ void MainWindow::createActions()
 {
 	try {
 		ui->actionImport->setStatusTip(ui->actionImport->toolTip());
-		connect(ui->actionImport, &QAction::triggered, this, &MainWindow::slot_newFile);
+		connect(ui->actionImport, &QAction::triggered, this, &MainWindow::newFile);
 		ui->actionExport->setStatusTip(ui->actionExport->toolTip());
-		connect(ui->actionExport, &QAction::triggered, this, &MainWindow::slot_exportFile);//need to change
+		connect(ui->actionExport, &QAction::triggered, this, &MainWindow::triggerExportSVG);//need to change
 		ui->actionExit->setStatusTip(ui->actionExit->toolTip());
-		connect(ui->actionExit, &QAction::triggered, this, &MainWindow::slot_closeFile);
+		connect(ui->actionExit, &QAction::triggered, this, &MainWindow::closeFile);
 		ui->actionSave->setStatusTip(ui->actionSave->toolTip());
-		connect(ui->actionSave, &QAction::triggered, this, &MainWindow::slot_saveFile);
+		connect(ui->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
 
 		/************************************************************************/
 		/* Create Menu                                                          */
@@ -433,12 +437,12 @@ void MainWindow::createStatusBar()
 }
 
 
-void MainWindow::slot_newFile()
+void MainWindow::newFile()
 {
 #ifdef _DEBUG
 	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)"));
 #else // Release
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "/", tr("OBJ files(*.obj)"));
+	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "", tr("OBJ files(*.obj)"));
 #endif
 	
 	if (filename != NULL) {
@@ -456,7 +460,6 @@ void MainWindow::slot_newFile()
 		if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
 			return;
 		
-		//kkkkkkkk
 #ifdef _DEBUG
 		qDebug("Loading Object Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
@@ -474,28 +477,35 @@ void MainWindow::slot_newFile()
 	}
 }
 
-void MainWindow::slot_exportFile()
+void MainWindow::exportSVG()
 {
-	if (MeshManager::getInstance()->getMeshStack()->getCurrentFlag() != OperationStack::Unfolded)
-	{
-		QMessageBox::warning(this, tr("Warning"), tr("Unable to export mesh! Unfold it first!"), QMessageBox::Close);
-		return;
-	}
-
-	MeshManager::getInstance()->exportXMLFile();
+	
+	MeshManager::getInstance()->exportXMLFile(conn_panel->getFilename(), conn_panel->getConfig());
 }
 
-void MainWindow::slot_closeFile()          //later add this function
+void MainWindow::closeFile()          //later add this function
 {
 	QMessageBox::warning(this, tr("Warning"), tr("Do you want to quit?"), QMessageBox::Yes | QMessageBox::No);
 	this->close();
 }
 
-void MainWindow::slot_saveFile()
+void MainWindow::saveFile()
 {
-	QString filename = QFileDialog::getSaveFileName(this, "Input a file name");
+	QString filename = QFileDialog::getSaveFileName(this, "Input a file name","",tr("OBJ files(*.obj)"));
 	cout << "saving file " << filename.toStdString() << endl;
 	MeshManager::getInstance()->saveMeshes();
+}
+
+void MainWindow::triggerExportSVG()
+{
+	auto curStack = MeshManager::getInstance()->getMeshStack();
+	if (curStack->getCurrentFlag() != OperationStack::Unfolded)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Unable to export mesh! Unfold it first!"), QMessageBox::Close);
+		return;
+	}
+	conn_panel->resetParas(curStack->getCurrentMesh()->processType);
+	conn_panel->show();
 }
 
 void MainWindow::slot_performMeshCut() {
@@ -525,9 +535,9 @@ void MainWindow::slot_triggerGRS()
 {
 	if (MeshManager::getInstance()->getMeshStack()->canGRS)
 	{
-	grs_panel->setSaveMode((sender() == ui->GRSBtn/*actionsMap["extend"]*/ )? true:false);
-	grs_panel->show();
-	grs_panel->activateWindow();
+		grs_panel->setSaveMode((sender() == ui->GRSBtn/*actionsMap["extend"]*/ )? true:false);
+		grs_panel->show();
+		grs_panel->activateWindow();
 	}
 }
 
@@ -582,8 +592,8 @@ void MainWindow::slot_triggerRimmedMesh()
 
     if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
-		rmpanel->show();
-        rmpanel->activateWindow();
+		rim_panel->show();
+        rim_panel->activateWindow();
 	}
 
 	ui->actionRim->setChecked(false);
@@ -595,9 +605,14 @@ void MainWindow::slot_triggerWeaveMesh()
 
 	if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
-		wmpanel->show();
-		wmpanel->activateWindow();
+		wv_panel->show();
+		wv_panel->activateWindow();
 	}
+
+}
+
+void MainWindow::slot_triggerDForms()
+{
 
 }
 
@@ -624,7 +639,7 @@ void MainWindow::slot_rimmed3DMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
-	MeshManager::getInstance()->set3DRimMesh(rmpanel->getConfig());
+	MeshManager::getInstance()->set3DRimMesh(rim_panel->getConfig());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 
@@ -632,7 +647,7 @@ void MainWindow::slot_weaveMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
-	MeshManager::getInstance()->setWeaveMesh(wmpanel->getConfig());
+	MeshManager::getInstance()->setWeaveMesh(wv_panel->getConfig());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 
@@ -766,8 +781,8 @@ void MainWindow::slot_toggleVertexSelection()
 
 
 void MainWindow::slot_triggerColormap() {
-	ceditor->show();
-	ceditor->activateWindow();
+	color_editor->show();
+	color_editor->activateWindow();
 }
 
 void MainWindow::slot_triggerCriticalPoints() {
@@ -776,26 +791,26 @@ void MainWindow::slot_triggerCriticalPoints() {
 	//viewer->setCriticalPointsMethod(viewer->getCmode());
 	//viewer->showCriticalPoints();
 	viewer->update();
-	cppanel->show();
+	cp_panel->show();
 }
 
 void MainWindow::slot_triggerCutLocusPanel() {
-	actionsMap["show CP"]->setChecked(clpanel->isMinMaxChecked());
+	actionsMap["show CP"]->setChecked(cl_panel->isMinMaxChecked());
 
 	//kkkkkkkkkkk
 	//viewer->setCutLocusMethod(viewer->getLmode());
-	if (clpanel->isMinMaxChecked()) {
+	if (cl_panel->isMinMaxChecked()) {
 		//kkkkkkkkkkk
 		//viewer->showCutLocusPoints();
 	}
 	//viewer->showCutLocusCut();
 	viewer->update();
-	clpanel->show();
+	cl_panel->show();
 }
 
 void MainWindow::slot_disableclp()
 {
-	actionsMap["show CP"]->setChecked(clpanel->isMinMaxChecked());
+	actionsMap["show CP"]->setChecked(cl_panel->isMinMaxChecked());
 }
 
 void MainWindow::slot_updateViewerColormap()
@@ -816,9 +831,9 @@ void MainWindow::slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1,
 
 
 void MainWindow::closeEvent(QCloseEvent *e) {
-	ceditor->close();
-	cppanel->close();
-	clpanel->close();
+	color_editor->close();
+	cp_panel->close();
+	cl_panel->close();
 }
 
 

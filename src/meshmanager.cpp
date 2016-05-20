@@ -6,6 +6,7 @@
 #include "meshhollower.h"
 #include "meshrimface.h"
 #include "MeshWeaver.h"
+#include "MeshDFormer.h"
 #include "MeshIterator.h"
 #include "MeshConnector.h"
 
@@ -375,8 +376,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
-	QScopedPointer<HDS_Mesh> ref_mesh;
-		ref_mesh.reset(new HDS_Mesh(*inMesh));
+	QScopedPointer<HDS_Mesh> ref_mesh(new HDS_Mesh(*inMesh));
 
 
 	//cout << "validating reference mesh" << endl;
@@ -589,14 +589,10 @@ void MeshManager::mapToExtendedMesh()
 
 void MeshManager::unfoldMesh()
 {
-	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
-
-	QScopedPointer<HDS_Mesh> ref_mesh;
-
-
-	ref_mesh.reset(new HDS_Mesh(*inMesh));
+	auto ref_mesh = operationStack->getCurrentMesh();
 	ref_mesh->validate();
 	cout << "unfolded mesh set" << endl;
+	ref_mesh->updatePieceSet();
 
 	// cut the mesh using the selected edges
 	set<int> selectedFaces;
@@ -612,13 +608,16 @@ void MeshManager::unfoldMesh()
 	}
 	HDS_Mesh* outMesh = new HDS_Mesh(*ref_mesh);
 
-	if (MeshUnfolder::unfold(outMesh, ref_mesh.take(), selectedFaces)) {
+	if (MeshUnfolder::unfold(outMesh, ref_mesh, selectedFaces))
+	{
 		// unfolded successfully
 		outMesh->printInfo("unfolded mesh:");
 		operationStack->push(outMesh);
 		//unfolded_mesh->printMesh("unfolded mesh:");
 	}
-	else {
+	else
+	{
+		delete outMesh;
 		// failed to unfold
 		cout << "Failed to unfold." << endl;
 	}
@@ -649,7 +648,7 @@ bool MeshManager::saveMeshes()
 }
 
 
-void MeshManager::setGRS(map<QString, double> config)
+void MeshManager::setGRS(const confMap &config)
 {
 	if (panelType == 0) {//single panel
 	cutMeshWithSelectedEdges();
@@ -707,14 +706,14 @@ void MeshManager::rimMesh(double rimSize)
 	selectedEdges.clear();
 }
 
-void MeshManager::set3DRimMesh(std::map<QString,float> config)
+void MeshManager::set3DRimMesh(const confMap &config)
 {
     MeshRimFace::setOriMesh(operationStack->getOriMesh());
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
     MeshRimFace::configRimMesh(config);
-	if (config["center"] == 0)
+	if (config.at("center") == 0)
 		MeshRimFace::rimMeshV(outMesh);
 	else
 		MeshRimFace::rimMeshF(outMesh);
@@ -747,7 +746,7 @@ void MeshManager::setQuadEdge(double flapSize, int type, double shift)
 
 }
 
-void MeshManager::setWeaveMesh(std::map<QString,float> config)
+void MeshManager::setWeaveMesh(const confMap &config)
 {
 	MeshWeaver::setOriMesh(operationStack->getOriMesh());
 
@@ -760,14 +759,15 @@ void MeshManager::setWeaveMesh(std::map<QString,float> config)
 	operationStack->push(outMesh);
 }
 
-void MeshManager::exportXMLFile()
+void MeshManager::createDFormMesh()
 {
-	if (true)// No connector generated
-	{
-		HDS_Mesh* unfolded_mesh = operationStack->getUnfoldedMesh();
-		MeshConnector::generateConnector(unfolded_mesh);
-	}
-	
+	operationStack->push(MeshDFormer::generateDForm(operationStack->getCurrentMesh()));
+}
+
+void MeshManager::exportXMLFile(
+	const QString &filename, const confMap &conf)
+{
+	MeshConnector::genConnector(operationStack->getUnfoldedMesh(), filename, conf);
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx)

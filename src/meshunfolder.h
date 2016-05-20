@@ -17,13 +17,16 @@ class MeshUnfolder
 public:
 	static MeshUnfolder* getInstance();
 
-	static bool unfold(HDS_Mesh *mesh, HDS_Mesh *ref, set<int> fixedFaces = set<int>());
-	static bool unfoldable(HDS_Mesh *ref_mesh);
-	static void reset_layout(HDS_Mesh *unfolded_mesh);
+	static bool unfold(
+		HDS_Mesh* mesh, const HDS_Mesh* ref,
+		set<int> fixedFaces = set<int>());
+	static bool unfoldable(const HDS_Mesh* ref_mesh);
+	static void reset_layout(HDS_Mesh* unfolded_mesh);
 
 private:
-	static void unfoldFace(int fprev, int fcur, HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
-					const QVector3D &uvec, const QVector3D &vvec);
+	static void unfoldFace(int fprev, int fcur,
+		HDS_Mesh* unfolded_mesh, const HDS_Mesh* ref_mesh,
+		const QVector3D &uvec, const QVector3D &vvec);
 	
 public:
 private:
