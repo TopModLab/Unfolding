@@ -795,6 +795,78 @@ void HDS_Mesh::exportFaceVBO(
 			//fid_array->insert(fid_array->end(), 2, fid);
 			//fflag_array->insert(fflag_array->end(), 2, flag);
 			}*/
+			case 6:
+			{
+				if (!face->isBridger)
+				{
+					/*********************/
+					/* Non-Bridger Faces */
+					/* From Multi-Hollow */
+					/*              1    */
+					/*           2 /|    */
+					/*   4 _______|*|    */
+					/*    /_________|    */
+					/*   5          0    */
+					/*********************/
+					// Index buffer
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[1]);
+					fIBOs->push_back(vid_array[2]);
+
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[2]);
+					fIBOs->push_back(vid_array[3]);
+
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[3]);
+					fIBOs->push_back(vid_array[4]);
+
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[4]);
+					fIBOs->push_back(vid_array[5]);
+				}
+				break;
+			}
+			case 8:
+			{
+				if (!face->isBridger)
+				{
+					/*********************/
+					/* Non-Bridger Faces */
+					/* From Multi-Hollow */
+					/*      5       1    */
+					/*   6 /|    2 /|    */
+					/*    |*|_____|*|    */
+					/*    |_________|    */
+					/*    7         0    */
+					/*********************/
+					// Index buffer
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[1]);
+					fIBOs->push_back(vid_array[2]);
+					
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[2]);
+					fIBOs->push_back(vid_array[3]);
+
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[3]);
+					fIBOs->push_back(vid_array[4]);
+
+					fIBOs->push_back(vid_array[0]);
+					fIBOs->push_back(vid_array[4]);
+					fIBOs->push_back(vid_array[7]);
+
+					fIBOs->push_back(vid_array[7]);
+					fIBOs->push_back(vid_array[4]);
+					fIBOs->push_back(vid_array[5]);
+
+					fIBOs->push_back(vid_array[7]);
+					fIBOs->push_back(vid_array[5]);
+					fIBOs->push_back(vid_array[6]);
+				}
+				break;
+			}
 			default: // n-gons
 			{
 				// Triangle Fan
