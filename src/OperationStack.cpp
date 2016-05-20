@@ -4,9 +4,9 @@
 OperationStack::OperationStack()
 	: curFlag(Undefined)
 	, canUnfold(false)
-	, canExtend(true)
-	, canCut(true)
 	, canGRS(true)
+	, canCut(true)
+	, canGES(true)
 	, canRim(true)
 	, canQuad(true)
 {
@@ -65,9 +65,9 @@ void OperationStack::reset()
 	unfolded_mesh.reset();
 
 	canUnfold = false;
-	canExtend = true;
-	canCut = true;
 	canGRS = true;
+	canCut = true;
+	canGES = true;
 	canRim = true;
 	canQuad = true;
 }
@@ -83,9 +83,9 @@ void OperationStack::clear()
 
 	setCurrentFlag(OperationStack::Original);
 	canUnfold = false;
-	canExtend = true;
-	canCut = true;
 	canGRS = true;
+	canCut = true;
+	canGES = true;
 	canRim = true;
 	canQuad = true;
 }
@@ -101,25 +101,26 @@ void OperationStack::setCurrentFlag(Flag flag)
 	case Cutted:
 		canUnfold = true;
 		canCut = false;
-		canGRS = false;
+		canGES = false;
 		canRim = false;
 		canQuad = false;
 		break;
+	case GES:
 	case GRS:
 	case Rimmed:
 	case QuadEdge:
 		canUnfold = true;
-		canExtend = false;
-		canCut = false;
 		canGRS = false;
+		canCut = false;
+		canGES = false;
 		canRim = false;
 		canQuad = false;
 		break;
 	case Unfolded:
 		canUnfold = false;
-		canExtend = false;
-		canCut = false;
 		canGRS = false;
+		canCut = false;
+		canGES = false;
 		canRim = false;
 		canQuad = false;
 		break;

@@ -73,9 +73,9 @@ SOURCES += src/main.cpp\
     src/MeshWeaver.cpp \
     src/ViewerRuler.cpp \
     src/WeavePanel.cpp \
-    src/GRSPanel.cpp \
     src/QuadEdgePanel.cpp \
-    src/BridgerPanel.cpp
+    src/BridgerPanel.cpp \
+    src/GESPanel.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -130,9 +130,9 @@ HEADERS  += src/mainwindow.h \
     src/MeshWeaver.h \
     src/ViewerRuler.h \
     src/WeavePanel.h \
-    src/GRSPanel.h \
     src/QuadEdgePanel.h \
-    src/BridgerPanel.h
+    src/BridgerPanel.h \
+    src/GESPanel.h
 
 FORMS    += extras/colormap_editor/colormapeditor.ui \
     forms/mainwindow.ui \
@@ -141,9 +141,9 @@ FORMS    += extras/colormap_editor/colormapeditor.ui \
     forms/ConnectorPanel.ui \
     forms/rimfacepanel.ui \
     forms/WeavePanel.ui \
-    forms/GRSPanel.ui \
     forms/QuadEdgePanel.ui \
-    forms/BridgerPanel.ui
+    forms/BridgerPanel.ui \
+    forms/GESPanel.ui
 
 RESOURCES += \
     resources.qrc

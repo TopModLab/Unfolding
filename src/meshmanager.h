@@ -84,9 +84,9 @@ public:
 	void unfoldMesh();
 	void smoothMesh();
 
-	void setGRS();
+	void setGES();
 	void setQuadEdge(double fsize, int type, double shift);
-	void extendMesh(map<QString, double> config);
+	void setGRS(map<QString, double> config);
 	void rimMesh(double rimSize = 0.0);
 	void set3DRimMesh(std::map<QString, float> config);
 	void setWeaveMesh(std::map<QString, float> config);

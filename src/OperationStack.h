@@ -12,9 +12,9 @@ public:
 	enum Flag{
 		Undefined = -1,
 		Original = 0,
-		Extended = 1,
+		GRS = 1,
 		Cutted = 2,
-		GRS = 3,
+		GES = 3,
 		Rimmed = 4,
 		QuadEdge = 5,
 		Woven = 6,
@@ -49,9 +49,9 @@ public:
 	Flag getCurrentFlag();
 
 	bool canUnfold;
-	bool canExtend;
-	bool canCut;
 	bool canGRS;
+	bool canCut;
+	bool canGES;
 	bool canRim;
 	bool canQuad;
 

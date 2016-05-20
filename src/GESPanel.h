@@ -1,19 +1,19 @@
-#ifndef GRSPANEL_H
-#define GRSPANEL_H
+#ifndef GESPANEL_H
+#define GESPANEL_H
 
 #include <QWidget>
 
 namespace Ui {
-class GRSPanel;
+class GESPanel;
 }
 
-class GRSPanel : public QWidget
+class GESPanel : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit GRSPanel(QWidget *parent = 0);
-	~GRSPanel();
+	explicit GESPanel(QWidget *parent = 0);
+	~GESPanel();
 
 	double getBridgerSize();
 	void setPanelType(int);
@@ -26,7 +26,7 @@ public slots:
 	void slot_setSize(int);
 
 private:
-	Ui::GRSPanel *ui;
+	Ui::GESPanel *ui;
 	int bridgerSize;
 	int panelType;
 };

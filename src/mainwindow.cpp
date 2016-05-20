@@ -61,9 +61,9 @@ bool MainWindow::createComponents()
 		ceditor.reset(new ColormapEditor);
 		cppanel.reset(new CriticalPointsPanel);
 		clpanel.reset(new CutLocusPanel);
-		conpanel.reset(new BridgerPanel);
+		grs_panel.reset(new BridgerPanel);
 		quad_panel.reset(new QuadEdgePanel);
-		grs_panel.reset(new GRSPanel);
+		ges_panel.reset(new GESPanel);
 		rmpanel.reset(new RimFacePanel);
 		wmpanel.reset(new WeavePanel);
 
@@ -111,20 +111,20 @@ bool MainWindow::connectComponents()
 	*/
 	connect(clpanel.data(), &CutLocusPanel::sig_closedSignal, this, &MainWindow::slot_disableclp);
 
-	connect(conpanel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
-	connect(conpanel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_extendMesh);
+	connect(grs_panel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
+	connect(grs_panel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_GRS);
 
-	connect(quad_panel.data(), &QuadEdgePanel::sig_saved, this, &MainWindow::slot_hollowMesh);
-	connect(quad_panel.data(), &QuadEdgePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(quad_panel.data(), &QuadEdgePanel::sig_saved, this, &MainWindow::slot_quadEdge);
+	connect(quad_panel.data(), &QuadEdgePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
-	connect(grs_panel.data(), &GRSPanel::sig_saved, this, &MainWindow::slot_GRS);
-	connect(grs_panel.data(), &GRSPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(ges_panel.data(), &GESPanel::sig_saved, this, &MainWindow::slot_GES);
+	connect(ges_panel.data(), &GESPanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
 	connect(rmpanel.data(), &RimFacePanel::sig_saved, this, &MainWindow::slot_rimmed3DMesh);
-	connect(rmpanel.data(), &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(rmpanel.data(), &RimFacePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
 	connect(wmpanel.data(), &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
-	connect(wmpanel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
+	connect(wmpanel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
 	return true;
 }
@@ -315,22 +315,19 @@ void MainWindow::createActions()
 
 		connect(ui->actionSmooth, &QAction::triggered, this, &MainWindow::slot_smoothMesh);
 
-		ui->actionExtend->setChecked(false);
-		connect(ui->actionExtend, &QAction::triggered, this, &MainWindow::slot_triggerExtendMesh);
+		//ui->actionExtend->setChecked(false);
+		//connect(ui->actionExtend, &QAction::triggered, this, &MainWindow::slot_triggerGES);
 		
 		connect(ui->quadEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerQuadEdge);
 		connect(ui->wingedEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerWingedEdge);
 
 		connect(ui->GRSBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerGRS);
+		connect(ui->GESBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerGES);
 
-		//ui->actionRim->setChecked(false);
-		//connect(ui->actionRim, &QAction::triggered, this, &MainWindow::slot_triggerRimmedMesh);
 		connect(ui->FBWBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerRimmedMesh);
 
 		connect(ui->weaveBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerWeaveMesh);
 
-		//ui->actionCut->setChecked(false);
-		//connect(ui->actionCut, &QAction::triggered, this, &MainWindow::slot_performMeshCut);
 		connect(ui->halfEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_performMeshCut);
 
 		connect(ui->unfoldBtn, &QToolButton::clicked, this, &MainWindow::slot_unfoldMesh);
@@ -524,13 +521,13 @@ void MainWindow::slot_unfoldMesh() {
 	}
 }
 
-void MainWindow::slot_triggerExtendMesh()
+void MainWindow::slot_triggerGRS()
 {
-	if (MeshManager::getInstance()->getMeshStack()->canExtend)
+	if (MeshManager::getInstance()->getMeshStack()->canGRS)
 	{
-	conpanel->setSaveMode((sender() == ui->actionExtend/*actionsMap["extend"]*/ )? true:false);
-	conpanel->show();
-	conpanel->activateWindow();
+	grs_panel->setSaveMode((sender() == ui->GRSBtn/*actionsMap["extend"]*/ )? true:false);
+	grs_panel->show();
+	grs_panel->activateWindow();
 	}
 }
 
@@ -562,15 +559,15 @@ void MainWindow::slot_triggerWingedEdge()
 	}
 }
 
-void MainWindow::slot_triggerGRS()
+void MainWindow::slot_triggerGES()
 {
 	MeshManager::getInstance()->getMeshStack()->reset();
 
-	if (MeshManager::getInstance()->getMeshStack()->canGRS)
+	if (MeshManager::getInstance()->getMeshStack()->canGES)
 	{
-		grs_panel->setPanelType(ui->panelCBox->currentIndex());
-		grs_panel->show();
-		grs_panel->activateWindow();
+		ges_panel->setPanelType(ui->panelCBox->currentIndex());
+		ges_panel->show();
+		ges_panel->activateWindow();
 
 	}
 
@@ -604,7 +601,7 @@ void MainWindow::slot_triggerWeaveMesh()
 
 }
 
-void MainWindow::slot_hollowMesh()
+void MainWindow::slot_quadEdge()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::QuadEdge);
 
@@ -614,12 +611,12 @@ void MainWindow::slot_hollowMesh()
 
 }
 
-void MainWindow::slot_GRS()
+void MainWindow::slot_GES()
 {
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::GRS);
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::GES);
 
-	HDS_Bridger::setScale(grs_panel->getBridgerSize());
-	MeshManager::getInstance()->setGRS();
+	HDS_Bridger::setScale(ges_panel->getBridgerSize());
+	MeshManager::getInstance()->setGES();
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 }
 
@@ -641,16 +638,16 @@ void MainWindow::slot_weaveMesh()
 
 void MainWindow::slot_setBridger()
 {
-	HDS_Bridger::setBridger(conpanel->getConfigValues());
+	HDS_Bridger::setBridger(grs_panel->getConfigValues());
 
 }
 
-void MainWindow::slot_extendMesh()
+void MainWindow::slot_GRS()
 {
+	//graph rotation
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::GRS);
 
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Extended);
-
-	MeshManager::getInstance()->extendMesh(conpanel->getConfigValues());
+	MeshManager::getInstance()->setGRS(grs_panel->getConfigValues());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 }

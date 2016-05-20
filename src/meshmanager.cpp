@@ -384,22 +384,38 @@ void MeshManager::cutMeshWithSelectedEdges()
 
 	// cut the mesh using the selected edges
 	set<int> selectedEdges;
-	for(auto he : ref_mesh->halfedges())
-	{
-		if( he->isPicked )
-		{
-			// use picked edges as cut edges
-			he->setPicked(false);
-			he->setCutEdge(true);
 
+
+	if (panelType == 0) {
+		//select no edge
+	}else if (panelType == 1) {
+		//select all edges
+		for(auto he : ref_mesh->halfedges())
+		{
+			he->setCutEdge(true);
 			if( selectedEdges.find(he->index) == selectedEdges.end() &&
 					selectedEdges.find(he->flip->index) == selectedEdges.end() )
 			{
 				selectedEdges.insert(he->index);
 			}
 		}
-	}
+	}else {
+		for(auto he : ref_mesh->halfedges())
+		{
+			if( he->isPicked )
+			{
+				// use picked edges as cut edges
+				he->setPicked(false);
+				he->setCutEdge(true);
 
+				if( selectedEdges.find(he->index) == selectedEdges.end() &&
+						selectedEdges.find(he->flip->index) == selectedEdges.end() )
+				{
+					selectedEdges.insert(he->index);
+				}
+			}
+		}
+	}
 	//cout << "Number of selected edges = " << selectedEdges.size() << endl;
 
 	bool isUnfoldable = false;
@@ -633,18 +649,23 @@ bool MeshManager::saveMeshes()
 }
 
 
-void MeshManager::extendMesh(map<QString, double> config)
+void MeshManager::setGRS(map<QString, double> config)
 {
+	if (panelType == 0) {//single panel
+	cutMeshWithSelectedEdges();
 	HDS_Bridger::setBridger(config);
 	MeshExtender::setOriMesh(operationStack->getOriMesh());
 
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
+
 	MeshExtender::extendMesh(outMesh);
+
 	//update sorted faces
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
+	}
 }
 
 void MeshManager::rimMesh(double rimSize)
@@ -701,7 +722,7 @@ void MeshManager::set3DRimMesh(std::map<QString,float> config)
 	operationStack->push(outMesh);
 }
 
-void MeshManager::setGRS()
+void MeshManager::setGES()
 {
 	if (panelType == 1)
 		setQuadEdge(1,2,0);
@@ -717,7 +738,7 @@ void MeshManager::setQuadEdge(double flapSize, int type, double shift)
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-	if (panelType == 1)
+	if (panelType == 1)//mult panel
 		MeshHollower::hollowMesh(outMesh, flapSize, type, shift);
 	else
 		cout<<"Operation not defined yet"<<endl;

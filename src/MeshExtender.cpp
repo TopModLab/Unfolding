@@ -24,17 +24,17 @@ void MeshExtender::setOriMesh(HDS_Mesh* mesh)
 	ori_mesh = mesh;
 }
 
-vector <QVector3D> MeshExtender::scaleBridgerEdge(he_t* he)
+vector <QVector3D> MeshExtender::scaleBridgerEdge(vert_t* v1, vert_t* v2)
 {
     double scale = HDS_Bridger::getScale();
 	vector <QVector3D> vpair;
     //obsolete scale function
-    QVector3D v1 = he->v->pos;
-    QVector3D v2 = he->flip->v->pos;
+	QVector3D v1pos = v1->pos;
+	QVector3D v2pos = v2->pos;
 
-	QVector3D vmid = (v1 + v2)/2.0;
-    vpair.push_back( (1 - scale)* vmid + scale *v1 );
-    vpair.push_back( (1 - scale)* vmid + scale *v2 );
+	QVector3D vmid = (v1pos + v2pos)/2.0;
+	vpair.push_back( (1 - scale)* vmid + scale *v1pos );
+	vpair.push_back( (1 - scale)* vmid + scale *v2pos );
 
 
 	return vpair;
@@ -177,7 +177,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	initiate();
 	cur_mesh = mesh;
 
-	unordered_map<hdsid_t, he_t*> ori_hemap = cur_mesh->heMap;
+	unordered_map<hdsid_t, vert_t*> ori_map = ori_mesh->vertMap;
 
 	scaleFaces();
 
@@ -231,8 +231,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		if (!he->isCutEdge){
 			///for all non-cut-edge edges, create bridge faces
 
-			he_t* he_ori = ori_hemap[(he->refid)>>2];
-            vector <QVector3D> vpair = scaleBridgerEdge(he_ori);
+			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
+			HDS_Vertex* v2_ori = ori_map[(he->bridgeTwin->v->refid)>>2];
+			vector <QVector3D> vpair = scaleBridgerEdge(v1_ori, v2_ori);
 			addBridger(he, he->bridgeTwin, vpair);
 
 		}else {
@@ -258,8 +259,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			flap_he->refid = twin_he->refid;
 			hes_new.push_back(flap_he);
 
-			he_t* he_ori = ori_hemap[(he->refid)>>2];
-            vector <QVector3D> vpair = scaleBridgerEdge(he_ori);
+			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
+			HDS_Vertex* v2_ori = ori_map[(flap_he->v->refid)>>2];
+			vector <QVector3D> vpair = scaleBridgerEdge(v1_ori, v2_ori);
 
 
 			vert_t* twin_flap_vs = new vert_t;
@@ -283,9 +285,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			hes_new.push_back(twin_flap_he);
 
 			addBridger(he, flap_he, vpair);
-			vector<QVector3D> vpair_reverse(2);
-			vpair_reverse.push_back(vpair[1]);
-			vpair_reverse.push_back(vpair[0]);
+			vector<QVector3D> vpair_reverse =scaleBridgerEdge(v2_ori, v1_ori);
 			addBridger(twin_he, twin_flap_he, vpair_reverse);
 
 		}

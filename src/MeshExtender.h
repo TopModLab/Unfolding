@@ -34,7 +34,7 @@ protected:
 	//cubic bezier curve based bridger
 
 
-    static vector <QVector3D> scaleBridgerEdge(he_t* he);
+	static vector <QVector3D> scaleBridgerEdge(vert_t* v1, vert_t* v2);
 
 
 	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, face_t* cutFace = nullptr);

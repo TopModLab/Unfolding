@@ -12,7 +12,7 @@ using viewer_t = MeshViewer;
 #include "cutlocuspanel.h"
 #include "BridgerPanel.h"
 #include "QuadEdgePanel.h"
-#include "GRSPanel.h"
+#include "GESPanel.h"
 #include "rimfacepanel.h"
 #include "WeavePanel.h"
 #include <QScopedPointer>
@@ -73,17 +73,17 @@ private slots:
 	void slot_updateViewerColormap();
 
 	void slot_smoothMesh();
-	void slot_triggerExtendMesh();
+	void slot_triggerGRS();
 	void slot_triggerQuadEdge();
 	void slot_triggerWingedEdge();
 	void slot_triggerRimmedMesh();
-	void slot_triggerGRS();
+	void slot_triggerGES();
 	void slot_triggerWeaveMesh();
 
 	void slot_setBridger();
-	void slot_extendMesh();
-	void slot_hollowMesh();
 	void slot_GRS();
+	void slot_quadEdge();
+	void slot_GES();
 	void slot_rimmed3DMesh();
 	void slot_weaveMesh();
 
@@ -124,9 +124,9 @@ private:
 	QScopedPointer<ColormapEditor> ceditor;
 	QScopedPointer<CriticalPointsPanel> cppanel;
 	QScopedPointer<CutLocusPanel> clpanel;
-	QScopedPointer<BridgerPanel> conpanel;
+	QScopedPointer<BridgerPanel> grs_panel;
 	QScopedPointer<QuadEdgePanel> quad_panel;
-	QScopedPointer<GRSPanel> grs_panel;
+	QScopedPointer<GESPanel> ges_panel;
 	QScopedPointer<RimFacePanel> rmpanel;
 	QScopedPointer<WeavePanel> wmpanel;
 

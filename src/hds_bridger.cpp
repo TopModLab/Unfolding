@@ -41,7 +41,10 @@ void HDS_Bridger::setCutFace(face_t* face1, face_t* face2)
 
 HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, vector<QVector3D> controlPoints)
 {
-
+	if (he->flip->f != nullptr && !he->flip->f->isCutFace)
+		he->setCutEdge(false);
+	if (hef->flip->f != nullptr && !hef->flip->f->isCutFace)
+		hef->setCutEdge(false);
 	this->he = he;
 	this->hef = hef;
 

@@ -1,12 +1,12 @@
-#include "GRSPanel.h"
-#include "ui_GRSPanel.h"
+#include "GESPanel.h"
+#include "ui_GESPanel.h"
 
-GRSPanel::GRSPanel(QWidget *parent) :
+GESPanel::GESPanel(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::GRSPanel)
+	ui(new Ui::GESPanel)
 {
 	ui->setupUi(this);
-	setWindowTitle(tr("GRS Panel"));
+	setWindowTitle(tr("GES Panel"));
 
 	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(slot_saved()));
 	connect(ui->okButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
@@ -14,33 +14,33 @@ GRSPanel::GRSPanel(QWidget *parent) :
 	connect(ui->sizeSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setSize(int)));
 }
 
-GRSPanel::~GRSPanel()
+GESPanel::~GESPanel()
 {
 	delete ui;
 }
 
 void
-GRSPanel::setPanelType(int type)
+GESPanel::setPanelType(int type)
 {
 	panelType = type;
 	//adjust panel ui according to panelType
 }
 
 void
-GRSPanel::slot_setSize(int value)
+GESPanel::slot_setSize(int value)
 {
 	ui->sizeText->setText(QString::number((float)value/ui->sizeSlider->maximum()));
 }
 
 void
-GRSPanel::slot_saved()
+GESPanel::slot_saved()
 {
 	bridgerSize = ui->sizeSlider->value();
 	close();
 }
 
 double
-GRSPanel::getBridgerSize()
+GESPanel::getBridgerSize()
 {
 	return (double)bridgerSize / (double)ui->sizeSlider->maximum() /2.0;
 }
