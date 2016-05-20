@@ -206,25 +206,29 @@ bool HDS_Mesh::validateVertex(vert_t *v) {
 	return true;
 }
 
-void HDS_Mesh::validate() {
+bool HDS_Mesh::validate() {
+	bool validated = true;
 	// verify that the mesh has good topology, ie has loop
 	for( auto v : vertSet ) {
 		if( !validateVertex(v) ) {
 			cout << "vertex #" << v->index << " is invalid." << endl;
+			validated = false;
 		}
 	}
 
 	for( auto f : faceSet ) {
 		if( !validateFace(f) ) {
 			cout << "face #" << f->index << " is invalid." << endl;
+			validated = false;
 		}
 	}
 	for( auto e : heSet ) {
 		if( !validateEdge(e) ) {
 			cout << "half edge #" << e->index << " is invalid." << endl;
+			validated = false;
 		}
 	}
-
+	return validated;
 }
 
 void HDS_Mesh::printInfo(const string& msg)

@@ -90,9 +90,11 @@ public:
 	void exportFaceVBO(ui32s_t* fIBOs = nullptr,
 		ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr) const;
 
-	 unordered_set<he_t*>& halfedges()  { return heSet; }
-	 unordered_set<face_t*>& faces()  { return faceSet; }
-	 unordered_set<vert_t*>& verts()  { return vertSet; }
+	unordered_set<he_t*>& halfedges() { return heSet; }
+	unordered_set<face_t*> faces() const { return faceSet; }
+	unordered_set<vert_t*> verts() const { return vertSet; }
+	unordered_set<face_t*>& faces() { return faceSet; }
+	unordered_set<vert_t*>& verts() { return vertSet; }
 
 	 unordered_map<hdsid_t, he_t*>& hesMap()  { return heMap; }
 	 unordered_map<hdsid_t, face_t*>& facesMap()  { return faceMap; }
@@ -119,7 +121,7 @@ public:
 	void selectEdge(hdsid_t idx);
 	void selectVertex(hdsid_t idx);
 
-	void validate();
+	bool validate();
 
 	void save(const string &filename);
 
@@ -132,6 +134,7 @@ private:
 
 protected:
 	friend class ReebGraph;
+	friend class MainWindow;
 	friend class MeshCutter;
 	friend class MeshViewerLegacy;
 	friend class MeshViewer;

@@ -73,13 +73,8 @@ MeshConnector::MeshConnector()
 {
 }
 
-
-MeshConnector::~MeshConnector()
-{
-}
-
-void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filename,
-	const confMap& conf, int cn_t)
+void MeshConnector::exportHollowPiece(const mesh_t* unfolded_mesh, const char* filename,
+	const confMap &conf)
 {
 	if (unfolded_mesh == nullptr)
 	{
@@ -98,15 +93,16 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
-	double he_offset(10);
-	double he_scale = conf.find(ConnectorConf::SCALE)->second;
-	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
-	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
+	//double he_offset(10);
+	double he_scale = conf.at("scale");
+	//double wid_conn = conf.at("width");
+	//double len_conn = conf.at("length");
 	double uncut_len = ConvertToPt((int)UNIT_TYPE::INCH, 0.1);
-	int segCount = conf.find(ConnectorConf::ETCHSEG)->second;
-	int unit_type = static_cast<int>(conf.find(ConnectorConf::PINHOLE_UNIT)->second);
-	int pinholecount_type = static_cast<int>(conf.find(ConnectorConf::PINHOLECOUNT_TYPE)->second);
-	int score_type = static_cast<int>(conf.find(ConnectorConf::SCORE_TYPE)->second);
+	int segCount = static_cast<int>(conf.at("etchSeg"));
+	//int cn_t = static_cast<int>(conf.at("connector"));
+	int unit_type = static_cast<int>(conf.at("pinUnit"));
+	int pinholecount_type = static_cast<int>(conf.at("pinCount"));
+	int score_type = static_cast<int>(conf.at("scoreType"));
 	cstchar* score_text;
 	if (score_type == 0)
 	{
@@ -114,16 +110,16 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	}
 	else
 	{
-		double score_len = conf.find(ConnectorConf::DASH_LEN)->second;
-		double score_gap = conf.find(ConnectorConf::DASH_GAP)->second;
+		double score_len = conf.at("dashLen");
+		double score_gap = conf.at("dashGap");
 		//sscanf_s(score_text, SVG_DASHARRAY, score_len, score_gap);
 	}
 	
 	//cout << "Score text is: " << score_text << endl;
 	double pin_radius = ConvertToPt(unit_type,
-		conf.find(ConnectorConf::PINHOLESIZE)->second) * 0.5;
+		conf.at("pinSize")) * 0.5;
 	
-	double circle_offset = 3;
+	//double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
@@ -156,7 +152,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
 		for (auto fid : piece)
 		{
-			face_t *curFace = unfolded_mesh->faceMap[fid];
+			face_t *curFace = unfolded_mesh->faceMap.at(fid);
 			auto he = curFace->he;
 			auto curHE = he;
 			// Cut layer
@@ -361,7 +357,7 @@ void MeshConnector::exportHollowPiece(mesh_t* unfolded_mesh, const char* filenam
 	printf("SVG file %s saved successfully!\n", filename);
 }
 
-void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filename, const confMap& conf, int cn_t /*= HOLLOW_CONNECTOR*/)
+void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char* filename, const confMap &conf)
 {
 	if (unfolded_mesh == nullptr)
 	{
@@ -381,12 +377,12 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 	/* Scalors                                                              */
 	/************************************************************************/
 	double he_offset(10);
-	double he_scale = conf.find(ConnectorConf::SCALE)->second;
-	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
-	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
-	int unit_type = static_cast<int>(conf.find(ConnectorConf::PINHOLE_UNIT)->second);
+	double he_scale = conf.at("scale");
+	double wid_conn = conf.at("width");
+	double len_conn = conf.at("length");
+	int unit_type = static_cast<int>(conf.at("pinUnit"));
 	double pin_radius = ConvertToPt(unit_type,
-		conf.find(ConnectorConf::PINHOLESIZE)->second) * 0.5;
+		conf.at("pinSize")) * 0.5;
 	double scale = MeshHollower::flapSize;
 	double shift = (MeshHollower::shiftAmount + 1) * 0.5;
 	int pinnum = shift > 0.8 ? 2 : 1;
@@ -423,7 +419,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
 		for (auto fid : piece)
 		{
-			face_t *curFace = unfolded_mesh->faceMap[fid];
+			auto curFace = unfolded_mesh->faceMap.at(fid);
 			auto he = curFace->he;
 			auto curHE = he;
 			// Cut layer
@@ -441,11 +437,9 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 			{
 				// Add pinholes
 				vector<he_t*> cutedges;
-				he_t* refedge;
-
 				
 				vector<QVector2D> flapPos;
-				int offset = 0;
+				size_t offset = 0;
 				do
 				{
 					if (!curHE->isCutEdge)
@@ -636,7 +630,7 @@ void MeshConnector::exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filen
 	printf("SVG file %s saved successfully!\n", filename);
 }
 
-void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename, const confMap& conf, int cn_t /*= HOLLOW_CONNECTOR*/)
+void MeshConnector::exportBindPiece(const mesh_t* unfolded_mesh, const char* filename, const confMap &conf)
 {
 	if (unfolded_mesh == nullptr)
 	{
@@ -656,10 +650,10 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 	/* Scalors                                                              */
 	/************************************************************************/
 	double he_offset(10);
-	double he_scale = conf.find(ConnectorConf::SCALE)->second;
-	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
-	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
-	double pin_radius = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	double he_scale = conf.at("scale");
+	double wid_conn = conf.at("width");
+	double len_conn = conf.at("length");
+	double pin_radius = conf.at("pinSize");
 
 
 	double circle_offset = 3;
@@ -687,7 +681,7 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
 		for (auto fid : piece)
 		{
-			face_t *curFace = unfolded_mesh->faceMap[fid];
+			face_t *curFace = unfolded_mesh->faceMap.at(fid);
 			auto he = curFace->he;
 			auto curHE = he;
 			// Cut layer
@@ -768,8 +762,8 @@ void MeshConnector::exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
 	printf("SVG file %s saved successfully!\n", filename);
 }
 
-void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filename,
-	const confMap& conf, int cn_t)
+void MeshConnector::exportRegularPiece(const mesh_t* unfolded_mesh, const char* filename,
+	const confMap &conf)
 {
 	//ConnectorType cn_t = SIMPLE_CONNECTOR;
 	FILE *SVG_File;
@@ -780,7 +774,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 		return;
 	}
 
-	unordered_set<HDS_Mesh::face_t*> faces = unfolded_mesh->faces();
+	auto faces = unfolded_mesh->faces();
 	unordered_set<HDS_Mesh::face_t*> cutfaces;// , infaces;
 	for (auto face : faces)
 	{
@@ -793,9 +787,10 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 	/* Scalors                                                              */
 	/************************************************************************/
 	double he_offset(10);
-	double he_scale = conf.find(ConnectorConf::SCALE)->second;
-	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
-	double len_conn = conf.find(ConnectorConf::LENGTH)->second; 
+	double he_scale = conf.at("scale");
+	double wid_conn = conf.at("width");
+	double len_conn = conf.at("length");
+	int cn_t = static_cast<int>(conf.at("connector"));
 	
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
@@ -879,7 +874,7 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 			QVector2D n = (a - d).normalized();
 
 			QVector2D Pn = *Pthis + a;
-			QVector2D Psc = Pn + n * wid_conn * 0.6;
+			QVector2D Psc = Pn + n * wid_conn * 0.6f;
 
 			switch (cn_t)
 			{
@@ -1131,8 +1126,8 @@ void MeshConnector::exportRegularPiece(mesh_t* unfolded_mesh, const char* filena
 	cout << "SVG file saved successfully!" << endl;
 }
 
-void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
-	const confMap& conf, int cn_t)
+void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* filename,
+	const confMap &conf)
 {
 	FILE *SVG_File;
 	errno_t err = fopen_s(&SVG_File, filename, "w");
@@ -1145,10 +1140,11 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 	/* Scalors                                                              */
 	/************************************************************************/
 	double he_offset(10);
-	double he_scale = conf.find(ConnectorConf::SCALE)->second;
-	double wid_conn = conf.find(ConnectorConf::WIDTH)->second;
-	double len_conn = conf.find(ConnectorConf::LENGTH)->second;
-	double pin_radius = conf.find(ConnectorConf::PINHOLESIZE)->second;
+	double he_scale = conf.at("scale");
+	double wid_conn = conf.at("width");
+	double len_conn = conf.at("length");
+	double pin_radius = conf.at("pinSize");
+	int cn_t = static_cast<int>(conf.at("connector"));
 
 	double circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
@@ -1189,7 +1185,7 @@ void MeshConnector::exportRimmedPiece(mesh_t* unfolded_mesh, const char* filenam
 		fprintf(SVG_File, "<g opacity=\"0.8\">\n");
 		for (auto fid : piece)
 		{
-			face_t *curFace = unfolded_mesh->faceMap[fid];
+			face_t *curFace = unfolded_mesh->faceMap.at(fid);
 			
 			if (curFace->isCutFace)
 			{
@@ -1332,42 +1328,45 @@ void MeshConnector::wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch
 	fprintf(SVG_File, "</g>\n");//set a new group for inner lines
 }
 
-void MeshConnector::generateConnector(mesh_t *unfolded_mesh)
+void MeshConnector::genConnector(
+	const mesh_t *unfolded_mesh,
+	const QString &filename, const confMap &conf)
 {
-	ConnectorPanel *connPanel = new ConnectorPanel(unfolded_mesh->processType);
-	connPanel->exec();
-	
-	QString filename = connPanel->getFilename();
-	//double scale = connPanel->getScale();
-	int cn_t = connPanel->getConnectorType();
-	auto conf = connPanel->getConfiguration();
-
 	if (unfolded_mesh == nullptr)
 	{
 		//assert();
 		return;
 	}
+	/*ConnectorPanel *connPanel = new ConnectorPanel(unfolded_mesh->processType);
+	connPanel->exec();
+	
+	QString filename = connPanel->getFilename();
+	//double scale = connPanel->getScale();
+	//int cn_t = connPanel->getConnectorType();
+	auto conf = connPanel->getConfiguration();
+*/
+	
 
 	switch (unfolded_mesh->processType)
 	{
 	case HDS_Mesh::REGULAR_PROC:
-		exportRegularPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		exportRegularPiece(unfolded_mesh, filename.toUtf8(), conf);
 		break;
 	case HDS_Mesh::HOLLOWED_PROC:
-		exportHollowPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		exportHollowPiece(unfolded_mesh, filename.toUtf8(), conf);
 		break;
 	case HDS_Mesh::HOLLOWED_MF_PROC:
 		// new proc
-		exportHollowMFPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		exportHollowMFPiece(unfolded_mesh, filename.toUtf8(), conf);
 		break;
 	case HDS_Mesh::BINDED_PROC:
-		exportBindPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		exportBindPiece(unfolded_mesh, filename.toUtf8(), conf);
 		break;
 	case HDS_Mesh::RIMMED_PROC:
-		exportRimmedPiece(unfolded_mesh, filename.toUtf8(), conf, cn_t);
+		exportRimmedPiece(unfolded_mesh, filename.toUtf8(), conf);
 		break;
 	default:
 		break;
 	}
-	delete connPanel;
+	//delete connPanel;
 }

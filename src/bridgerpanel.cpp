@@ -73,9 +73,4 @@ void BridgerPanel::slot_saved()
 
 }
 
-std::map<QString, double> BridgerPanel::getConfigValues()
-{
-	return bridgerConfig;
-}
-
 

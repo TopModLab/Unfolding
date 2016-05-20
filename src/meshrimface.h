@@ -7,11 +7,9 @@
 class MeshRimFace : public MeshExtender
 {
 public:
-	MeshRimFace();
-	static void configRimMesh(std::map<QString, float> config);
+	static void configRimMesh(const confMap &config);
 	static void rimMeshV(HDS_Mesh *mesh);//around vertex
 	static void rimMeshF(HDS_Mesh *mesh);//around face
-	~MeshRimFace();
 
 	static void projectFaceCenter(vert_t* v, he_t* he, QVector3D &vn, QVector3D &vp);
 	static void projectEdgeVertices(vert_t* v, he_t* he, QVector3D &up_pos, QVector3D &down_pos);
@@ -38,23 +36,26 @@ private:
 };
 
 inline void
-MeshRimFace::configRimMesh(std::map<QString, float> config) {
-	planeWidth = config["roundness"];
-	planeHeight = config["thicknessOfBridger"];
+MeshRimFace::configRimMesh(const confMap &config)
+{
+	planeWidth = config.at("roundness");
+	planeHeight = config.at("thicknessOfBridger");
 
-	if ((int)config["center"] == 0)  {
-	shapeType = (int)config["type"];
+	if ((int)config.at("center") == 0)
+	{
+		shapeType = (int)config.at("type");
 
-	onEdge = (int)config["onEdge"];
-	isHalf = (int)config["isHalf"];
-	isQuadratic = (int)config["isQuadratic"];
-	smoothEdge = (int)config["smoothEdge"];
-	addConnector = (int)config["addConnector"];
-	avoidIntersect = (int)config["avoidIntersect"];
-	if (isQuadratic)
-		planeWidth = 1- planeWidth;
-	}else {
-		flapWidth = config["thicknessOfCon"];
+		onEdge = (int)config.at("onEdge");
+		isHalf = (int)config.at("isHalf");
+		isQuadratic = (int)config.at("isQuadratic");
+		smoothEdge = (int)config.at("smoothEdge");
+		addConnector = (int)config.at("addConnector");
+		avoidIntersect = (int)config.at("avoidIntersect");
+
+		if (isQuadratic) planeWidth = 1 - planeWidth;
+	}
+	else {
+		flapWidth = config.at("thicknessOfCon");
 		planeWidth = 1- planeWidth;
 	}
 

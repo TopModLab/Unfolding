@@ -77,7 +77,10 @@ inline void printColor(QColor clr) {
 }
 
 template<typename T, typename mesh_t>
-vector<T> laplacianSmooth(const vector<T> &val, mesh_t *mesh, double lambda = 0.25, double sigma = 1.0) {
+vector<T> laplacianSmooth(
+	const vector<T> &val, mesh_t *mesh,
+	double lambda = 0.25, double sigma = 1.0)
+{
 	unordered_map<typename mesh_t::vert_t*, double> L(mesh->verts().size());
 	vector<T> newval(mesh->verts().size());
 	for (auto vi : mesh->verts()) {
@@ -96,7 +99,7 @@ vector<T> laplacianSmooth(const vector<T> &val, mesh_t *mesh, double lambda = 0.
 	L.insert(make_pair(vi, numer / denom - val[vi->index]));
 	}
 	for (auto p : L) {
-	newval[p.first->index] = val[p.first->index] + lambda * p.second;
+		newval[p.first->index] = val[p.first->index] + lambda * p.second;
 	}
 
 	return newval;
@@ -111,38 +114,39 @@ vector<T> laplacianSmooth(const vector<T> &val, mesh_t *mesh, double lambda = 0.
    Return FALSE if no solution exists.
 */
 inline void LineLineIntersect(
-   QVector3D p1,QVector3D p2,QVector3D p3,QVector3D p4,QVector3D *pa)
+	QVector3D p1, QVector3D p2,
+	QVector3D p3, QVector3D p4, QVector3D *pa)
 {
 	//QVector3D *pb;
-   QVector3D p13,p43,p21;
-   double d1343,d4321,d1321,d4343,d2121;
-   double numer,denom;
-//   double EPS = 0.0001;
+	QVector3D p13, p43, p21;
+	double d1343, d4321, d1321, d4343, d2121;
+	double numer, denom;
+	//   double EPS = 0.0001;
 
-   p13 = p1 - p3;
-   p43 = p4 - p3;
-   p21 = p2 - p1;
+	p13 = p1 - p3;
+	p43 = p4 - p3;
+	p21 = p2 - p1;
 
-//   if (fabsf(p43.x) < EPS && fabsf(p43.y) < EPS && fabsf(p43.z) < EPS)
-//	  return(false);
-//   if (fabsf(p21.x) < EPS && fabsf(p21.y) < EPS && fabsf(p21.z) < EPS)
-//	  return(false);
+	//   if (fabsf(p43.x) < EPS && fabsf(p43.y) < EPS && fabsf(p43.z) < EPS)
+	//	  return(false);
+	//   if (fabsf(p21.x) < EPS && fabsf(p21.y) < EPS && fabsf(p21.z) < EPS)
+	//	  return(false);
 
-   d1343 = QVector3D::dotProduct(p13, p43);
-   d4321 = QVector3D::dotProduct(p43, p21);
-   d1321 = QVector3D::dotProduct(p13, p21);
-   d4343 = QVector3D::dotProduct(p43, p43);
-   d2121 = QVector3D::dotProduct(p21, p21);
+	d1343 = QVector3D::dotProduct(p13, p43);
+	d4321 = QVector3D::dotProduct(p43, p21);
+	d1321 = QVector3D::dotProduct(p13, p21);
+	d4343 = QVector3D::dotProduct(p43, p43);
+	d2121 = QVector3D::dotProduct(p21, p21);
 
-   denom = d2121 * d4343 - d4321 * d4321;
-//   if (fabsf(denom) < EPS)
-//	  return(false);
-   numer = d1343 * d4321 - d1321 * d4343;
+	denom = d2121 * d4343 - d4321 * d4321;
+	//   if (fabsf(denom) < EPS)
+	//	  return(false);
+	numer = d1343 * d4321 - d1321 * d4343;
 
-   double mua = numer / denom;
-   //double mub = (d1343 + d4321 * (mua)) / d4343;
-   *pa = p1 + mua * p21;
-   //*pb = p3 + mub * p43;
+	double mua = numer / denom;
+	//double mub = (d1343 + d4321 * (mua)) / d4343;
+	*pa = p1 + mua * p21;
+	//*pb = p3 + mub * p43;
 }
 
 }

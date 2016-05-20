@@ -60,7 +60,7 @@ bool MainWindow::createComponents()
 		ceditor.reset(new ColormapEditor);
 		cppanel.reset(new CriticalPointsPanel);
 		clpanel.reset(new CutLocusPanel);
-		conpanel.reset(new BridgerPanel);
+		brPanel.reset(new BridgerPanel);
 		hmpanel.reset(new HollowMeshPanel);
 		bmpanel.reset(new BindingMeshPanel);
 		rmpanel.reset(new RimFacePanel);
@@ -110,8 +110,8 @@ bool MainWindow::connectComponents()
 	*/
 	connect(clpanel.data(), &CutLocusPanel::sig_closedSignal, this, &MainWindow::slot_disableclp);
 
-	connect(conpanel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
-	connect(conpanel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_extendMesh);
+	connect(brPanel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
+	connect(brPanel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_extendMesh);
 
 	connect(hmpanel.data(), &HollowMeshPanel::sig_saved, this, &MainWindow::slot_hollowMesh);
 	connect(hmpanel.data(), &HollowMeshPanel::sig_setBridger, this, &MainWindow::slot_triggerExtendMesh);
@@ -441,7 +441,7 @@ void MainWindow::newFile()
 #ifdef _DEBUG
 	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)"));
 #else // Release
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "/", tr("OBJ files(*.obj)"));
+	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "", tr("OBJ files(*.obj)"));
 #endif
 	
 	if (filename != NULL) {
@@ -459,7 +459,6 @@ void MainWindow::newFile()
 		if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
 			return;
 		
-		//kkkkkkkk
 #ifdef _DEBUG
 		qDebug("Loading Object Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
@@ -479,13 +478,15 @@ void MainWindow::newFile()
 
 void MainWindow::exportFile()
 {
-	if (MeshManager::getInstance()->getMeshStack()->getCurrentFlag() != OperationStack::Unfolded)
+	auto curStack = MeshManager::getInstance()->getMeshStack();
+	if (curStack->getCurrentFlag() != OperationStack::Unfolded)
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("Unable to export mesh! Unfold it first!"), QMessageBox::Close);
 		return;
 	}
-
-	MeshManager::getInstance()->exportXMLFile();
+	connPanel->resetParas(curStack->getCurrentMesh()->processType);
+	brPanel->show();
+	MeshManager::getInstance()->exportXMLFile(connPanel->getFilename(), connPanel->getConfig());
 }
 
 void MainWindow::closeFile()          //later add this function
@@ -496,7 +497,7 @@ void MainWindow::closeFile()          //later add this function
 
 void MainWindow::saveFile()
 {
-	QString filename = QFileDialog::getSaveFileName(this, "Input a file name");
+	QString filename = QFileDialog::getSaveFileName(this, "Input a file name","",tr("OBJ files(*.obj)"));
 	cout << "saving file " << filename.toStdString() << endl;
 	MeshManager::getInstance()->saveMeshes();
 }
@@ -528,9 +529,9 @@ void MainWindow::slot_triggerExtendMesh()
 {
 	if (MeshManager::getInstance()->getMeshStack()->canExtend)
 	{
-	conpanel->setSaveMode((sender() == ui->actionExtend/*actionsMap["extend"]*/ )? true:false);
-	conpanel->show();
-	conpanel->activateWindow();
+	brPanel->setSaveMode((sender() == ui->actionExtend/*actionsMap["extend"]*/ )? true:false);
+	brPanel->show();
+	brPanel->activateWindow();
 	}
 }
 
@@ -651,7 +652,7 @@ void MainWindow::slot_weaveMesh()
 
 void MainWindow::slot_setBridger()
 {
-	HDS_Bridger::setBridger(conpanel->getConfigValues());
+	HDS_Bridger::setBridger(brPanel->getConfigValues());
 
 }
 
@@ -660,7 +661,7 @@ void MainWindow::slot_extendMesh()
 
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Extended);
 
-	MeshManager::getInstance()->extendMesh(conpanel->getConfigValues());
+	MeshManager::getInstance()->extendMesh(brPanel->getConfigValues());
 	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 }

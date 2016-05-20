@@ -41,7 +41,7 @@ public:
 
 	//config Bridger
 	void setCutFace(face_t* cutFace1, face_t* cutFace2);
-	static void setBridger(std::map<QString, double> config);
+	static void setBridger(const confMap &config);
 	static void setScale(double scale);
 	static void setSamples(int);
 

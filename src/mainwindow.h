@@ -8,6 +8,7 @@
 #include "MeshViewer.h"
 using viewer_t = MeshViewer;
 #include "../extras/colormap_editor/colormapeditor.h"
+#include "ConnectorPanel.h"
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
 #include "bridgerpanel.h"
@@ -123,9 +124,10 @@ private:
 
 	QScopedPointer<viewer_t> viewer;
 	QScopedPointer<ColormapEditor> ceditor;
+	QScopedPointer<ConnectorPanel> connPanel;
 	QScopedPointer<CriticalPointsPanel> cppanel;
 	QScopedPointer<CutLocusPanel> clpanel;
-	QScopedPointer<BridgerPanel> conpanel;
+	QScopedPointer<BridgerPanel> brPanel;
 	QScopedPointer<HollowMeshPanel> hmpanel;
 	QScopedPointer<BindingMeshPanel> bmpanel;
 	QScopedPointer<RimFacePanel> rmpanel;

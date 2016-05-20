@@ -2,24 +2,18 @@
 
 QFont ConnectorPanel::fontfamily = QFont("Arial");
 
-ConnectorPanel::ConnectorPanel(int mesh_process_type)
+ConnectorPanel::ConnectorPanel(int procType)
 	: ui(new Ui::ConnectorPanel)
-	, meshType(mesh_process_type)
 {
 	ui->setupUi(this);
 
 	//setMeshConfigure();
-	initConnectorType();
+	resetParas(procType);
 	//setWindowTitle(tr("Mesh Export Panel"));
-	connect(ui->file_button, SIGNAL(clicked()), this, SLOT(slot_setFileName()));
-	connect(ui->save_button, SIGNAL(clicked(QAbstractButton*)), this, SLOT(slot_savePanelData(QAbstractButton*)));
+	connect(ui->file_button, &QAbstractButton::clicked, this, &ConnectorPanel::setFileName);
+	//connect(ui->save_button, &QAbstractButton::clicked, this, &ConnectorPanel::savePanelData);
 	//connect(ui->scale_slider, SIGNAL(valueChanged(int)), this, SLOT(slot_setScaleToSpinbox(int)));
 	//connect(ui->scale_val, SIGNAL(valueChanged(double)), this, SLOT(slot_setScaleToSlider(double)));
-}
-
-ConnectorPanel::~ConnectorPanel()
-{
-	delete ui;
 }
 
 void ConnectorPanel::setMeshConfigure()
@@ -48,42 +42,48 @@ QString ConnectorPanel::getFilename() const
 	return ui->filename_text->text();
 }
 
+/*
 double ConnectorPanel::getScale() const
 {
 	return ui->scale_val->value();
-}
+}*/
 
+/*
 int ConnectorPanel::getConnectorType() const
 {
 	return ui->connector_type->currentIndex();
-}
+}*/
 
-confMap ConnectorPanel::getConfiguration() const
+confMap ConnectorPanel::getConfig() const
 {
 	confMap ret;
 	fontfamily = ui->font_val->currentFont();
 
-	ret.insert(make_pair(ConnectorConf::SCALE, ui->scale_val->value()));
-	ret.insert(make_pair(ConnectorConf::WIDTH, ui->width_val->value()));
-	ret.insert(make_pair(ConnectorConf::LENGTH, ui->length_val->value()));
+	ret.insert(make_pair("connector", (double)ui->connector_type->currentIndex()));
+	
 
-	ret.insert(make_pair(ConnectorConf::PINHOLE_UNIT, (double)ui->pinholeunit_type->currentIndex()));
-	ret.insert(make_pair(ConnectorConf::PINHOLESIZE, ui->pinholesize_val->value()));
-	ret.insert(make_pair(ConnectorConf::PINHOLECOUNT_TYPE,
+	ret.insert(make_pair("scale", ui->scale_val->value()));
+	ret.insert(make_pair("width", ui->width_val->value()));
+	ret.insert(make_pair("length", ui->length_val->value()));
+
+	ret.insert(make_pair("pinUnit", (double)ui->pinholeunit_type->currentIndex()));
+	ret.insert(make_pair("pinSize", ui->pinholesize_val->value()));
+	ret.insert(make_pair("pinCount",
 		(double)ui->pinholecount_type->currentIndex()));
 
-	ret.insert(make_pair(ConnectorConf::ETCHSEG, (double)ui->etchseg_val->value()));
-	ret.insert(make_pair(ConnectorConf::SCORE_TYPE, (double)ui->score_type->currentIndex()));
-	ret.insert(make_pair(ConnectorConf::DASH_LEN, ui->scoredash_len->value()));
-	ret.insert(make_pair(ConnectorConf::DASH_GAP, ui->scoredash_gap->value()));
-	ret.insert(make_pair(ConnectorConf::DASH_UNIT, (double)ui->scoredash_unit->currentIndex()));
+	ret.insert(make_pair("etchSeg", (double)ui->etchseg_val->value()));
+	ret.insert(make_pair("scoreType", (double)ui->score_type->currentIndex()));
+	ret.insert(make_pair("dashLen", ui->scoredash_len->value()));
+	ret.insert(make_pair("dashGap", ui->scoredash_gap->value()));
+	ret.insert(make_pair("dashUnit", (double)ui->scoredash_unit->currentIndex()));
 	return ret;
 }
 
-void ConnectorPanel::initConnectorType()
+void ConnectorPanel::resetParas(int procType)
 {
-	ui->mesh_type->setCurrentIndex(meshType);
-	switch (meshType)
+	//meshType = procType;
+	ui->mesh_type->setCurrentIndex(procType);
+	switch (procType)
 	{
 	case HDS_Mesh::REGULAR_PROC:
 		ui->connector_type->addItem("Simple");
@@ -110,13 +110,8 @@ void ConnectorPanel::initConnectorType()
 	}
 }
 
-void ConnectorPanel::slot_setFileName()
+void ConnectorPanel::setFileName()
 {
-	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "export/untitled.svg", tr("SVG files (*.svg)"));
+	QString filename = QFileDialog::getSaveFileName(this, "Export file as", "default", tr("SVG files (*.svg)"));
 	ui->filename_text->setText(filename);
-}
-
-void ConnectorPanel::slot_savePanelData(QAbstractButton* button)
-{
-	this->close();
 }

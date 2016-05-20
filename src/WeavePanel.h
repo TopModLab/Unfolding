@@ -16,7 +16,7 @@ public:
 	explicit WeavePanel(QWidget *parent = 0);
 	~WeavePanel();
 
-	std::map<QString,float> getConfig() {return config;}
+	confMap getConfig() const { return config; }
 
 signals:
 	void sig_saved();
@@ -31,8 +31,7 @@ public slots:
 
 private:
 	Ui::WeavePanel *ui;
-	std::map<QString,float> config;
-
+	confMap config;
 };
 
 #endif // WEAVEPANEL_H

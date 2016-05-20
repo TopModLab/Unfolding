@@ -23,7 +23,7 @@ MeshUnfolder* MeshUnfolder::getInstance()
 }
 
 void MeshUnfolder::unfoldFace(int fprev, int fcur,
-	HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh,
+	HDS_Mesh *unfolded_mesh, const HDS_Mesh *ref_mesh,
 	const QVector3D &uvec, const QVector3D &vvec)
 {
 	typedef HDS_Face face_t;
@@ -115,9 +115,9 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	} while( curHE != he );
 }
 
-bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
+bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 	// for each vertex in the cutted_mesh, check the condition
-	auto isBadVertex = [](HDS_Vertex* v) -> bool {
+	auto isBadVertex = [](const HDS_Vertex* v) -> bool {
 		vector<double> sums;
 		double sum = 0;
 		auto he = v->he;
@@ -137,13 +137,13 @@ bool MeshUnfolder::unfoldable(HDS_Mesh *cutted_mesh) {
 
 			he = curHE;
 			curHE = he->flip->next;
-		}while( he != v->he ) ;
+		} while (he != v->he);
 
 		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
 		return sum > (PI2 + PI_EPS) || (sum < (PI2 - PI_EPS) && !hasCutFace);
 	};
-	if( any_of(cutted_mesh->vertSet.begin(), cutted_mesh->vertSet.end(), isBadVertex) ) return false;
+	if( any_of(ref_mesh->vertSet.begin(), ref_mesh->vertSet.end(), isBadVertex) ) return false;
 	else return true;
 }
 
@@ -238,7 +238,9 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 }
 
 
-bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> fixedFaces)
+bool MeshUnfolder::unfold(
+	HDS_Mesh* unfolded_mesh, const HDS_Mesh *ref_mesh,
+	set<int> fixedFaces)
 {
 	//progress dialog
 	QProgressDialog unfoldingProgress("Unfolding...", "", 0, 100);
@@ -254,7 +256,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
 	}
-	ref_mesh->updatePieceSet();
+	// ref_mesh->updatePieceSet();
 	// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
@@ -306,7 +308,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 	for (auto piece : ref_mesh->pieceSet)
 	{
 		auto it_fid = piece.begin();
-		if (ref_mesh->faceMap[*it_fid]->isCutFace)
+		if (ref_mesh->faceMap.at(*it_fid)->isCutFace)
 		{
 			it_fid++;
 		}

@@ -9,15 +9,15 @@ int HDS_Bridger::nSamples = 4;
 double HDS_Bridger::cp = 0;
 int HDS_Bridger::opening = 0;
 
-void HDS_Bridger::setBridger(std::map<QString, double> config)
+void HDS_Bridger::setBridger(const confMap &config)
 {
-	shape = (int)config["shape"]; //0 bezier 1 original 2 flat
-	scale = config["size"];
-	curv = config["curv"];
-	nSamples = (int)config["samples"];
+	shape = (int)config.at("shape"); //0 bezier 1 original 2 flat
+	scale = config.at("size");
+	curv = config.at("curv");
+	nSamples = (int)config.at("samples");
 	cout << "N-Sample:\t" << nSamples << endl;
-	cp = config["cp"];
-	opening = (int)config["opening"];
+	cp = config.at("cp");
+	opening = (int)config.at("opening");
 
 }
 

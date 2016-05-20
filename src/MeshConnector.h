@@ -25,6 +25,7 @@ enum ConnectorConf: int
 {
 	// General
 	LABEL_FONT = 0,
+	CONNECT_TYPE,
 	SCALE,
 	WIDTH,
 	LENGTH,
@@ -58,7 +59,7 @@ struct EnumClassHash
 	}
 };
 
-typedef std::unordered_map<ConnectorConf, double, EnumClassHash> confMap;
+//typedef std::unordered_map<ConnectorConf, double, EnumClassHash> confMap;
 
 struct TextLabel
 {
@@ -114,7 +115,6 @@ private:
 	typedef HDS_Vertex vert_t;
 public:
 	MeshConnector();
-	~MeshConnector();
 	enum ConnectorType
 	{
 		// Regular type
@@ -129,28 +129,26 @@ public:
 		ARCH_CONNECTOR = 0,
 		RING_CONNECTOR = 1
 	};
-	static void generateConnector(mesh_t *unfolded_mesh);
+	static void genConnector(const mesh_t* unfolded_mesh,
+		const QString &filename, const confMap &conf);
 private:
-	static void exportHollowPiece(mesh_t* unfolded_mesh, const char* filename,
-		const confMap& conf,
-		int cn_t = HOLLOW_CONNECTOR);
-	static void exportHollowMFPiece(mesh_t* unfolded_mesh, const char* filename,
-		const confMap& conf,
-		int cn_t = HOLLOW_CONNECTOR);
-	static void exportBindPiece(mesh_t* unfolded_mesh, const char* filename,
-		const confMap& conf,
-		int cn_t = HOLLOW_CONNECTOR);
-	static void exportRegularPiece(mesh_t* unfolded_mesh, const char* filename,
-		const confMap& conf,
-		int cn_t = SIMPLE_CONNECTOR);
-	static void exportRimmedPiece(mesh_t* unfolded_mesh, const char* filename,
-		const confMap& conf,
-		int cn_t = ARCH_CONNECTOR);
+	static void exportHollowPiece(const mesh_t* unfolded_mesh,
+		const char* filename, const confMap &conf);
+	static void exportHollowMFPiece(const mesh_t* unfolded_mesh,
+		const char* filename,	const confMap &conf);
+	static void exportBindPiece(const mesh_t* unfolded_mesh,
+		const char* filename, const confMap &conf);
+	static void exportRegularPiece(const mesh_t* unfolded_mesh,
+		const char* filename, const confMap &conf);
+	static void exportRimmedPiece(const mesh_t* unfolded_mesh,
+		const char* filename, const confMap &conf);
 
 	static void writeToSVG(const char* filename);
 
-	static void writeCutLayer(FILE* SVG_File, const vector<QVector2D> &cut, int cuttype = 0, int id = 0);
-	static void wrtieEtchLayer(FILE* SVG_File, const vector<QVector2D> &etch, int seg = 0);
+	static void writeCutLayer(FILE* SVG_File,
+		const vector<QVector2D> &cut, int cuttype = 0, int id = 0);
+	static void wrtieEtchLayer(FILE* SVG_File,
+		const vector<QVector2D> &etch, int seg = 0);
 
 private:
 	/*static double pinholesize;
