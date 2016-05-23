@@ -18,7 +18,7 @@ class ConnectorPanel : public QDialog
 	Q_OBJECT
 
 public:
-	ConnectorPanel(int meshProcType = HDS_Mesh::REGULAR_PROC);
+	ConnectorPanel(int meshProcType = HDS_Mesh::HALFEDGE_PROC);
 
 	QString getFilename() const;
 	confMap getConfig() const { return conf; }

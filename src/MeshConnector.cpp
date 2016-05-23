@@ -40,28 +40,24 @@ MeshConnector::MeshConnector()
 {
 }
 
-void MeshConnector::exportHollowPiece(
-	const mesh_t* unfolded_mesh, const char* filename,
-	const confMap &conf)
+void MeshConnector::exportHollowPiece(FILE* fp,
+	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-	if (unfolded_mesh == nullptr) return;
-	FILE *SVG_File = fopen(filename, "w");
-	if (!SVG_File)
-	{
-		printf("Can't write to file %s!\n", filename);
-		return;
-	}
-
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
 	double str_wd = conf.at("strokeWd");
 	double he_scale = conf.at("scale");
-	double uncut_len = ConvertToPt((int)UNIT_TYPE::INCH, 0.1);
-	int connect_material = static_cast<int>(conf.at("connectMat"));
+	//double uncut_len = ConvertToPt((int)UNIT_TYPE::INCH, 0.1);
+	//int matConnLen = static_cast<int>(conf.at("connectMat"));
 	int segCount = static_cast<int>(conf.at("etchSeg"));
 	//int cn_t = static_cast<int>(conf.at("connector"));
-	int unit_type = static_cast<int>(conf.at("pinUnit"));
+	//int unit_type = static_cast<int>(conf.at("pinUnit"));
+	double uncut_len = ConvertToPt(
+		static_cast<int>(conf.at("matConnUnit")),
+		conf.at("matConnLen"));
+	double pin_radius = ConvertToPt(
+		static_cast<int>(conf.at("pinUnit")), conf.at("pinSize")) * 0.5;
 	int pinholecount_type = static_cast<int>(conf.at("pinCount"));
 	int score_type = static_cast<int>(conf.at("scoreType"));
 	cstchar* score_text;
@@ -75,14 +71,12 @@ void MeshConnector::exportHollowPiece(
 		double score_gap = conf.at("dashGap");
 	}
 	
-	double pin_radius = ConvertToPt(unit_type,
-		conf.at("pinSize")) * 0.5;
 	
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
 	// define the size of export graph
-	fprintf(SVG_File, SVG_HEAD,
+	fprintf(fp, SVG_HEAD,
 		static_cast<int>(size_vec.x() * he_scale) + 50,
 		static_cast<int>(size_vec.y() * he_scale) + 50);
 
@@ -107,7 +101,7 @@ void MeshConnector::exportHollowPiece(
 		unordered_set<he_t*> visitedEtchEdges;
 
 		// Group current piece
-		fprintf(SVG_File, "<g>\n");
+		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
 			face_t *curFace = unfolded_mesh->faceMap.at(fid);
@@ -260,14 +254,14 @@ void MeshConnector::exportHollowPiece(
 			auto rot = printTextRot[i];
 			auto ifo = printTextIfo[i];
 			
-			printText(SVG_File, pos.x(), pos.y(), rot, str_wd, ifo);
+			printText(fp, pos.x(), pos.y(), rot, str_wd, ifo);
 		}
 		/************************************************************************/
 		/* Write out circles                                                    */
 		/************************************************************************/
 		for (auto pinpos : printPinholes)
 		{
-			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
+			fprintf(fp, SVG_CIRCLE, printCircleID++,
 				pinpos.x(), pinpos.y(), pin_radius, str_wd);
 		}
 		/************************************************************************/
@@ -275,7 +269,7 @@ void MeshConnector::exportHollowPiece(
 		/************************************************************************/
 		for (auto labpos : printOrientLabel)
 		{
-            fprintf(SVG_File, SVG_LABEL, labpos.x(), labpos.y(), str_wd,
+            fprintf(fp, SVG_LABEL, labpos.x(), labpos.y(), str_wd,
 				ConnectorPanel::fontfamily.family().toUtf8().constData());
 		}
 
@@ -283,41 +277,37 @@ void MeshConnector::exportHollowPiece(
 		/* Write out edge for cut                                               */
 		/************************************************************************/
 		// To open polyline
-		if (connect_material == 1)// if cut as open polyline
+		if (uncut_len == 0)// if cut as open polyline
 		{
-			auto startpos = printBorderEdgePts.front();
+			writeCutLayer(fp, printBorderEdgePts,
+				str_wd, 1, printFaceID++);
+		}
+		// Cut as polygon
+		else
+		{
 			auto endpos = printBorderEdgePts.back();
-			auto lastDir = startpos - endpos;
-			endpos += lastDir * (1 - uncut_len / lastDir.length());
+			auto lastDir = printBorderEdgePts.front() - endpos;
+			endpos += lastDir * max(1 - uncut_len / lastDir.length(), 0);
 
 			printBorderEdgePts.push_back(endpos);
+
+			writeCutLayer(fp, printBorderEdgePts,
+				str_wd, 0, printFaceID++);
 		}
-		// Else if cut as polygon
-		// Do nothing
-		writeCutLayer(SVG_File, printBorderEdgePts, str_wd,
-			connect_material, printFaceID++);
 		/************************************************************************/
 		/* Write out edge for etch                                              */
 		/************************************************************************/
-		wrtieEtchLayer(SVG_File, printEtchEdges, segCount);
+		wrtieEtchLayer(fp, printEtchEdges, segCount);
 	}
 	/************************************************************************/
 	/* End of SVG File End                                                  */
 	/************************************************************************/
-	fprintf(SVG_File, "</svg>");
-	fclose(SVG_File);
-	printf("SVG file %s saved successfully!\n", filename);
+	fprintf(fp, "</svg>");
 }
 
-void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char* filename, const confMap &conf)
+void MeshConnector::exportHollowMFPiece(FILE* fp,
+	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-	if (unfolded_mesh == nullptr) return;
-	FILE *SVG_File = fopen(filename, "w");
-	if (!SVG_File)
-	{
-		printf("Can't write to file %s!\n", filename);
-		return;
-	}
 
 	/************************************************************************/
 	/* Scalors                                                              */
@@ -339,7 +329,7 @@ void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char*
 
 	//SVG file head
 	// define the size of export graph
-	fprintf(SVG_File, SVG_HEAD,
+	fprintf(fp, SVG_HEAD,
 		static_cast<int>(size_vec.x() * he_scale),
 		static_cast<int>(size_vec.y() * he_scale));
 
@@ -363,7 +353,7 @@ void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char*
 		unordered_set<he_t*> visitedEtchEdges;
 
 		// Group current piece
-		fprintf(SVG_File, "<g>\n");
+		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
 			auto curFace = unfolded_mesh->faceMap.at(fid);
@@ -460,13 +450,6 @@ void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char*
 
 				// Add labels for pinholes
 				
-				/*printTextPos.push_back(flapPos[0]);
-				printTextRot.push_back(Radian2Degree(atan2(dir.y(), dir.x())));
-				printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->v->refid));
-				printTextPos.push_back(flapPos[1]);
-				printTextRot.push_back(Radian2Degree(-atan2(dir.y(), dir.x())));
-				printTextIfo.push_back(HDS_Common::ref_ID2String(curHE->next->v->refid));*/
-
 				// Add labels for pinholes
 				// Label for v0
 				auto res = printTextRecord.find(curHE->v->refid);
@@ -530,15 +513,8 @@ void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char*
 		for (int i = 0; i < printTextPos.size(); i++)
 		{
 			auto pos = printTextPos[i];
-			auto rot = printTextRot[i];
-			auto ifo = printTextIfo[i];
-			/*fprintf(SVG_File, SVG_TEXT,
-				pos.x() * he_scale, pos.y() * he_scale, rot,
-				pos.x() * he_scale, pos.y() * he_scale,
-				ConnectorPanel::fontfamily.family().toUtf8().constData(),
-				str_wd, ifo.toUtf8().data());*/
-			printText(SVG_File, pos.x() * he_scale, pos.y() * he_scale,
-				rot, str_wd, ifo);
+			printText(fp, pos.x() * he_scale, pos.y() * he_scale,
+				printTextRot[i], str_wd, printTextIfo[i]);
 
 		}
 		/************************************************************************/
@@ -546,27 +522,27 @@ void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char*
 		/************************************************************************/
 		for (auto pinpos : printPinholes)
 		{
-			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
+			fprintf(fp, SVG_CIRCLE, printCircleID++,
 				pinpos.x() * he_scale, pinpos.y() * he_scale,
 				pin_radius, str_wd);
 		}
 		/************************************************************************/
 		/* Write out edge for cut                                               */
 		/************************************************************************/
-		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
+		fprintf(fp, "\t<polygon id=\"%d\" points=\"", printFaceID++);
 		for (int isec = 0; isec < printBorderEdgePts.size(); isec++)
 		{
-			fprintf(SVG_File, "%f,%f ",
+			fprintf(fp, "%f,%f ",
 				printBorderEdgePts[isec].x() * he_scale,
 				printBorderEdgePts[isec].y() * he_scale);
 		}
-		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:%lf\" />\n", str_wd);
+		fprintf(fp, "\" style=\"fill:none;stroke:blue;stroke-width:%lf\" />\n", str_wd);
 		/************************************************************************/
 		/* Write out edge for etch                                               */
 		/************************************************************************/
 		for (int isec = 0; isec < printEtchEdges.size(); isec+=2)
 		{
-			fprintf(SVG_File, SVG_LINE, isec / 2,
+			fprintf(fp, SVG_LINE, isec / 2,
 				printEtchEdges[isec].x() * he_scale,
 				printEtchEdges[isec].y() * he_scale,
 				printEtchEdges[isec + 1].x() * he_scale,
@@ -575,25 +551,17 @@ void MeshConnector::exportHollowMFPiece(const mesh_t* unfolded_mesh, const char*
 		}
 
 		// End of group
-		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+		fprintf(fp, "</g>\n");//set a new group for inner lines
 	}
 	/************************************************************************/
 	/* End of SVG File End                                                  */
 	/************************************************************************/
-	fprintf(SVG_File, "</svg>");
-	fclose(SVG_File);
-	printf("SVG file %s saved successfully!\n", filename);
+	fprintf(fp, "</svg>");
 }
 
-void MeshConnector::exportBindPiece(const mesh_t* unfolded_mesh, const char* filename, const confMap &conf)
+void MeshConnector::exportBindPiece(FILE* fp,
+	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-	if (unfolded_mesh == nullptr) return;
-	FILE *SVG_File = fopen(filename, "w");
-	if (!SVG_File)
-	{
-		printf("Can't write to file %s!\n", filename);
-		return;
-	}
 
 	/************************************************************************/
 	/* Scalors                                                              */
@@ -611,7 +579,7 @@ void MeshConnector::exportBindPiece(const mesh_t* unfolded_mesh, const char* fil
 
 	//SVG file head
 	// define the size of export graph
-	fprintf(SVG_File, SVG_HEAD,
+	fprintf(fp, SVG_HEAD,
 		static_cast<int>(size_vec.x() * he_scale),
 		static_cast<int>(size_vec.y() * he_scale));
 
@@ -628,7 +596,7 @@ void MeshConnector::exportBindPiece(const mesh_t* unfolded_mesh, const char* fil
 		unordered_set<he_t*> visitedEtchEdges;
 
 		// Group current piece
-		fprintf(SVG_File, "<g>\n");
+		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
 			face_t *curFace = unfolded_mesh->faceMap.at(fid);
@@ -675,7 +643,7 @@ void MeshConnector::exportBindPiece(const mesh_t* unfolded_mesh, const char* fil
 		/************************************************************************/
 		for (auto circlepos : printPinholes)
 		{
-			fprintf(SVG_File, SVG_CIRCLE, printCircleID++,
+			fprintf(fp, SVG_CIRCLE, printCircleID++,
 				circlepos.x() * he_scale, circlepos.y() * he_scale,
 				pin_radius, str_wd);
 		}
@@ -683,20 +651,20 @@ void MeshConnector::exportBindPiece(const mesh_t* unfolded_mesh, const char* fil
 		/************************************************************************/
 		/* Write out edge for cut                                               */
 		/************************************************************************/
-		fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", printFaceID++);
+		fprintf(fp, "\t<polygon id=\"%d\" points=\"", printFaceID++);
 		for (int isec = 0; isec < printBorderEdgePts.size(); isec++)
 		{
-			fprintf(SVG_File, "%f,%f ",
+			fprintf(fp, "%f,%f ",
 				printBorderEdgePts[isec].x() * he_scale,
 				printBorderEdgePts[isec].y() * he_scale);
 		}
-		fprintf(SVG_File, "\" style=\"fill:none;stroke:blue;stroke-width:%lf\" />\n", str_wd);
+		fprintf(fp, "\" style=\"fill:none;stroke:blue;stroke-width:%lf\" />\n", str_wd);
 		/************************************************************************/
 		/* Write out edge for etch                                               */
 		/************************************************************************/
 		for (int isec = 0; isec < printEtchEdges.size(); isec += 2)
 		{
-			fprintf(SVG_File, SVG_LINE, isec / 2,
+			fprintf(fp, SVG_LINE, isec / 2,
 				printEtchEdges[isec].x() * he_scale,
 				printEtchEdges[isec].y() * he_scale,
 				printEtchEdges[isec + 1].x() * he_scale,
@@ -704,26 +672,17 @@ void MeshConnector::exportBindPiece(const mesh_t* unfolded_mesh, const char* fil
 				"yellow", str_wd);
 		}
 		// End of group
-		fprintf(SVG_File, "</g>\n");
+		fprintf(fp, "</g>\n");
 	}
 	/************************************************************************/
 	/* End of SVG File End                                                  */
 	/************************************************************************/
-	fprintf(SVG_File, "</svg>");
-	fclose(SVG_File);
-	printf("SVG file %s saved successfully!\n", filename);
+	fprintf(fp, "</svg>");
 }
 
-void MeshConnector::exportRegularPiece(const mesh_t* unfolded_mesh, const char* filename,
-	const confMap &conf)
+void MeshConnector::exportRegularPiece(FILE* fp,
+	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-	if (unfolded_mesh == nullptr) return;
-	FILE *SVG_File = fopen(filename, "w");
-	if (!SVG_File)
-	{
-		printf("Can't write to file %s!\n", filename);
-		return;
-	}
 
 	auto faces = unfolded_mesh->faces();
 	unordered_set<HDS_Mesh::face_t*> cutfaces;// , infaces;
@@ -748,7 +707,7 @@ void MeshConnector::exportRegularPiece(const mesh_t* unfolded_mesh, const char* 
 
 	//SVG file head
 	// define the size of export graph
-	fprintf(SVG_File, SVG_HEAD,
+	fprintf(fp, SVG_HEAD,
 		static_cast<int>(size_vec.x() * he_scale),
 		static_cast<int>(size_vec.y() * he_scale));
 
@@ -1020,22 +979,20 @@ void MeshConnector::exportRegularPiece(const mesh_t* unfolded_mesh, const char* 
 		for (int i = 0; i < printTextPos.size(); i++)
 		{
 			auto pos = printTextPos[i];
-			auto rot = printTextRot[i];
-			auto ifo = printTextIfo[i];
-			printText(SVG_File, pos.x(), pos.y(),
-				rot, str_wd, ifo);
+			printText(fp, pos.x(), pos.y(),
+				printTextRot[i], str_wd, printTextIfo[i]);
 
 		}
 		//////////////////////////////////////////////////////////////////////////
-		fprintf(SVG_File,
+		fprintf(fp,
 			"<g>\n" \
 			"\t<polygon id=\"%d\" points=\"",
 			face->index);
 		for (int i = 0; i < printEdgePts.size(); i++)
 		{
-			fprintf(SVG_File, "%f,%f ", printEdgePts[i]->x(), printEdgePts[i]->y());
+			fprintf(fp, "%f,%f ", printEdgePts[i]->x(), printEdgePts[i]->y());
 		}
-		fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:%lf\" />\n",
+		fprintf(fp, "%f,%f\" style=\"fill:none;stroke:blue;stroke-width:%lf\" />\n",
 			printEdgePts[0]->x(), printEdgePts[0]->y(), str_wd);
 		//print carve edges
 		if (printEdgePtsCarves.size())
@@ -1043,7 +1000,7 @@ void MeshConnector::exportRegularPiece(const mesh_t* unfolded_mesh, const char* 
 
 			for (int i = 0; i < printEdgePtsCarves.size(); i += 2)
 			{
-				fprintf(SVG_File, "\t<polyline id=\"%d\" points=\"%f,%f %f,%f\" " \
+				fprintf(fp, "\t<polyline id=\"%d\" points=\"%f,%f %f,%f\" " \
 					"style=\"fill:none;stroke:blue;stroke-width:%lf\" />\n",
 					i,
 					printEdgePtsCarves[i]->x(), printEdgePtsCarves[i]->y(),
@@ -1058,36 +1015,30 @@ void MeshConnector::exportRegularPiece(const mesh_t* unfolded_mesh, const char* 
 		{
 			HDS_HalfEdge *he = face->he;
 			HDS_HalfEdge *curHE = he;
-			fprintf(SVG_File, "\t<polygon id=\"%d\" points=\"", face->index);
+			fprintf(fp, "\t<polygon id=\"%d\" points=\"", face->index);
 
 			do {
-				fprintf(SVG_File, "%f,%f ",
+				fprintf(fp, "%f,%f ",
 					curHE->v->pos.x() * he_scale, curHE->v->pos.y() * he_scale);
 				curHE = curHE->next;
 			} while (curHE != he);
-			fprintf(SVG_File, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:%lf\" />\n",
+			fprintf(fp, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:%lf\" />\n",
 				he->v->pos.x() * he_scale, he->v->pos.y() * he_scale, str_wd);
 		}
 		//////////////////////////////////////////////////////////////////////////
-		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+		fprintf(fp, "</g>\n");//set a new group for inner lines
 	}
-	fprintf(SVG_File,
+	fprintf(fp,
 		/*//"</g>\n"\*/
 		"</svg>");
-	fclose(SVG_File);
+	fclose(fp);
 	cout << "SVG file saved successfully!" << endl;
 }
 
-void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* filename,
-	const confMap &conf)
+void MeshConnector::exportRimmedPiece(FILE* fp,
+	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-	if (unfolded_mesh == nullptr) return;
-	FILE *SVG_File = fopen(filename, "w");
-	if (!SVG_File)
-	{
-		printf("Can't write to file %s!\n", filename);
-		return;
-	}
+	
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -1104,7 +1055,7 @@ void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* f
 
 	//SVG file head
 	// define the size of export graph
-	fprintf(SVG_File, SVG_HEAD,
+	fprintf(fp, SVG_HEAD,
 		static_cast<int>(size_vec.x() * he_scale),
 		static_cast<int>(size_vec.y() * he_scale));
 
@@ -1135,7 +1086,7 @@ void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* f
 		double outerR, innerR, innerPinR, outerPinR, offRad, offPinRad;
 
 		// Group current piece
-		fprintf(SVG_File, "<g>\n");
+		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
 			face_t *curFace = unfolded_mesh->faceMap.at(fid);
@@ -1183,7 +1134,7 @@ void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* f
 		/************************************************************************/
 		for (auto pinpos : printPinholes)
 		{
-			fprintf(SVG_File, SVG_CIRCLE, printPinholeID++, 1.0,
+			fprintf(fp, SVG_CIRCLE, printPinholeID++, 1.0,
 				pinpos.x(), pinpos.y(), str_wd);
 		}
 
@@ -1194,7 +1145,7 @@ void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* f
 		switch (cn_t)
 		{
 		case ARCH_CONNECTOR:
-			fprintf(SVG_File,
+			fprintf(fp,
 				SVG_ARCH,
 				printFaceID++,
 				printRimPts[0].x(), printRimPts[0].y(),
@@ -1203,15 +1154,15 @@ void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* f
 				innerR, innerR, printRimPts[3].x(), printRimPts[3].y(), str_wd);
 			break;
 		case RING_CONNECTOR:
-			fprintf(SVG_File, // Outer circle
+			fprintf(fp, // Outer circle
 				"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
 				"style=\"stroke:blue;stroke-width:%lf;fill:none\" />\n",
 				printFaceID, centerPt.x(), centerPt.y(), outerR, str_wd);
-			fprintf(SVG_File, // Inner circle
+			fprintf(fp, // Inner circle
 				"\t<circle id=\"Circle%d\" cx=\"%f\" cy=\"%f\" r=\"%lf\" " \
 				"style=\"stroke:blue;stroke-width:%lf;fill:none\" />\n",
 				printFaceID, centerPt.x(), centerPt.y(), innerR, str_wd);
-			fprintf(SVG_File, // Carve edge
+			fprintf(fp, // Carve edge
 				SVG_LINE,
 				printFaceID++,
 				printRimPts[1].x(), printRimPts[1].y(),
@@ -1224,15 +1175,12 @@ void MeshConnector::exportRimmedPiece(const mesh_t* unfolded_mesh, const char* f
 		
 
 		
-		fprintf(SVG_File, "</g>\n");//set a new group for inner lines
+		fprintf(fp, "</g>\n");//set a new group for inner lines
 	}
 	/************************************************************************/
 	/* End of SVG File End                                                  */
 	/************************************************************************/
-	fprintf(SVG_File, "</svg>");
-	fclose(SVG_File);
-	
-	cout << "SVG file saved successfully!" << endl;
+	fprintf(fp, "</svg>");
 }
 
 void MeshConnector::writeCutLayer(
@@ -1287,41 +1235,38 @@ void MeshConnector::genConnector(
 	const mesh_t *unfolded_mesh,
 	const QString &filename, const confMap &conf)
 {
-	if (unfolded_mesh == nullptr)
+	
+	if (unfolded_mesh == nullptr) return;
+	FILE *fp = fopen(filename.toUtf8(), "w");
+	if (!fp)
 	{
-		//assert();
+		printf("Can't write to file %s!\n", filename);
 		return;
 	}
-	/*ConnectorPanel *connPanel = new ConnectorPanel(unfolded_mesh->processType);
-	connPanel->exec();
-	
-	QString filename = connPanel->getFilename();
-	//double scale = connPanel->getScale();
-	//int cn_t = connPanel->getConnectorType();
-	auto conf = connPanel->getConfiguration();
-*/
-	
-
 	switch (unfolded_mesh->processType)
 	{
-	case HDS_Mesh::REGULAR_PROC:
-		exportRegularPiece(unfolded_mesh, filename.toUtf8(), conf);
+	case HDS_Mesh::HALFEDGE_PROC:
+		exportRegularPiece(fp, unfolded_mesh, conf);
 		break;
 	case HDS_Mesh::QUAD_PROC:
-		exportHollowPiece(unfolded_mesh, filename.toUtf8(), conf);
+		exportHollowPiece(fp, unfolded_mesh, conf);
 		break;
 	case HDS_Mesh::WINGED_PROC:
 		// new proc
-		exportHollowMFPiece(unfolded_mesh, filename.toUtf8(), conf);
+		exportHollowMFPiece(fp, unfolded_mesh, conf);
 		break;
 	case HDS_Mesh::GRS_PROC:
-		exportBindPiece(unfolded_mesh, filename.toUtf8(), conf);
+		exportBindPiece(fp, unfolded_mesh, conf);
 		break;
 	case HDS_Mesh::RIMMED_PROC:
-		exportRimmedPiece(unfolded_mesh, filename.toUtf8(), conf);
+		exportRimmedPiece(fp, unfolded_mesh, conf);
 		break;
 	default:
 		break;
 	}
-	//delete connPanel;
+
+	fclose(fp);
+#ifdef _DEBUG
+	cout << "SVG file " << filename.toUtf8().constData() << " saved successfully!" << endl;
+#endif
 }

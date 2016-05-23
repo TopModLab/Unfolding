@@ -19,11 +19,10 @@ public:
 
 	enum PROCESS_TYPE : uint16_t
 	{
-		REGULAR_PROC,
+		HALFEDGE_PROC,
 		QUAD_PROC,
 		WINGED_PROC,
 		GRS_PROC,
-		EXTENDED_PROC,
 		RIMMED_PROC
 	};
 	enum SHOW_COMP : uint16_t

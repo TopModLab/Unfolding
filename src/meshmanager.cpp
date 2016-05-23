@@ -648,11 +648,11 @@ bool MeshManager::saveMeshes()
 }
 
 
-void MeshManager::setGRS(const confMap &config)
+void MeshManager::setGRS(const confMap &conf)
 {
 	if (panelType == 0) {//single panel
 	cutMeshWithSelectedEdges();
-	HDS_Bridger::setBridger(config);
+	HDS_Bridger::setBridger(conf);
 	MeshExtender::setOriMesh(operationStack->getOriMesh());
 
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
@@ -706,14 +706,14 @@ void MeshManager::rimMesh(double rimSize)
 	selectedEdges.clear();
 }
 
-void MeshManager::set3DRimMesh(const confMap &config)
+void MeshManager::set3DRimMesh(const confMap &conf)
 {
     MeshRimFace::setOriMesh(operationStack->getOriMesh());
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-    MeshRimFace::configRimMesh(config);
-	if (config.at("center") == 0)
+    MeshRimFace::configRimMesh(conf);
+	if (conf.at("center") == 0)
 		MeshRimFace::rimMeshV(outMesh);
 	else
 		MeshRimFace::rimMeshF(outMesh);
@@ -746,14 +746,14 @@ void MeshManager::setQuadEdge(double flapSize, int type, double shift)
 
 }
 
-void MeshManager::setWeaveMesh(const confMap &config)
+void MeshManager::setWeaveMesh(const confMap &conf)
 {
 	MeshWeaver::setOriMesh(operationStack->getOriMesh());
 
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
-	MeshWeaver::configWeaveMesh(config);
+	MeshWeaver::configWeaveMesh(conf);
 	MeshWeaver::weaveMesh(outMesh);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
@@ -764,7 +764,7 @@ void MeshManager::createDFormMesh()
 	operationStack->push(MeshDFormer::generateDForm(operationStack->getCurrentMesh()));
 }
 
-void MeshManager::exportXMLFile(
+void MeshManager::exportSVGFile(
 	const QString &filename, const confMap &conf)
 {
 	MeshConnector::genConnector(operationStack->getUnfoldedMesh(), filename, conf);

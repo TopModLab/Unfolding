@@ -94,8 +94,6 @@ bool MainWindow::connectComponents()
 	/*connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int)));
 	connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int, int, int, double)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int, int, int, double)));*/
 	connect(conn_panel.data(), &ConnectorPanel::sig_saved, this, &MainWindow::exportSVG);
-	connect(conn_panel.data(), &ConnectorPanel::sig_saved, this, &MainWindow::exportSVG);
-
 
 	connect(cp_panel.data(), &CriticalPointsPanel::sig_methodChanged, this, &MainWindow::slot_updateCriticalPointsMethod);
 	connect(cp_panel.data(), &CriticalPointsPanel::sig_smoothingTimesChanged, this, &MainWindow::slot_updateCriticalPointsSmoothingTimes);
@@ -479,8 +477,7 @@ void MainWindow::newFile()
 
 void MainWindow::exportSVG()
 {
-	
-	MeshManager::getInstance()->exportXMLFile(conn_panel->getFilename(), conn_panel->getConfig());
+	MeshManager::getInstance()->exportSVGFile(conn_panel->getFilename(), conn_panel->getConfig());
 }
 
 void MainWindow::closeFile()          //later add this function

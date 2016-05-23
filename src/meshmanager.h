@@ -88,13 +88,13 @@ public:
 
 	void setGES();
 	void setQuadEdge(double fsize, int type, double shift);
-	void setGRS(const confMap &config);
+	void setGRS(const confMap &conf);
 	void rimMesh(double rimSize = 0.0);
-	void set3DRimMesh(const confMap &config);
-	void setWeaveMesh(const confMap &config);
+	void set3DRimMesh(const confMap &conf);
+	void setWeaveMesh(const confMap &conf);
 	void createDFormMesh();
 	// Export as SVG files
-	void exportXMLFile(const QString &filename, const confMap &conf);
+	void exportSVGFile(const QString &filename, const confMap &conf);
 	bool saveMeshes();
 
 	void setCurrentOpFlag(OperationStack::Flag curFlag) { operationStack->setCurrentFlag(curFlag); }

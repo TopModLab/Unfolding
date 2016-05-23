@@ -126,6 +126,7 @@ inline double Inch2Pt(double inch)
 }
 inline double ConvertToPt(int src_type, double len)
 {
+	if (len == 0) return 0;
 	switch (src_type)
 	{
 	case (int)UNIT_TYPE::MILIMITER:
@@ -172,16 +173,16 @@ public:
 	static void genConnector(const mesh_t* unfolded_mesh,
 		const QString &filename, const confMap &conf);
 private:
-	static void exportHollowPiece(const mesh_t* unfolded_mesh,
-		const char* filename, const confMap &conf);
-	static void exportHollowMFPiece(const mesh_t* unfolded_mesh,
-		const char* filename,	const confMap &conf);
-	static void exportBindPiece(const mesh_t* unfolded_mesh,
-		const char* filename, const confMap &conf);
-	static void exportRegularPiece(const mesh_t* unfolded_mesh,
-		const char* filename, const confMap &conf);
-	static void exportRimmedPiece(const mesh_t* unfolded_mesh,
-		const char* filename, const confMap &conf);
+	static void exportHollowPiece(FILE* fp,
+		const mesh_t* unfolded_mesh, const confMap &conf);
+	static void exportHollowMFPiece(FILE* fp,
+		const mesh_t* unfolded_mesh, const confMap &conf);
+	static void exportBindPiece(FILE* fp,
+		const mesh_t* unfolded_mesh, const confMap &conf);
+	static void exportRegularPiece(FILE* fp,
+		const mesh_t* unfolded_mesh, const confMap &conf);
+	static void exportRimmedPiece(FILE* fp,
+		const mesh_t* unfolded_mesh, const confMap &conf);
 
 	
 	static void writeToSVG(const char* filename);

@@ -11,7 +11,7 @@ HDS_Mesh::HDS_Mesh()
 	: showComponent(SHOW_FACE | SHOW_EDGE)
 	, showFace(true), showVert(true)
 	, showEdge(true), showNormals(false)
-	, processType(REGULAR_PROC)
+	, processType(HALFEDGE_PROC)
 	, bound(nullptr)
 {
 }
