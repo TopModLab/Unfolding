@@ -173,8 +173,13 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 //		v2_flap = (1.0 - flapSize) * v2 + flapSize * v3;
         QVector3D v1_flap_scaled = (1.0 - flapSize) * v1 + flapSize * center;
         QVector3D v2_flap_scaled = (1.0 - flapSize) * v2 + flapSize * center;
+		if (flapSize != 1) {
 		Utils::LineLineIntersect(v1, v0, v1_flap_scaled, v2_flap_scaled, &v1_flap);
 		Utils::LineLineIntersect(v2, v3, v1_flap_scaled, v2_flap_scaled, &v2_flap);
+		}else {
+			v1_flap = (v1 + v0)/2.0;
+			v2_flap = (v2 + v3)/2.0;
+		}
 
 	}else {
 		//get parallel flaps
