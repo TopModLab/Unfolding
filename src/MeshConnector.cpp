@@ -559,7 +559,7 @@ void MeshConnector::exportHollowMFPiece(FILE* fp,
 	fprintf(fp, "</svg>");
 }
 
-void MeshConnector::exportBindPiece(FILE* fp,
+void MeshConnector::exportGESPiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
 
@@ -678,6 +678,11 @@ void MeshConnector::exportBindPiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
+}
+
+void MeshConnector::exportGRSPiece(FILE *fp, const MeshConnector::mesh_t *unfolded_mesh, const confMap &conf)
+{
+
 }
 
 void MeshConnector::exportRegularPiece(FILE* fp,
@@ -1252,11 +1257,18 @@ bool MeshConnector::genConnector(
 		// new proc
 		exportHollowMFPiece(fp, unfolded_mesh, conf);
 		break;
+	case HDS_Mesh::GES_PROC:
+		exportGESPiece(fp, unfolded_mesh, conf);
+		break;
 	case HDS_Mesh::GRS_PROC:
-		exportBindPiece(fp, unfolded_mesh, conf);
+		exportGRSPiece(fp, unfolded_mesh, conf);//TBD, need connector on bridger
+		fclose(fp);
+		return false;
 		break;
 	case HDS_Mesh::RIMMED_PROC:
-		exportRimmedPiece(fp, unfolded_mesh, conf);
+		//exportRimmedPiece(fp, unfolded_mesh, conf);
+		fclose(fp);
+		return false;
 		break;
 	default:
 		break;

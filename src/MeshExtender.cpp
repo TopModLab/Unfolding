@@ -88,8 +88,11 @@ void MeshExtender::scaleFaces()
 				newHE->refid = curHE->refid;
 				newHE->flip->refid = curHE->flip->refid;
 				newHE->setCutEdge(curHE->isCutEdge);
-				if (newHE->isCutEdge)
-					newHE->flip->f = curHE->flip->f;
+				if (newHE->isCutEdge){
+					face_t* newCutFace = new face_t(*(curHE->flip->f));
+					newHE->flip->f = newCutFace;
+					faces_new.push_back(newCutFace);
+				}
 				newHE = newHE->next;
 				curHE = curHE->next;
 			}while(newHE!= newFace->he);
@@ -193,12 +196,12 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		}
 	}
 
-	for (auto f: cur_mesh->faces()) {
-		if(f->isCutFace){
-			faces_new.push_back(f);
-		}
+//	for (auto f: cur_mesh->faces()) {
+//		if(f->isCutFace){
+//			faces_new.push_back(new face_t(*f));
+//		}
 
-	}
+//	}
 
 	//assign flip s face
 	for (auto& he_inner: hes_new){
@@ -293,7 +296,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	}
 
 	updateNewMesh();
-
+	cur_mesh->processType = HDS_Mesh::GRS_PROC;
 	cout<<"extend succeed............."<<endl;
 	return true;
 
@@ -304,12 +307,7 @@ void MeshExtender::updateNewMesh()
 	//for debugging...
 	int bridgerCount = 0;
 
-	cur_mesh->heSet.clear();
-	cur_mesh->vertSet.clear();
-	cur_mesh->faceSet.clear();
-	cur_mesh->heMap.clear();
-	cur_mesh->vertMap.clear();
-	cur_mesh->faceMap.clear();
+	cur_mesh->releaseMesh();
 
 	HDS_Vertex::resetIndex();
 	HDS_HalfEdge::resetIndex();

@@ -267,14 +267,17 @@ void HDS_Mesh::releaseMesh() {
 	for(auto v : vertSet)
 		delete v;
 	vertSet.clear();
+	vertMap.clear();
 
 	for(auto f : faceSet)
 		delete f;
 	faceSet.clear();
+	faceMap.clear();
 
 	for(auto he : heSet)
 		delete he;
 	heSet.clear();
+	heMap.clear();
 
 	delete bound;
 }

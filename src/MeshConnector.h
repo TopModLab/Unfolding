@@ -143,7 +143,9 @@ private:
 		const mesh_t* unfolded_mesh, const confMap &conf);
 	static void exportHollowMFPiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);
-	static void exportBindPiece(FILE* fp,
+	static void exportGESPiece(FILE* fp,
+		const mesh_t* unfolded_mesh, const confMap &conf);
+	static void exportGRSPiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);
 	static void exportRegularPiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);
