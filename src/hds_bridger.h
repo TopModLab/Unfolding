@@ -65,9 +65,6 @@ private:
 	static double curv;
 	static int nSamples;
 	static double cp;
-	static int opening;
-
-
 };
 
 #endif // HDS_BRIDGER_H
