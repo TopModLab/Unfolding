@@ -287,7 +287,7 @@ void MeshConnector::exportHollowPiece(FILE* fp,
 		{
 			auto endpos = printBorderEdgePts.back();
 			auto lastDir = printBorderEdgePts.front() - endpos;
-			endpos += lastDir * max(1 - uncut_len / lastDir.length(), 0);
+			endpos += lastDir * max(1 - uncut_len / lastDir.length(), 0.0);
 
 			printBorderEdgePts.push_back(endpos);
 
@@ -1231,18 +1231,15 @@ void MeshConnector::wrtieEtchLayer(
 	fprintf(SVG_File, "</g>\n");//set a new group for inner lines
 }
 
-void MeshConnector::genConnector(
-	const mesh_t *unfolded_mesh,
+bool MeshConnector::genConnector(
+	const mesh_t* unfolded_mesh,
 	const QString &filename, const confMap &conf)
 {
-	
-	if (unfolded_mesh == nullptr) return;
+	if (unfolded_mesh == nullptr) return false;
+
 	FILE *fp = fopen(filename.toUtf8(), "w");
-	if (!fp)
-	{
-		printf("Can't write to file %s!\n", filename);
-		return;
-	}
+	if (!fp) return false;
+
 	switch (unfolded_mesh->processType)
 	{
 	case HDS_Mesh::HALFEDGE_PROC:
@@ -1266,7 +1263,5 @@ void MeshConnector::genConnector(
 	}
 
 	fclose(fp);
-#ifdef _DEBUG
-	cout << "SVG file " << filename.toUtf8().constData() << " saved successfully!" << endl;
-#endif
+	return true;
 }
