@@ -7,21 +7,20 @@ double HDS_Bridger::scale = 0.2;
 double HDS_Bridger::curv = 0.5;
 int HDS_Bridger::nSamples = 4;
 double HDS_Bridger::cp = 0;
-int HDS_Bridger::opening = 0;
 
 void HDS_Bridger::setBridger(const confMap &config)
 {
-	shape = (int)config.at("shape"); //0 bezier 1 original 2 flat
+	//0 bezier 1 original 2 flat
+	shape = static_cast<int>(config.at("shape"));
+
 	scale = config.at("size");
 	curv = config.at("curv");
-	nSamples = (int)config.at("samples");
-	cout << "N-Sample:\t" << nSamples << endl;
+	nSamples = static_cast<int>(config.at("samples"));
 	cp = config.at("cp");
-	opening = (int)config.at("opening");
-
 }
 
-void HDS_Bridger::setSamples(int sample) {
+void HDS_Bridger::setSamples(int sample)
+{
 	nSamples = sample;
 }
 
@@ -55,12 +54,12 @@ HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, vector<QVector3D> 
 		p11 = he->v->pos;
 		p21 = hef->flip->v->pos;
 
-		if (controlPoints.size() == 2){
+		if (controlPoints.size() == 2) {
 			//quadratic bezier curve constructor
 
 			bezierPos_front = quadraticBezierCurve(p10, controlPoints[1], p20);
 			bezierPos_back = quadraticBezierCurve(p11, controlPoints[0], p21);
-		}else {
+		} else {
 			bezierPos_front = cubicBezierCurve(p10, controlPoints[1], controlPoints[3], p20);
 			bezierPos_back = cubicBezierCurve(p11, controlPoints[0], controlPoints[2], p21);
 		}
@@ -100,12 +99,8 @@ void HDS_Bridger::createBridge()
 				bridgeFace->isBridger = true;
 				//add face to mesh
 				faces.push_back(bridgeFace);
-
-
 		}
-
 	}
-
 }
 
 QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
@@ -134,7 +129,7 @@ vector<QVector3D> HDS_Bridger::quadraticBezierCurve(QVector3D p0, QVector3D p1, 
 	if (shape == 1)
 	{
 		pos.push_back(p1);
-	}else {
+	} else {
 
 		for( float i = 1.0/(float)nSamples ; i < 1 ; i += 1.0/(float)nSamples )
 		{
@@ -155,7 +150,7 @@ vector<QVector3D> HDS_Bridger::cubicBezierCurve(QVector3D p0, QVector3D p1, QVec
 	{
 		pos.push_back(p1);
 		pos.push_back(p2);
-	}else {
+	} else {
 
 		for( float i = 1.0/(float)nSamples ; i < 1 ; i += 1.0/(float)nSamples )
 		{
@@ -194,7 +189,6 @@ HDS_Face * HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 	he_t* he_v1e_v2s = HDS_Mesh::insertEdge(v1e, v2s, he1, he2);
 	he_t* he_v2e_v1s = HDS_Mesh::insertEdge(v2e, v1s, he2, he1);
 
-
 	he_v1e_v2s->f = bridgeFace;
 	he_v2e_v1s->f = bridgeFace;
 
@@ -206,16 +200,13 @@ HDS_Face * HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 	he_v1e_v2s->setCutEdge(true);
 	he_v2e_v1s->setCutEdge(true);
 
-
 	hes.push_back(he_v1e_v2s);
 	hes.push_back(he_v2e_v1s);
 
 	return bridgeFace;
-
 }
 
 HDS_Bridger::~HDS_Bridger()
 {
-
 }
 
