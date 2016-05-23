@@ -651,7 +651,6 @@ bool MeshManager::saveMeshes()
 
 void MeshManager::setGRS(map<QString, double> config)
 {
-	if (panelType == 0) {//single panel
 	cutMeshWithSelectedEdges();
 	HDS_Bridger::setBridger(config);
 	MeshExtender::setOriMesh(operationStack->getOriMesh());
@@ -665,7 +664,7 @@ void MeshManager::setGRS(map<QString, double> config)
 	//update sorted faces
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
-	}
+
 }
 
 void MeshManager::rimMesh(double rimSize)

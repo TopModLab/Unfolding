@@ -42,5 +42,5 @@ GESPanel::slot_saved()
 double
 GESPanel::getBridgerSize()
 {
-	return (double)bridgerSize / (double)ui->sizeSlider->maximum() /2.0;
+	return (double)bridgerSize / (double)ui->sizeSlider->maximum();
 }

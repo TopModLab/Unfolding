@@ -255,6 +255,7 @@ bool MeshUnfolder::unfold(HDS_Mesh *unfolded_mesh, HDS_Mesh *ref_mesh, set<int> 
 		return false;
 	}
 	ref_mesh->updatePieceSet();
+	cout << "Unfold Piece Count:\t" << ref_mesh->pieceSet.size() << endl;
 	// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{

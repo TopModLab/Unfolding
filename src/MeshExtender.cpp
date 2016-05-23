@@ -176,7 +176,9 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
 	initiate();
 	cur_mesh = mesh;
-
+	if (HDS_Bridger::getScale() == 1) {
+		HDS_Bridger::setScale(0.99);
+	}
 	unordered_map<hdsid_t, vert_t*> ori_map = ori_mesh->vertMap;
 
 	scaleFaces();
@@ -204,7 +206,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 		if (he->f == nullptr){
 
-
 			//find nearest cut face, if not found set a new one
 			he_t* curHE = he;
 			do {
@@ -230,7 +231,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 		he_t* he = heMap.second->flip;
 		if (!he->isCutEdge){
 			///for all non-cut-edge edges, create bridge faces
-
 			HDS_Vertex* v1_ori = ori_map[(he->v->refid)>>2];
 			HDS_Vertex* v2_ori = ori_map[(he->bridgeTwin->v->refid)>>2];
 			vector <QVector3D> vpair = scaleBridgerEdge(v1_ori, v2_ori);
@@ -238,7 +238,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 		}else {
 			// for all cut-edge edges, create flaps
-
+			cout<<"cut edge bridger"<<endl;
 			he_t* twin_he = he->bridgeTwin;
 			vert_t* flap_vs = new vert_t;
 			vert_t* flap_ve = new vert_t;
@@ -254,8 +254,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 			he_t* flap_he = HDS_Mesh::insertEdge(flap_vs, flap_ve);
 			flap_he->setCutEdge(true);
-			flap_he->f = twin_he->f;
-			flap_he->flip->f = twin_he->f;
+			flap_he->f = he->f;
+			flap_he->flip->f = he->f;
 			flap_he->refid = twin_he->refid;
 			hes_new.push_back(flap_he);
 
@@ -278,8 +278,8 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 			he_t* twin_flap_he = HDS_Mesh::insertEdge(twin_flap_vs, twin_flap_ve);
 			twin_flap_he->setCutEdge(true);
-			twin_flap_he->f = he->f;
-			twin_flap_he->flip->f = he->f;
+			twin_flap_he->f = twin_he->f;
+			twin_flap_he->flip->f = twin_he->f;
 
 			twin_flap_he->refid = he->refid;
 			hes_new.push_back(twin_flap_he);
