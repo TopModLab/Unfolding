@@ -25,6 +25,7 @@ void ConnectorPanel::resetParas(int procType)
 {
 	//meshType = procType;
 	ui->mesh_type->setCurrentIndex(procType);
+	ui->connector_type->clear();
 	switch (procType)
 	{
 	case HDS_Mesh::REGULAR_PROC:
@@ -66,7 +67,8 @@ void ConnectorPanel::save()
 	fontfamily = ui->font_val->currentFont();
 
 	conf["connector"] = (double)ui->connector_type->currentIndex();
-
+	conf["connectMat"] = (double)ui->conn_mat_val->currentIndex();
+	conf["strokeWd"] = ui->stroke_wd_val->value();
 	conf["scale"] = ui->scale_val->value();
 	conf["width"] = ui->width_val->value();
 	conf["length"] = ui->length_val->value();
