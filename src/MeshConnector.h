@@ -22,47 +22,13 @@
 #include "Graph.hpp"
 #include "ConnectorPanel.h"
 
-/*
-enum ConnectorConf: int
-{
-	// General
-	LABEL_FONT = 0,
-	CONNECT_TYPE,
-	SCALE,
-	WIDTH,
-	LENGTH,
-	LABELED,
-	LABEL_TEXT,
-	// Regular
-		// Gear
-		GEAR_COUNT,
-	// Hollow
-	PINHOLE_UNIT,
-	PINHOLESIZE,
-	PINHOLECOUNT_TYPE,
-	ETCHSEG,
-	SCORE_TYPE,
-		DASH_LEN,
-		DASH_GAP,
-		DASH_UNIT
-};*/
 enum class UNIT_TYPE : int
 {
 	MILIMITER,
 	INCH,
 	POINT
 };
-/*
-struct EnumClassHash
-{
-	template <typename T>
-	std::size_t operator()(T t) const
-	{
-		return static_cast<std::size_t>(t);
-	}
-};*/
 
-//typedef std::unordered_map<ConnectorConf, double, EnumClassHash> confMap;
 typedef const char cstchar;
 cstchar SVG_HEAD[] =
 	"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
