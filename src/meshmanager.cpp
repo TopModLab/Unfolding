@@ -650,7 +650,6 @@ bool MeshManager::saveMeshes()
 
 void MeshManager::setGRS(const confMap &conf)
 {
-	if (panelType == 0) {//single panel
 	cutMeshWithSelectedEdges();
 	HDS_Bridger::setBridger(conf);
 	MeshExtender::setOriMesh(operationStack->getOriMesh());
@@ -664,7 +663,7 @@ void MeshManager::setGRS(const confMap &conf)
 	//update sorted faces
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
-	}
+
 }
 
 void MeshManager::rimMesh(double rimSize)

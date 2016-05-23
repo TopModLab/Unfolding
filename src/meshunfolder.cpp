@@ -137,7 +137,7 @@ bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 
 			he = curHE;
 			curHE = he->flip->next;
-		} while (he != v->he);
+		} while(he != v->he);
 
 		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
@@ -257,6 +257,7 @@ bool MeshUnfolder::unfold(
 		return false;
 	}
 	// ref_mesh->updatePieceSet();
+	cout << "Unfold Piece Count:\t" << ref_mesh->pieceSet.size() << endl;
 	// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
