@@ -128,6 +128,27 @@ bool MainWindow::connectComponents()
 	connect(wv_panel.data(), &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
 	connect(wv_panel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 
+	connect (ui->panelCBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			[=](int id){
+		switch (id) {
+		case 0: //single panel
+			ui->GESBtn->setEnabled(false);
+			ui->quadEdgeBtn->setEnabled(false);
+			ui->wingedEdgeBtn->setEnabled(false);
+			break;
+		case 1: //mult panel
+			ui->GESBtn->setEnabled(true);
+			ui->quadEdgeBtn->setEnabled(true);
+			ui->wingedEdgeBtn->setEnabled(true);
+			break;
+		case 2: //reduced panel
+			ui->GESBtn->setEnabled(false);
+			ui->quadEdgeBtn->setEnabled(false);
+			ui->wingedEdgeBtn->setEnabled(false);
+			break;
+		}
+	});
+
 	return true;
 }
 
@@ -477,7 +498,16 @@ void MainWindow::newFile()
 
 void MainWindow::exportSVG()
 {
-	MeshManager::getInstance()->exportSVGFile(conn_panel->getFilename(), conn_panel->getConfig());
+	if (MeshManager::getInstance()->exportSVGFile(
+		conn_panel->getFilename(), conn_panel->getConfig()))
+	{
+		statusBar()->showMessage("SVG file saved to "
+			+ conn_panel->getFilename() + " successfully!", 5000);
+	}
+	else
+	{
+		statusBar()->showMessage("Saving SVG file failed!", 5000);
+	}
 }
 
 void MainWindow::closeFile()          //later add this function

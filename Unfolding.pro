@@ -63,6 +63,7 @@ SOURCES += src/main.cpp\
     src/meshhollower.cpp \
     src/BBox.cpp \
     src/ConnectorPanel.cpp \
+    src/MeshDFormer.cpp \
     src/MeshConnector.cpp \
     src/meshrimface.cpp \
     src/OperationStack.cpp \
@@ -119,6 +120,7 @@ HEADERS  += src/mainwindow.h \
     src/meshhollower.h \
     src/BBox.h \
     src/ConnectorPanel.h \
+    src/MeshDFormer.h \
     src/MeshConnector.h \
     src/meshrimface.h \
     src/OperationStack.h \

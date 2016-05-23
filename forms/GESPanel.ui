@@ -47,7 +47,7 @@
       <item>
        <widget class="QSlider" name="sizeSlider">
         <property name="maximum">
-         <number>49</number>
+         <number>99</number>
         </property>
         <property name="value">
          <number>20</number>
@@ -69,6 +69,12 @@
          <size>
           <width>22</width>
           <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="text">
