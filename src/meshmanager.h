@@ -94,7 +94,7 @@ public:
 	void setWeaveMesh(const confMap &conf);
 	void createDFormMesh();
 	// Export as SVG files
-	void exportSVGFile(const QString &filename, const confMap &conf);
+	bool exportSVGFile(const QString &filename, const confMap &conf);
 	bool saveMeshes();
 
 	void setCurrentOpFlag(OperationStack::Flag curFlag) { operationStack->setCurrentFlag(curFlag); }

@@ -498,7 +498,16 @@ void MainWindow::newFile()
 
 void MainWindow::exportSVG()
 {
-	MeshManager::getInstance()->exportSVGFile(conn_panel->getFilename(), conn_panel->getConfig());
+	if (MeshManager::getInstance()->exportSVGFile(
+		conn_panel->getFilename(), conn_panel->getConfig()))
+	{
+		statusBar()->showMessage("SVG file saved to "
+			+ conn_panel->getFilename() + " successfully!", 5000);
+	}
+	else
+	{
+		statusBar()->showMessage("Saving SVG file failed!", 5000);
+	}
 }
 
 void MainWindow::closeFile()          //later add this function

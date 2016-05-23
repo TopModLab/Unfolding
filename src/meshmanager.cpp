@@ -763,10 +763,10 @@ void MeshManager::createDFormMesh()
 	operationStack->push(MeshDFormer::generateDForm(operationStack->getCurrentMesh()));
 }
 
-void MeshManager::exportSVGFile(
+bool MeshManager::exportSVGFile(
 	const QString &filename, const confMap &conf)
 {
-	MeshConnector::genConnector(operationStack->getUnfoldedMesh(), filename, conf);
+	return MeshConnector::genConnector(operationStack->getUnfoldedMesh(), filename, conf);
 }
 
 void MeshManager::colorMeshByGeoDistance(int vidx)

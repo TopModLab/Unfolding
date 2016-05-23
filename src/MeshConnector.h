@@ -170,7 +170,7 @@ public:
 		ARCH_CONNECTOR = 0,
 		RING_CONNECTOR = 1
 	};
-	static void genConnector(const mesh_t* unfolded_mesh,
+	static bool genConnector(const mesh_t* unfolded_mesh,
 		const QString &filename, const confMap &conf);
 private:
 	static void exportHollowPiece(FILE* fp,
