@@ -122,7 +122,6 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 		}
 	}
 
-	updateNewMesh();
 	if (flapSize > 0) {
 
     //generate hole position ref map
@@ -152,6 +151,8 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
         }while (curHE!= f->he);
     }
 	}
+	updateNewMesh();
+
 }
 
 
