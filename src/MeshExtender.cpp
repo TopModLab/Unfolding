@@ -63,12 +63,13 @@ void MeshExtender::scaleFaces()
 	for (auto f: cur_mesh->faces()) {
 		if (!f->isCutFace){
 			f->setScaleFactor(HDS_Bridger::getScale());
-			int numOfCorners = f->corners().size();
+			auto fCorners = f->corners();
+			auto fScaledCorners = f->getScaledCorners();
 			vector<vert_t*> vertices;
-			for (int i = 0; i < numOfCorners; i++) {
+			for (int i = 0; i < fCorners.size(); i++) {
 				vert_t* v_new = new vert_t;
-				v_new->pos = f->getScaledCorners()[i];
-				v_new->refid = f->corners()[i]->refid;
+				v_new->pos = fScaledCorners[i];
+				v_new->refid = fCorners[i]->refid;
 				vertices.push_back(v_new);
 				verts_new.push_back(v_new);
 			}
@@ -139,8 +140,9 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 HDS_Face* MeshExtender::duplicateFace(face_t* face, face_t* cutFace)
 {
 	vector<vert_t*> vertices;
-	for (auto v: face->corners()) {
-		vertices.push_back( new vert_t(v->pos));
+	auto fCorners = face->corners();
+	for (auto v: fCorners) {
+		vertices.push_back(new vert_t(v->pos));
 	}
 	face_t* newFace = createFace(vertices, cutFace);
 	newFace->refid = face->refid;
