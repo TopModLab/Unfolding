@@ -139,9 +139,9 @@ public:
 	static bool genConnector(const mesh_t* unfolded_mesh,
 		const QString &filename, const confMap &conf);
 private:
-	static void exportHollowPiece(FILE* fp,
+	static void exportQuadEdgePiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);
-	static void exportHollowMFPiece(FILE* fp,
+	static void exportWingedEdgePiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);
 	static void exportGESPiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);

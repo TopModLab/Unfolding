@@ -17,6 +17,8 @@ void OperationStack::undo()
 	if (opStack.size() > 1){
 		redoStack.push(opStack.top());
 		opStack.pop();
+		setCurrentFlag(getCurrentFlag());
+
 		cout<<"undo to flag "<<getCurrentFlag()<<endl;
 
 	}else {
@@ -29,6 +31,7 @@ void OperationStack::redo()
 {
 	if (!redoStack.empty()){
 		opStack.push(redoStack.top());
+		setCurrentFlag(getCurrentFlag());
 		redoStack.pop();
 
 	}else {
@@ -41,7 +44,7 @@ void OperationStack::redo()
 void OperationStack::push(HDS_Mesh* curMesh)
 {
 	opStack.push(QSharedPointer<Operation>(new Operation(curMesh, curFlag)));
-
+	setCurrentFlag(curFlag);
 	if (curFlag == Original)
 		ori_mesh = opStack.top()->mesh;
 	if (curFlag == Unfolded)
@@ -63,13 +66,7 @@ void OperationStack::reset()
 	while (opStack.size() > 1)
 		opStack.pop();
 	unfolded_mesh.reset();
-
-	canUnfold = false;
-	canGRS = true;
-	canCut = true;
-	canGES = true;
-	canRim = true;
-	canQuad = true;
+	setCurrentFlag(OperationStack::Original);
 }
 
 void OperationStack::clear()
@@ -80,14 +77,8 @@ void OperationStack::clear()
 		opStack.pop();
 	ori_mesh.reset();
 	unfolded_mesh.reset();
-
 	setCurrentFlag(OperationStack::Original);
-	canUnfold = false;
-	canGRS = true;
-	canCut = true;
-	canGES = true;
-	canRim = true;
-	canQuad = true;
+
 }
 
 /*call setCurrentFlag in mainWindow before mesh operation*/
@@ -98,6 +89,14 @@ void OperationStack::setCurrentFlag(Flag flag)
 
 	//check operation availability
 	switch(flag) {
+	case Original:
+		canUnfold = false;
+		canGRS = true;
+		canCut = true;
+		canGES = true;
+		canRim = true;
+		canQuad = true;
+		break;
 	case Cutted:
 		canUnfold = true;
 		canCut = false;
