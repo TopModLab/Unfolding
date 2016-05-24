@@ -40,7 +40,7 @@ MeshConnector::MeshConnector()
 {
 }
 
-void MeshConnector::exportHollowPiece(FILE* fp,
+void MeshConnector::exportQuadEdgePiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
 	/************************************************************************/
@@ -305,7 +305,7 @@ void MeshConnector::exportHollowPiece(FILE* fp,
 	fprintf(fp, "</svg>");
 }
 
-void MeshConnector::exportHollowMFPiece(FILE* fp,
+void MeshConnector::exportWingedEdgePiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
 
@@ -1251,11 +1251,11 @@ bool MeshConnector::genConnector(
 		exportRegularPiece(fp, unfolded_mesh, conf);
 		break;
 	case HDS_Mesh::QUAD_PROC:
-		exportHollowPiece(fp, unfolded_mesh, conf);
+		exportQuadEdgePiece(fp, unfolded_mesh, conf);
 		break;
 	case HDS_Mesh::WINGED_PROC:
 		// new proc
-		exportHollowMFPiece(fp, unfolded_mesh, conf);
+		exportWingedEdgePiece(fp, unfolded_mesh, conf);
 		break;
 	case HDS_Mesh::GES_PROC:
 		exportGESPiece(fp, unfolded_mesh, conf);
