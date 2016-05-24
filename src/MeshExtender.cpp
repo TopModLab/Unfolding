@@ -297,12 +297,14 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 
 	updateNewMesh();
 	cur_mesh->processType = HDS_Mesh::GRS_PROC;
-	cout<<"extend succeed............."<<endl;
+#ifdef _DEBUG
+	cout << "extend succeed............." << endl;
+#endif
 	return true;
 
 }
 
-void MeshExtender::updateNewMesh()
+bool MeshExtender::updateNewMesh()
 {
 	//for debugging...
 	int bridgerCount = 0;
@@ -313,31 +315,23 @@ void MeshExtender::updateNewMesh()
 	HDS_HalfEdge::resetIndex();
 	HDS_Face::resetIndex();
 
-	for (face_t* f: faces_new) {
+	for (auto f : faces_new) {
 		f->index = HDS_Face::assignIndex();
 		cur_mesh->addFace(f);
 		if (f->isBridger) bridgerCount++;
 	}
 	//add new vertices and edges
-	for (auto v: verts_new) {
+	for (auto v : verts_new) {
 		v->index = HDS_Vertex::assignIndex();
 		cur_mesh->addVertex(v);
 	}
-	for (auto he: hes_new) {
+	for (auto he : hes_new) {
 		he->index = HDS_HalfEdge::assignIndex();
 		he->flip->index = HDS_HalfEdge::assignIndex();
 		cur_mesh->addHalfEdge(he);
 		cur_mesh->addHalfEdge(he->flip);
-
 	}
-	cur_mesh->validate();
 
-	// update the curvature of each vertex
-	for (auto &v : cur_mesh->vertSet) {
-		v->computeNormal();
-		v->computeCurvature();
-		//cout << v->index << ": " << (*v) << endl;
-	}
-	cur_mesh->updatePieceSet();
-
+	if (cur_mesh->validate()) return true;
+	else return false;
 }

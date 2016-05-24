@@ -45,7 +45,7 @@ public:
 	static void setScale(double scale);
 	static void setSamples(int);
 
-	static double getScale(){return scale;}
+	static double getScale() { return scale; }
 
 private:
 	HDS_Face* cutFace1, *cutFace2;

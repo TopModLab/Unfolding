@@ -501,12 +501,12 @@ void MainWindow::exportSVG()
 	if (MeshManager::getInstance()->exportSVGFile(
 		conn_panel->getFilename(), conn_panel->getConfig()))
 	{
-		statusBar()->showMessage("SVG file saved to "
-			+ conn_panel->getFilename() + " successfully!", 5000);
+		statusBar()->showMessage("Succeeded to save SVG file as "
+			+ conn_panel->getFilename() + "!", 5000);
 	}
 	else
 	{
-		statusBar()->showMessage("Saving SVG file failed!", 5000);
+		statusBar()->showMessage("Failed to save SVG file...", 5000);
 	}
 }
 
@@ -635,7 +635,6 @@ void MainWindow::slot_triggerWeaveMesh()
 		wv_panel->show();
 		wv_panel->activateWindow();
 	}
-
 }
 
 void MainWindow::slot_triggerDForms()
@@ -648,9 +647,16 @@ void MainWindow::slot_quadEdge()
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::QuadEdge);
 
 	HDS_Bridger::setScale(quad_panel->getBridgerSize());
-	MeshManager::getInstance()->setQuadEdge(quad_panel->getFlapSize(), quad_panel->getType(), quad_panel->getShift());
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
-
+	if (MeshManager::getInstance()->setQuadEdge(
+			quad_panel->getFlapSize(), quad_panel->getType(), quad_panel->getShift()))
+	{
+		statusBar()->showMessage("Succeeded to generate Quad-Edge Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate Quad-Edge Mesh...", 5000);
+	}
 }
 
 void MainWindow::slot_GES()
@@ -658,24 +664,44 @@ void MainWindow::slot_GES()
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::GES);
 
 	HDS_Bridger::setScale(ges_panel->getBridgerSize());
-	MeshManager::getInstance()->setGES();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	if (MeshManager::getInstance()->setGES())
+	{
+		statusBar()->showMessage("Succeeded to generate GES Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate GES Mesh...", 5000);
+	}
 }
 
 void MainWindow::slot_rimmed3DMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
-
-	MeshManager::getInstance()->set3DRimMesh(rim_panel->getConfig());
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	if (MeshManager::getInstance()->set3DRimMesh(rim_panel->getConfig()))
+	{
+		statusBar()->showMessage("Succeeded to generate Rim Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate Rim Mesh...", 5000);
+	}
 }
 
 void MainWindow::slot_weaveMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
 
-	MeshManager::getInstance()->setWeaveMesh(wv_panel->getConfig());
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	if (MeshManager::getInstance()->setWeaveMesh(wv_panel->getConfig()))
+	{
+		statusBar()->showMessage("Succeeded to generate Woven Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate Woven Mesh...", 5000);
+	}
 }
 
 void MainWindow::slot_setBridger()
@@ -689,15 +715,29 @@ void MainWindow::slot_GRS()
 	//graph rotation
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::GRS);
 
-	MeshManager::getInstance()->setGRS(grs_panel->getConfigValues());
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
-
+	if (MeshManager::getInstance()->setGRS(grs_panel->getConfigValues()))
+	{
+		statusBar()->showMessage("Succeeded to generate GRS Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate GRS Mesh...", 5000);
+	}
 }
 
 
-void MainWindow::slot_smoothMesh() {
-	MeshManager::getInstance()->smoothMesh();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getSmoothedMesh());
+void MainWindow::slot_smoothMesh()
+{
+	if (MeshManager::getInstance()->smoothMesh())
+	{
+		statusBar()->showMessage("Succeeded to smooth mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to smooth mesh...", 5000);
+	}
 }
 
 

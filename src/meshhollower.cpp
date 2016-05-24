@@ -5,7 +5,7 @@ double MeshHollower::flapSize = 0.2;//[0 >> 1]
 double MeshHollower::shiftAmount = 0;//[-1 >> 1]
 
 holePosRefMap* MeshHollower::refMapPointer = nullptr;
-unordered_map<HDS_HalfEdge*,Flap> MeshHollower::flapMap;
+unordered_map<HDS_HalfEdge*, Flap> MeshHollower::flapMap;
 
 double getT(QVector3D v_start, QVector3D v_t, QVector3D v_end)
 {
@@ -18,8 +18,8 @@ double getT(QVector3D v_start, QVector3D v_t, QVector3D v_end)
     return vt2vs[maxidx] / ve2vs[maxidx];
 }
 
-void MeshHollower::
-hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
+bool MeshHollower::hollowMesh(
+	HDS_Mesh * mesh, double newFlapSize, int type, double shift)
 {
 	initiate();
 	delete refMapPointer;
@@ -32,15 +32,16 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 
 
 	unordered_set<he_t*> old_edges;
-	for (auto he: cur_mesh->halfedges()) {
+	for (auto he: ori_mesh->halfedges()) {
 		if (old_edges.find(he->flip) == old_edges.end())
 			old_edges.insert(he);
 	}
 
-    unordered_set<face_t*> originalFaces = cur_mesh->faces();
+    unordered_set<face_t*> originalFaces = ori_mesh->faces();
 
+	double bridgerScale = HDS_Bridger::getScale();
     for (auto f : originalFaces) {
-		f->setScaleFactor(HDS_Bridger::getScale());
+		f->setScaleFactor(bridgerScale);
 	}
 
 	//set new bridger on each edge
@@ -59,9 +60,7 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 
 		// Assign id and refid
 		he1_v1->refid = he2_v1->refid = he_v->refid;
-		//	= HDS_Common::assignRef_ID(he_v->index, HDS_Common::FROM_VERTEX);
 		he1_v2->refid = he2_v2->refid = he_flip_v->refid;
-		//	= HDS_Common::assignRef_ID(he_flip_v->index, HDS_Common::FROM_VERTEX);
 
 		verts_new.push_back(he1_v1);
 		verts_new.push_back(he1_v2);
@@ -121,37 +120,41 @@ hollowMesh(HDS_Mesh* mesh, double newFlapSize, int type, double shift)
 			faces_new.push_back(addFlapFace(type, he->flip, he2, cutFace));
 		}
 	}
-
-	updateNewMesh();
-	if (flapSize > 0) {
-
-    //generate hole position ref map
-    for (face_t* f: originalFaces) {
-        he_t* curHE = f->he;
-        do {
-            //get prev and next flap
-            Flap flap_prev = flapMap[curHE->prev];
-            Flap flap_next = flapMap[curHE->next];
-            Flap flap_cur = flapMap[curHE];
-            // get vn of prev flap
-            QVector3D vn_of_flap_prev = flap_prev.vn_flap;
-            QVector3D vp_of_flap_next = flap_next.vp_flap;
-            // get v of current flap
-            QVector3D v = flap_cur.flap_he->v->pos;
-            QVector3D flip_v = flap_cur.flap_he->flip->v->pos;
-            // calculate t
-            double t = getT(v, vn_of_flap_prev, flip_v);
-            double flip_t = getT(flip_v, vp_of_flap_next, v);
-            // assign (he_flap, t)to holePosRefMap
-            (*refMapPointer)[flap_cur.flap_he->index] = t;
-
-            //repeat for (he_flap->flip, t)
-            (*refMapPointer)[flap_cur.flap_he->flip->index] = flip_t;
-
-            curHE = curHE->next;
-        }while (curHE!= f->he);
-    }
+	//cout << "Ref Map Size: " << refMapPointer->size() << endl;
+	if (!updateNewMesh())
+	{
+		return false;
 	}
+	
+	if (flapSize > 0) {
+		//generate hole position ref map
+		for (face_t* f : originalFaces) {
+			he_t* curHE = f->he;
+			do {
+				//get prev and next flap
+				Flap flap_prev = flapMap[curHE->prev];
+				Flap flap_next = flapMap[curHE->next];
+				Flap flap_cur = flapMap[curHE];
+				// get vn of prev flap
+				QVector3D vn_of_flap_prev = flap_prev.vn_flap;
+				QVector3D vp_of_flap_next = flap_next.vp_flap;
+				// get v of current flap
+				QVector3D v = flap_cur.flap_he->v->pos;
+				QVector3D flip_v = flap_cur.flap_he->flip->v->pos;
+				// calculate t
+				double t = getT(v, vn_of_flap_prev, flip_v);
+				double flip_t = getT(flip_v, vp_of_flap_next, v);
+				// assign (he_flap, t)to holePosRefMap
+				(*refMapPointer)[flap_cur.flap_he->index] = t;
+
+				//repeat for (he_flap->flip, t)
+				(*refMapPointer)[flap_cur.flap_he->flip->index] = flip_t;
+
+				curHE = curHE->next;
+			} while (curHE != f->he);
+		}
+	}
+	return true;
 }
 
 
@@ -190,7 +193,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 		v2_flap = (1.0 - flapSize) * v2 + flapSize * center;
 	}
 
-    Flap currentFlap = {startHE, v1_flap, v2_flap};
+	Flap currentFlap = { startHE, v1_flap, v2_flap };
     flapMap[originalHE] = currentFlap;
 
 	vector<HDS_Vertex*> vertices;

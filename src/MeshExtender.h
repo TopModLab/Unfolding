@@ -26,7 +26,7 @@ protected:
 	friend class MeshHollower;
 
 	static void initiate();
-	static void updateNewMesh();
+	static bool updateNewMesh();
 	static void scaleFaces();
 
 	//quadratic bezier curve based bridger

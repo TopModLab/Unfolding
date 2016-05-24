@@ -587,7 +587,7 @@ void MeshManager::mapToExtendedMesh()
 
 }*/
 
-void MeshManager::unfoldMesh()
+bool MeshManager::unfoldMesh()
 {
 	auto ref_mesh = operationStack->getCurrentMesh();
 	ref_mesh->validate();
@@ -613,20 +613,21 @@ void MeshManager::unfoldMesh()
 		// unfolded successfully
 		outMesh->printInfo("unfolded mesh:");
 		operationStack->push(outMesh);
-		//unfolded_mesh->printMesh("unfolded mesh:");
+		return true;
 	}
 	else
 	{
 		delete outMesh;
 		// failed to unfold
 		cout << "Failed to unfold." << endl;
+		return false;
 	}
 
 }
 
 /* legacy code, not sure what it's doing,
  * so didnt put the smoothed_mesh in operationStack*/
-void MeshManager::smoothMesh()
+bool MeshManager::smoothMesh()
 {
 	if( smoothed_mesh.isNull() )
 	{
@@ -638,6 +639,7 @@ void MeshManager::smoothMesh()
 	//MeshSmoother::smoothMesh(smoothed_mesh.data());
 	//MeshSmoother::smoothMesh_perVertex(smoothed_mesh.data());
 	MeshSmoother::smoothMesh_Laplacian(smoothed_mesh.data());
+	return true;
 }
 
 
@@ -648,7 +650,7 @@ bool MeshManager::saveMeshes()
 }
 
 
-void MeshManager::setGRS(const confMap &conf)
+bool MeshManager::setGRS(const confMap &conf)
 {
 	cutMeshWithSelectedEdges();
 	HDS_Bridger::setBridger(conf);
@@ -658,19 +660,21 @@ void MeshManager::setGRS(const confMap &conf)
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
 
-	MeshExtender::extendMesh(outMesh);
+	if (!MeshExtender::extendMesh(outMesh))
+	{
+		delete outMesh;
+		return false;
+	}
 
 	//update sorted faces
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
+	return true;
 }
 
-void MeshManager::rimMesh(double rimSize)
+bool MeshManager::rimMesh(double rimSize)
 {
-//	if (extended_mesh != nullptr)
-//		extended_mesh->clearSortedFaces();
-
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	QScopedPointer<HDS_Mesh> ref_mesh;
@@ -687,25 +691,26 @@ void MeshManager::rimMesh(double rimSize)
 		}
 	}
 
-	bool rimSucceeded;
 	// make a copy of the mesh with selected edges
 	HDS_Mesh* outMesh = new HDS_Mesh(*ref_mesh);
-	rimSucceeded = MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges);
 
-	if (rimSucceeded)
+	if (!MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges))
 	{
-		//cutted_mesh->isHollowed
-		outMesh->processType = HDS_Mesh::RIMMED_PROC;
-		// cutting performed successfully
-		cout << "Rimming succeed!" << endl;
-		operationStack->push(outMesh);
+		delete outMesh;
+		return false;
 	}
 
+	//cutted_mesh->isHollowed
+	outMesh->processType = HDS_Mesh::RIMMED_PROC;
+	// cutting performed successfully
+	cout << "Rimming succeed!" << endl;
+	operationStack->push(outMesh);
 	// discard the selected edges now
 	selectedEdges.clear();
+	return true;
 }
 
-void MeshManager::set3DRimMesh(const confMap &conf)
+bool MeshManager::set3DRimMesh(const confMap &conf)
 {
     MeshRimFace::setOriMesh(operationStack->getOriMesh());
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
@@ -718,18 +723,24 @@ void MeshManager::set3DRimMesh(const confMap &conf)
 		MeshRimFace::rimMeshF(outMesh);
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
+
+	return true;
 }
 
-void MeshManager::setGES()
+bool MeshManager::setGES()
 {
 	if (panelType == 1)
-		setQuadEdge(1,2,0);
+		if (setQuadEdge(1, 2, 0))
+		{
+			return true;
+		}
 	else
 		cout<<"Operation not defined yet"<<endl;
+	return false;
 }
 
 
-void MeshManager::setQuadEdge(double flapSize, int type, double shift)
+bool MeshManager::setQuadEdge(double fsize, int type, double shift)
 {
 	MeshHollower::setOriMesh(operationStack->getOriMesh());
 
@@ -737,15 +748,25 @@ void MeshManager::setQuadEdge(double flapSize, int type, double shift)
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
 	if (panelType == 1)//mult panel
-		MeshHollower::hollowMesh(outMesh, flapSize, type, shift);
+	{
+		if (!MeshHollower::hollowMesh(outMesh, fsize, type, shift))
+		{
+			return false;
+		}
+	}
 	else
+	{
 		cout<<"Operation not defined yet"<<endl;
+		delete outMesh;
+		return false;
+	}
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
+	return true;
 }
 
-void MeshManager::setWeaveMesh(const confMap &conf)
+bool MeshManager::setWeaveMesh(const confMap &conf)
 {
 	MeshWeaver::setOriMesh(operationStack->getOriMesh());
 
@@ -754,13 +775,22 @@ void MeshManager::setWeaveMesh(const confMap &conf)
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
 	MeshWeaver::configWeaveMesh(conf);
 	MeshWeaver::weaveMesh(outMesh);
+
 	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
+
+	return true;
 }
 
-void MeshManager::createDFormMesh()
+bool MeshManager::createDFormMesh()
 {
-	operationStack->push(MeshDFormer::generateDForm(operationStack->getCurrentMesh()));
+	HDS_Mesh* outMesh = MeshDFormer::generateDForm(operationStack->getCurrentMesh());
+	if (outMesh == nullptr)
+	{
+		return false;
+	}
+	operationStack->push(outMesh);
+	return true;
 }
 
 bool MeshManager::exportSVGFile(

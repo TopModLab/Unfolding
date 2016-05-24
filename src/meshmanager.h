@@ -83,16 +83,16 @@ public:
 	void cutMeshWithSelectedEdges();
 	bool initSparseGraph();
 	//void mapToExtendedMesh();
-	void unfoldMesh();
-	void smoothMesh();
+	bool unfoldMesh();
+	bool smoothMesh();
 
-	void setGES();
-	void setQuadEdge(double fsize, int type, double shift);
-	void setGRS(const confMap &conf);
-	void rimMesh(double rimSize = 0.0);
-	void set3DRimMesh(const confMap &conf);
-	void setWeaveMesh(const confMap &conf);
-	void createDFormMesh();
+	bool setGES();
+	bool setQuadEdge(double fsize, int type, double shift);
+	bool setGRS(const confMap &conf);
+	bool rimMesh(double rimSize = 0.0);
+	bool set3DRimMesh(const confMap &conf);
+	bool setWeaveMesh(const confMap &conf);
+	bool createDFormMesh();
 	// Export as SVG files
 	bool exportSVGFile(const QString &filename, const confMap &conf);
 	bool saveMeshes();
