@@ -208,7 +208,6 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	//assign flip s face
 	for (auto& he_inner: hes_new){
 		he_t* he = he_inner->flip;
-
 		if (he->f == nullptr){
 
 			//find nearest cut face, if not found set a new one

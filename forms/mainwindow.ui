@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>997</width>
-    <height>680</height>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -275,6 +275,19 @@
             </property>
             <property name="text">
              <string>Winged Edge</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="origamiBtn">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Origami</string>
             </property>
            </widget>
           </item>

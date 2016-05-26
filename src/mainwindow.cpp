@@ -135,16 +135,19 @@ bool MainWindow::connectComponents()
 			ui->GESBtn->setEnabled(false);
 			ui->quadEdgeBtn->setEnabled(false);
 			ui->wingedEdgeBtn->setEnabled(false);
+			ui->origamiBtn->setEnabled(true);
 			break;
 		case 1: //mult panel
 			ui->GESBtn->setEnabled(true);
 			ui->quadEdgeBtn->setEnabled(true);
 			ui->wingedEdgeBtn->setEnabled(true);
+			ui->origamiBtn->setEnabled(false);
 			break;
 		case 2: //reduced panel
 			ui->GESBtn->setEnabled(false);
 			ui->quadEdgeBtn->setEnabled(false);
 			ui->wingedEdgeBtn->setEnabled(false);
+			ui->origamiBtn->setEnabled(false);
 			break;
 		}
 	});
@@ -346,6 +349,7 @@ void MainWindow::createActions()
 
 		connect(ui->GRSBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerGRS);
 		connect(ui->GESBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerGES);
+		connect(ui->origamiBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerOrigami);
 
 		connect(ui->FBWBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerRimmedMesh);
 
@@ -565,6 +569,17 @@ void MainWindow::slot_triggerGRS()
 		grs_panel->setSaveMode((sender() == ui->GRSBtn/*actionsMap["extend"]*/ )? true:false);
 		grs_panel->show();
 		grs_panel->activateWindow();
+	}
+}
+
+void MainWindow::slot_triggerOrigami()
+{
+	//Origami
+	if (MeshManager::getInstance()->getMeshStack()->canOrigami)
+	{
+		origami_panel->setSaveMode((sender() == ui->origamiBtn) ? true : false);
+		origami_panel->show();
+		origami_panel->activateWindow();
 	}
 }
 

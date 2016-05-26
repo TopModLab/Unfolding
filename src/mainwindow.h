@@ -89,6 +89,7 @@ private slots:
 	void slot_GES();
 	void slot_rimmed3DMesh();
 	void slot_weaveMesh();
+	void slot_triggerOrigami();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
@@ -129,6 +130,7 @@ private:
 	QScopedPointer<CriticalPointsPanel> cp_panel;
 	QScopedPointer<CutLocusPanel> cl_panel;
 	QScopedPointer<BridgerPanel> grs_panel;
+	QScopedPointer<OrigamiPanel> origami_panel;
 	QScopedPointer<QuadEdgePanel> quad_panel;
 	QScopedPointer<GESPanel> ges_panel;
 	QScopedPointer<RimFacePanel> rim_panel;

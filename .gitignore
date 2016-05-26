@@ -53,3 +53,4 @@ visual_studio/*.suo
 *.db
 /visual_studio/x64
 /export/Archived
+/visual_studio/Unfolding.VC.VC.opendb

@@ -55,6 +55,7 @@ public:
 	bool canGES;
 	bool canRim;
 	bool canQuad;
+	bool canOrigami;
 
 private:
 	stack<QSharedPointer<Operation>> opStack;

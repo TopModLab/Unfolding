@@ -9,6 +9,7 @@ OperationStack::OperationStack()
 	, canGES(true)
 	, canRim(true)
 	, canQuad(true)
+	, canOrigami(true)
 {
 }
 
