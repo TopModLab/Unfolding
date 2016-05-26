@@ -89,6 +89,7 @@ public:
 	bool setGES();
 	bool setQuadEdge(double fsize, int type, double shift);
 	bool setGRS(const confMap &conf);
+	bool setOrigami(const confMap &conf);
 	bool rimMesh(double rimSize = 0.0);
 	bool set3DRimMesh(const confMap &conf);
 	bool setWeaveMesh(const confMap &conf);

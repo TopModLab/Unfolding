@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BridgerPanel</class>
- <widget class="QWidget" name="BridgerPanel">
+ <class>OrigamiPanel</class>
+ <widget class="QWidget" name="OrigamiPanel">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>444</width>
+    <width>461</width>
     <height>299</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -39,171 +39,97 @@
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <layout class="QGridLayout" name="gridLayout">
          <property name="sizeConstraint">
           <enum>QLayout::SetNoConstraint</enum>
          </property>
-         <item row="4" column="0">
-          <widget class="QLabel" name="sampleLabel">
-           <property name="text">
-            <string>Samples</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="sizeLabel">
-           <property name="text">
-            <string>Size</string>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="0">
-          <widget class="QSlider" name="convergeSlider">
-           <property name="minimum">
-            <number>-100</number>
-           </property>
-           <property name="maximum">
-            <number>100</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QComboBox" name="shapeComboBox">
-           <item>
-            <property name="text">
-             <string>Bezier</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QSlider" name="curvSlider">
-           <property name="maximum">
-            <number>10</number>
-           </property>
-           <property name="singleStep">
-            <number>1</number>
-           </property>
-           <property name="sliderPosition">
-            <number>5</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="tickPosition">
-            <enum>QSlider::NoTicks</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="0">
-          <widget class="QLabel" name="convergeLabel">
-           <property name="text">
-            <string>Converging Point</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Shape</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QSlider" name="samplesSlider">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>32</number>
-           </property>
-           <property name="sliderPosition">
-            <number>3</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="tickPosition">
-            <enum>QSlider::NoTicks</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QSlider" name="sizeSlider">
-           <property name="minimum">
-            <number>0</number>
-           </property>
+         <item row="2" column="1">
+          <widget class="QSlider" name="slider1">
            <property name="maximum">
             <number>100</number>
            </property>
            <property name="value">
             <number>20</number>
            </property>
-           <property name="sliderPosition">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="label2">
+           <property name="text">
+            <string>laber2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="label1">
+           <property name="minimumSize">
+            <size>
+             <width>128</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>label1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QSlider" name="slider2">
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
             <number>20</number>
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="invertedAppearance">
-            <bool>false</bool>
-           </property>
-           <property name="invertedControls">
-            <bool>false</bool>
-           </property>
           </widget>
          </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="curvLabel">
-           <property name="text">
-            <string>curvature</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="Line" name="line">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLabel" name="sample_val_label">
+         <item row="2" column="2">
+          <widget class="QLabel" name="slider1_val">
            <property name="minimumSize">
             <size>
              <width>30</width>
              <height>0</height>
             </size>
-           </property>
-           <property name="text">
-            <string>3</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLabel" name="size_val_label">
-           <property name="minimumSize">
-            <size>
-             <width>30</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
            </property>
            <property name="text">
             <string>20</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QLabel" name="slider2_val">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>20</string>
            </property>
           </widget>
          </item>
@@ -215,14 +141,8 @@
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-     </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-     <property name="centerButtons">
-      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -231,34 +151,34 @@
  <resources/>
  <connections>
   <connection>
-   <sender>samplesSlider</sender>
+   <sender>slider1</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>sample_val_label</receiver>
+   <receiver>slider1_val</receiver>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>414</x>
-     <y>132</y>
+     <x>335</x>
+     <y>41</y>
     </hint>
     <hint type="destinationlabel">
-     <x>523</x>
-     <y>132</y>
+     <x>426</x>
+     <y>44</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>sizeSlider</sender>
+   <sender>slider2</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>size_val_label</receiver>
+   <receiver>slider2_val</receiver>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>422</x>
-     <y>85</y>
+     <x>356</x>
+     <y>82</y>
     </hint>
     <hint type="destinationlabel">
-     <x>531</x>
-     <y>85</y>
+     <x>429</x>
+     <y>89</y>
     </hint>
    </hints>
   </connection>

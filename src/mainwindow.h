@@ -12,6 +12,7 @@ using viewer_t = MeshViewer;
 #include "criticalpointspanel.h"
 #include "cutlocuspanel.h"
 #include "BridgerPanel.h"
+#include "origamipanel.h"
 #include "QuadEdgePanel.h"
 #include "GESPanel.h"
 #include "rimfacepanel.h"
@@ -76,6 +77,7 @@ private slots:
 
 	void slot_smoothMesh();
 	void slot_triggerGRS();
+	void slot_triggerOrigami();
 	void slot_triggerQuadEdge();
 	void slot_triggerWingedEdge();
 	void slot_triggerRimmedMesh();
@@ -85,11 +87,12 @@ private slots:
 
 	void slot_setBridger();
 	void slot_GRS();
+	void slot_origami();
 	void slot_quadEdge();
 	void slot_GES();
 	void slot_rimmed3DMesh();
 	void slot_weaveMesh();
-	void slot_triggerOrigami();
+	
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);

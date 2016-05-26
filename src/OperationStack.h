@@ -19,6 +19,7 @@ public:
 		QuadEdge = 5,
 		Woven = 6,
 		DForm = 7,
+		Origami = 8,
 		Unfolded
 	};
 

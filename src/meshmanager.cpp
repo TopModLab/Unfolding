@@ -673,6 +673,33 @@ bool MeshManager::setGRS(const confMap &conf)
 	return true;
 }
 
+bool MeshManager::setOrigami(const confMap &conf)
+{
+	cutMeshWithSelectedEdges();
+	//HDS_Bridger::setBridger(conf);
+	MeshExtender::setOriMesh(operationStack->getOriMesh());
+
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
+
+	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
+
+	// Keep outMesh == inMesh, for origami testing
+	/*
+	if (!MeshExtender::extendMesh(outMesh))
+	{
+		delete outMesh;
+		return false;
+	}
+	*/
+
+
+	//update sorted faces
+	outMesh->updateSortedFaces();
+	operationStack->push(outMesh);
+
+	return true;
+}
+
 bool MeshManager::rimMesh(double rimSize)
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();

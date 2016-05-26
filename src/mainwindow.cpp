@@ -63,6 +63,7 @@ bool MainWindow::createComponents()
 		cp_panel.reset(new CriticalPointsPanel);
 		cl_panel.reset(new CutLocusPanel);
 		grs_panel.reset(new BridgerPanel);
+		origami_panel.reset(new OrigamiPanel);
 		quad_panel.reset(new QuadEdgePanel);
 		ges_panel.reset(new GESPanel);
 		rim_panel.reset(new RimFacePanel);
@@ -115,6 +116,8 @@ bool MainWindow::connectComponents()
 
 	connect(grs_panel.data(), &BridgerPanel::sig_saved, this, &MainWindow::slot_setBridger);
 	connect(grs_panel.data(), &BridgerPanel::sig_save2extend, this, &MainWindow::slot_GRS);
+
+	connect(origami_panel.data(), &OrigamiPanel::sig_save2origami, this, &MainWindow::slot_origami);
 
 	connect(quad_panel.data(), &QuadEdgePanel::sig_saved, this, &MainWindow::slot_quadEdge);
 	connect(quad_panel.data(), &QuadEdgePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
@@ -577,7 +580,6 @@ void MainWindow::slot_triggerOrigami()
 	//Origami
 	if (MeshManager::getInstance()->getMeshStack()->canOrigami)
 	{
-		origami_panel->setSaveMode((sender() == ui->origamiBtn) ? true : false);
 		origami_panel->show();
 		origami_panel->activateWindow();
 	}
@@ -741,6 +743,21 @@ void MainWindow::slot_GRS()
 	}
 }
 
+void MainWindow::slot_origami()
+{
+	//origami
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Origami);
+
+	if (MeshManager::getInstance()->setOrigami(origami_panel->getConfigValues()))
+	{
+		statusBar()->showMessage("Succeeded to generate Origami Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate Origami Mesh...", 5000);
+	}
+}
 
 void MainWindow::slot_smoothMesh()
 {

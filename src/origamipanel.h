@@ -11,28 +11,24 @@ class OrigamiPanel;
 
 class OrigamiPanel : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit OrigamiPanel(QWidget *parent = 0);
-	~OrigamiPanel();
-	//std::map<QString, double> getConfigValues();
+    explicit OrigamiPanel(QWidget *parent = 0);
+    ~OrigamiPanel();
 	confMap getConfigValues() const { return origamiConfig; }
-	void setSaveMode(bool);
 
 signals:
-	void sig_save2extend();
+	void sig_save2origami();
 	void sig_saved();
 	void sig_canceled();
 
 public slots:
 	void slot_saved();
-	void slot_restrainSliders(int);
 
 private:
-	Ui::OrigamiPanel *ui;
-	//std::map<QString, double> origamiConfig;
+    Ui::OrigamiPanel *ui;
 	confMap origamiConfig;
 };
 
-#endif // BRIDGERPANEL_H
+#endif // ORIGAMIPANEL_H

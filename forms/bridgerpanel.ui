@@ -228,6 +228,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>shapeComboBox</tabstop>
+  <tabstop>sizeSlider</tabstop>
+  <tabstop>samplesSlider</tabstop>
+  <tabstop>curvSlider</tabstop>
+  <tabstop>convergeSlider</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -237,12 +244,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>414</x>
-     <y>132</y>
+     <x>395</x>
+     <y>151</y>
     </hint>
     <hint type="destinationlabel">
-     <x>523</x>
-     <y>132</y>
+     <x>431</x>
+     <y>151</y>
     </hint>
    </hints>
   </connection>
@@ -253,12 +260,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>422</x>
-     <y>85</y>
+     <x>395</x>
+     <y>103</y>
     </hint>
     <hint type="destinationlabel">
-     <x>531</x>
-     <y>85</y>
+     <x>431</x>
+     <y>103</y>
     </hint>
    </hints>
   </connection>
