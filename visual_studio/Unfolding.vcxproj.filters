@@ -324,6 +324,9 @@
     <ClCompile Include="..\src\origamipanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\meshorigamizer.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -502,6 +505,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_origamipanel.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\meshorigamizer.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

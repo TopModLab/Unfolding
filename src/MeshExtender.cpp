@@ -63,14 +63,14 @@ void MeshExtender::scaleFaces()
 	for (auto f: cur_mesh->faces()) {
 		if (!f->isCutFace){
 			f->setScaleFactor(HDS_Bridger::getScale());
-			auto fCorners = f->corners();
-			auto fScaledCorners = f->getScaledCorners();
+			auto fCorners = f->corners();	//returen type: HDS_vertex
+			auto fScaledCorners = f->getScaledCorners();	//return type: QVector3D
 			vector<vert_t*> vertices;
 			for (int i = 0; i < fCorners.size(); i++) {
 				vert_t* v_new = new vert_t;
 				v_new->pos = fScaledCorners[i];
 				v_new->refid = fCorners[i]->refid;
-				vertices.push_back(v_new);
+				vertices.push_back(v_new);   
 				verts_new.push_back(v_new);
 			}
 
@@ -178,7 +178,7 @@ void MeshExtender::assignCutFace(face_t* face, face_t* cutFace)
 }
 
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
-{
+ {
 	initiate();
 	cur_mesh = mesh;
 	if (HDS_Bridger::getScale() == 1) {

@@ -24,7 +24,8 @@ public:
 		WINGED_PROC,
 		GRS_PROC,
 		GES_PROC,
-		RIMMED_PROC
+		RIMMED_PROC,
+		ORIGAMI_PROC
 	};
 	enum SHOW_COMP : uint16_t
 	{
@@ -142,6 +143,7 @@ protected:
 	friend class MeshUnfolder;
 	friend class MeshSmoother;
 	friend class MeshExtender;
+	friend class MeshOrigamizer;
 	friend class MeshRimFace;
 	friend class MeshIterator;
 	friend class MeshConnector;

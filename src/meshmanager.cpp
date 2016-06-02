@@ -3,6 +3,7 @@
 #include "meshunfolder.h"
 #include "meshsmoother.h"
 #include "MeshExtender.h"
+#include "meshorigamizer.h"
 #include "meshhollower.h"
 #include "meshrimface.h"
 #include "MeshWeaver.h"
@@ -677,21 +678,18 @@ bool MeshManager::setOrigami(const confMap &conf)
 {
 	cutMeshWithSelectedEdges();
 	//HDS_Bridger::setBridger(conf);
-	MeshExtender::setOriMesh(operationStack->getOriMesh());
+	MeshOrigamizer::setOriMesh(operationStack->getOriMesh());
 
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
 
-	// Keep outMesh == inMesh, for origami testing
-	/*
-	if (!MeshExtender::extendMesh(outMesh))
+
+	if (!MeshOrigamizer::origamiMesh(outMesh))
 	{
 		delete outMesh;
 		return false;
 	}
-	*/
-
 
 	//update sorted faces
 	outMesh->updateSortedFaces();
