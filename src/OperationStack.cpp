@@ -97,6 +97,7 @@ void OperationStack::setCurrentFlag(Flag flag)
 		canGES = true;
 		canRim = true;
 		canQuad = true;
+		canOrigami = true;
 		break;
 	case Cutted:
 		canUnfold = true;
@@ -104,9 +105,11 @@ void OperationStack::setCurrentFlag(Flag flag)
 		canGES = false;
 		canRim = false;
 		canQuad = false;
+		canOrigami = false;
 		break;
 	case GES:
 	case GRS:
+	case Origami:
 	case Rimmed:
 	case QuadEdge:
 		canUnfold = true;
@@ -115,6 +118,7 @@ void OperationStack::setCurrentFlag(Flag flag)
 		canGES = false;
 		canRim = false;
 		canQuad = false;
+		canOrigami = false;
 		break;
 	case Unfolded:
 		canUnfold = false;
@@ -123,6 +127,7 @@ void OperationStack::setCurrentFlag(Flag flag)
 		canGES = false;
 		canRim = false;
 		canQuad = false;
+		canOrigami = false;
 		break;
 	}
 }

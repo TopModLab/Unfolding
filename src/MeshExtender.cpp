@@ -115,6 +115,7 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 	{
 
 		auto& curV = vertices[i];
+		//insertEdge: insert TWO half edges
 		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
 
 		if (cutFace != nullptr){
