@@ -1019,7 +1019,7 @@ HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2
 	if (v1->he == nullptr) v1_isNew = true;
 	if (v2->he == nullptr) v2_isNew = true;
 
-	he_t* he = new he_t;
+	he_t* he = new he_t;         
 	he_t* he_flip = new he_t;
 	he->setFlip(he_flip);
 

@@ -1,5 +1,8 @@
 #include "meshorigamizer.h"
 
+#define tucked_length 0.05
+#define tucked_angle (Pi / 180.0 * 80)
+
 typedef HDS_Face face_t;
 typedef HDS_HalfEdge he_t;
 typedef HDS_Vertex vert_t;
@@ -43,21 +46,53 @@ pair<vector<he_t*>, HDS_Face*> MeshOrigamizer::bridging(HDS_HalfEdge* he1, HDS_H
 	hes.push_back(he_v1e_v2s);
 	hes.push_back(he_v2e_v1s);
 
+	//fix face
+	bridgeFace->isCutFace = false;
+	bridgeFace->isBridger = true;
+
 	return make_pair(hes, bridgeFace);
 }
 
-void MeshOrigamizer::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double theta, double length) 
+void MeshOrigamizer::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double theta, double folding_length) 
 {
+	if (he1->flip->f != nullptr && !he1->flip->f->isCutFace)
+		he1->setCutEdge(false);
+	if (he2->flip->f != nullptr && !he2->flip->f->isCutFace)
+		he2->setCutEdge(false);
 
-	QVector3D normal1 = he1->flip->computeNormal();
-	QVector3D normal2 = he2->flip->computeNormal();
+	QVector3D normal1, normal2;
+	normal1 = he1->flip->computeNormal();
+	if (!he1->isCutEdge && !he2->isCutEdge) {
+		normal2 = he2->flip->computeNormal();
+	}else{
+		normal2 = he1->bridgeTwin->flip->computeNormal();
+	}
+	
+	//get crease vector and end point
+	QVector3D crease_s = (he1->flip->v->pos + he2->v->pos) / 2;
+	QVector3D crease_e = (he2->flip->v->pos + he1->v->pos) / 2;
+	QVector3D horizontal = crease_e - crease_s;
+	horizontal.normalize();
+
 	//get vector perpendicular to the edge and point into the mesh
 	QVector3D vertical = -(normal1 + normal2) / 2;
 	vertical.normalize();
+
+	//input angle theta should be in Radians
+	//rotate horizontal by theta, around local axis perpenducular to crease plane
+	QVector3D folding_edge = horizontal * cos(theta) + vertical * sin(theta);
+	folding_edge.normalize();
+
 	HDS_Vertex* vs = new HDS_Vertex;
 	HDS_Vertex* ve = new HDS_Vertex;
-	vs->pos = he1->flip->v->pos + vertical * length;
-	ve->pos = he2->flip->v->pos + vertical * length;
+	double crease_len = (crease_e - crease_s).length();
+	if (theta <= Pi / 2) {
+		vs->pos = crease_s + folding_edge * (folding_length + crease_len * cos(theta));
+		ve->pos = crease_e + folding_edge * folding_length;
+	}else{
+		vs->pos = crease_s + folding_edge * folding_length;
+		ve->pos = crease_e + folding_edge * (folding_length + crease_len * cos(Pi - theta));
+	}
 	HDS_HalfEdge* he_new = HDS_Mesh::insertEdge(vs, ve);
 	face_t* cutFace1 = he1->f;
 	face_t* cutFace2 = he2->f;
@@ -89,7 +124,7 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 	origamiConfig["shape"] = 0;
 	origamiConfig["curv"] = 0.5;
 	origamiConfig["samples"] = 2;
-	origamiConfig["size"] = 1;
+	origamiConfig["size"] = 0.6;
 	origamiConfig["cp"] = 0.5;
 	HDS_Bridger::setBridger(origamiConfig);
 	
@@ -98,8 +133,8 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 	cur_mesh = mesh;
 	unordered_map<hdsid_t, vert_t*> ori_map = ori_mesh->vertMap;
 
-	seperateFaces();
-	//scaleFaces();
+	//seperateFaces();
+	scaleFaces();
 
 	//get bridge pairs
 	unordered_map<hdsid_t, he_t*> refidMap;
@@ -145,7 +180,7 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 			///for all non-cut-edge edges, create bridge faces
 			HDS_Vertex* v1_ori = ori_map[(he->v->refid) >> 2];	//refid >> 2  ==> vertexIndex
 			HDS_Vertex* v2_ori = ori_map[(he->bridgeTwin->v->refid) >> 2];	
-			addBridger(he, he->bridgeTwin, Pi / 2, 0.2);
+			addBridger(he, he->bridgeTwin, tucked_angle, tucked_length);
 		}
 		else {
 			// for all cut-edge edges, create flaps
@@ -170,10 +205,6 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 			flap_he->refid = twin_he->refid;
 			hes_new.push_back(flap_he);
 
-			HDS_Vertex* v1_ori = ori_map[(he->v->refid) >> 2];
-			HDS_Vertex* v2_ori = ori_map[(flap_he->v->refid) >> 2];
-			vector <QVector3D> vpair = scaleBridgerEdge(v1_ori, v2_ori);
-
 
 			vert_t* twin_flap_vs = new vert_t;
 			vert_t* twin_flap_ve = new vert_t;
@@ -195,9 +226,8 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 			twin_flap_he->refid = he->refid;
 			hes_new.push_back(twin_flap_he);
 
-			addBridger(he, flap_he, Pi / 2, 2);
-			vector<QVector3D> vpair_reverse = scaleBridgerEdge(v2_ori, v1_ori);
-			addBridger(twin_he, twin_flap_he, Pi / 2, 2);
+			addBridger(he, flap_he, tucked_angle, tucked_length);
+			addBridger(twin_he, twin_flap_he, tucked_angle, tucked_length);
 		}
 	}
 
