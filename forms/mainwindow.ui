@@ -1377,6 +1377,24 @@
     <string>Calculate D-Form Parameters</string>
    </property>
   </action>
+  <action name="actionOrigami">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/origami.png</normaloff>:/icons/origami.png</iconset>
+   </property>
+   <property name="text">
+    <string>Origami Mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Generate origami mesh</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

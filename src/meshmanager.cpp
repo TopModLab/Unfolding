@@ -676,8 +676,10 @@ bool MeshManager::setGRS(const confMap &conf)
 
 bool MeshManager::setOrigami(const confMap &conf)
 {
+	//origami parameter configuration
+	MeshOrigamizer::initBridger(conf);
+
 	cutMeshWithSelectedEdges();
-	//HDS_Bridger::setBridger(conf);
 	MeshOrigamizer::setOriMesh(operationStack->getOriMesh());
 
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();

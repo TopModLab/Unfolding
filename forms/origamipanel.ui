@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>461</width>
-    <height>299</height>
+    <width>487</width>
+    <height>396</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,8 +30,14 @@
          <height>250</height>
         </size>
        </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../resources.qrc">:/icons/origami.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -45,27 +51,7 @@
          <property name="sizeConstraint">
           <enum>QLayout::SetNoConstraint</enum>
          </property>
-         <item row="2" column="1">
-          <widget class="QSlider" name="slider1">
-           <property name="maximum">
-            <number>180</number>
-           </property>
-           <property name="value">
-            <number>20</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLabel" name="label2">
-           <property name="text">
-            <string>laber2</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
+         <item row="9" column="1">
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -78,8 +64,44 @@
            </property>
           </spacer>
          </item>
+         <item row="4" column="2">
+          <widget class="QLabel" name="slider2_val">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>5</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QSlider" name="slider_tucked_length">
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>5</number>
+           </property>
+           <property name="sliderPosition">
+            <number>5</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="label_tucked_length">
+           <property name="text">
+            <string>tucked_length</string>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="1">
-          <widget class="QLabel" name="label1">
+          <widget class="QLabel" name="label_scale">
            <property name="minimumSize">
             <size>
              <width>128</width>
@@ -87,20 +109,7 @@
             </size>
            </property>
            <property name="text">
-            <string>label1</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QSlider" name="slider2">
-           <property name="maximum">
-            <number>100</number>
-           </property>
-           <property name="value">
-            <number>20</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <string>scale</string>
            </property>
           </widget>
          </item>
@@ -113,23 +122,83 @@
             </size>
            </property>
            <property name="text">
-            <string>20</string>
+            <string>80</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
            </property>
           </widget>
          </item>
-         <item row="4" column="2">
-          <widget class="QLabel" name="slider2_val">
-           <property name="minimumSize">
-            <size>
-             <width>30</width>
-             <height>0</height>
-            </size>
+         <item row="2" column="1">
+          <widget class="QSlider" name="slider_scale">
+           <property name="maximum">
+            <number>99</number>
            </property>
+           <property name="value">
+            <number>80</number>
+           </property>
+           <property name="sliderPosition">
+            <number>80</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QSlider" name="slider_tucked_smooth">
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="sliderPosition">
+            <number>25</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QLabel" name="label_angle">
            <property name="text">
-            <string>20</string>
+            <string>angle</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QLabel" name="slider3_val">
+           <property name="text">
+            <string>25</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QLabel" name="label_tucked_smooth">
+           <property name="text">
+            <string>tucked_smooth</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QSlider" name="slider_angle">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>179</number>
+           </property>
+           <property name="sliderPosition">
+            <number>90</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="2">
+          <widget class="QLabel" name="slider4_val">
+           <property name="text">
+            <string>90</string>
            </property>
           </widget>
          </item>
@@ -148,37 +217,72 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+  <include location="../../../../.designer/resources.qrc"/>
+ </resources>
  <connections>
   <connection>
-   <sender>slider1</sender>
+   <sender>slider_scale</sender>
    <signal>valueChanged(int)</signal>
    <receiver>slider1_val</receiver>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>41</y>
+     <x>618</x>
+     <y>80</y>
     </hint>
     <hint type="destinationlabel">
-     <x>426</x>
-     <y>44</y>
+     <x>1001</x>
+     <y>82</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>slider2</sender>
+   <sender>slider_tucked_length</sender>
    <signal>valueChanged(int)</signal>
    <receiver>slider2_val</receiver>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>356</x>
-     <y>82</y>
+     <x>639</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
-     <x>429</x>
-     <y>89</y>
+     <x>1001</x>
+     <y>156</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slider_tucked_smooth</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>slider3_val</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>452</x>
+     <y>218</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1011</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slider_angle</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>slider4_val</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>709</x>
+     <y>283</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1016</x>
+     <y>292</y>
     </hint>
    </hints>
   </connection>

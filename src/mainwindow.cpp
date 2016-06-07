@@ -796,6 +796,7 @@ void MainWindow::slot_reset()
 	ui->actionUnfold->setChecked(false);
 	ui->actionExtend->setChecked(false);
 	ui->actionHollow->setChecked(false);
+	//ui->actionOrigami->setChecked(false);
 
 	//reset mesh
 	//MeshManager::getInstance()->resetMesh();

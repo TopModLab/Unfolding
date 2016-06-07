@@ -1,13 +1,28 @@
 #include "meshorigamizer.h"
 
-#define tucked_length 0.05
-#define tucked_angle (Pi / 180.0 * 80)
-
 typedef HDS_Face face_t;
 typedef HDS_HalfEdge he_t;
 typedef HDS_Vertex vert_t;
 
-pair<vector<he_t*>, HDS_Face*> MeshOrigamizer::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2, face_t* cutFace1, face_t* cutFace2) {
+double MeshOrigamizer::tucked_length;
+double MeshOrigamizer::tucked_smooth;
+double MeshOrigamizer::tucked_angle;
+double MeshOrigamizer::origami_scale;
+
+vector<QVector3D> MeshOrigamizer::ctrlPoints_front;
+vector<QVector3D> MeshOrigamizer::ctrlPoints_back;
+vector<face_t*> MeshOrigamizer::bridger_faces;
+vector<he_t*> MeshOrigamizer::bridger_hes;
+vector<vert_t*> MeshOrigamizer::bridger_verts;
+
+void MeshOrigamizer::initBridger(const confMap &conf) {
+	origami_scale = conf.at("scale");
+	tucked_length = conf.at("tucked_length");
+	tucked_smooth = tucked_length * conf.at("tucked_smooth");
+	tucked_angle = conf.at("angle") * Pi;
+}
+
+HDS_Face* MeshOrigamizer::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2, face_t* cutFace1, face_t* cutFace2) {
 	//get 4 vertices from h1 h2
 	HDS_Vertex* v1s, *v1e, *v2s, *v2e;
 	v1s = he1->v;
@@ -41,36 +56,47 @@ pair<vector<he_t*>, HDS_Face*> MeshOrigamizer::bridging(HDS_HalfEdge* he1, HDS_H
 	he_v1e_v2s->setCutEdge(true);
 	he_v2e_v1s->setCutEdge(true);
 
-	vector<he_t*> hes;
+	bridger_hes.push_back(he_v1e_v2s);
+	bridger_hes.push_back(he_v2e_v1s);
 
-	hes.push_back(he_v1e_v2s);
-	hes.push_back(he_v2e_v1s);
-
-	//fix face
-	bridgeFace->isCutFace = false;
-	bridgeFace->isBridger = true;
-
-	return make_pair(hes, bridgeFace);
+	return bridgeFace;
 }
 
-void MeshOrigamizer::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double theta, double folding_length) 
+void MeshOrigamizer::setControlPoints(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double theta, double folding_length, double smooth_length)
 {
 	if (he1->flip->f != nullptr && !he1->flip->f->isCutFace)
 		he1->setCutEdge(false);
 	if (he2->flip->f != nullptr && !he2->flip->f->isCutFace)
 		he2->setCutEdge(false);
 
+	//clear control points
+	ctrlPoints_front.clear();
+	ctrlPoints_back.clear();
+
+	//set face normals
 	QVector3D normal1, normal2;
-	normal1 = he1->flip->computeNormal();
+	normal1 = he1->flip->f->computeNormal();
 	if (!he1->isCutEdge && !he2->isCutEdge) {
-		normal2 = he2->flip->computeNormal();
-	}else{
-		normal2 = he1->bridgeTwin->flip->computeNormal();
+		normal2 = he2->flip->f->computeNormal();
+	}
+	else {
+		normal2 = he1->bridgeTwin->flip->f->computeNormal();
 	}
 	
-	//get crease vector and end point
-	QVector3D crease_s = (he1->flip->v->pos + he2->v->pos) / 2;
-	QVector3D crease_e = (he2->flip->v->pos + he1->v->pos) / 2;
+
+	/////////////////////////////////////////////////////////////////////
+	//end points of scaled mesh edges
+	HDS_Vertex *v1s, *v1e, *v2s, *v2e;
+	v1s = he1->v;
+	v1e = he1->flip->v;
+	v2s = he2->v;
+	v2e = he2->flip->v;
+
+	//4 pair of new vertices, 
+	QVector3D vn1s, vn1e, vn2s, vn2e, vn3s, vn3e, vn4s, vn4e;
+
+	QVector3D crease_s = (v1e->pos + v2s->pos) / 2;
+	QVector3D crease_e = (v2e->pos + v1s->pos) / 2;
 	QVector3D horizontal = crease_e - crease_s;
 	horizontal.normalize();
 
@@ -80,54 +106,110 @@ void MeshOrigamizer::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double the
 
 	//input angle theta should be in Radians
 	//rotate horizontal by theta, around local axis perpenducular to crease plane
-	QVector3D folding_edge = horizontal * cos(theta) + vertical * sin(theta);
-	folding_edge.normalize();
+	/*QVector3D interior_folding = horizontal * cos(theta) + vertical * sin(theta);
+	interior_folding.normalize();*/
 
-	HDS_Vertex* vs = new HDS_Vertex;
-	HDS_Vertex* ve = new HDS_Vertex;
 	double crease_len = (crease_e - crease_s).length();
+
+
+	vn1s = (v1e->pos * 2.0 / 3.0 + v2s->pos * 1.0 / 3.0 + vertical * smooth_length);
+	vn1e = (v1s->pos * 2.0 / 3.0 + v2e->pos * 1.0 / 3.0 + vertical * smooth_length);
+	vn2s = (v1e->pos * 2.0 / 3.0 + v2s->pos * 1.0 / 3.0 + vertical * folding_length);
+	vn2e = (v1s->pos * 2.0 / 3.0 + v2e->pos * 1.0 / 3.0 + vertical * folding_length);
+	vn3s = (v1e->pos * 1.0 / 3.0 + v2s->pos * 2.0 / 3.0 + vertical * folding_length);
+	vn3e = (v1s->pos * 1.0 / 3.0 + v2e->pos * 2.0 / 3.0 + vertical * folding_length);
+	vn4s = (v1e->pos * 1.0 / 3.0 + v2s->pos * 2.0 / 3.0 + vertical * smooth_length);
+	vn4e = (v1s->pos * 1.0 / 3.0 + v2e->pos * 2.0 / 3.0 + vertical * smooth_length);
+
+
 	if (theta <= Pi / 2) {
-		vs->pos = crease_s + folding_edge * (folding_length + crease_len * cos(theta));
-		ve->pos = crease_e + folding_edge * folding_length;
-	}else{
-		vs->pos = crease_s + folding_edge * folding_length;
-		ve->pos = crease_e + folding_edge * (folding_length + crease_len * cos(Pi - theta));
+		vn2s = vn2s + vertical * crease_len * tan(Pi / 2 - theta);
+		vn3s = vn3s + vertical * crease_len * tan(Pi / 2 - theta);
+	}else {
+		vn2e = vn2e + vertical * crease_len * tan(theta - Pi / 2);
+		vn3e = vn3e + vertical * crease_len * tan(theta - Pi / 2);
 	}
-	HDS_HalfEdge* he_new = HDS_Mesh::insertEdge(vs, ve);
+
+
+
+//#ifdef _DEBUG
+//	if (!he1->isCutEdge) {
+//		std::cout << "vertical:  x: " << vertical.x() << "  y: " << vertical.y() << "  z: " << vertical.z() << std::endl;
+//		std::cout << "normal1:  x: " << normal1.x() << "  y: " << normal1.y() << "  z: " << normal1.z() << std::endl;
+//		std::cout << "normal2:  x: " << normal2.x() << "  y: " << normal2.y() << "  z: " << normal2.z() << std::endl;
+//	}
+//#endif
+
+	ctrlPoints_front.push_back(vn1s);
+	ctrlPoints_front.push_back(vn2s);
+	ctrlPoints_front.push_back(vn3s);
+	ctrlPoints_front.push_back(vn4s);
+	ctrlPoints_back.push_back(vn1e);
+	ctrlPoints_back.push_back(vn2e);
+	ctrlPoints_back.push_back(vn3e);
+	ctrlPoints_back.push_back(vn4e);
+}
+
+void MeshOrigamizer::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double theta, double folding_length, double smooth_length)
+{
+	//set control points
+	setControlPoints(he1, he2, theta, folding_length, smooth_length);
+	//set cut faces
 	face_t* cutFace1 = he1->f;
 	face_t* cutFace2 = he2->f;
-
-	//create bridge face 1
-	pair<vector<he_t*>, HDS_Face*> bridger1 = bridging(he1, he_new, cutFace1, cutFace2);
-	//create bridge face 2
-	pair<vector<he_t*>, HDS_Face*> bridger2 = bridging(he_new->flip, he2, cutFace1, cutFace2);
 	
-	//save added bridger info
-	verts_new.push_back(vs);
-	verts_new.push_back(ve);
+	//create verts, hes, faces corresponding to new bridger
+	bridger_verts.clear();
+	bridger_hes.clear();
+	bridger_faces.clear();
 
-	hes_new.push_back(he_new);
-	hes_new.push_back(bridger1.first[0]);
-	hes_new.push_back(bridger1.first[1]);
-	hes_new.push_back(bridger2.first[0]);
-	hes_new.push_back(bridger2.first[1]);
+	for (int i = 0; i < ctrlPoints_front.size(); ++i) {
+		HDS_Vertex* vs = new HDS_Vertex;
+		HDS_Vertex* ve = new HDS_Vertex;
 
-	faces_new.push_back(bridger1.second);
-	faces_new.push_back(bridger2.second);
+		vs->pos = ctrlPoints_front[i];
+		ve->pos = ctrlPoints_back[i];
+		HDS_HalfEdge* he_new = HDS_Mesh::insertEdge(vs, ve);
+		
+		//save added bridger info
+		bridger_hes.push_back(he_new);
+		bridger_verts.push_back(vs);
+		bridger_verts.push_back(ve);
+	}
+
+	//create bridger segments
+	vector<he_t*> hes_ori = bridger_hes;
+	hes_ori.insert(hes_ori.begin(), he1->flip);
+	hes_ori.push_back(he2);
+	
+	for (auto he = hes_ori.begin(); he != prev(hes_ori.end()); he++) {
+		auto he_next = next(he);
+		//bridge each pair of edges
+		//get bridge faces, set to Bridger->faces
+		HDS_Face* bridgeFace = bridging((*he)->flip, *he_next, cutFace1, cutFace2);
+		//fix face
+		bridgeFace->isCutFace = false;
+		bridgeFace->isBridger = true;
+		//add face to mesh
+		bridger_faces.push_back(bridgeFace);
+	}
+
+	//copy bridger geomery info to new mesh
+	hes_new.insert(hes_new.end(), bridger_hes.begin(), bridger_hes.end());
+	faces_new.insert(faces_new.end(), bridger_faces.begin(), bridger_faces.end());
+	verts_new.insert(verts_new.end(), bridger_verts.begin(), bridger_verts.end());
+
+	bridger_verts.clear();
+	bridger_hes.clear();
+	bridger_faces.clear();
+	ctrlPoints_front.clear();
+	ctrlPoints_back.clear();
 }
 
 bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 {
 	//////////////////////////////////////////////////////////
-	/*just for origami functional test, must be removed later*/
-	confMap origamiConfig;
-	origamiConfig["shape"] = 0;
-	origamiConfig["curv"] = 0.5;
-	origamiConfig["samples"] = 2;
-	origamiConfig["size"] = 0.6;
-	origamiConfig["cp"] = 0.5;
-	HDS_Bridger::setBridger(origamiConfig);
-	
+	HDS_Bridger::setScale(origami_scale);
 
 	initiate();
 	cur_mesh = mesh;
@@ -139,13 +221,14 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 	//get bridge pairs
 	unordered_map<hdsid_t, he_t*> refidMap;
 	for (auto he : hes_new) {
-		if (refidMap.find(he->flip->refid) == refidMap.end()) {
+		if(refidMap.find(he->flip->refid) == refidMap.end()) {
 			refidMap.insert(make_pair(he->refid, he));
 		}
 		else {
 			he->flip->setBridgeTwin(refidMap[he->refid]->flip);
 		}
 	}
+
 
 	//assign flip s face
 	for (auto& he_inner : hes_new) {
@@ -178,9 +261,7 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 		he_t* he = heMap.second->flip;
 		if (!he->isCutEdge) {
 			///for all non-cut-edge edges, create bridge faces
-			HDS_Vertex* v1_ori = ori_map[(he->v->refid) >> 2];	//refid >> 2  ==> vertexIndex
-			HDS_Vertex* v2_ori = ori_map[(he->bridgeTwin->v->refid) >> 2];	
-			addBridger(he, he->bridgeTwin, tucked_angle, tucked_length);
+			addBridger(he, he->bridgeTwin, tucked_angle, tucked_length, tucked_smooth);
 		}
 		else {
 			// for all cut-edge edges, create flaps
@@ -226,8 +307,8 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 			twin_flap_he->refid = he->refid;
 			hes_new.push_back(twin_flap_he);
 
-			addBridger(he, flap_he, tucked_angle, tucked_length);
-			addBridger(twin_he, twin_flap_he, tucked_angle, tucked_length);
+			addBridger(he, flap_he, tucked_angle, tucked_length, tucked_smooth);
+			addBridger(twin_he, twin_flap_he, Pi - tucked_angle, tucked_length, tucked_smooth);
 		}
 	}
 

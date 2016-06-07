@@ -25,6 +25,8 @@ OrigamiPanel::~OrigamiPanel()
 
 void OrigamiPanel::slot_saved()
 {
-	origamiConfig["testValue1"] = (double)ui->slider1->value() / (double)ui->slider1->maximum();
-	origamiConfig["testValue2"] = (double)ui->slider2->value() / (double)ui->slider2->maximum();
+	origamiConfig["scale"] = (double)ui->slider_scale->value() / (double)(ui->slider_scale->maximum() + 1);
+	origamiConfig["tucked_length"] = (double)ui->slider_tucked_length->value() / (double)ui->slider_tucked_length->maximum();
+	origamiConfig["tucked_smooth"] = (double)ui->slider_tucked_smooth->value() / (double)ui->slider_tucked_smooth->maximum();
+	origamiConfig["angle"] = (double)ui->slider_angle->value() / (double)(ui->slider_angle->maximum() + 1);
 }
