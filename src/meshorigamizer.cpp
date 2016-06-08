@@ -1,4 +1,5 @@
 #include "meshorigamizer.h"
+using namespace std;
 
 typedef HDS_Face face_t;
 typedef HDS_HalfEdge he_t;
@@ -150,10 +151,110 @@ void MeshOrigamizer::setControlPoints(HDS_HalfEdge* he1, HDS_HalfEdge* he2, doub
 	ctrlPoints_back.push_back(vn4e);
 }
 
+void MeshOrigamizer::setControlPoints2(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double theta, double folding_length, double smooth_length) {
+	if (he1->flip->f != nullptr && !he1->flip->f->isCutFace)
+		he1->setCutEdge(false);
+	if (he2->flip->f != nullptr && !he2->flip->f->isCutFace)
+		he2->setCutEdge(false);
+
+	//clear control points
+	ctrlPoints_front.clear();
+	ctrlPoints_back.clear();
+
+	//set face normals
+	QVector3D normal1, normal2;
+	normal1 = he1->flip->f->computeNormal();
+	if (!he1->isCutEdge && !he2->isCutEdge) {
+		normal2 = he2->flip->f->computeNormal();
+	}
+	else {
+		normal2 = he1->bridgeTwin->flip->f->computeNormal();
+	}
+
+
+	/////////////////////////////////////////////////////////////////////
+	//end points of scaled mesh edges
+	HDS_Vertex *v1s, *v1e, *v2s, *v2e;
+	v1s = he1->v;
+	v1e = he1->flip->v;
+	v2s = he2->v;
+	v2e = he2->flip->v;
+
+	//4 pair of new vertices, 
+	QVector3D vn1s, vn1e, vn2s, vn2e, vn3s, vn3e, vn4s, vn4e;
+
+	QVector3D crease_s = (v1e->pos + v2s->pos) / 2;
+	QVector3D crease_e = (v2e->pos + v1s->pos) / 2;
+	QVector3D horizontal = crease_e - crease_s;
+	horizontal.normalize();
+
+	//get vector perpendicular to the edge and point into the mesh
+	QVector3D vertical = -(normal1 + normal2) / 2;
+	vertical.normalize();
+
+	//input angle theta should be in Radians
+	//rotate horizontal by theta, around local axis perpenducular to crease plane
+	/*QVector3D interior_folding = horizontal * cos(theta) + vertical * sin(theta);
+	interior_folding.normalize();*/
+
+	double crease_len = (crease_e - crease_s).length();
+
+
+	vn1s = (v1e->pos * 2.0 / 3.0 + v2s->pos * 1.0 / 3.0 + vertical * smooth_length);
+	vn1e = (v1s->pos * 2.0 / 3.0 + v2e->pos * 1.0 / 3.0 + vertical * smooth_length);
+	/*vn2s = (v1e->pos * 2.0 / 3.0 + v2s->pos * 1.0 / 3.0 + vertical * folding_length);
+	vn2e = (v1s->pos * 2.0 / 3.0 + v2e->pos * 1.0 / 3.0 + vertical * folding_length);
+	vn3s = (v1e->pos * 1.0 / 3.0 + v2s->pos * 2.0 / 3.0 + vertical * folding_length);
+	vn3e = (v1s->pos * 1.0 / 3.0 + v2e->pos * 2.0 / 3.0 + vertical * folding_length);*/
+	vn4s = (v1e->pos * 1.0 / 3.0 + v2s->pos * 2.0 / 3.0 + vertical * smooth_length);
+	vn4e = (v1s->pos * 1.0 / 3.0 + v2e->pos * 2.0 / 3.0 + vertical * smooth_length);
+
+	QVector3D tmp1 = vn1s - v1e->pos;
+	QVector3D tmp2 = tmp1.length() * tan(Pi / 2 - theta) * (-horizontal);
+	vn1s += tmp2;
+	vn1e += tmp2;
+	vn4s += tmp2;
+	vn4e += tmp2;
+	QVector3D tmp3 = (folding_length - smooth_length) * tan(Pi / 2 - theta) * (-horizontal);
+	QVector3D tmp4 = (folding_length - smooth_length) * vertical;
+	QVector3D tmp5 = tmp3 + tmp4;
+
+	if (theta <= Pi / 2) {
+		vn2s = vn1s + tmp5;
+		vn3s = vn4s + tmp5;
+
+		vn2e = vn1e + tmp5 + tmp5.normalized() * crease_len * sin(Pi / 2 - theta);
+		vn3e = vn4e + tmp5 + tmp5.normalized() * crease_len * sin(Pi / 2 - theta);
+	}else {
+		vn2e = vn1e + tmp5;
+		vn3e = vn4e + tmp5;
+
+		vn2s = vn1s + tmp5 + tmp5.normalized() * crease_len * sin(theta - Pi / 2);
+		vn3s = vn4s + tmp5 + tmp5.normalized() * crease_len * sin(theta - Pi / 2);
+	}
+
+	//#ifdef _DEBUG
+	//	if (!he1->isCutEdge) {
+	//		std::cout << "vertical:  x: " << vertical.x() << "  y: " << vertical.y() << "  z: " << vertical.z() << std::endl;
+	//		std::cout << "normal1:  x: " << normal1.x() << "  y: " << normal1.y() << "  z: " << normal1.z() << std::endl;
+	//		std::cout << "normal2:  x: " << normal2.x() << "  y: " << normal2.y() << "  z: " << normal2.z() << std::endl;
+	//	}
+	//#endif
+
+	ctrlPoints_front.push_back(vn1s);
+	ctrlPoints_front.push_back(vn2s);
+	ctrlPoints_front.push_back(vn3s);
+	ctrlPoints_front.push_back(vn4s);
+	ctrlPoints_back.push_back(vn1e);
+	ctrlPoints_back.push_back(vn2e);
+	ctrlPoints_back.push_back(vn3e);
+	ctrlPoints_back.push_back(vn4e); 
+}
+
 void MeshOrigamizer::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, double theta, double folding_length, double smooth_length)
 {
 	//set control points
-	setControlPoints(he1, he2, theta, folding_length, smooth_length);
+	setControlPoints2(he1, he2, theta, folding_length, smooth_length);
 	//set cut faces
 	face_t* cutFace1 = he1->f;
 	face_t* cutFace2 = he2->f;
