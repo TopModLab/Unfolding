@@ -19,6 +19,7 @@ protected:
 	static double tucked_smooth;
 	static double tucked_angle;
 	static double origami_scale;
+	static int bridger_type;
 
 	static vector<QVector3D> ctrlPoints_front;
 	static vector<QVector3D> ctrlPoints_back;

@@ -29,4 +29,5 @@ void OrigamiPanel::slot_saved()
 	origamiConfig["tucked_length"] = (double)ui->slider_tucked_length->value() / (double)ui->slider_tucked_length->maximum();
 	origamiConfig["tucked_smooth"] = (double)ui->slider_tucked_smooth->value() / (double)ui->slider_tucked_smooth->maximum();
 	origamiConfig["angle"] = (double)ui->slider_angle->value() / (double)(ui->slider_angle->maximum() + 1);
+	origamiConfig["bridger_type"] = ui->TypeComboBox->currentIndex();
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>487</width>
-    <height>396</height>
+    <width>495</width>
+    <height>408</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -51,7 +51,7 @@
          <property name="sizeConstraint">
           <enum>QLayout::SetNoConstraint</enum>
          </property>
-         <item row="9" column="1">
+         <item row="13" column="1">
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -64,7 +64,7 @@
            </property>
           </spacer>
          </item>
-         <item row="4" column="2">
+         <item row="6" column="2">
           <widget class="QLabel" name="slider2_val">
            <property name="minimumSize">
             <size>
@@ -77,7 +77,7 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="6" column="1">
           <widget class="QSlider" name="slider_tucked_length">
            <property name="maximum">
             <number>100</number>
@@ -93,14 +93,14 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="5" column="1">
           <widget class="QLabel" name="label_tucked_length">
            <property name="text">
             <string>tucked_length</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
+         <item row="3" column="1">
           <widget class="QLabel" name="label_scale">
            <property name="minimumSize">
             <size>
@@ -113,7 +113,7 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="2">
+         <item row="4" column="2">
           <widget class="QLabel" name="slider1_val">
            <property name="minimumSize">
             <size>
@@ -129,7 +129,7 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="4" column="1">
           <widget class="QSlider" name="slider_scale">
            <property name="maximum">
             <number>99</number>
@@ -145,7 +145,7 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="1">
+         <item row="8" column="1">
           <widget class="QSlider" name="slider_tucked_smooth">
            <property name="maximum">
             <number>100</number>
@@ -158,28 +158,28 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="1">
+         <item row="9" column="1">
           <widget class="QLabel" name="label_angle">
            <property name="text">
             <string>angle</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="2">
+         <item row="8" column="2">
           <widget class="QLabel" name="slider3_val">
            <property name="text">
             <string>25</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
+         <item row="7" column="1">
           <widget class="QLabel" name="label_tucked_smooth">
            <property name="text">
             <string>tucked_smooth</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="1">
+         <item row="10" column="1">
           <widget class="QSlider" name="slider_angle">
            <property name="minimum">
             <number>1</number>
@@ -195,11 +195,41 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="2">
+         <item row="10" column="2">
           <widget class="QLabel" name="slider4_val">
            <property name="text">
             <string>90</string>
            </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="label_type">
+           <property name="text">
+            <string>bridger_type</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="TypeComboBox">
+           <property name="editable">
+            <bool>false</bool>
+           </property>
+           <property name="currentText">
+            <string>Parallel</string>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>Parallel</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Non-parallel</string>
+            </property>
+           </item>
           </widget>
          </item>
         </layout>
@@ -219,7 +249,7 @@
  </widget>
  <resources>
   <include location="../resources.qrc"/>
-  <include location="../../../../.designer/resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -229,12 +259,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>618</x>
-     <y>80</y>
+     <x>438</x>
+     <y>94</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1001</x>
-     <y>82</y>
+     <x>482</x>
+     <y>94</y>
     </hint>
    </hints>
   </connection>
@@ -245,12 +275,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>639</x>
-     <y>154</y>
+     <x>438</x>
+     <y>138</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1001</x>
-     <y>156</y>
+     <x>482</x>
+     <y>138</y>
     </hint>
    </hints>
   </connection>
@@ -261,12 +291,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>452</x>
-     <y>218</y>
+     <x>438</x>
+     <y>182</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1011</x>
-     <y>222</y>
+     <x>482</x>
+     <y>182</y>
     </hint>
    </hints>
   </connection>
@@ -277,12 +307,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>709</x>
-     <y>283</y>
+     <x>438</x>
+     <y>226</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1016</x>
-     <y>292</y>
+     <x>482</x>
+     <y>226</y>
     </hint>
    </hints>
   </connection>

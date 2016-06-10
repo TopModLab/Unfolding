@@ -74,6 +74,9 @@
          </item>
          <item row="1" column="0">
           <widget class="QComboBox" name="shapeComboBox">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
            <item>
             <property name="text">
              <string>Bezier</string>
