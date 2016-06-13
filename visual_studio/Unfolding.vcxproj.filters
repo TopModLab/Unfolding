@@ -243,9 +243,6 @@
     <ClCompile Include="..\src\ConnectorPanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\hds_common.cpp">
-      <Filter>Header Files\HDS</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Camera.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
@@ -326,6 +323,9 @@
     </ClCompile>
     <ClCompile Include="..\src\meshorigamizer.cpp">
       <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\hds_common.cpp">
+      <Filter>Source Files\HDS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

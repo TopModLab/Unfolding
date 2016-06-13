@@ -56,7 +56,7 @@ public:
 	bool isNegCurve;
 	float angle;
 	int flag;
-
+	QVector2D orientation = QVector2D(0, 0); //direction of halfedge after unfolding, used in origami, 
 };
 
 #endif // HDS_EDGE_H

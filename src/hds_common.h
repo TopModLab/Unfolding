@@ -3,6 +3,7 @@
 #include <QString>
 #include "mathutils.hpp"
 #include <QVector3D>
+#include <Qvector2D>
 
 using hdsid_t = uint32_t;
 

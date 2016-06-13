@@ -399,6 +399,11 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 		}
 	}
 
+	vector<face_t*> ref_faces = faces_new;
+	for (auto& ref_face : ref_faces) {
+		;
+	}
+
 	for (auto& heMap : refidMap) {
 		he_t* he = heMap.second->flip;
 		if (!he->isCutEdge) {
