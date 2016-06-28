@@ -17,6 +17,7 @@ HDS_Face::HDS_Face()
 	he = nullptr;
 	scalingFactor = 1;
 	isPlanar = true;
+	isMarked = false;
 
 	//bound = nullptr;
 }

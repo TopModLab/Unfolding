@@ -27,17 +27,21 @@ private:
 		bool operator>(const Edge& e) const {
 			return weight > e.weight;
 		}
+		bool operator<(const Edge& e) const {
+			return weight < e.weight;
+		}
 	};
 	typedef vector<vector<pair<double, int>>> PathInfo;
 
 	typedef std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> PQ;
+	typedef std::priority_queue<Edge, std::vector<Edge>, std::less<Edge>> PQ2;
 
 	static PathInfo allPairShortestPath(HDS_Mesh *mesh);
 	static vector<int> retrivePath(PathInfo m, int u, int v);
 
 	static set<int> findCutEdges(HDS_Mesh *mesh);
 	static vector<Edge> minimumSpanningTree(PQ &edges, int);
-
+	static vector<Edge> maximumSpanningTree(PQ2 &edges, int);
 
 };
 

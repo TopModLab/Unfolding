@@ -399,6 +399,26 @@ vector<MeshCutter::Edge> MeshCutter::minimumSpanningTree(PQ &edges, int nVerts) 
 	return mst;
 }
 
+vector<MeshCutter::Edge> MeshCutter::maximumSpanningTree(PQ2 &edges, int nVerts) {
+	cout << "finding MaximumST ..." << endl;
+	cout << edges.size() << endl;
+	vector<MeshCutter::Edge> mst;
+	UnionFind uf(nVerts);   // connected part
+	while (!edges.empty() && mst.size() < nVerts - 1) {
+		auto e = edges.top();
+		edges.pop();
+		cout << "face (" << e.i << ", " << e.j << ") @ [" << e.u << ", " << e.weight << "]" << endl;
+		if (!uf.Connected(e.i, e.j)) {
+			cout << "accepted." << endl;
+			mst.push_back(e);
+			uf.Union(e.i, e.j);
+		}
+	}
+	return mst;
+}
+
+
+/*
 set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 {
 	cout << "Finding cut edges..." << endl;
@@ -425,6 +445,7 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 		}while( he != v->he ) ;
 
 		// either sums up roughly 2 * Pi, or has a cut face connected.
+		//return true;
 		return (sum > PI2) || (sum < PI2 && !hasCutFace);
 	};
 
@@ -486,5 +507,113 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 #ifdef _DEBUG
 	cout << "#cut edges = " << cutEdges.size() << endl;
 #endif // _DEBUG
+	return cutEdges;
+}
+*/
+
+//new
+set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
+{
+	cout << "Finding cut edges..." << endl;
+	/*
+	auto isBadVertex = [](HDS_Vertex* v) -> bool {
+		double sum = 0;
+		auto he = v->he;
+		auto curHE = he->flip->next;
+		bool hasCutFace = false;
+		do {
+			if (!curHE->f->isCutFace) {
+				//calculate vertex angle defect
+				QVector3D v1 = he->flip->v->pos - he->v->pos;
+				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+				double nv1pnv2 = v1.length() * v2.length();
+				double inv_nv1pnv2 = 1.0 / nv1pnv2;
+				double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+				double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
+				sum += angle;
+			}
+			else hasCutFace = true;
+			he = curHE;
+
+			curHE = he->flip->next;
+		} while (he != v->he);
+
+		// either sums up roughly 2 * Pi, or has a cut face connected.
+		//return true;
+		return (sum > PI2) || (sum < PI2 && !hasCutFace);
+	};
+	*/
+
+	set<int> cutEdges;
+
+	//set all vertice as cutVertices, no bad vertices
+	unordered_set<HDS_Vertex*> cutVertices = mesh->vertSet;
+	//unordered_set<HDS_Vertex*> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
+	//unordered_map<HDS_Vertex*, int> cutVerticesIndex;
+
+	// label the bad vertices
+	/*
+	int vidx = 0;
+	for (auto x : cutVertices) {
+		cutVerticesIndex[x] = vidx;
+		++vidx;
+	}
+	cout << "#cut vertices: " << cutVertices.size() << endl;
+	*/
+	
+
+	//PathInfo pathinfo = allPairShortestPath(mesh);
+	PQ2 edges;
+
+	unordered_set<HDS_HalfEdge*> hes = mesh->halfedges();
+
+	for (auto& e : hes) {
+		auto x = e->v;
+		auto y = e->flip->v;
+		if (x->index < y->index) {
+			edges.push(Edge(e->f->index, e->flip->f->index, e->index, e->flip->index, x->pos.distanceToPoint(y->pos)));
+		}
+	}
+
+	vector<Edge> mst = maximumSpanningTree(edges, mesh->faceSet.size());
+	unordered_set<int> nonCutEdgeIndex;
+	for (auto& t : mst) {
+		nonCutEdgeIndex.insert(t.u);
+		nonCutEdgeIndex.insert(t.v);
+	}
+
+
+	cout << "MST face-connections:" << endl;
+	for (auto &e : mst) {
+		cout << e.i << ", " << e.j << ", " << e.weight << endl;
+	}
+
+	/*
+	vector<vector<int>> mstEdges;
+	for (auto &e : mst) {
+		vector<int> path = retrivePath(pathinfo, e.u, e.v);
+		mstEdges.push_back(path);
+	}
+	*/
+
+
+	// generate a tree connecting all bad vertices using shortest path
+	// this basically becomes a minimum spanning tree.
+	///
+	for (auto &he : hes) {
+		if (he->v->index < he->flip->v->index) {
+			if (nonCutEdgeIndex.find(he->index) == nonCutEdgeIndex.end()) {
+				cutEdges.insert(he->index);
+				he->setCutEdge(true);
+			}
+		}
+	}
+
+#ifdef _DEBUG
+	cout << "#cut edges = " << cutEdges.size() << endl;
+#endif // _DEBUG
+	
+	set<int> tmp = {2,6,9,12,15,21,23};
+	//return tmp;
 	return cutEdges;
 }
