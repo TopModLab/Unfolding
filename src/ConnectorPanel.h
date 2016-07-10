@@ -26,6 +26,7 @@ public:
 	void resetParas(int procType);
 
 	static QFont fontfamily;
+	static double fontSize;
 signals:
 	void sig_saved();
 private:

@@ -1,6 +1,7 @@
 #include "ConnectorPanel.h"
 
 QFont ConnectorPanel::fontfamily = QFont("Arial");
+double ConnectorPanel::fontSize = 20.0;
 
 ConnectorPanel::ConnectorPanel(int procType)
 	: ui(new Ui::ConnectorPanel)
@@ -79,6 +80,7 @@ void ConnectorPanel::setFileName()
 void ConnectorPanel::save()
 {
 	fontfamily = ui->font_val->currentFont();
+	fontSize = ui->font_size_val->value();
 
 	conf["connector"] = (double)ui->connector_type->currentIndex();
 	// Material Connections

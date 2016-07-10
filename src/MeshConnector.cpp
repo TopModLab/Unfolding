@@ -29,9 +29,11 @@
 // Rim/Ring: 
 //			
 //////////////////////////////////////////////////////////////////////////
-auto printText = [&](FILE* file, double x, double y, double angle, double str_wd, const QString &text)
+auto printText = [&](FILE* file,
+	double x, double y, double angle, double str_wd, const QString &text)
 {
 	fprintf(file, SVG_TEXT, x, y, angle, x, y,
+		ConnectorPanel::fontSize,
 		ConnectorPanel::fontfamily.family().toUtf8().constData(),
 		str_wd, text.toUtf8().data());
 };

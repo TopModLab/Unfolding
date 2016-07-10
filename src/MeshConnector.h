@@ -46,7 +46,7 @@ cstchar SVG_DASHARRAY[] =
 	"style=\"fill:none;stroke:blue;stroke-width:%lf\" />";
 cstchar SVG_TEXT[] =
 	"\t<text x=\"%lf\" y=\"%lf\" transform=\"rotate(%lf %lf,%lf)\" " \
-	"style=\"font-size:10;font-family:'%s';"\
+	"style=\"font-size:%lf;font-family:'%s';"\
 	"stroke:blue;stroke-width:%lf;fill:none;" \
 	"text-anchor:middle;alignment-baseline:middle;\" >%s</text>\n";
 cstchar SVG_LABEL[] =
