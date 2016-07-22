@@ -511,38 +511,11 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 }
 */
 
-//new
+//new cutting algorithm, need to be tested
+
 set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 {
 	cout << "Finding cut edges..." << endl;
-	/*
-	auto isBadVertex = [](HDS_Vertex* v) -> bool {
-		double sum = 0;
-		auto he = v->he;
-		auto curHE = he->flip->next;
-		bool hasCutFace = false;
-		do {
-			if (!curHE->f->isCutFace) {
-				//calculate vertex angle defect
-				QVector3D v1 = he->flip->v->pos - he->v->pos;
-				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
-				double nv1pnv2 = v1.length() * v2.length();
-				double inv_nv1pnv2 = 1.0 / nv1pnv2;
-				double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
-				double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
-				sum += angle;
-			}
-			else hasCutFace = true;
-			he = curHE;
-
-			curHE = he->flip->next;
-		} while (he != v->he);
-
-		// either sums up roughly 2 * Pi, or has a cut face connected.
-		//return true;
-		return (sum > PI2) || (sum < PI2 && !hasCutFace);
-	};
-	*/
 
 	set<int> cutEdges;
 
@@ -551,16 +524,6 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 	//unordered_set<HDS_Vertex*> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
 	//unordered_map<HDS_Vertex*, int> cutVerticesIndex;
 
-	// label the bad vertices
-	/*
-	int vidx = 0;
-	for (auto x : cutVertices) {
-		cutVerticesIndex[x] = vidx;
-		++vidx;
-	}
-	cout << "#cut vertices: " << cutVertices.size() << endl;
-	*/
-	
 
 	//PathInfo pathinfo = allPairShortestPath(mesh);
 	PQ2 edges;
@@ -588,13 +551,6 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 		cout << e.i << ", " << e.j << ", " << e.weight << endl;
 	}
 
-	/*
-	vector<vector<int>> mstEdges;
-	for (auto &e : mst) {
-		vector<int> path = retrivePath(pathinfo, e.u, e.v);
-		mstEdges.push_back(path);
-	}
-	*/
 
 
 	// generate a tree connecting all bad vertices using shortest path
@@ -613,7 +569,5 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 	cout << "#cut edges = " << cutEdges.size() << endl;
 #endif // _DEBUG
 	
-	set<int> tmp = {2,6,9,12,15,21,23};
-	//return tmp;
 	return cutEdges;
 }

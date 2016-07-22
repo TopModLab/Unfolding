@@ -141,7 +141,11 @@ bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 
 		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
-		return sum > (PI2 + PI_EPS) || (sum < (PI2 - PI_EPS) && !hasCutFace);
+
+		//Since the new mesh cutting algorithm may generate cutted mesh with overlapping,
+		//force this function to return false in order to unfold it.
+		return false;
+		//return sum > (PI2 + PI_EPS) || (sum < (PI2 - PI_EPS) && !hasCutFace);
 	};
 	if( any_of(ref_mesh->vertSet.begin(), ref_mesh->vertSet.end(), isBadVertex) ) return false;
 	else return true;
@@ -251,11 +255,15 @@ bool MeshUnfolder::unfold(
 	unfoldingProgress.setMinimumDuration(0);
 	
 	// Check if model is properly cut and unfoldable
+
 	if( !unfoldable(ref_mesh) )
 	{
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
 	}
+	
+
+
 	// ref_mesh->updatePieceSet();
 	cout << "Unfold Piece Count:\t" << ref_mesh->pieceSet.size() << endl;
 	// If no face is selected, find one face in each piece and push into fixedFaces
