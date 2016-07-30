@@ -7,34 +7,23 @@
 hdsid_t HDS_HalfEdge::uid = 0;
 
 HDS_HalfEdge::HDS_HalfEdge()
-	: flag(0)
+	: index(-1), refid(0)
+	, flag(0)
+	, f(nullptr), v(nullptr)
+	, flip(nullptr), prev(nullptr), next(nullptr), cutTwin(nullptr)
 {
-	index = -1;
-	refid = 0;
-	f = nullptr;
-	v = nullptr;
-	flip = nullptr;
-	prev = nullptr;
-	next = nullptr;
-	cutTwin = nullptr;
 }
 
 HDS_HalfEdge::~HDS_HalfEdge()
 {
-
 }
 
 HDS_HalfEdge::HDS_HalfEdge(const HDS_HalfEdge &other)
 	: index(other.index), refid(other.refid)
 	, flag(other.flag)
+	, f(nullptr), v(nullptr)
+	, flip(nullptr), prev(nullptr), next(nullptr), cutTwin(nullptr)
 {
-	//index = other.index;
-	f = nullptr;
-	v = nullptr;
-	flip = nullptr;
-	prev = nullptr;
-	next = nullptr;
-	cutTwin = nullptr;
 }
 
 HDS_HalfEdge HDS_HalfEdge::operator=(const HDS_HalfEdge &other)

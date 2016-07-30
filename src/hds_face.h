@@ -68,7 +68,6 @@ public:
 		};
 	};
 	
-
 private:
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	double scalingFactor;

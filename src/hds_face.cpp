@@ -6,15 +6,10 @@
 hdsid_t HDS_Face::uid = 0;
 
 HDS_Face::HDS_Face()
-	: flag(0)
+	: flag(0), index(-1), refid(0)
+	, scalingFactor(1)
+	, he(nullptr)
 {
-	//isFlap = false;
-	index = -1;
-	refid = 0;
-	he = nullptr;
-	scalingFactor = 1;
-
-	//bound = nullptr;
 }
 
 HDS_Face::~HDS_Face()
@@ -23,16 +18,12 @@ HDS_Face::~HDS_Face()
 }
 
 HDS_Face::HDS_Face(const HDS_Face &other)
+	: flag(other.flag)
+	, index(other.index), refid(other.refid)
+	, n(other.n)
+	, scalingFactor(other.scalingFactor)
+	, he(nullptr)
 {
-	flag = other.flag;
-	//isFlap = other.isFlap;
-	index = other.index;
-	refid = other.refid;
-	n = other.n;
-	he = nullptr;
-	scalingFactor = other.scalingFactor;
-
-	//bound = nullptr;
 }
 
 

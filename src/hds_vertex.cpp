@@ -14,19 +14,14 @@ HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
 {
 }
 
-HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
-	: flag(v.flag)
+HDS_Vertex::HDS_Vertex(const HDS_Vertex &other)
+	: index(other.index), refid(other.refid)
+	, flag(other.flag)
+	, pos(other.pos), normal(other.normal)
+	, curvature(other.curvature), colorVal(other.colorVal)
+	, rtype(other.rtype), morseFunctionVal(other.morseFunctionVal)
+	, he(nullptr)
 {
-	
-	index = v.index;
-	refid = v.refid;
-	pos = v.pos;
-	normal = v.normal;
-	curvature = v.curvature;
-	colorVal = v.colorVal;
-	he = nullptr;
-	rtype = v.rtype;
-	morseFunctionVal = v.morseFunctionVal;
 }
 
 HDS_Vertex HDS_Vertex::operator=(const HDS_Vertex &other)

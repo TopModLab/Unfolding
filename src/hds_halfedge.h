@@ -1,9 +1,6 @@
 #ifndef HDS_EDGE_H
 #define HDS_EDGE_H
 #include "hds_common.h"
-/*
-#include "hds_face.h"
-#include "hds_vertex.h"*/
 
 class HDS_HalfEdge : public HDS_Common
 {
@@ -54,8 +51,6 @@ public:
 	};
 	
 	float angle;
-	
-
 };
 
 #endif // HDS_EDGE_H
