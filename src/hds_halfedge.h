@@ -9,17 +9,7 @@ class HDS_HalfEdge : public HDS_Common
 {
 private:
 	static hdsid_t uid;
-
 public:
-	enum EDGE_FLAG : uint16_t
-	{
-		DEFAULT		= 0,
-		PICKED		= 1 << 1,
-		CUTEDGE		= 1 << 2,
-		EXTENDED	= 1 << 3,
-		NEGCURVE	= 1 << 4
-	};
-
 	static void resetIndex() { uid = 0; }
 	static hdsid_t assignIndex() { return uid++; }
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_EDGE; }
@@ -35,7 +25,7 @@ public:
 	void setFlip(HDS_HalfEdge* thef) {flip = thef; thef->flip = this;}
 	void setBridgeTwin(HDS_HalfEdge* he) {bridgeTwin = he; he->bridgeTwin = this;}
 
-	uint16_t getFlag() const;
+	uint16_t getFlag() const { return flag; }
 
 	void computeCurvature();
 	QVector3D computeNormal();
@@ -50,12 +40,21 @@ public:
 	int index;
 	int refid;
 
-	bool isPicked;
-	bool isCutEdge;
-	bool isExtended;//From hollower
-	bool isNegCurve;
+	union
+	{
+		uint16_t flag;
+		struct
+		{
+			bool : 1;
+			bool isPicked : 1;
+			bool isCutEdge : 1;
+			bool isExtended : 1;//From hollower
+			bool isNegCurve : 1;
+		};
+	};
+	
 	float angle;
-	int flag;
+	
 
 };
 

@@ -9,14 +9,15 @@ HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
 	: pos(pos)
 	, index(idx), refid(rid)
 	, colorVal(0)
-	, isPicked(false), he(nullptr)
-	//, flag(FLAG_DEFAULT)
+	, flag(0)
+	, he(nullptr)
 {
 }
 
 HDS_Vertex::HDS_Vertex(const HDS_Vertex& v)
+	: flag(v.flag)
 {
-	isPicked = v.isPicked;
+	
 	index = v.index;
 	refid = v.refid;
 	pos = v.pos;
@@ -43,12 +44,6 @@ vector<HDS_Vertex*> HDS_Vertex::neighbors() const {
 		curHE = curHE->flip->next;
 	} while( curHE != he );
 	return neighbors;
-}
-
-uint16_t HDS_Vertex::getFlag() const
-{
-	return (uint16_t)(-(int16_t)isPicked) & PICKED;
-
 }
 
 void HDS_Vertex::computeCurvature()

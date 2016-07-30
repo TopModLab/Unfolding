@@ -6,17 +6,13 @@
 hdsid_t HDS_Face::uid = 0;
 
 HDS_Face::HDS_Face()
+	: flag(0)
 {
-	isPicked = false;
-	isCutFace = false;
-	isBridger = false;
-	isHole = false;
 	//isFlap = false;
 	index = -1;
 	refid = 0;
 	he = nullptr;
 	scalingFactor = 1;
-	isPlanar = true;
 
 	//bound = nullptr;
 }
@@ -28,11 +24,7 @@ HDS_Face::~HDS_Face()
 
 HDS_Face::HDS_Face(const HDS_Face &other)
 {
-	isPicked = other.isPicked;
-	isCutFace = other.isCutFace;
-	isBridger = other.isBridger;
-	isHole = other.isHole;
-	isPlanar = other.isPlanar;
+	flag = other.flag;
 	//isFlap = other.isFlap;
 	index = other.index;
 	refid = other.refid;
@@ -190,7 +182,7 @@ vector<QVector3D> HDS_Face::getScaledCorners()
 {
 	checkPlanar();
 
-	if(isPlanar) {
+	if(!isNonPlanar) {
 		// update the vertex position
 		auto vertices = corners();
 		for (auto v : vertices) {
@@ -211,15 +203,6 @@ void HDS_Face::scaleDown()
 	}
 }
 
-uint16_t HDS_Face::getFlag() const
-{
-	return (uint16_t)(-(int16_t)isPicked) & PICKED
-		| (uint16_t)(-(int16_t)isCutFace) & CUTFACE
-		| (uint16_t)(-(int16_t)isHole) & HOLE
-		| (uint16_t)(-(int16_t)isBridger) & BRIDGER
-		| (uint16_t)(-(int16_t)isPlanar) & PLANAR;
-}
-
 /*
 void HDS_Face::update_bbox()
 {
@@ -233,15 +216,13 @@ void HDS_Face::update_bbox()
 }*/
 void HDS_Face::checkPlanar()
 {
-	isPlanar = true;
-
 	auto vertices = corners();
 	QVector3D normal = QVector3D::crossProduct(vertices[1]->pos - vertices[0]->pos, vertices[2]->pos - vertices[0]->pos);
 
 	for(int i = 3; i < vertices.size(); i++) {
 		float dot = QVector3D::dotProduct(normal, vertices[i]->pos - vertices[0]->pos);
 		if (fabsf(dot) > 0.3){
-			isPlanar = false;
+			isNonPlanar = true;
 			break;
 		}
 	}

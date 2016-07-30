@@ -29,19 +29,3 @@ QString HDS_Common::ref_ID2String(hdsid_t refid)
 	//return ret.append(QString::number(refid >> 2));
 	return QString::number(refid >> 2);
 }
-
-void HDS_Common::setFlag(uint16_t flgComp)
-{
-	flag |= flgComp;
-}
-
-void HDS_Common::unsetFlag(uint16_t flgComp)
-{
-	flag &= ~flgComp;
-}
-
-void HDS_Common::reverseFlag(uint16_t flgComp)
-{
-	flag ^= flgComp;
-}
-

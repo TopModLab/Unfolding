@@ -9,11 +9,6 @@ private:
 	static hdsid_t uid;
 
 public:
-	enum EDGE_FLAG : uint16_t
-	{
-		FLAG_DEFAULT = 0,
-		PICKED = 1 << 1
-	};
 	enum ReebsPointType : uint16_t
 	{
 		Minimum,
@@ -34,7 +29,7 @@ public:
 	HDS_Vertex operator=(const HDS_Vertex &other);
 
 	void setPicked(bool v) { isPicked = v; }
-	uint16_t getFlag() const;
+	uint16_t getFlag() const { return flag; }
 
 	void computeCurvature();
 	void computeNormal();
@@ -50,10 +45,17 @@ public:
 
 	uint32_t index;
 	uint32_t refid;
+	union
+	{
+		uint16_t flag;
+		struct
+		{
+			bool : 1;
+			bool isPicked : 1;
+		};
+	};
 	double curvature;
 	double colorVal;
-	bool isPicked;
-	uint16_t flag;
 
 	int sdegree;  // the degree of saddle point
 	double morseFunctionVal;

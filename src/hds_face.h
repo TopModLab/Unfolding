@@ -43,19 +43,10 @@ public:
 	void scaleDown();
 	double getScalingFactor(){ return scalingFactor; }
 
-	uint16_t getFlag() const;
+	uint16_t getFlag() const { return flag; }
 	//bounding box related, should only work on cut face
 	//void update_bbox();
 public:
-	enum FACE_FLAG : uint16_t
-	{
-		DEFAULT		= 0,
-		PICKED		= 1 << 1,
-		CUTFACE		= 1 << 2,
-		HOLE		= 1 << 3,
-		BRIDGER		= 1 << 4,
-		PLANAR		= 1 << 5
-	};
 	QVector3D n;
 	HDS_HalfEdge *he;
 
@@ -63,11 +54,20 @@ public:
 	int refid;
 
 	// Flags
-	bool isPicked;
-	bool isCutFace; //invisible face between cut edges
-	bool isHole;
-	bool isBridger;
-	bool isPlanar;
+	union
+	{
+		uint16_t flag;
+		struct
+		{
+			bool : 1;
+			bool isPicked : 1;
+			bool isCutFace : 1; //invisible face between cut edges
+			bool isHole : 1;
+			bool isBridger : 1;
+			bool isNonPlanar : 1;
+		};
+	};
+	
 
 private:
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
