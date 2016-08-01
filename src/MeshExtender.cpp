@@ -74,7 +74,7 @@ void MeshExtender::scaleFaces()
 				verts_new.push_back(v_new);
 			}
 
-			face_t* newFace = createFace(vertices);
+			face_t* newFace = createFace(vertices); //new edges will be generated 
 			newFace->refid = f->refid;
 			newFace->isCutFace = false;
 			newFace->isBridger = false;

@@ -362,6 +362,191 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 
 	//get bridge pairs
 	unordered_map<hdsid_t, he_t*> refidMap;
+	unordered_map<he_t*, QVector2D> rotationMap;
+	unordered_map<hdsid_t, he_t*> heIdMap;
+	unordered_map<he_t*, he_t*> flipMap;
+	unordered_map<hdsid_t, vector<he_t*>> vertHeMap;
+	unordered_map<hdsid_t, bool> vertMarked;
+	queue<hdsid_t> markQueue;
+
+	for (auto& he : hes_new) {
+		vertHeMap[he->v->refid].push_back(he);
+		if (heIdMap[he->refid]) {
+			he_t* flip = heIdMap[he->refid];
+			heIdMap.erase(he->refid);
+			flipMap[he] = flip;
+			flipMap[flip] = he;
+		}else {
+			heIdMap[he->refid] = he;
+		}
+	}
+
+
+	cout << "+++++++++++++++++++++++++++++++++++++++++++++" << endl;
+
+	auto rotateVector2D = [](QVector2D vec, double angle) -> QVector2D {
+		return QVector2D(vec.x() * cos(angle) + vec.y() * sin(angle), -vec.x() * sin(angle) + vec.y() * cos(angle));
+	};
+
+	auto rotateFace = [&rotationMap, &flipMap, &rotateVector2D, &markQueue, &vertMarked] (he_t* he, QVector2D vec) -> void {
+		if (he->f->isMarked)
+			return;
+		he->f->isMarked = true;
+		he_t* curHe = he;
+		cout << "------ face angles ------------" << endl;
+		do {
+			rotationMap[curHe] = vec;
+			he_t* nextHe = curHe->next;
+			QVector3D v1 = curHe->v->pos - curHe->flip->v->pos;
+			QVector3D v2 = nextHe->flip->v->pos - nextHe->v->pos;
+			double nv1pnv2 = v1.length() * v2.length();
+			double inv_nv1pnv2 = 1.0 / nv1pnv2;
+			double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+			double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
+			cout << angle;
+			cout << " : " << vec.x() << " : " << vec.y() << endl;
+			//vec = QVector2D(-vec.x() * cos(angle) - vec.y() * sin(angle), vec.x() * sin(angle) - vec.y() * cos(angle));
+			vec = rotateVector2D(-vec, angle);
+			if (!vertMarked[curHe->v->refid]) {
+				markQueue.push(curHe->v->refid);
+			}
+			curHe = nextHe;
+		} while (curHe != he);
+	};
+
+	auto clockWiseRotate = [](QVector2D before, QVector2D after) -> double {
+		double cosVal = QVector2D::dotProduct(before, after) / (before.length() * after.length());
+		double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
+		double sinVal = (after.x() * before.y() - after.y() * before.x()) / (pow(before.x(), 2) + pow(before.y(), 2));
+		if (sinVal < -0.000001) {
+			angle = PI2 - angle;
+		}
+		return angle;
+	};
+	
+
+	auto calcAngle3D = [](QVector3D v1, QVector3D v2) -> double {
+		double nv1pnv2 = v1.length() * v2.length();
+		double inv_nv1pnv2 = 1.0 / nv1pnv2;
+		double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+		double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
+		return angle;
+	};
+
+	
+	
+	//randomly start from a vertex
+	markQueue.push(hes_new[0]->v->refid);
+	rotateFace(hes_new[0], QVector2D(1, 0));
+	
+	while (!markQueue.empty()) {
+		hdsid_t vertId = markQueue.front();
+		markQueue.pop();
+		if (vertMarked[vertId])
+			continue;
+		vertMarked[vertId] = true;
+		he_t* curHe = vertHeMap[vertId][0];
+		//find first marked face connect to the vertex
+		while (!curHe->f->isMarked) {
+			curHe = flipMap[curHe]->next;
+		}
+		he_t* startHe = curHe;
+		do {
+			he_t* curFlip = flipMap[curHe];
+			he_t* nextHe = curFlip->next;
+			double meshAngleSum = 0;
+			int anglesCnt = 0;
+			vector<he_t*> flipsToRotate;
+			while (!curFlip->f->isMarked) {
+				flipsToRotate.push_back(curFlip);
+				QVector3D v1 = curFlip->v->pos - curHe->flip->v->pos;
+				QVector3D v2 = nextHe->flip->v->pos - nextHe->v->pos;
+				double angle = calcAngle3D(v1, v2); 
+				meshAngleSum += angle;
+				anglesCnt++;
+				curFlip = flipMap[nextHe];
+				nextHe = curFlip->next;
+			}
+			double totalAngleSum = clockWiseRotate(rotationMap[curHe], -rotationMap[curFlip]);
+			double averageAngle = (totalAngleSum - meshAngleSum) / (anglesCnt + 1);
+			for (auto& he : flipsToRotate) {
+				QVector2D rotatedVec = rotateVector2D(rotationMap[flipMap[he]], averageAngle);
+				rotateFace(he, rotatedVec);
+			}
+			curHe = nextHe;
+		} while (curHe != startHe);
+	}
+	
+	
+
+	for (auto& heList : vertHeMap) {
+		cout << (heList.first >> 2) << " : ";
+		for (auto& he : heList.second) {
+			cout << (he->refid >> 2) << " - ";
+		}
+		cout << endl;
+		auto he = heList.second[0];
+		auto curHe = he;
+		do{
+			cout << (curHe->refid >> 2) << " - ";
+			curHe = flipMap[curHe]->next;
+		} while (curHe != he);
+		cout << endl;
+	}
+
+	cout << "+++++++++++++++++++++++++++++++++++++++++++++" << endl;
+
+
+	for (auto vert : verts_new) {
+		//cout << (vert->he->refid >> 3) << endl;
+		/*
+		double sum = 0;
+		auto he = vert->he;
+		auto curHE = he->flip->next;
+		bool hasCutFace = false;
+		do {
+			if (!curHE->f->isCutFace) {
+				//calculate vertex angle defect
+				QVector3D v1 = he->flip->v->pos - he->v->pos;
+				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+				double nv1pnv2 = v1.length() * v2.length();
+				double inv_nv1pnv2 = 1.0 / nv1pnv2;
+				double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
+				double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
+				sum += angle;
+			}
+			else hasCutFace = true;
+			he = curHE;
+
+			curHE = he->flip->next;
+		} while (he != vert->he);
+		cout << "angle: " << sum << endl;
+		*/
+	}
+	
+	cout << "+++++++++++++++++++++++++++++++++++++++++++++" << endl;
+	/*
+	//print int in binary form
+	auto print_bin = [](int n) -> void{
+		int l = sizeof(n) * 8;
+		int i;
+		if (i == 0)
+		{
+			printf("0\n");
+			return;
+		}
+		for (i = l - 1; i >= 0; i--)
+		{
+			if (n&(1 << i)) break;
+		}
+
+		for (; i >= 0; i--)
+			printf("%d", (n&(1 << i)) != 0);
+		printf("\n");
+		return;
+	};
+	*/
+
 	for (auto he : hes_new) {
 		if(refidMap.find(he->flip->refid) == refidMap.end()) {
 			refidMap.insert(make_pair(he->refid, he));
@@ -404,11 +589,18 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 		;
 	}
 
+	
+	cout << "+++++++++++++++++++++ Add Bridger ++++++++++++++++++++++++" << endl;
+
 	for (auto& heMap : refidMap) {
 		he_t* he = heMap.second->flip;
 		if (!he->isCutEdge) {
-			///for all non-cut-edge edges, create bridge faces
-			addBridger(he, he->bridgeTwin, tucked_angle, tucked_length, tucked_smooth);
+			//for all non-cut-edge edges, create bridge faces
+			double angle = clockWiseRotate(rotationMap[he->bridgeTwin->flip], -rotationMap[he->flip]);
+			cout << angle << endl;
+			//addBridger(he, he->bridgeTwin, tucked_angle, tucked_length, tucked_smooth);
+			angle += Pi / 2;
+			addBridger(he, he->bridgeTwin, angle, tucked_length, tucked_smooth);
 		}
 		else {
 			// for all cut-edge edges, create flaps
@@ -454,8 +646,15 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 			twin_flap_he->refid = he->refid;
 			hes_new.push_back(twin_flap_he);
 
-			addBridger(he, flap_he, tucked_angle, tucked_length, tucked_smooth);
-			addBridger(twin_he, twin_flap_he, Pi - tucked_angle, tucked_length, tucked_smooth);
+			//new angle calc method
+			double angle = clockWiseRotate(rotationMap[he->flip], -rotationMap[twin_he->flip]);
+			cout << angle << endl;
+			angle += Pi / 2;
+
+			//addBridger(he, flap_he, tucked_angle, tucked_length, tucked_smooth);
+			//addBridger(twin_he, twin_flap_he, Pi - tucked_angle, tucked_length, tucked_smooth);
+			addBridger(he, flap_he, angle, tucked_length, tucked_smooth);
+			addBridger(twin_he, twin_flap_he, Pi - angle, tucked_length, tucked_smooth);
 		}
 	}
 
