@@ -69,6 +69,7 @@ public:
 	bool isBridger;
 	bool isPlanar;
 	bool isMarked = false ;	//used in origami; set TRUE once face rotation completed
+	int markNumber = 0;
 
 private:
 	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
