@@ -6,17 +6,16 @@
 
 MeshViewer::MeshViewer(QWidget *parent)
 	: QOpenGLWidget(parent)
-	//, vtx_vbo(oglBuffer::Type::VertexBuffer)
 	, interactionState(ROAM_CAMERA)
-	//, selectionState(SingleSelect)
 	, heMesh(nullptr)
+	, renderFlag(0)
 	, shadingSate(SHADE_WF_FLAT)
 	, dispComp(DispComp::DISP_GRID)
 	, hlComp(HighlightComp::HIGHLIGHT_CUTEDGE)
 	, grid(4, 6.0f, this)
-	, view_cam(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0), QVector3D(0, 1, 0)
-	, 54.3, 1.67, 0.1, 100)
-	, mesh_changed(false), scale(1.0)
+	, view_cam(QVector3D(4, 2, 4), QVector3D(0, 0, 0),
+		QVector3D(0, 1, 0), 54.3, 1.67, 0.1, 100)
+	, mesh_changed(false), view_scale(1.0)
 	, vRBO(this), fRBO(this), heRBO(this)
 {
 	// Set surface format for current widget
@@ -131,9 +130,14 @@ void MeshViewer::initializeGL()
 	glGenBuffers(2, fRBO.tbo);
 }
 
-
 void MeshViewer::allocateGL()
 {
+	// Clear Selection
+	while (!selVTX.empty()) selVTX.pop();
+	while (!selHE.empty()) selHE.pop();
+	while (!selFACE.empty()) selFACE.pop();
+	heMesh->exportSelection(&selVTX, &selHE, &selFACE);
+
 	heMesh->exportVertVBO(&vtx_array, &vRBO.flags);
 	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
 	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
@@ -161,24 +165,6 @@ void MeshViewer::allocateGL()
 
 	mesh_changed = false;
 }
-
-/*
-void MeshViewer::createPrimitiveBuffers(RenderBufferObject &RBO)
-{
-	// Bind VAO
-	RBO.vao.create();
-	RBO.vao.bind();
-
-	RBO.vbo->bind();
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glEnableVertexAttribArray(0);
-
-	RBO.ibo.create();
-	RBO.ibo.setUsagePattern(oglBuffer::StaticDraw);
-	RBO.ibo.bind();
-
-	RBO.releaseAll();
-}*/
 
 void MeshViewer::initShader()
 {
@@ -215,7 +201,7 @@ void MeshViewer::initShader()
 void MeshViewer::initializeFBO()
 {
 	fbo.reset(new oglFBO(width(), height(), oglFBO::CombinedDepthStencil, GL_TEXTURE_2D));
-//	selectionBuffer.resize(width()*height() * 4);
+	//selectionBuffer.resize(width()*height() * 4);
 }
 
 void MeshViewer::drawMeshToFBO()
@@ -229,7 +215,7 @@ void MeshViewer::drawMeshToFBO()
 	uid_shader.bind();
 	uid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 	uid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-	uid_shader.setUniformValue("scale", static_cast<float>(scale));
+	uid_shader.setUniformValue("scale", static_cast<float>(view_scale));
 
 	switch (interactionState)
 	{
@@ -282,7 +268,7 @@ void MeshViewer::drawMeshToFBO()
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glLineWidth(2);
+		glLineWidth(10);
 		heRBO.vao.bind();
 
 
@@ -356,9 +342,11 @@ void MeshViewer::drawMeshToFBO()
 	{
 		if (selected)
 		{
-			//renderID = heRBO.flags[renderID];
+			auto he = heMesh->heMap.at(renderID);
+			auto hef = he->flip;
 			selHE.push(renderID);
-			heMesh->heMap.at(renderID)->isPicked = true;
+			selHE.push(hef->index);
+			he->isPicked = hef->isPicked = true;
 		}
 		else
 		{
@@ -373,8 +361,9 @@ void MeshViewer::drawMeshToFBO()
 		break;
 	}
 	}
-	
+#ifdef _DEBUG
 	cout << "draw primitive id:" << renderID << endl;
+#endif // DEBUG
 }
 
 void MeshViewer::paintGL()
@@ -434,7 +423,7 @@ void MeshViewer::paintGL()
 				vtx_solid_shader.bind();
 				vtx_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				vtx_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera); 
-				vtx_solid_shader.setUniformValue("scale", static_cast<float>(scale));
+				vtx_solid_shader.setUniformValue("scale", static_cast<float>(view_scale));
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, vRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, vRBO.flag_tbo);
@@ -457,7 +446,7 @@ void MeshViewer::paintGL()
 				face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 				glUniform1ui(oglUniLoc(face_solid_shader, "hl_comp"), hlComp);
-				face_solid_shader.setUniformValue("scale", static_cast<float>(scale));
+				face_solid_shader.setUniformValue("scale", static_cast<float>(view_scale));
 				// Bind Texture Buffer
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
@@ -481,7 +470,7 @@ void MeshViewer::paintGL()
 				edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 				//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
 				glUniform1ui(oglUniLoc(edge_solid_shader, "hl_comp"), hlComp);
-				edge_solid_shader.setUniformValue("scale", static_cast<float>(scale));
+				edge_solid_shader.setUniformValue("scale", static_cast<float>(view_scale));
 				// Bind Texture Buffer
 				glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
@@ -552,7 +541,10 @@ void MeshViewer::keyPressEvent(QKeyEvent* e)
 	//    }
 	case Qt::Key_F:
 	{
-		resetCamera();
+		view_cam.WorldToCamera.setToIdentity();
+		view_cam.WorldToCamera.lookAt(QVector3D(4, 2, 4), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
+		view_cam.CameraToWorld = view_cam.WorldToCamera.inverted();
+		update();
 		break;
 	}
 	case Qt::Key_M:
@@ -767,24 +759,18 @@ void MeshViewer::selectAll()
 		for (auto f : heMesh->faces())
 			f->setPicked(true);
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
-		//fRBO.destroy();
-		//createPrimitiveBuffers(fRBO);
 		fRBO.allocateTBO();
 		break;
 	case SEL_EDGE:
 		for (auto e : heMesh->halfedges())
 			e->setPicked(true);
 		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
-		//heRBO.destroy();
-		//createPrimitiveBuffers(heRBO);
 		heRBO.allocateTBO();
 		break;
 	case SEL_VERT:
 		for (auto v : heMesh->verts())
 			v->setPicked(true);
 		heMesh->exportVertVBO(nullptr, &vRBO.flags);
-		//initialVBO();
-		//allocateVertices();
 		vRBO.allocateTBO(1);// Bind only flag tbo
 		break;
 	default:
@@ -826,9 +812,4 @@ void MeshViewer::selectInverse()
 		break;
 	}
 	update();
-}
-
-void MeshViewer::resetCamera()
-{
-	view_cam = perspCamera(QVector3D(4, 2, 4), QVector3D(0.0, 0.0, 0.0));
 }

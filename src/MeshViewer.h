@@ -156,7 +156,6 @@ public:// slots functions
 	void toggleText();
 
 private: // paint function
-	void resetCamera();
 	void allocateGL();
 
 	void initShader();
@@ -174,13 +173,13 @@ public:
 	SingleSelect = 0,
 	MultiSelect
 	};*/
-	enum InteractionState : uint32_t
+	enum InteractionState : uint8_t
 	{
 		ROAM_CAMERA = 0,
-		SEL_MULTI = 2,
-		SEL_VERT = 4,
-		SEL_FACE = 8,
-		SEL_EDGE = 16
+		SEL_MULTI = 1 << 1,
+		SEL_VERT = 1 << 2,
+		SEL_FACE = 1 << 3,
+		SEL_EDGE = 1 << 4
 	};
 	enum DataTypeMark : uint8_t
 	{
@@ -254,26 +253,26 @@ private://interaction ie selection
 
 	MouseState mouseState;
 
-	union SelectionID{
-		size_t vertexID;
-		size_t faceID;
-		size_t edgeID;
-		size_t selID;
-	} selectionID;
-
 private:
-	bool isCriticalPointModeSet = false;
-	bool isCutLocusModeset = false;
-	bool isSelecting;
-	bool showCLDistance; //show cut locus dists
-	bool showCPDistance; //show critical points dists
-	bool showCut;
-	bool showMultCut;
-	bool showOneCut;
-	bool showReebPoints;
-	bool showText;
-	bool showVIndex; // show vertex index
-
+	union
+	{
+		uint16_t renderFlag;
+		struct
+		{
+			bool isCriticalPointModeSet : 1;
+			bool isCutLocusModeset : 1;
+			bool isSelecting : 1;
+			bool showCLDistance : 1; //show cut locus dists
+			bool showCPDistance : 1; //show critical points dists
+			bool showCut : 1;
+			bool showMultCut : 1;
+			bool showOneCut : 1;
+			bool showReebPoints : 1;
+			bool showText : 1;
+			bool showVIndex : 1; // show vertex index
+		};
+	};
+	
 	uint8_t shadingSate;
 	uint32_t dispComp;//Display Components Flag
 	uint32_t hlComp;// Highlight Components Flag
@@ -288,7 +287,7 @@ private:
 
 	HDS_Mesh* heMesh;   // not own
 	bool mesh_changed;
-	double scale;
+	double view_scale;
 	//QMatrix4x4 model_matrix;
 
 	// VBOs and VAOs

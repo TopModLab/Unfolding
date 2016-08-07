@@ -18,17 +18,19 @@ void main()
 	{
 		p0.z -= 0.00125f;
 		p1.z -= 0.00125f;
-		color = vec3(0.f, 1.f, 0.2f);
-	}
-	else if (bool(flag & 2u))
-	{
-		color = vec3(1.f, 0.f, 0.f);
+		color = vec3(0.0f, 1.0f, 0.2f);
 	}
 	else// Regular edge
 	{
-		color = vec3(0.f, 0.f, 1.f);
+		color = vec3(0.0f, 0.0f, 1.0f);
 	}
-	
+
+	// Selected edge will override edge color
+	if (bool(flag & 2u))
+	{
+		color = vec3(1.f, 0.25f, 0.0f);
+	}
+
 	gl_Position = p0;
 	EmitVertex();
 

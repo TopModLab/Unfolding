@@ -10,22 +10,26 @@ void main()
 	switch (mode)
 	{
 	case 0://background
+	{
 		frag_color = vec4(0.f, 0.f, 0.f, 0.f);
 		break;
+	}
 	case 1://vertex
+	{
 		uid = gl_PrimitiveID;
-		frag_color = vec4(float(uid >> 16) / 255.0,
-			float((uid >> 8) & 0xFF) / 255.0,
-			float(uid & 0xFF) / 255.0, 1.0);
+		frag_color = vec4(float(uid >> 16) / 255.0f,
+			float((uid >> 8) & 0xFF) / 255.0f,
+			float(uid & 0xFF) / 255.0f, 1.0f);
 		break;
+	}
 	case 2://edge or face
+	{
 		uid = int(texelFetch(id_tex, gl_PrimitiveID).r);
-		//uid = gl_PrimitiveID;
-		frag_color = vec4(float(uid >> 16) / 255.0,
-			float((uid >> 8) & 0xFF) / 255.0,
-			float(uid & 0xFF) / 255.0, 1.0);
+		frag_color = vec4(float(uid >> 16) / 255.0f,
+			float((uid >> 8) & 0xFF) / 255.0f,
+			float(uid & 0xFF) / 255.0f, 1.0f);
 		break;
-	default:
-		break;
+	}
+	default: break;
 	}
 }

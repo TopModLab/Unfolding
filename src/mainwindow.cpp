@@ -436,7 +436,7 @@ void MainWindow::createToolBar()
 
 		connect(scaleValBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			[&](double val) {
-			viewer->scale = val; viewer->update(); });
+			viewer->view_scale = val; viewer->update(); });
 		ui->displayToolBar->addWidget(scaleValBox);
 		ui->displayToolBar->addSeparator();
 	}
@@ -882,7 +882,8 @@ void MainWindow::slot_disableclp()
 
 void MainWindow::slot_updateViewerColormap()
 {
-	//kkkkkkkkkkk
+	// TODO: Implement Update Colormap with New Viewer
+	// or Remove it
 	//viewer->setCurvatureColormap(ceditor->getColormap());
 }
 
@@ -913,20 +914,21 @@ void MainWindow::updateCurrentMesh()
 }
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
-	//kkkkkkkkkkk
+	// TODO: Implement Critical Point Method with New Viewer
 	//viewer->setCriticalPointsMethod(midx);
 	viewer->update();
 }
 
 void MainWindow::slot_updateCriticalPointsSmoothingTimes(int times) {
-	//kkkkkkkkkkk
+
+	// TODO: Implement Critical Point Smooth Time Method with New Viewer
 	//viewer->setCriticalPointsSmoothingTimes(times);
 	viewer->update();
 }
 
 void MainWindow::slot_updateCriticalPointsSmoothingType(int t) {
 	cout << "Smoothing type = " << t << endl;
-	//kkkkkkkkkkk
+	// TODO: Implement Critical Point Smoothing Type Method with New Viewer
 	//viewer->setCriticalPointsSmoothingType(t);
 
 	viewer->update();
@@ -934,7 +936,7 @@ void MainWindow::slot_updateCriticalPointsSmoothingType(int t) {
 
 void MainWindow::slot_updateCutLocusMethod(int midx)
 {
-	//kkkkkkkkkkk
+	// TODO: Implement Cut Locus Method with New Viewer
 	//viewer->setCutLocusMethod(midx);
 	viewer->update();
 

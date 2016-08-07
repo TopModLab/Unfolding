@@ -661,9 +661,10 @@ void HDS_Mesh::exportEdgeVBO(
 		unordered_set<he_t*> visitiedHE;
 		visitiedHE.reserve(heSetSize);
 
-
 		heIBOs->clear();
 		heIBOs->reserve(heSetSize);
+		heIDs->clear();
+		heIDs->reserve(heSetSize >> 1);
 		heFLAGs->clear();
 		heFLAGs->reserve(heSetSize >> 1);
 
@@ -911,6 +912,31 @@ void HDS_Mesh::exportFaceVBO(
 				curHE = curHE->next;
 			} while (curHE != he);
 			fFLAGs->insert(fFLAGs->end(), vidCount - 2, flag);
+		}
+	}
+}
+
+void HDS_Mesh::exportSelection(ui32q_t* selVTX, ui32q_t* selHE, ui32q_t* selFACE)
+{
+	if (selVTX != nullptr)
+	{
+		for (auto v : vertSet)
+		{
+			if (v->isPicked) selVTX->push(v->index);
+		}
+	}
+	if (selHE != nullptr)
+	{
+		for (auto he : heSet)
+		{
+			if (he->isPicked) selHE->push(he->index);
+		}
+	}
+	if (selFACE != nullptr)
+	{
+		for (auto f : faceSet)
+		{
+			if (f->isPicked) selFACE->push(f->index);
 		}
 	}
 }

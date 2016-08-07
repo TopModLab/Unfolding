@@ -89,6 +89,8 @@ public:
 		ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;
 	void exportFaceVBO(ui32s_t* fIBOs = nullptr,
 		ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr) const;
+	using ui32q_t = queue<uint32_t>;
+	void exportSelection(ui32q_t* selVTX, ui32q_t* selHE, ui32q_t* selFACE);
 
 	unordered_set<he_t*>& halfedges() { return heSet; }
 	unordered_set<face_t*> faces() const { return faceSet; }
