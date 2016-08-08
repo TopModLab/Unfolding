@@ -9,7 +9,7 @@ double MeshOrigamizer::tucked_length;
 double MeshOrigamizer::tucked_smooth;
 double MeshOrigamizer::tucked_angle;
 double MeshOrigamizer::origami_scale;
-int MeshOrigamizer::bridger_type;
+int MeshOrigamizer::bridger_type; 
 
 vector<QVector3D> MeshOrigamizer::ctrlPoints_front;
 vector<QVector3D> MeshOrigamizer::ctrlPoints_back;
@@ -417,7 +417,7 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 	auto clockWiseRotate = [](QVector2D before, QVector2D after) -> double {
 		double cosVal = QVector2D::dotProduct(before, after) / (before.length() * after.length());
 		double angle = acos(clamp<double>(cosVal, -1.0, 1.0));
-		double sinVal = (after.x() * before.y() - after.y() * before.x()) / (pow(before.x(), 2) + pow(before.y(), 2));
+		double sinVal = (after.x() * before.y() - after.y() * before.x()) / pow(before.length() ,2);
 		if (sinVal < -0.000001) {
 			angle = PI2 - angle;
 		}
@@ -434,10 +434,31 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 	};
 
 	
-	
+	vert_t* start_vert = hes_new[0]->v;
+	he_t* start_he = hes_new[0];
 	//randomly start from a vertex
-	markQueue.push(hes_new[0]->v->refid);
-	rotateFace(hes_new[0], QVector2D(1, 0));
+	for (auto vert : verts_new) {
+		start_he = vert->he;
+		if (flipMap.find(start_he) == flipMap.end())
+			start_he = start_he->flip;
+
+		he_t* cur_he = start_he;
+		bool found = false;
+		while (!cur_he->isCutEdge) {
+			cur_he = flipMap[cur_he]->next;
+			if (cur_he == start_he) {
+				found = true;
+				break;
+			}
+		}
+		if (found) {
+			start_vert = vert;
+			break;
+		}
+	}
+
+	markQueue.push(start_vert->refid);
+	rotateFace(start_he, QVector2D(1, 0));
 	
 	while (!markQueue.empty()) {
 		hdsid_t vertId = markQueue.front();
@@ -558,7 +579,7 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 
 
 	//assign flip s face
-	for (auto& he_inner : hes_new) {
+ 	for (auto& he_inner : hes_new) {
 		he_t* he = he_inner->flip;
 		if (he->f == nullptr) {
 			//find nearest cut face, if not found set a new one
@@ -597,10 +618,19 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 		if (!he->isCutEdge) {
 			//for all non-cut-edge edges, create bridge faces
 			double angle = clockWiseRotate(rotationMap[he->bridgeTwin->flip], -rotationMap[he->flip]);
+			//double angle = clockWiseRotate(rotationMap[he->flip], -rotationMap[flipMap[he->flip]]);
 			cout << angle << endl;
 			//addBridger(he, he->bridgeTwin, tucked_angle, tucked_length, tucked_smooth);
-			angle += Pi / 2;
-			addBridger(he, he->bridgeTwin, angle, tucked_length, tucked_smooth);
+			if (angle <= Pi) {
+				angle /= 2;
+				angle += Pi / 2;
+				addBridger(he, he->bridgeTwin, angle, tucked_length, tucked_smooth);
+			}else{
+				angle = PI2 - angle;
+				angle /= 2;
+				angle += Pi / 2;
+				addBridger(he->bridgeTwin, he, angle, tucked_length, tucked_smooth);
+			}
 		}
 		else {
 			// for all cut-edge edges, create flaps
@@ -651,10 +681,10 @@ bool MeshOrigamizer::origamiMesh( HDS_Mesh * mesh )
 			cout << angle << endl;
 			angle += Pi / 2;
 
-			//addBridger(he, flap_he, tucked_angle, tucked_length, tucked_smooth);
-			//addBridger(twin_he, twin_flap_he, Pi - tucked_angle, tucked_length, tucked_smooth);
-			addBridger(he, flap_he, angle, tucked_length, tucked_smooth);
-			addBridger(twin_he, twin_flap_he, Pi - angle, tucked_length, tucked_smooth);
+			addBridger(he, flap_he, tucked_angle, tucked_length, tucked_smooth);
+			addBridger(twin_he, twin_flap_he, Pi - tucked_angle, tucked_length, tucked_smooth);
+			//addBridger(he, flap_he, angle, tucked_length, tucked_smooth);
+			//addBridger(twin_he, twin_flap_he, Pi - angle, tucked_length, tucked_smooth);
 		}
 	}
 

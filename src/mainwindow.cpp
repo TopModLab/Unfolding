@@ -150,7 +150,7 @@ bool MainWindow::connectComponents()
 			ui->GESBtn->setEnabled(false);
 			ui->quadEdgeBtn->setEnabled(false);
 			ui->wingedEdgeBtn->setEnabled(false);
-			ui->origamiBtn->setEnabled(false);
+			ui->origamiBtn->setEnabled(true);
 			break;
 		}
 	});
