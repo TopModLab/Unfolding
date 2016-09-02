@@ -519,8 +519,10 @@ void MainWindow::closeFile()          //later add this function
 void MainWindow::saveFile()
 {
 	QString filename = QFileDialog::getSaveFileName(this, "Input a file name","",tr("OBJ files(*.obj)"));
+#if _DEBUG
 	cout << "saving file " << filename.toStdString() << endl;
-	MeshManager::getInstance()->saveMeshes();
+#endif
+	MeshManager::getInstance()->saveMeshes(filename.toStdString());
 }
 
 void MainWindow::triggerExportSVG()

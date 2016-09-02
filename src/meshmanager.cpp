@@ -643,9 +643,9 @@ bool MeshManager::smoothMesh()
 }
 
 
-bool MeshManager::saveMeshes()
+bool MeshManager::saveMeshes(const string &filename)
 {
-	// save only the cutted and unfolded
+	operationStack->getCurrentMesh()->save(filename);
 	return true;
 }
 

@@ -1358,7 +1358,10 @@ void HDS_Mesh::save(const string &filename)
 
 	// save the faces
 	for (int i = 0; i < faceMap.size(); ++i) {
-		auto corners = faceMap[i]->corners();
+		auto& curFace = faceMap[i];
+		if (curFace->isCutFace) continue;
+
+		auto corners = curFace->corners();
 		ss << "f ";
 		for (auto v : corners) {
 			ss << v->index + 1 << ' ';

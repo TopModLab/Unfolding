@@ -730,10 +730,13 @@
      <normaloff>:/icons/open.svg</normaloff>:/icons/open.svg</iconset>
    </property>
    <property name="text">
-    <string>Import</string>
+    <string>Import Model</string>
    </property>
    <property name="toolTip">
-    <string>Import a new obj file</string>
+    <string>Import an external model from an obj file</string>
+   </property>
+   <property name="statusTip">
+    <string>Import an external model from an obj file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -748,7 +751,10 @@
     <string>Export</string>
    </property>
    <property name="toolTip">
-    <string>Export data as</string>
+    <string>Export Unfolded Model as Graph</string>
+   </property>
+   <property name="statusTip">
+    <string>Export Unfolded Model as Graph</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
@@ -883,10 +889,13 @@
      <normaloff>:/icons/save.svg</normaloff>:/icons/save.svg</iconset>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>Save Model</string>
    </property>
    <property name="toolTip">
-    <string>Save a file</string>
+    <string>Save current model to disk</string>
+   </property>
+   <property name="statusTip">
+    <string>Save current model to disk</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>

@@ -95,7 +95,7 @@ public:
 	bool createDFormMesh();
 	// Export as SVG files
 	bool exportSVGFile(const QString &filename, const confMap &conf);
-	bool saveMeshes();
+	bool saveMeshes(const string &filename);
 
 	void setCurrentOpFlag(OperationStack::Flag curFlag) { operationStack->setCurrentFlag(curFlag); }
 public slots:
