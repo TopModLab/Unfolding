@@ -178,7 +178,7 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 	unordered_map <hdsid_t, he_t*> ori_map = ori_mesh->hesMap();
 
 
-	for(vert_t* v: cur_mesh->verts()) {
+	for(vert_t &v: cur_mesh->verts()) {
 		///assign cut faces
 		face_t* cutFace = new face_t;
 		cutFace->isCutFace = true;
@@ -188,9 +188,9 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 		vector<QVector3D> control_points_n;
 		vector<QVector3D> control_points_p;
 
-		for (he_t* he: mesh->incidentEdges(v)) {
+		for (he_t* he: mesh->incidentEdges(&v)) {
 			vert_t* v1 = he->flip->v;
-			QVector3D v_mid = (v->pos + v1->pos)/2;
+			QVector3D v_mid = (v.pos + v1->pos)/2;
 			vector<QVector3D> vpos;
 			if (onEdge) {
 				if (shapeType == 0) {
@@ -527,8 +527,8 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 	initiate();
 	cur_mesh = mesh;
 
-	for (face_t* f: cur_mesh->faces()) {
-		he_t* he = f->he;
+	for (face_t &f: cur_mesh->faces()) {
+		he_t* he = f.he;
 
 		vector<he_t*> control_edges_n;
 		vector<he_t*> control_edges_p;
@@ -642,7 +642,7 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 
 			}
 			he = he->next;
-		}while(he != f->he);
+		} while(he != f.he);
 
 		//connect pieces
 

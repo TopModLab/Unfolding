@@ -45,11 +45,11 @@ doubles_t MeshManager::getInterpolatedZValue(int lev0, int lev1, double alpha)
 
 	auto dist0 = doubles_t(hds_mesh->verts().size());
 	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = v->pos.z();
+	for (auto &v : m0->verts()) {
+		dist0[v.index] = v.pos.z();
 	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = v->pos.z();
+	for (auto &v : m1->verts()) {
+		dist1[v.index] = v.pos.z();
 	}
 	return Utils::interpolate(dist0, dist1, alpha);
 }
@@ -63,11 +63,11 @@ doubles_t MeshManager::getInterpolatedPointNormalValue(int lev0, int lev1, doubl
 
 	auto dist0 = doubles_t(hds_mesh->verts().size());
 	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+	for (auto &v : m0->verts()) {
+		dist0[v.index] = QVector3D::dotProduct(v.pos, pnormal);
 	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = QVector3D::dotProduct(v->pos, pnormal);
+	for (auto &v : m1->verts()) {
+		dist1[v.index] = QVector3D::dotProduct(v.pos, pnormal);
 	}
 	return Utils::interpolate(dist0, dist1, alpha);
 }
@@ -80,11 +80,11 @@ doubles_t MeshManager::getInterpolatedCurvature(int lev0, int lev1, double alpha
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
 	auto dist0 = doubles_t(hds_mesh->verts().size());
 	auto dist1 = doubles_t(hds_mesh->verts().size());
-	for (auto v : m0->verts()) {
-		dist0[v->index] = v->curvature;
+	for (auto &v : m0->verts()) {
+		dist0[v.index] = v.curvature;
 	}
-	for (auto v : m1->verts()) {
-		dist1[v->index] = v->curvature;
+	for (auto &v : m1->verts()) {
+		dist1[v.index] = v.curvature;
 	}
 	return Utils::interpolate(dist0, dist1, alpha);
 }
@@ -390,28 +390,28 @@ void MeshManager::cutMeshWithSelectedEdges()
 		//select no edge
 	}else if (panelType == 1) {
 		//select all edges
-		for(auto he : ref_mesh->halfedges())
+		for(auto &he : ref_mesh->halfedges())
 		{
-			he->setCutEdge(true);
-			if( selectedEdges.find(he->index) == selectedEdges.end() &&
-					selectedEdges.find(he->flip->index) == selectedEdges.end() )
+			he.setCutEdge(true);
+			if( selectedEdges.find(he.index) == selectedEdges.end() &&
+					selectedEdges.find(he.flip->index) == selectedEdges.end() )
 			{
-				selectedEdges.insert(he->index);
+				selectedEdges.insert(he.index);
 			}
 		}
 	}else {
-		for(auto he : ref_mesh->halfedges())
+		for(auto &he : ref_mesh->halfedges())
 		{
-			if( he->isPicked )
+			if( he.isPicked )
 			{
 				// use picked edges as cut edges
-				he->setPicked(false);
-				he->setCutEdge(true);
+				he.setPicked(false);
+				he.setCutEdge(true);
 
-				if( selectedEdges.find(he->index) == selectedEdges.end() &&
-						selectedEdges.find(he->flip->index) == selectedEdges.end() )
+				if( selectedEdges.find(he.index) == selectedEdges.end() &&
+						selectedEdges.find(he.flip->index) == selectedEdges.end() )
 				{
-					selectedEdges.insert(he->index);
+					selectedEdges.insert(he.index);
 				}
 			}
 		}
@@ -596,13 +596,13 @@ bool MeshManager::unfoldMesh()
 
 	// cut the mesh using the selected edges
 	set<int> selectedFaces;
-	for (auto f : ref_mesh->faces())
+	for (auto &f : ref_mesh->faces())
 	{
-		if (f->isPicked) {
+		if (f.isPicked) {
 			// use picked edges as cut edges
-			f->setPicked(false);
-			if (selectedFaces.find(f->index) == selectedFaces.end()) {
-				selectedFaces.insert(f->index);
+			f.setPicked(false);
+			if (selectedFaces.find(f.index) == selectedFaces.end()) {
+				selectedFaces.insert(f.index);
 			}
 		}
 	}
@@ -682,12 +682,12 @@ bool MeshManager::rimMesh(double rimSize)
 
 	// Select all edges to cut all faces
 	set<int> selectedEdges;
-	for (auto he : ref_mesh->halfedges())
+	for (auto &he : ref_mesh->halfedges())
 	{
-		if (selectedEdges.find(he->index) == selectedEdges.end() &&
-			selectedEdges.find(he->flip->index) == selectedEdges.end())
+		if (selectedEdges.find(he.index) == selectedEdges.end() &&
+			selectedEdges.find(he.flip->index) == selectedEdges.end())
 		{
-			selectedEdges.insert(he->index);
+			selectedEdges.insert(he.index);
 		}
 	}
 
@@ -806,8 +806,8 @@ void MeshManager::colorMeshByGeoDistance(int vidx)
 		const double sigma = 1.0;
 		unordered_map<HDS_Vertex*, double> L(mesh->verts().size());
 		doubles_t newval(mesh->verts().size());
-		for (auto vi : mesh->verts()) {
-			auto neighbors = vi->neighbors();
+		for (auto &vi : mesh->verts()) {
+			auto neighbors = vi.neighbors();
 
 			double denom = 0.0;
 			double numer = 0.0;
@@ -819,7 +819,7 @@ void MeshManager::colorMeshByGeoDistance(int vidx)
 				numer += wij * val[vj->index];
 			}
 
-			L.insert(make_pair(vi, numer / denom - val[vi->index]));
+			L.insert(make_pair(&vi, numer / denom - val[vi.index]));
 		}
 		for (auto p : L) {
 			newval[p.first->index] = val[p.first->index] + lambda * p.second;

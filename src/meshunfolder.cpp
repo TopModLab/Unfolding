@@ -309,7 +309,7 @@ bool MeshUnfolder::unfold(
 	for (auto piece : ref_mesh->pieceSet)
 	{
 		auto it_fid = piece.begin();
-		if (ref_mesh->faceMap.at(*it_fid)->isCutFace)
+		if (ref_mesh->faceSet[*it_fid].isCutFace)
 		{
 			it_fid++;
 		}
@@ -318,7 +318,7 @@ bool MeshUnfolder::unfold(
 		// Start from a face, expand all faces
 		queue<HDS_Face*> Q;
 		//unfolded_mesh->printInfo();
-		Q.push(unfolded_mesh->faceMap[fid]);
+		Q.push(&unfolded_mesh->faceSet[fid]);
 
 		int32s_t expSeq;     // sequence of expansion
 		map<int, int> parentMap;
@@ -362,7 +362,7 @@ bool MeshUnfolder::unfold(
 			
 			// Compute the spanning vectors for the first face
 			QVector3D uvec, vvec;
-			HDS_Face *face0_ref = ref_mesh->faceMap.at(expSeq.front());
+			auto face0_ref = &ref_mesh->faceSet[expSeq.front()];
 			HDS_HalfEdge *he0_ref = face0_ref->he;
 			QVector3D cface0_ref = face0_ref->center();
 			
@@ -370,7 +370,7 @@ bool MeshUnfolder::unfold(
 			vvec = QVector3D::crossProduct(face0_ref->computeNormal(), uvec);
 
 			// Project the first face to XY plane
-			HDS_Face *face0_unf = unfolded_mesh->faceMap.at(expSeq.front());
+			HDS_Face *face0_unf = &unfolded_mesh->faceSet[expSeq.front()];
 			auto oriP = he0_ref->v->pos;// +QVector3D(rand() % 5, rand() % 5, 0);
 			auto he_unf = face0_unf->he;
 			auto curHE = he_unf;

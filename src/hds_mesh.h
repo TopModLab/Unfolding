@@ -92,15 +92,15 @@ public:
 	using ui32q_t = queue<uint32_t>;
 	void exportSelection(ui32q_t* selVTX, ui32q_t* selHE, ui32q_t* selFACE);
 
-	unordered_set<he_t*>& halfedges() { return heSet; }
-	unordered_set<face_t*> faces() const { return faceSet; }
-	unordered_set<vert_t*> verts() const { return vertSet; }
-	unordered_set<face_t*>& faces() { return faceSet; }
-	unordered_set<vert_t*>& verts() { return vertSet; }
+	vector<he_t>& halfedges() { return heSet; }
+	vector<face_t> faces() const { return faceSet; }
+	vector<vert_t> verts() const { return vertSet; }
+	vector<face_t>& faces() { return faceSet; }
+	vector<vert_t>& verts() { return vertSet; }
 
-	 unordered_map<hdsid_t, he_t*>& hesMap()  { return heMap; }
-	 unordered_map<hdsid_t, face_t*>& facesMap()  { return faceMap; }
-	 unordered_map<hdsid_t, vert_t*>& vertsMap()  { return vertMap; }
+	 //unordered_map<hdsid_t, he_t*>& hesMap()  { return heMap; }
+	 //unordered_map<hdsid_t, face_t*>& facesMap()  { return faceMap; }
+	 //unordered_map<hdsid_t, vert_t*>& vertsMap()  { return vertMap; }
 
 	void addHalfEdge(he_t*);
 	void addVertex(vert_t*);
@@ -148,18 +148,18 @@ protected:
 	friend class MeshIterator;
 	friend class MeshConnector;
 private:
-	unordered_set<he_t*> heSet;
-	unordered_set<face_t*> faceSet;
-	unordered_set<vert_t*> vertSet;
+	vector<he_t> heSet;
+	vector<face_t> faceSet;
+	vector<vert_t> vertSet;
 
-	vector<face_t*> sortedFaces;
+	//vector<face_t*> sortedFaces;
 
-	unordered_map<hdsid_t, he_t*> heMap;
-	unordered_map<hdsid_t, face_t*> faceMap;
-	unordered_map<hdsid_t, vert_t*> vertMap;
+	//unordered_map<hdsid_t, he_t*> heMap;
+	//unordered_map<hdsid_t, face_t*> faceMap;
+	//unordered_map<hdsid_t, vert_t*> vertMap;
 
 	// pieces information
-	set<set<hdsid_t>> pieceSet;
+	vector<set<hdsid_t>> pieceSet;
 	BBox3* bound;
 private:
 	//bool isHollowed;

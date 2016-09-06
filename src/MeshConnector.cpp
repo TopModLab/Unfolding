@@ -106,7 +106,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
-			face_t *curFace = unfolded_mesh->faceMap.at(fid);
+			const face_t *curFace = &unfolded_mesh->faceSet[fid];
 			auto he = curFace->he;
 			auto curHE = he;
 			// Cut layer
@@ -358,7 +358,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
-			auto curFace = unfolded_mesh->faceMap.at(fid);
+			auto curFace = &unfolded_mesh->faceSet[fid];
 			auto he = curFace->he;
 			auto curHE = he;
 			// Cut layer
@@ -692,12 +692,12 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 {
 
 	auto faces = unfolded_mesh->faces();
-	unordered_set<HDS_Mesh::face_t*> cutfaces;// , infaces;
-	for (auto face : faces)
+	unordered_set<const HDS_Mesh::face_t*> cutfaces;// , infaces;
+	for (auto &face : faces)
 	{
-		if (face->isCutFace)
+		if (face.isCutFace)
 		{
-			cutfaces.insert(face);
+			cutfaces.insert(&face);
 		}
 	}
 	/************************************************************************/
@@ -1017,7 +1017,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 		}
 
 		// draw connected faces
-		set<HDS_Face*> neighbourFaces = face->connectedFaces();
+		set<HDS_Face*> neighbourFaces = face.connectedFaces();
 		for (auto face : neighbourFaces)
 		{
 			HDS_HalfEdge *he = face->he;

@@ -106,7 +106,7 @@ vector<HDS_Vertex*> HDS_Face::corners() const
 	return corners;
 }
 
-QVector3D HDS_Face::computeNormal()
+QVector3D HDS_Face::computeNormal() 
 {
 	QVector3D c = center();
 	n = QVector3D::crossProduct(he->v->pos - c, he->next->v->pos - c);

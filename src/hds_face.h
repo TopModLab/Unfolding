@@ -32,6 +32,7 @@ public:
 	QVector3D center() const;
 	vector<HDS_Vertex*> corners() const;
 	QVector3D computeNormal();
+	QVector3D updateNormal();
 	void checkPlanar();
 
 	// Check if 

@@ -305,13 +305,13 @@ void MeshViewer::drawMeshToFBO()
 		if (selected)
 		{
 			selVTX.push(renderID);
-			heMesh->vertMap.at(renderID)->isPicked = true;
+			heMesh->vertSet[renderID].isPicked = true;
 		} 
 		else
 		{
 			while (!selVTX.empty())
 			{
-				heMesh->vertMap.at(selVTX.front())->isPicked = false;
+				heMesh->vertSet[selVTX.front()].isPicked = false;
 				selVTX.pop();
 			}
 		}
@@ -324,13 +324,13 @@ void MeshViewer::drawMeshToFBO()
 		if (selected)
 		{
 			selFACE.push(renderID);
-			heMesh->faceMap.at(renderID)->isPicked = true;
+			heMesh->faceSet[renderID].isPicked = true;
 		}
 		else
 		{
 			while (!selFACE.empty())
 			{
-				heMesh->faceMap.at(selFACE.front())->isPicked = false;
+				heMesh->faceSet[selFACE.front()].isPicked = false;
 				selFACE.pop();
 			}
 		}
@@ -342,7 +342,7 @@ void MeshViewer::drawMeshToFBO()
 	{
 		if (selected)
 		{
-			auto he = heMesh->heMap.at(renderID);
+			auto he = &heMesh->heSet[renderID];
 			auto hef = he->flip;
 			selHE.push(renderID);
 			selHE.push(hef->index);
@@ -352,7 +352,7 @@ void MeshViewer::drawMeshToFBO()
 		{
 			while (!selHE.empty())
 			{
-				heMesh->heMap.at(selHE.front())->isPicked = false;
+				heMesh->heSet[selHE.front()].isPicked = false;
 				selHE.pop();
 			}
 		}
@@ -756,20 +756,20 @@ void MeshViewer::selectAll()
 	switch (interactionState) {
 
 	case SEL_FACE:
-		for (auto f : heMesh->faces())
-			f->setPicked(true);
+		for (auto &f : heMesh->faces())
+			f.setPicked(true);
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
 		fRBO.allocateTBO();
 		break;
 	case SEL_EDGE:
-		for (auto e : heMesh->halfedges())
-			e->setPicked(true);
+		for (auto &e : heMesh->halfedges())
+			e.setPicked(true);
 		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
 		heRBO.allocateTBO();
 		break;
 	case SEL_VERT:
-		for (auto v : heMesh->verts())
-			v->setPicked(true);
+		for (auto &v : heMesh->verts())
+			v.setPicked(true);
 		heMesh->exportVertVBO(nullptr, &vRBO.flags);
 		vRBO.allocateTBO(1);// Bind only flag tbo
 		break;
@@ -785,27 +785,27 @@ void MeshViewer::selectInverse()
 	{
 	case SEL_FACE:
 	{
-		for (auto f : heMesh->faces())
-			heMesh->selectFace(f->index);
+		for (auto &f : heMesh->faces())
+			heMesh->selectFace(f.index);
 		break;
 	}
 	case SEL_EDGE:
 	{
 		unordered_set<HDS_HalfEdge*> selected = heMesh->getSelectedHalfEdges();
 
-		for (auto e : heMesh->halfedges())
+		for (auto &e : heMesh->halfedges())
 		{
-			if (selected.find(e) != selected.end())
-				e->setPicked(false);
+			if (selected.find(&e) != selected.end())
+				e.setPicked(false);
 			else
-				e->setPicked(true);
+				e.setPicked(true);
 		}
 		break;
 	}
 	case SEL_VERT:
 	{
-		for (auto v : heMesh->verts())
-			heMesh->selectVertex(v->index);
+		for (auto &v : heMesh->verts())
+			heMesh->selectVertex(v.index);
 		break;
 	}
 	default:
