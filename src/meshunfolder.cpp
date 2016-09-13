@@ -31,8 +31,8 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	typedef HDS_HalfEdge he_t;
 
 	// use the previous face as reference, expand current face
-	face_t *face_prev = unfolded_mesh->faceMap.at(fprev);
-	face_t *face_cur = unfolded_mesh->faceMap.at(fcur);
+	face_t *face_prev = &unfolded_mesh->faceSet[fprev];
+	face_t *face_cur = &unfolded_mesh->faceSet[fcur];
 
 	// print the corners of the previous face
 	auto corners_prev = face_prev->corners();
@@ -76,10 +76,10 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	}
 
 	// shared edge in the reference mesh
-	he_t *he_share_ref = ref_mesh->heMap.at(he_share->index);
-	face_t *face_cur_ref = ref_mesh->faceMap.at(face_cur->index);
-	vert_t *vs_ref = he_share_ref->v;
-	vert_t *ve_ref = he_share_ref->flip->v;
+	auto he_share_ref = &ref_mesh->heSet[he_share->index];
+	auto face_cur_ref = &ref_mesh->faceSet[face_cur->index];
+	auto vs_ref = he_share_ref->v;
+	auto ve_ref = he_share_ref->flip->v;
 
 	// compute the spanning vectors for the face in the reference mesh
 	QVector3D cface_ref = face_cur_ref->center();
@@ -101,7 +101,7 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 		{
 			// compute the new position of the vertex
 			vert_t *v = curHE->v;
-			vert_t *v_ref = ref_mesh->vertMap.at(curHE->v->index);
+			const vert_t *v_ref = &ref_mesh->vertSet[curHE->v->index];
 
 			// compute the coordinates of this vertex using the reference mesh
 			QVector3D dvec_ref = v_ref->pos - vs_ref->pos;
@@ -117,10 +117,10 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 
 bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 	// for each vertex in the cutted_mesh, check the condition
-	auto isBadVertex = [](const HDS_Vertex* v) -> bool {
+	auto isBadVertex = [](const HDS_Vertex v) -> bool {
 		vector<double> sums;
 		double sum = 0;
-		auto he = v->he;
+		auto he = v.he;
 		auto curHE = he->flip->next;
 		bool hasCutFace = false;
 		do {
@@ -137,7 +137,7 @@ bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 
 			he = curHE;
 			curHE = he->flip->next;
-		} while(he != v->he);
+		} while(he != v.he);
 
 		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
@@ -169,7 +169,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		QVector3D newOrigin, newX, newY;
 		for (auto fid : piece)
 		{
-			auto face = unfolded_mesh->faceMap[fid];
+			auto face = &unfolded_mesh->faceSet[fid];
 			auto corners = face->corners();
 			verts.insert(corners.begin(), corners.end());
 			if (!face->isCutFace && !checkedOrientation)

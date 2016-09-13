@@ -33,12 +33,13 @@ HDS_Face HDS_Face::operator=(const HDS_Face &other)
 	throw "Not implemented.";
 }
 
-set<HDS_Face *> HDS_Face::connectedFaces()
+set<HDS_Face *> HDS_Face::connectedFaces() const
 {
 	// Find all faces that are directly connected to current face
 	set<HDS_Face*> faces;
 		
-	faces.insert(this);
+	//TODO: force cast
+	faces.insert(const_cast<HDS_Face*>(this));
 	auto curHE = this->he;
 	do {
 		auto f = curHE->flip->f;
@@ -110,6 +111,14 @@ QVector3D HDS_Face::computeNormal()
 {
 	QVector3D c = center();
 	n = QVector3D::crossProduct(he->v->pos - c, he->next->v->pos - c);
+	n.normalize();
+	return n;
+}
+
+QVector3D HDS_Face::computeNormal() const
+{
+	QVector3D c = center();
+	QVector3D n = QVector3D::crossProduct(he->v->pos - c, he->next->v->pos - c);
 	n.normalize();
 	return n;
 }

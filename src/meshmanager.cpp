@@ -352,7 +352,7 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 			nullface->isCutFace = true;
 			nullface->he = he;
 			nullface->he = null_hefs[0];
-			faces.push_back(nullface);
+			faces.push_back(*nullface);
 		}
 	}
 	

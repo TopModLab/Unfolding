@@ -25,13 +25,14 @@ public:
 	void setPicked(bool v) { isPicked = v; }
 
 	// Find all directly connected faces
-	set<HDS_Face *> connectedFaces();
-	// Find all linked faces in current partiction
+	set<HDS_Face *> connectedFaces() const;
+	// Find all linked faces in current partition
 	set<HDS_Face *> linkedFaces();
 
 	QVector3D center() const;
 	vector<HDS_Vertex*> corners() const;
 	QVector3D computeNormal();
+	QVector3D computeNormal() const;
 	QVector3D updateNormal();
 	void checkPlanar();
 

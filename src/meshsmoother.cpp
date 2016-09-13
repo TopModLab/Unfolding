@@ -17,8 +17,8 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 	const double CTHRES = 1e-6;
 	vector<HDS_Vertex*> H;
 	for (auto v : mesh->vertSet) {
-		if ( fabs(v->curvature) > CTHRES )
-			H.push_back(v);
+		if ( fabs(v.curvature) > CTHRES )
+			H.push_back(&v);
 	}
 	std::make_heap(H.begin(), H.end(), vertex_comp);
 
@@ -242,22 +242,22 @@ void MeshSmoother::smoothMesh_Laplacian(HDS_Mesh *mesh)
 
 	//  cout<<"mesh->vertSet"<<mesh->vertSet.size()<<endl;// later added
 	for (auto vi : mesh->vertSet) {
-		auto neighbors = vi->neighbors();
+		auto neighbors = vi.neighbors();
 
 		double denom = 0.0;
 		QVector3D numer(0, 0, 0);
 
 		for (auto vj : neighbors) {
-			double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
+			double wij = 1.0 / (vi.pos.distanceToPoint(vj->pos) + sigma);
 			denom += wij;
 			numer += wij * vj->pos;
 		}
 		//cout<<"vi.pos"<<nn<<vi->pos<<endl;// later added
 		nn+=1;                           // later added
-		L.insert(make_pair(vi, numer/denom-vi->pos));
+		L.insert(make_pair(&vi, numer/denom-vi.pos));
 	}
 
 	for (auto vi : mesh->vertSet) {
-		vi->pos += lambda * L.at(vi);
+		vi.pos += lambda * L.at(&vi);
 	}
 }

@@ -159,7 +159,7 @@ void HDS_Mesh::updatePieceSet()
 				curPiece.insert(cf->index);
 				visitedFaces.insert(cf->index);
 			}
-			pieceSet.insert(curPiece);
+			pieceSet.push_back(curPiece);
 		}
 	}
 #ifdef _DEBUG
@@ -1100,28 +1100,31 @@ HDS_Mesh::he_t * HDS_Mesh::insertEdge(HDS_Mesh::vert_t* v1, HDS_Mesh::vert_t* v2
 	return he;
 }
 
-template <typename T>
-void HDS_Mesh::flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m) {
-	auto it = m.find(idx);
-
-	if( it != m.end() ) {
-		it->second->setPicked( !it->second->isPicked );
-	}
-}
+// template <typename T>
+// void HDS_Mesh::flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m) {
+// 	auto it = m.find(idx);
+// 
+// 	if( it != m.end() ) {
+// 		it->second->setPicked( !it->second->isPicked );
+// 	}
+// }
 
 void HDS_Mesh::selectFace(hdsid_t idx)
 {
-	flipSelectionState(idx, faceMap);
+	faceSet[idx].setPicked(!faceSet[idx].isPicked);
+//	flipSelectionState(idx, faceSet);
 }
 
 void HDS_Mesh::selectEdge(hdsid_t idx)
 {
-	flipSelectionState(idx, heMap);
+	heSet[idx].setPicked(!heSet[idx].isPicked);
+//	flipSelectionState(idx, heMap);
 }
 
 void HDS_Mesh::selectVertex(hdsid_t idx)
 {
-	flipSelectionState(idx, vertMap);
+	vertSet[idx].setPicked(!vertSet[idx].isPicked);
+//	flipSelectionState(idx, vertMap);
 }
 
 vector<HDS_Mesh::vert_t> HDS_Mesh::getSelectedVertices()
@@ -1171,7 +1174,7 @@ vector<HDS_Mesh::face_t> HDS_Mesh::getSelectedFaces()
 }
 
 
-vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
+vector<HDS_Mesh::vert_t> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
 {
 	//TODO: currently not used
 	auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
@@ -1200,7 +1203,7 @@ vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, cons
 	}
 
 	int s11=0,s22=0,s33=0;
-	auto isReebPoint = [&](vert_t* v) {
+	auto isReebPoint = [&](vert_t v) {
 
 
 		int s1=0,s2=0,s3=0;
@@ -1219,20 +1222,20 @@ vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, cons
 
 
 
-			auto neighbors = v->neighbors();
+			auto neighbors = v.neighbors();
 
 			// if all neighbors have smaller z-values
 			bool allSmaller = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
 
 					//    cout<<"moorseFunc(n"<<n->index<<", a, b, c) = "<<moorseFunc(n, a, b, c)<<endl;
 					//    cout<<"moorseFunc(v"<<v->index<<", a, b, c) = "<<moorseFunc(v, a, b, c)<<endl;
-					return moorseFunc(n, a, b, c) > moorseFunc(v, a, b, c);
+					return moorseFunc(n, a, b, c) > moorseFunc(&v, a, b, c);
 
 		});
 
 			// if all neighbors have larger z-values
 			bool allLarger = std::all_of(neighbors.begin(), neighbors.end(), [&](vert_t* n) {
-					return moorseFunc(n, a, b, c) < moorseFunc(v, a, b, c);
+					return moorseFunc(n, a, b, c) < moorseFunc(&v, a, b, c);
 		});
 			//   cout<<" moorseFunc("<<v->index<<", a, b, c) = "<< moorseFunc(v, a, b, c);
 			// if this is a saddle point
@@ -1243,11 +1246,11 @@ vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, cons
 			{
 
 				for (auto n : neighbors) {
-					double st= moorseFunc(n, a, b, c) - moorseFunc(v, a, b, c);
+					double st= moorseFunc(n, a, b, c) - moorseFunc(&v, a, b, c);
 					//     if(abs(st)<1e-5) st=0;                                             //later changed;
 					diffs.push_back(st);
 					//   diffs[n->index]=st;
-					if(v->index==6||v->index==7||v->index==5||v->index==8||v->index==100){
+					if(v.index==6||v.index==7||v.index==5||v.index==8||v.index==100){
 						//          cout<<"moorseFunc("<<n->index<<", a, b, c) - moorseFunc("<<v->index<<", a, b, c) = "<<st<<endl;
 					}
 
@@ -1279,8 +1282,8 @@ vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, cons
 				isSaddle = (ngroups >= 4 && ngroups % 2 == 0);
 
 				if (isSaddle) {
-					v->rtype = HDS_Vertex::Saddle;
-					v->sdegree = (ngroups - 2) / 2;
+					v.rtype = HDS_Vertex::Saddle;
+					v.sdegree = (ngroups - 2) / 2;
 					//     cout << "Saddle: " << v->index << ",moorseFunc(v, a, b, c) =  " << moorseFunc(v, a, b, c) << endl;
 					//for (auto neighbor : neighbors) {
 					//  cout << moorseFunc(neighbor, a, b, c) << " ";
@@ -1293,7 +1296,7 @@ vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, cons
 			}
 
 			if (allSmaller) {
-				v->rtype = HDS_Vertex::Minimum;
+				v.rtype = HDS_Vertex::Minimum;
 				//       cout << "Minimum: " << v->index << ",moorseFunc(v, a, b, c) =  " << moorseFunc(v, a, b, c) << endl;
 				//for (auto neighbor : neighbors) {
 				//  cout << moorseFunc(neighbor, a, b, c) << " ";
@@ -1305,7 +1308,7 @@ vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, cons
 
 
 			if (allLarger) {
-				v->rtype = HDS_Vertex::Maximum;
+				v.rtype = HDS_Vertex::Maximum;
 				//     cout << "Maximum: " << v->index << ",moorseFunc(v, a, b, c) =  " << moorseFunc(v, a, b, c) << endl;
 				//for (auto neighbor : neighbors) {
 				//  cout << moorseFunc(neighbor, a, b, c) << " ";
@@ -1319,11 +1322,11 @@ vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, cons
 
 			if (allSmaller || allLarger || isSaddle) {}
 			else {
-				v->rtype = HDS_Vertex::Regular;
+				v.rtype = HDS_Vertex::Regular;
 				return false;
 			}
 		}
-		if(s1==3)s11+=v->sdegree;
+		if(s1==3)s11+=v.sdegree;
 		if(s2==3)s22+=1;
 		if(s3==3)s33+=1;
 		cout<<"maximum = "<<s33<<endl;
@@ -1341,7 +1344,7 @@ void HDS_Mesh::colorVertices(const doubles_t &val)
 {
 #if 1
 	for (int i = 0; i < vertSet.size(); ++i) {
-		vertMap[i]->colorVal = val[i];
+		vertSet[i].colorVal = val[i];
 	}
 
 #else
@@ -1358,17 +1361,15 @@ void HDS_Mesh::save(const string &filename)
 	stringstream ss;
 
 	// save the vertices first
-	for (int i = 0; i < vertMap.size(); ++i) {
-		auto v = vertMap[i];
-		ss << "v " << v->pos.x() << ' ' << v->pos.y() << ' ' << v->pos.z() << endl;
+	for (auto v : vertSet) {
+		ss << "v " << v.pos.x() << ' ' << v.pos.y() << ' ' << v.pos.z() << endl;
 	}
 
 	// save the faces
-	for (int i = 0; i < faceMap.size(); ++i) {
-		auto& curFace = faceMap[i];
-		if (curFace->isCutFace) continue;
+	for (auto curFace : faceSet) {
+		if (curFace.isCutFace) continue;
 
-		auto corners = curFace->corners();
+		auto corners = curFace.corners();
 		ss << "f ";
 		for (auto v : corners) {
 			ss << v->index + 1 << ' ';

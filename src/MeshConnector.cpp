@@ -601,7 +601,7 @@ void MeshConnector::exportGESPiece(FILE* fp,
 		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
-			face_t *curFace = unfolded_mesh->faceMap.at(fid);
+			auto curFace = &unfolded_mesh->faceSet[fid];
 			auto he = curFace->he;
 			auto curHE = he;
 			// Cut layer
@@ -747,6 +747,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 			}
 		}
 	}*/
+
 	for (auto face : cutfaces)
 	{
 		HDS_HalfEdge *he = face->he;
@@ -1017,7 +1018,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 		}
 
 		// draw connected faces
-		set<HDS_Face*> neighbourFaces = face.connectedFaces();
+		auto neighbourFaces = face->connectedFaces();
 		for (auto face : neighbourFaces)
 		{
 			HDS_HalfEdge *he = face->he;
@@ -1096,7 +1097,7 @@ void MeshConnector::exportRimmedPiece(FILE* fp,
 		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
-			face_t *curFace = unfolded_mesh->faceMap.at(fid);
+			auto curFace = &unfolded_mesh->faceSet[fid];
 			
 			if (curFace->isCutFace)
 			{

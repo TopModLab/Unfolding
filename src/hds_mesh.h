@@ -60,7 +60,7 @@ public:
 					const vector<he_t> &hes);
 
 
-	vector<vert_t*> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
+	vector<vert_t> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
 	vector<vert_t> getSelectedVertices();
 	vector<he_t> getSelectedEdges(); //use one half edge to represent an edge
@@ -121,8 +121,8 @@ public:
 
 	static he_t* insertEdge(vert_t* v1, vert_t* v2, he_t* he1 = nullptr, he_t* he2 = nullptr);
 
-	template <typename T>
-	void flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m);
+// 	template <typename T>
+// 	void flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m);
 	void selectFace(hdsid_t idx);
 	void selectEdge(hdsid_t idx);
 	void selectVertex(hdsid_t idx);

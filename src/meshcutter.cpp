@@ -29,7 +29,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	// cut vertices with number of connected cut edges
 	map<vert_t*, int> cutVerts;
 	unordered_set<int> cutEdgesFlips;//new flip edges of cut edges
-	unordered_set<int> cutFacesTotal;//all temporatry cut faces
+	unordered_set<int> cutFacesTotal;//all temporary cut faces
 
 	// handle hole face
 	for (auto f: mesh->faces()) {
@@ -93,7 +93,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		he.flip = he_new_flip;
 
 		he_new_flip->index = HDS_HalfEdge::assignIndex();
-		mesh->addHalfEdge(he_new_flip);
+		mesh->addHalfEdge(*he_new_flip);
 		cutEdgesFlips.insert(he_new_flip->index);//record new half-edge
 
 		// the flip of hef
@@ -110,17 +110,17 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		hef_new_flip->index = HDS_HalfEdge::assignIndex();
 
 		// Assign refid to new edge
-		he_new_flip->refid = hef_new_flip->refid = he->refid;
+		he_new_flip->refid = hef_new_flip->refid = he.refid;
 		// HDS_Common::assignRef_ID(he->index, HDS_Common::FROM_EDGE);
 
-		mesh->addHalfEdge(hef_new_flip);
+		mesh->addHalfEdge(*hef_new_flip);
 		cutEdgesFlips.insert(hef_new_flip->index);//record new half-edge
 
 		// fix the new face
 		nf->he = he_new_flip;
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = true;
-		mesh->addFace(nf);
+		mesh->addFace(*nf);
 		cutFacesTotal.insert(nf->index);
 
 		// record this cut event using twin
@@ -263,13 +263,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 			// remove the old vertex and add new vertices
 			cout << "removing vertex " << cv.first->index << endl;
-			mesh->vertSet.erase(mesh->vertSet.find(cv.first));
+			mesh->vertSet.erase(mesh->vertSet.begin() + cv.first->index);
+			//mesh->vertSet.erase(mesh->vertSet.find(cv.first));
 			//mesh->vertMap.erase(cv.first->index);
 			delete cv.first;
 
 			for( auto v : cv_new ) {
 				cout << "inserting vertex " << v->index << endl;
-				mesh->addVertex(v);
+				mesh->addVertex(*v);
 			}
 #ifdef _DEBUG
 			mesh->printInfo("merged");
@@ -283,17 +284,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 
 	// delete old cut face, create new cut face depending on edge loop
-	while (!cutFacesTotal.empty())
+	for (auto index : cutFacesTotal)
 	{
-		auto f = mesh->faceMap[*cutFacesTotal.begin()];
-		if (mesh->faceSet.find(f) != mesh->faceSet.end())
+		if (index >= mesh->faceSet.size())
 		{
-			cout << "removing face " << f->index << endl;
-
-			cutFacesTotal.erase(f->index);
-			mesh->faceSet.erase(f);
-			mesh->faceMap.erase(f->index);
-			delete f;
+			cout << "FATAL: Cut face out of index boundary" << endl;
+		} else {
+			cout << "removing face " << index << endl;
+			mesh->faceSet.erase(mesh->faceSet.begin() + index);
 		}
 	}
 
@@ -304,9 +302,9 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 		nf->index = HDS_Face::assignIndex();
 		nf->isCutFace = true;
-		mesh->addFace(nf);
+		mesh->addFace(*nf);
 
-		auto he = mesh->heMap[*cutEdgesFlips.begin()];
+		auto he = &mesh->heSet[*cutEdgesFlips.begin()];
 		nf->he = he;
 		auto curHE = he;
 		do
@@ -318,14 +316,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	}
 
 	// update the curvature of each vertex
-	mesh->vertMap.clear();
+//	mesh->vertMap.clear();
 	HDS_Vertex::resetIndex();
 	for( auto &v : mesh->vertSet )
 	{
-		v->computeCurvature();
-		v->index = HDS_Vertex::assignIndex();
-		mesh->vertMap.insert(make_pair(v->index, v));
-		cout << v->index << ": " << (*v) << endl;
+		v.computeCurvature();
+		v.index = HDS_Vertex::assignIndex();
+//		mesh->vertMap.insert(make_pair(v->index, v));
+		cout << v.index << ": " << (v) << endl;
 	}
 
 	cuttingProgress.setValue(100);
@@ -348,8 +346,8 @@ MeshCutter::PathInfo MeshCutter::allPairShortestPath(HDS_Mesh *mesh) {
 
 	// floyd-warshall
 	for(auto e : mesh->heSet) {
-		auto u = e->v;
-		auto v = e->flip->v;
+		auto u = e.v;
+		auto v = e.flip->v;
 		m[u->index][v->index] = make_pair(u->pos.distanceToPoint(v->pos), v->index);
 	}
 
@@ -401,9 +399,9 @@ vector<MeshCutter::Edge> MeshCutter::minimumSpanningTree(PQ &edges, int nVerts) 
 set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 {
 	cout << "Finding cut edges..." << endl;
-	auto isBadVertex = [](HDS_Vertex* v) -> bool {
+	auto isBadVertex = [](HDS_Vertex v) -> bool {
 		double sum = 0;
-		auto he = v->he;
+		auto he = v.he;
 		auto curHE = he->flip->next;
 		bool hasCutFace = false;
 		do {
@@ -421,7 +419,7 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 			he = curHE;
 
 			curHE = he->flip->next;
-		}while( he != v->he ) ;
+		}while( he != v.he ) ;
 
 		// either sums up roughly 2 * Pi, or has a cut face connected.
 		return (sum > PI2) || (sum < PI2 && !hasCutFace);
@@ -430,8 +428,8 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 	set<int> cutEdges;
 
 	// find out all bad vertices
-	unordered_set<HDS_Vertex*> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
-	unordered_map<HDS_Vertex*, int> cutVerticesIndex;
+	vector<HDS_Vertex> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
+	unordered_map<HDS_Vertex, int> cutVerticesIndex;
 	// label the bad vertices
 	int vidx = 0;
 	for(auto x : cutVertices) {
@@ -443,8 +441,10 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 	PQ edges;
 	for(auto x : cutVertices) {
 		for(auto y : cutVertices) {
-			if( x->index < y->index ) {
-				edges.push(Edge(cutVerticesIndex[x], cutVerticesIndex[y], x->index, y->index, pathinfo[x->index][y->index].first));
+			if( x.index < y.index ) {
+				edges.push(Edge(cutVerticesIndex[x], cutVerticesIndex[y], 
+					x.index, y.index, 
+					pathinfo[x.index][y.index].first));
 			}
 		}
 	}
@@ -469,11 +469,11 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 		// and form a cut edge tree starting from this edge
 		for(int i=0;i<path.size()-1;++i) {
 			int u = path[i], v = path[i+1];
-			auto vu = mesh->vertMap[u], vv = mesh->vertMap[v];
-			auto he = vu->he;
+			auto vu = mesh->vertSet[u], vv = mesh->vertSet[v];
+			auto he = vu.he;
 			auto curHE = he;
 			do {
-				if( curHE->flip->v == vv ) {
+				if( curHE->flip->v == &vv ) {
 					cutEdges.insert(curHE->index);
 					curHE->setCutEdge(true);
 					break;

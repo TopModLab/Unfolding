@@ -146,8 +146,11 @@ HDS_Face* MeshExtender::duplicateFace(face_t* face, face_t* cutFace)
 	}
 	face_t* newFace = createFace(vertices, cutFace);
 	newFace->refid = face->refid;
-	faces_new.push_back(newFace);
-	verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+	faces_new.push_back(*newFace);
+	for (auto newv : vertices)
+	{
+		verts_new.push_back(*newv);
+	}
 	return newFace;
 }
 
@@ -240,7 +243,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			///for all non-cut-edge edges, create bridge faces
 			HDS_Vertex v1_ori = ori_vec[(he->v->refid)>>2];
 			HDS_Vertex v2_ori = ori_vec[(he->bridgeTwin->v->refid)>>2];
-			vector <QVector3D> vpair = scaleBridgerEdge(&v1_ori, &v2_ori);
+			vector <QVector3D> vpair = scaleBridgerEdge(v1_ori, v2_ori);
 			addBridger(he, he->bridgeTwin, vpair);
 
 		}else {
@@ -333,7 +336,7 @@ bool MeshExtender::updateNewMesh()
 		he.index = HDS_HalfEdge::assignIndex();
 		he.flip->index = HDS_HalfEdge::assignIndex();
 		cur_mesh->addHalfEdge(he);
-		cur_mesh->addHalfEdge(he.flip);
+		cur_mesh->addHalfEdge(*(he.flip));
 	}
 
 	if (cur_mesh->validate()) return true;

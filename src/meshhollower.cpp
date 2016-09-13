@@ -33,15 +33,15 @@ bool MeshHollower::hollowMesh(
 
 	unordered_set<he_t*> old_edges;
 	for (auto he: ori_mesh->halfedges()) {
-		if (old_edges.find(he->flip) == old_edges.end())
-			old_edges.insert(he);
+		if (old_edges.find(he.flip) == old_edges.end())
+			old_edges.insert(&he);
 	}
 
-    unordered_set<face_t*> originalFaces = ori_mesh->faces();
+    vector<face_t> originalFaces = ori_mesh->faces();
 
 	double bridgerScale = HDS_Bridger::getScale();
     for (auto f : originalFaces) {
-		f->setScaleFactor(bridgerScale);
+		f.setScaleFactor(bridgerScale);
 	}
 
 	//set new bridger on each edge
@@ -62,10 +62,10 @@ bool MeshHollower::hollowMesh(
 		he1_v1->refid = he2_v1->refid = he_v->refid;
 		he1_v2->refid = he2_v2->refid = he_flip_v->refid;
 
-		verts_new.push_back(he1_v1);
-		verts_new.push_back(he1_v2);
-		verts_new.push_back(he2_v1);
-		verts_new.push_back(he2_v2);
+		verts_new.push_back(*he1_v1);
+		verts_new.push_back(*he1_v2);
+		verts_new.push_back(*he2_v1);
+		verts_new.push_back(*he2_v2);
 
 		//new edge pair based on new vertex position
 		he_t* he1 = HDS_Mesh::insertEdge(he1_v1, he1_v2);
@@ -82,8 +82,8 @@ bool MeshHollower::hollowMesh(
 		he2->refid = he2->flip->refid = he->flip->refid;
 		//	= HDS_Common::assignRef_ID(he->flip->index, HDS_Common::FROM_EDGE);
 
-		hes_new.push_back(he1);
-		hes_new.push_back(he2);
+		hes_new.push_back(*he1);
+		hes_new.push_back(*he2);
 
 
 		//set edge cut face
@@ -99,10 +99,10 @@ bool MeshHollower::hollowMesh(
 
 		he1->f = cutFace;
 		he1->flip->f = cutFace;
-		faces_new.push_back(cutFace);
+		faces_new.push_back(*cutFace);
 
 
-		vector <QVector3D> vpair = scaleBridgerEdge(he->flip->v, he->v);
+		vector <QVector3D> vpair = scaleBridgerEdge(*he->flip->v, *he->v);
 
 		//add bridger
 		addBridger(he1->flip, he2->flip, vpair);
@@ -116,8 +116,8 @@ bool MeshHollower::hollowMesh(
 			he1->setCutEdge(false);
 			he2->setCutEdge(false);
 
-			faces_new.push_back(addFlapFace(type, he, he1, cutFace));
-			faces_new.push_back(addFlapFace(type, he->flip, he2, cutFace));
+			faces_new.push_back(*addFlapFace(type, he, he1, cutFace));
+			faces_new.push_back(*addFlapFace(type, he->flip, he2, cutFace));
 		}
 	}
 	//cout << "Ref Map Size: " << refMapPointer->size() << endl;
@@ -128,8 +128,8 @@ bool MeshHollower::hollowMesh(
 	
 	if (flapSize > 0) {
 		//generate hole position ref map
-		for (face_t* f : originalFaces) {
-			he_t* curHE = f->he;
+		for (auto f : originalFaces) {
+			he_t* curHE = f.he;
 			do {
 				//get prev and next flap
 				Flap flap_prev = flapMap[curHE->prev];
@@ -151,7 +151,7 @@ bool MeshHollower::hollowMesh(
 				(*refMapPointer)[flap_cur.flap_he->flip->index] = flip_t;
 
 				curHE = curHE->next;
-			} while (curHE != f->he);
+			} while (curHE != f.he);
 		}
 	}
 	return true;
@@ -188,7 +188,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 
 	}else {
 		//get parallel flaps
-		//linear area incresement using sqrt(flapSize)
+		//linear area increments using sqrt(flapSize)
 		v1_flap = (1.0 - flapSize) * v1 + flapSize * center;
 		v2_flap = (1.0 - flapSize) * v2 + flapSize * center;
 	}
@@ -214,7 +214,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 
 		break;
 	}
-	case 1://mult flap
+	case 1://multi flap
 	{
 		cur_mesh->setProcessType(HDS_Mesh::WINGED_PROC);
 
@@ -288,7 +288,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	}
 
 	for (auto v: vertices)
-		verts_new.push_back(v);
+		verts_new.push_back(*v);
 
 	vertices.insert(vertices.begin(),startHE->flip->v);
 	vertices.push_back(startHE->v);
