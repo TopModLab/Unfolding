@@ -37,7 +37,7 @@ public:
 	face_t* bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2);
 
 	int index;
-	bool isFlap; //if original he is cutted, Bridger becomes flap
+	bool isFlap; //if original he is cut, Bridger becomes flap
 
 	//config Bridger
 	void setCutFace(face_t* cutFace1, face_t* cutFace2);

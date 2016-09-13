@@ -20,7 +20,7 @@ public:
 	MeshExtender(){}
 	static bool extendMesh(HDS_Mesh *mesh);
 
-	static void setOriMesh(HDS_Mesh* hds_mesh);
+	static void setOriMesh(const HDS_Mesh* hds_mesh);
 protected:
 
 	friend class MeshHollower;
@@ -34,7 +34,7 @@ protected:
 	//cubic bezier curve based bridger
 
 
-	static vector <QVector3D> scaleBridgerEdge(vert_t* v1, vert_t* v2);
+	static vector <QVector3D> scaleBridgerEdge(vert_t v1, vert_t v2);
 
 
 	static HDS_Face* createFace(vector<HDS_Vertex*> vertices, face_t* cutFace = nullptr);
@@ -44,11 +44,11 @@ protected:
 	static void assignCutFace(face_t* face, face_t* cutFace);
 
 	static HDS_Mesh* cur_mesh;
-	static HDS_Mesh* ori_mesh;
+	static const HDS_Mesh* ori_mesh;
 
-	static vector<he_t*> hes_new;
-	static vector<vert_t*> verts_new;
-	static vector<face_t*> faces_new;
+	static vector<he_t> hes_new;
+	static vector<vert_t> verts_new;
+	static vector<face_t> faces_new;
 
 private:
 	static void createBridger(HDS_Bridger* Bridger);

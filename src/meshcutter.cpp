@@ -33,15 +33,15 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 	// handle hole face
 	for (auto f: mesh->faces()) {
-		if (f->isHole) {
-			f->isCutFace = true;
-			cutFacesTotal.insert(f->index);
-			HDS_HalfEdge* edge = f->he;
+		if (f.isCutFace) {
+			//f->isCutFace = true;
+			cutFacesTotal.insert(f.index);
+			HDS_HalfEdge* edge = f.he;
 			do {
 				edge->setCutEdge(true);
 				cutEdgesFlips.insert(edge->index);
 				edge = edge->next;
-			}while(edge != f->he);
+			}while(edge != f.he);
 
 			cutVerts.insert(make_pair(edge->v, 1));
 		}
@@ -49,9 +49,9 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	// split each cut edge into 2 edges
 	for(auto heIdx : edges)
 	{
-		auto he = mesh->heMap[heIdx];
-		auto hef = he->flip;
-		auto vs = he->v;
+		auto he = mesh->heSet[heIdx];
+		auto hef = he.flip;
+		auto vs = he.v;
 		auto ve = hef->v;
 
 		// record the number of cut edges the cut vertices is connected to
@@ -81,7 +81,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 		// set two new edges to be cut edges and assign pointers(next, prev) to match two cut edges
 		// the flip of he
-		he_new_flip->flip = he;
+		he_new_flip->flip = &he;
 		he_new_flip->f = nf;
 		//he_new_flip->f = he->f;
 		he_new_flip->v = ve;
@@ -90,7 +90,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		he_new_flip->isCutEdge = true;
 
 
-		he->flip = he_new_flip;
+		he.flip = he_new_flip;
 
 		he_new_flip->index = HDS_HalfEdge::assignIndex();
 		mesh->addHalfEdge(he_new_flip);
@@ -329,7 +329,6 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	}
 
 	cuttingProgress.setValue(100);
-	mesh->updateSortedFaces();
 	mesh->updatePieceSet();
 	return true;
 }

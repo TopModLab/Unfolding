@@ -167,9 +167,9 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 		heCount += inFaces[i]->size;
 
 	// Half-Edge Data in Mesh
-	vector<vert_t*> verts(vertsCount, nullptr);
-	vector<face_t*> faces(facesCount, nullptr);
-	vector<he_t*> hes(heCount, nullptr);
+	vector<vert_t> verts(vertsCount);
+	vector<face_t> faces(facesCount);
+	vector<he_t> hes(heCount);
 	// Temporary Half-Edge Pair Recorder
 	using hepair_t = pair<hdsid_t, hdsid_t>;
 	map<hepair_t, he_t*> heMap;
@@ -178,34 +178,34 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 	for (size_t i = 0; i < vertsCount; i++)
 	{
 		size_t vid = i * 3;
-		verts[i] = new vert_t(QVector3D(
+		verts[i].pos = (QVector3D(
 					static_cast<float>(inVerts[vid]),
 					static_cast<float>(inVerts[vid + 1]),
 					static_cast<float>(inVerts[vid + 2])));
 	}
 	// Malloc Faces
-	for (size_t i = 0; i < facesCount; i++)
-	{
-		faces[i] = new face_t;
-	}
+//	for (size_t i = 0; i < facesCount; i++)
+//	{
+//		faces[i] = new face_t;
+//	}
 
 	for (size_t i = 0, heIdx = 0; i < facesCount; i++)
 	{
 
 		auto& Fi = inFaces[i];
-		face_t* curFace = faces[i];
+		face_t* curFace = &faces[i];
 
 		for (size_t j = 0; j < Fi->size; j++)
 		{
 			he_t* curHe = new he_t;
-			vert_t* curVert = verts[Fi->v[j]];
+			vert_t* curVert = &verts[Fi->v[j]];
 			curHe->v = curVert;
 			curHe->f = curFace;
 
 			if (curVert->he == nullptr)
 				curVert->he = curHe;
 
-			hes[heIdx + j] = curHe;
+			hes[heIdx + j] = *curHe;
 		}
 
 		// link the half edge of the face
@@ -216,8 +216,8 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 			int jn = j + 1;
 			if (jn >= Fi->size) jn -= Fi->size;
 
-			hes[heIdx + j]->prev = hes[heIdx + jp];
-			hes[heIdx + j]->next = hes[heIdx + jn];
+			hes[heIdx + j].prev = &hes[heIdx + jp];
+			hes[heIdx + j].next = &hes[heIdx + jn];
 
 			int vj = Fi->v[j];
 			//     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
@@ -229,7 +229,7 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 			if (heMap.find(vPair) == heMap.end())
 			//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
 			{
-				heMap[vPair] = hes[heIdx + j];
+				heMap[vPair] = &hes[heIdx + j];
 				//address transport; hes[heIdx + j] = curHe; *****critical******
 				//      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
 				//      ss+=1;  //later added;
@@ -240,7 +240,7 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 			}
 		}
 		//    cout<<"ss = "<<ss<<endl;    //later added;
-		curFace->he = hes[heIdx];
+		curFace->he = &hes[heIdx];
 		curFace->computeNormal();
 
 		heIdx += Fi->size;
@@ -288,18 +288,22 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 		msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
 		if (msgBox.exec() == QMessageBox::Cancel)
 		{
-			for (auto v : verts)
-			{
-				delete v;
-			}
-			for (auto f : faces)
-			{
-				delete f;
-			}
-			for (auto he : hes)
-			{
-				delete he;
-			}
+			verts.clear();
+			faces.clear();
+			hes.clear();
+
+// 			for (auto v : verts)
+// 			{
+// 				delete v;
+// 			}
+// 			for (auto f : faces)
+// 			{
+// 				delete f;
+// 			}
+// 			for (auto he : hes)
+// 			{
+// 				delete he;
+// 			}
 			delete thismesh;
 			return nullptr;
 		}
@@ -351,15 +355,15 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 			faces.push_back(nullface);
 		}
 	}
-
+	
 	for (auto &v : verts) {
-		v->computeCurvature();
-		v->computeNormal();
+		v.computeCurvature();
+		v.computeNormal();
 	}
 	int negCount = 0;
 	for (auto &he : hes) {
-		he->computeCurvature();
-		if (he->isNegCurve) negCount++;
+		he.computeCurvature();
+		if (he.isNegCurve) negCount++;
 	}
 	thismesh->setMesh(faces, verts, hes);
 
@@ -666,8 +670,6 @@ bool MeshManager::setGRS(const confMap &conf)
 		return false;
 	}
 
-	//update sorted faces
-	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
 	return true;
@@ -721,7 +723,6 @@ bool MeshManager::set3DRimMesh(const confMap &conf)
 		MeshRimFace::rimMeshV(outMesh);
 	else
 		MeshRimFace::rimMeshF(outMesh);
-	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
 	return true;
@@ -760,7 +761,6 @@ bool MeshManager::setQuadEdge(double fsize, int type, double shift)
 		delete outMesh;
 		return false;
 	}
-	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
 	return true;
@@ -776,7 +776,6 @@ bool MeshManager::setWeaveMesh(const confMap &conf)
 	MeshWeaver::configWeaveMesh(conf);
 	MeshWeaver::weaveMesh(outMesh);
 
-	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
 	return true;

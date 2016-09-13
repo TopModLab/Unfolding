@@ -196,13 +196,13 @@ void MeshSmoother::smoothMesh_wholeMesh(HDS_Mesh *mesh)
 
 	// update curvature and vertex normal
 	for (auto v : mesh->vertSet) {
-		v->computeCurvature();
-		v->computeNormal();
+		v.computeCurvature();
+		v.computeNormal();
 	}
 
 	// update face normals
 	for (auto f : mesh->faceSet) {
-		f->computeNormal();
+		f.computeNormal();
 	}
 
 	// find out the set of zero curvature and static curvature

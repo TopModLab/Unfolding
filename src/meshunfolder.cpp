@@ -271,19 +271,19 @@ bool MeshUnfolder::unfold(
 		// Find all faces
 		for(auto f : ref_mesh->faceSet)
 		{
-			if (f->isCutFace)
+			if (f.isCutFace)
 			{
 				continue;
 			}
 
 			// If f has not been visited yet
 			// Add to selected faces
-			if( visitedFaces.find(f->index) == visitedFaces.end() )
+			if( visitedFaces.find(f.index) == visitedFaces.end() )
 			{
-				visitedFaces.insert(f->index);
-				fixedFaces.insert(f->index);
+				visitedFaces.insert(f.index);
+				fixedFaces.insert(f.index);
 				// Find all linked faces except cut face
-				set<HDS_Face*> connectedFaces = Utils::filter_set(f->linkedFaces(), [](HDS_Face* f){
+				set<HDS_Face*> connectedFaces = Utils::filter_set(f.linkedFaces(), [](HDS_Face* f){
 						return !(f->isCutFace);
 				});
 				// record the pieces

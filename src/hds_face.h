@@ -63,7 +63,7 @@ public:
 			bool : 1;
 			bool isPicked : 1;
 			bool isCutFace : 1; //invisible face between cut edges
-			bool isHole : 1;
+			//bool isHole : 1;
 			bool isBridger : 1;
 			bool isNonPlanar : 1;
 		};

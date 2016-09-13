@@ -46,8 +46,8 @@ public:
 	~HDS_Mesh();
 
 	HDS_Mesh operator=(const HDS_Mesh& rhs);
-	void updateSortedFaces();
-	void clearSortedFaces();
+	//void updateSortedFaces();
+	//void clearSortedFaces();
 
 	void updatePieceSet();	/* Find linked faces and store in pieceSet */
 	
@@ -55,9 +55,9 @@ public:
 	void printMesh(const string &msg = "");
 	void releaseMesh();
 
-	void setMesh(const vector<face_t*> &faces,
-					const vector<vert_t*> &verts,
-					const vector<he_t*> &hes);
+	void setMesh(const vector<face_t> &faces,
+					const vector<vert_t> &verts,
+					const vector<he_t> &hes);
 
 
 	unordered_set<vert_t*> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
@@ -92,21 +92,25 @@ public:
 	using ui32q_t = queue<uint32_t>;
 	void exportSelection(ui32q_t* selVTX, ui32q_t* selHE, ui32q_t* selFACE);
 
+	
 	vector<he_t>& halfedges() { return heSet; }
-	vector<face_t> faces() const { return faceSet; }
-	vector<vert_t> verts() const { return vertSet; }
 	vector<face_t>& faces() { return faceSet; }
 	vector<vert_t>& verts() { return vertSet; }
+
+	const vector<he_t>& halfedges() const { return heSet; }
+	const vector<face_t>& faces() const { return faceSet; }
+	const vector<vert_t>& verts() const { return vertSet; }
+
 
 	 //unordered_map<hdsid_t, he_t*>& hesMap()  { return heMap; }
 	 //unordered_map<hdsid_t, face_t*>& facesMap()  { return faceMap; }
 	 //unordered_map<hdsid_t, vert_t*>& vertsMap()  { return vertMap; }
 
-	void addHalfEdge(he_t*);
-	void addVertex(vert_t*);
-	void addFace(face_t*);
-	void deleteFace(face_t*);
-	void deleteHalfEdge(he_t*);
+	void addHalfEdge(he_t);
+	void addVertex(vert_t);
+	void addFace(face_t);
+	void deleteFace(face_t);
+	void deleteHalfEdge(he_t);
 
     static vector<face_t *> incidentFaces(vert_t *v);
     static vector<he_t *> incidentEdges(vert_t *v);
@@ -130,9 +134,9 @@ public:
 	void setProcessType(int type){processType = type;}
 
 private:
-	bool validateVertex(vert_t *v);
-	bool validateFace(face_t *f);
-	bool validateEdge(he_t *e);
+	bool validateVertex(const vert_t &v);
+	bool validateFace(const face_t &f);
+	bool validateEdge(const he_t &e);
 
 protected:
 	friend class ReebGraph;
