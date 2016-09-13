@@ -781,6 +781,7 @@ void MeshViewer::selectAll()
 
 void MeshViewer::selectInverse()
 {
+	//TODO: buggy
 	switch (interactionState)
 	{
 	case SEL_FACE:
@@ -791,14 +792,15 @@ void MeshViewer::selectInverse()
 	}
 	case SEL_EDGE:
 	{
-		unordered_set<HDS_HalfEdge*> selected = heMesh->getSelectedHalfEdges();
+		vector<HDS_HalfEdge> selected = heMesh->getSelectedHalfEdges();
 
 		for (auto &e : heMesh->halfedges())
 		{
-			if (selected.find(&e) != selected.end())
-				e.setPicked(false);
-			else
-				e.setPicked(true);
+			e.setPicked(!e.isPicked);
+// 			if (selected.find(&e) != selected.end())
+// 				e.setPicked(false);
+// 			else
+// 				e.setPicked(true);
 		}
 		break;
 	}

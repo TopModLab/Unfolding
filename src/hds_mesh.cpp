@@ -1124,56 +1124,56 @@ void HDS_Mesh::selectVertex(hdsid_t idx)
 	flipSelectionState(idx, vertMap);
 }
 
-unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getSelectedVertices()
+vector<HDS_Mesh::vert_t> HDS_Mesh::getSelectedVertices()
 {
-	unordered_set<vert_t*> pickedVerts;
+	vector<vert_t> pickedVerts;
 	for(auto v: vertSet) {
-		if (v->isPicked) {
-			pickedVerts.insert(v);
+		if (v.isPicked) {
+			pickedVerts.push_back(v);
 		}
 	}
 	return pickedVerts;
 }
 
-unordered_set<HDS_Mesh::he_t*> HDS_Mesh::getSelectedEdges()
+vector<HDS_Mesh::he_t> HDS_Mesh::getSelectedEdges()
 {
-	unordered_set<he_t*> pickedHEs;
-	unordered_set<he_t*> heSetTmp = heSet;
-	for(auto he: heSetTmp) {
-		if (he->isPicked) {
-			pickedHEs.insert(he);
-			heSetTmp.erase(he);
-			heSetTmp.erase(he->flip);
-		}
-	}
-	return pickedHEs;
-}
-
-unordered_set<HDS_Mesh::he_t*> HDS_Mesh::getSelectedHalfEdges()
-{
-	unordered_set<he_t*> pickedHEs;
+	//TODO: currently not used
+	vector<he_t> pickedHEs;
 	for(auto he: heSet) {
-		if (he->isPicked) {
-			pickedHEs.insert(he);
+		if (he.isPicked && 
+			find(pickedHEs.begin(), pickedHEs.end(), he.flip) == pickedHEs.end()) {
+			pickedHEs.push_back(he);
 		}
 	}
 	return pickedHEs;
 }
 
-unordered_set<HDS_Mesh::face_t*> HDS_Mesh::getSelectedFaces()
+vector<HDS_Mesh::he_t> HDS_Mesh::getSelectedHalfEdges()
 {
-	unordered_set<face_t*> pickedFaces;
+	vector<he_t> pickedHEs;
+	for(auto he: heSet) {
+		if (he.isPicked) {
+			pickedHEs.push_back(he);
+		}
+	}
+	return pickedHEs;
+}
+
+vector<HDS_Mesh::face_t> HDS_Mesh::getSelectedFaces()
+{
+	vector<face_t> pickedFaces;
 	for(auto f: faceSet) {
-		if (f->isPicked) {
-			pickedFaces.insert(f);
+		if (f.isPicked) {
+			pickedFaces.push_back(f);
 		}
 	}
 	return pickedFaces;
 }
 
 
-unordered_set<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
+vector<HDS_Mesh::vert_t*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
 {
+	//TODO: currently not used
 	auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
 		if (!funcval.empty()) {
 			// assign the function value to the vertex

@@ -60,12 +60,12 @@ public:
 					const vector<he_t> &hes);
 
 
-	unordered_set<vert_t*> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
+	vector<vert_t*> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
-	unordered_set<vert_t*> getSelectedVertices();
-	unordered_set<he_t*> getSelectedEdges(); //use one half edge to represent an edge
-	unordered_set<he_t*> getSelectedHalfEdges(); //return all ispicked half edges
-	unordered_set<face_t*> getSelectedFaces();
+	vector<vert_t> getSelectedVertices();
+	vector<he_t> getSelectedEdges(); //use one half edge to represent an edge
+	vector<he_t> getSelectedHalfEdges(); //return all ispicked half edges
+	vector<face_t> getSelectedFaces();
 
 	void colorVertices(const doubles_t &val);
 
