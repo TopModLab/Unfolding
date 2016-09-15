@@ -1267,7 +1267,7 @@ bool MeshConnector::genConnector(
 		fclose(fp);
 		return false;
 		break;
-	case HDS_Mesh::RIMMED_PROC:
+	case HDS_Mesh::FBWALK_PROC:
 		//exportRimmedPiece(fp, unfolded_mesh, conf);
 		fclose(fp);
 		return false;

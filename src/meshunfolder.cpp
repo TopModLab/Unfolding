@@ -221,10 +221,11 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		/************************************************************************/
 		/* Assembling Offset                                                    */
 		/************************************************************************/
-		if (unfolded_mesh->processType == HDS_Mesh::RIMMED_PROC)
+/*
+		if (unfolded_mesh->processType == HDS_Mesh::FBWALK_PROC)
 		{
 			piece_offset *= 1.5;
-		}
+		}*/
 		curBound.pMin += piece_offset;
 		curBound.pMax += piece_offset;
 		for (auto vert : verts)

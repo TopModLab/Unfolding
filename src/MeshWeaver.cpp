@@ -40,6 +40,7 @@ void MeshWeaver::weaveLinearScaledPiece() {
 
 					face_t* newFace = createFace(vertices, cutFace);
 					newFace->refid = he->refid;
+					newFace->isJoint = true;
 					faces_new.push_back(newFace);
 					top_pieces[he->refid] = newFace;
 					top_piece_bounds[he->refid] = make_pair(vp_max, vn_max);
@@ -79,6 +80,7 @@ void MeshWeaver::weaveLinearScaledPiece() {
 
 			face_t* newFace = createFace(vertices, cutFace);
 			newFace->refid = he->refid;
+			newFace->isJoint = true;
 			faces_new.push_back(newFace);
 
 			//find bezier control points
@@ -235,6 +237,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 
 				he_t* he_mid = HDS_Mesh::insertEdge(vmid_up, vmid_down);
 				he_mid->refid = he->refid;
+				he_mid->isJoint = true;
 
 				hes_new.push_back(he_mid);
 				control_edges[he->refid] = he_mid;
@@ -310,6 +313,8 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 
 			he_t* he_mid = HDS_Mesh::insertEdge(vmid_up, vmid_down);
 			he_mid->refid = he_nxt->refid;
+			he_mid->isJoint = true;
+
 			he_mid->f = cutFace;
 			he_mid->flip->f = cutFace;
 			hes_new.push_back(he_mid);

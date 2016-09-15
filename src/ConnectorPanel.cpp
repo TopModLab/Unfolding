@@ -58,7 +58,7 @@ void ConnectorPanel::resetParas(int procType)
 	case HDS_Mesh::GRS_PROC:
 		ui->mesh_type_val->setText("Graph Rotation System Mesh");
 		break;
-	case HDS_Mesh::RIMMED_PROC:
+	case HDS_Mesh::FBWALK_PROC:
 		ui->mesh_type_val->setText("Rimmed Mesh");
 		ui->connector_type->addItem("Arch");
 		ui->connector_type->addItem("Ring");
