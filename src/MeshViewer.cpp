@@ -22,7 +22,8 @@ MeshViewer::MeshViewer(QWidget *parent)
 	QSurfaceFormat format;
 	format.setDepthBufferSize(32);
 	format.setStencilBufferSize(8);
-	format.setSamples(9);
+	// To enable anti-aliasing, set sample to sampleNumber^2
+	//format.setSamples(9);
 	format.setVersion(3, 3);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
