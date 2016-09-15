@@ -1029,7 +1029,7 @@ HDS_HalfEdge* HDS_Mesh::incidentEdge(vert_t *v1, vert_t *v2)
 		if(curHE->flip->v == v2)
 			return curHE;
 		curHE = curHE->flip->next;
-	}while (curHE != he);
+	} while (curHE != he);
 	return nullptr;
 }
 

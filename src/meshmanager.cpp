@@ -481,7 +481,13 @@ bool MeshManager::initSparseGraph()
 	if (hds_mesh->verts().size()>10)
 	{
 		ui32s_t* triFids = meshloader->getTriangulatedIndices();
-		gcomp.reset(new GeodesicComputer(filename, &meshloader->getVerts(), triFids));
+		auto floatVerts = meshloader->getVerts();
+		doubles_t doubleVerts(floatVerts.size());
+		for (size_t i = 0; i < floatVerts.size(); i++)
+		{
+			doubleVerts[i] = static_cast<float>(floatVerts[i]);
+		}
+		gcomp.reset(new GeodesicComputer(filename, &doubleVerts, triFids));
 		delete triFids;
 		gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(gcomp.data()));
 		for (int i = 0; i < smoothed_mesh_filenames.size(); ++i) {
