@@ -7,14 +7,12 @@
 
 class HDS_Bridger
 {
-
+private:
 	typedef HDS_Face face_t;
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
 
-private:
 	static size_t uid;
-
 public:
 	static void resetIndex() { uid = 0; }
 	static size_t assignIndex() { return uid++; }
@@ -26,10 +24,9 @@ public:
 	HDS_Bridger(const HDS_Bridger &other);
 	HDS_Bridger operator=(const HDS_Bridger &other);
 
-
-	vector<face_t*> faces; //corresponding faces pointer
-	vector<he_t*> hes; //corresponding half edges pointer
-	vector<vert_t*> verts; //corresponding vertices pointer
+	vector<he_t>   hes; //corresponding half edges pointer
+	vector<vert_t> verts; //corresponding vertices pointer
+	vector<face_t> faces; //corresponding faces pointer
 
 	//HDS_Bridger* flapTwin; //points to its twin Bridger created in a cut event
 	void createBridge();

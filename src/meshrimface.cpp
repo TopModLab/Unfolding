@@ -654,8 +654,8 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 		control_edges_p.erase(control_edges_p.begin());
 
 
-		int edgeCount = control_edges_n.size();
-		for (int index = 0; index < edgeCount; index++) {
+		size_t edgeCount = control_edges_n.size();
+		for (size_t index = 0; index < edgeCount; index++) {
 			vector<QVector3D> vpos;
 			vpos = {control_points_n[2*index], control_points_n[2*index+1],
 					control_points_p[2*index+1], control_points_p[2*index]};

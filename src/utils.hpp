@@ -29,9 +29,9 @@ inline bool exists(const string &filename) {
 template <typename Container, typename Pred>
 Container filter(Container c, Pred p) {
 	Container res;
-	for(auto x : c) {
-	if( p(x) )
-		res.push_back(x);
+	for (auto x : c) {
+		if (p(x))
+			res.push_back(x);
 	}
 	return res;
 }

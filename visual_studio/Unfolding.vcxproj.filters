@@ -88,36 +88,18 @@
     <Filter Include="Shader Files">
       <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\extras">
+      <UniqueIdentifier>{5ab96681-afcf-4552-bf9a-a7e7dabbb77b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extras\LocalGeodesics">
+      <UniqueIdentifier>{e898f53f-aeb0-4625-af8a-44b58957abe1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extras\colormap_editor">
+      <UniqueIdentifier>{40efd9b3-a5a7-4216-9e87-335ba22a8514}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\colormap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\colormap_editor\colormapeditor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\morsesmalecomplex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_mainwindow.cpp">
@@ -314,6 +296,33 @@
     </ClCompile>
     <ClCompile Include="..\src\QuadEdgePanel.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
+      <Filter>Source Files\extras\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp">
+      <Filter>Source Files\extras\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp">
+      <Filter>Source Files\extras\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
+      <Filter>Source Files\extras\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.cpp">
+      <Filter>Source Files\extras\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
+      <Filter>Source Files\extras\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp">
+      <Filter>Source Files\extras\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\colormap_editor\colormapeditor.cpp">
+      <Filter>Source Files\extras\colormap_editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\morsesmalecomplex.cpp">
+      <Filter>Source Files\geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

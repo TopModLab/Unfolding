@@ -72,33 +72,34 @@ void HDS_Bridger::createBridge()
 		//push back all internal edges
 		for (int i = 0; i < nSamples - 1; i++)
 		{
-			HDS_Vertex* vs = new HDS_Vertex;
-			HDS_Vertex* ve = new HDS_Vertex;
+			HDS_Vertex vs, ve;
 
-			vs->pos = bezierPos_front[i];
-			ve->pos = bezierPos_back[i];
-			HDS_HalfEdge* he_new = HDS_Mesh::insertEdge(vs, ve);
+			vs.pos = bezierPos_front[i];
+			ve.pos = bezierPos_back[i];
+			HDS_HalfEdge* he_new = HDS_Mesh::insertEdge(&vs, &ve);
 
-			hes.push_back(he_new);
+			hes.push_back(*he_new);
 			verts.push_back(vs);
 			verts.push_back(ve);
 		}
 
 		//create bridge segments
-		vector<he_t*> hes_ori = hes;
-		hes_ori.insert(hes_ori.begin(),he->flip);
-		hes_ori.push_back(hef);
+		vector<he_t> hes_ori;
+		hes_ori.reserve(hes.size() + 2);
+		hes_ori.push_back(*he->flip);
+		hes_ori.insert(hes_ori.end(), hes.begin(), hes.end());
+		hes_ori.push_back(*hef);
 		for (auto he = hes_ori.begin(); he != prev(hes_ori.end()); he++) {
 				auto he_next = next(he);
 				//bridge each pair of edges
 				//get bridge faces, set to Bridger->faces
-				HDS_Face* bridgeFace = bridging((*he)->flip, *he_next);
+				HDS_Face* bridgeFace = bridging(&(*he->flip), &(*he_next));
 				//fix face
 				//bridgeFace->index = HDS_Face::assignIndex();
 				bridgeFace->isCutFace = false;
 				bridgeFace->isBridger = true;
 				//add face to mesh
-				faces.push_back(bridgeFace);
+				faces.push_back(*bridgeFace);
 		}
 	}
 }
@@ -200,8 +201,8 @@ HDS_Face * HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 	he_v1e_v2s->setCutEdge(true);
 	he_v2e_v1s->setCutEdge(true);
 
-	hes.push_back(he_v1e_v2s);
-	hes.push_back(he_v2e_v1s);
+	hes.push_back(*he_v1e_v2s);
+	hes.push_back(*he_v2e_v1s);
 
 	return bridgeFace;
 }

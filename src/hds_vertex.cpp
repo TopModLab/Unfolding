@@ -5,8 +5,8 @@
 
 hdsid_t HDS_Vertex::uid = 0;
 
-HDS_Vertex::HDS_Vertex(const QVector3D &pos, int idx, int rid)
-	: pos(pos)
+HDS_Vertex::HDS_Vertex(const QVector3D &p, int idx, int rid)
+	: pos(p)
 	, index(idx), refid(rid)
 	, colorVal(0)
 	, flag(0)

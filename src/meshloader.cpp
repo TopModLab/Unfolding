@@ -10,21 +10,21 @@ ui32s_t* MeshLoader::getTriangulatedIndices() const
 {
 	ui32s_t* ret = new ui32s_t;
 	ret->reserve(m_polys.size() * 3);
-	for (auto Fi : m_polys)
+	for (auto &Fi : m_polys)
 	{
-		if (Fi->size > 3)
+		if (Fi.size > 3)
 		{
 			// triangulate this face
-			for (size_t j = 1; j < Fi->size - 1; j++)
+			for (size_t j = 1; j < Fi.size - 1; j++)
 			{
-				ret->push_back(Fi->v[0]);
-				ret->push_back(Fi->v[j]);
-				ret->push_back(Fi->v[j + 1]);
+				ret->push_back(Fi.v[0]);
+				ret->push_back(Fi.v[j]);
+				ret->push_back(Fi.v[j + 1]);
 			}
 		}
 		else
 		{
-			ret->insert(ret->end(), Fi->v.begin(), Fi->v.end());
+			ret->insert(ret->end(), Fi.v.begin(), Fi.v.end());
 		}
 	}
 	ret->shrink_to_fit();
@@ -44,10 +44,7 @@ void MeshLoader::clear() {
 	m_verts.clear();
 	m_uvs.clear();
 	m_norms.clear();
-	for (auto poly : m_polys)
-	{
-		delete poly;
-	}
+	
 	m_polys.clear();
 }
 
@@ -62,46 +59,39 @@ void MeshLoader::shrink_to_fit()
 void MeshLoader::triangulate()
 {
 	cout << "Triangulating the mesh ..." << endl;
-	vector<PolyIndex*> newFaces, usedFases;
+	vector<PolyIndex> newFaces;
 
-	usedFases.reserve(m_polys.size());
-	for (auto Fi : m_polys)
+	newFaces.reserve(m_polys.size());
+	for (auto &Fi : m_polys)
 	{
-		if( Fi->v.size() > 3 )
+		if( Fi.v.size() > 3 )
 		{
 			// triangulate this face
-			for(size_t j=1;j<Fi->v.size()-1;j++)
+			for (size_t j = 1; j < Fi.v.size() - 1; j++)
 			{
-				PolyIndex* f = new PolyIndex;
-				f->v.push_back(Fi->v[0]);
-				f->v.push_back(Fi->v[j]);
-				f->v.push_back(Fi->v[j+1]);
+				PolyIndex f;
+				f.v.push_back(Fi.v[0]);
+				f.v.push_back(Fi.v[j]);
+				f.v.push_back(Fi.v[j + 1]);
 
-				f->uv.push_back(Fi->uv[0]);
-				f->uv.push_back(Fi->uv[j]);
-				f->uv.push_back(Fi->uv[j+1]);
+				f.uv.push_back(Fi.uv[0]);
+				f.uv.push_back(Fi.uv[j]);
+				f.uv.push_back(Fi.uv[j + 1]);
 
-				f->n.push_back(Fi->n[0]);
-				f->n.push_back(Fi->n[j]);
-				f->n.push_back(Fi->n[j+1]);
+				f.n.push_back(Fi.n[0]);
+				f.n.push_back(Fi.n[j]);
+				f.n.push_back(Fi.n[j + 1]);
 
 				newFaces.push_back(f);
 			}
-			usedFases.push_back(Fi);
 		}
 		else
 		{
 			newFaces.push_back(Fi);
 		}
 	}
-	// Clear Non-Triangular Faces
-	for (auto used : usedFases)
-	{
-		delete used;
-	}
-	usedFases.clear();
 
-	m_polys = newFaces;
+	m_polys = std::move(newFaces);
 
 	triangulated = true;
 
@@ -264,7 +254,7 @@ bool OBJLoader::load_from_string(const string &filename)
 		int offset = 0;
 		char trash[255] = {};
 		char lineHeader[3] = {};
-		double val[3] = {};
+		float val[3] = {};
 		uint32_t indices[3];
 
 		while (subStr - srcStr <= strLen)
@@ -281,7 +271,7 @@ bool OBJLoader::load_from_string(const string &filename)
 			// Vertex
 			if (strcmp(lineHeader, "v") == 0)
 			{
-				sscanf(subStr, "%lf %lf %lf%n", val, val + 1, val + 2, &offset);
+				sscanf(subStr, "%f %f %f%n", val, val + 1, val + 2, &offset);
 				m_verts.insert(m_verts.end(), val, val + 3);
 
 				subStr += offset + 1;
@@ -289,14 +279,14 @@ bool OBJLoader::load_from_string(const string &filename)
 			// Texture Coordinate
 			else if (strcmp(lineHeader, "vt") == 0)
 			{
-				err = sscanf(subStr, "%lf %lf%n", val, val + 1, &offset); m_uvs.insert(m_uvs.end(), val, val + 2);
+				err = sscanf(subStr, "%f %f%n", val, val + 1, &offset); m_uvs.insert(m_uvs.end(), val, val + 2);
 				subStr += offset + 1;
 			}
 			// Vertex Normal
 			else if (strcmp(lineHeader, "vn") == 0)
 			{
 				//float val[3];
-				err = sscanf(subStr, "%lf %lf %lf%n", val, val + 1, val + 2, &offset);
+				err = sscanf(subStr, "%f %f %f%n", val, val + 1, val + 2, &offset);
 				m_norms.insert(m_norms.end(), val, val + 3);
 
 				subStr += offset + 1;
@@ -304,11 +294,11 @@ bool OBJLoader::load_from_string(const string &filename)
 			// Face Index
 			else if (strcmp(lineHeader, "f") == 0)
 			{
-				PolyIndex* fid = new PolyIndex;
+				PolyIndex fid;
 				err = sscanf(subStr, "%s%n", &trash, &offset);
 				indices[1] = indices[2] = 0;
 				index_t ft = facetype(trash, indices);
-				fid->push_back(indices);
+				fid.push_back(indices);
 				subStr += offset;
 
 				switch (ft)
@@ -318,7 +308,7 @@ bool OBJLoader::load_from_string(const string &filename)
 					{
 						err = sscanf(subStr, "%s%n", &trash, &offset);
 						sscanf(trash, "%d/%d/%d", indices, indices + 1, indices + 2);
-						fid->push_back(indices);
+						fid.push_back(indices);
 						subStr += offset;
 					}
 					break;
@@ -327,7 +317,7 @@ bool OBJLoader::load_from_string(const string &filename)
 					{
 						err = sscanf(subStr, "%s%n", &trash, &offset);
 						sscanf(trash, "%d/%d", indices, indices + 1);
-						fid->push_back(indices);
+						fid.push_back(indices);
 						subStr += offset;
 					}
 					break;
@@ -336,7 +326,7 @@ bool OBJLoader::load_from_string(const string &filename)
 					{
 						err = sscanf(subStr, "%s%n", &trash, &offset);
 						sscanf(trash, "%d//%d", indices, indices + 2);
-						fid->push_back(indices);
+						fid.push_back(indices);
 						subStr += offset;
 					}
 					break;
@@ -345,14 +335,14 @@ bool OBJLoader::load_from_string(const string &filename)
 					{
 						err = sscanf(subStr, "%s%n", &trash, &offset);
 						sscanf(trash, "%d", indices);
-						fid->push_back(indices);
+						fid.push_back(indices);
 						subStr += offset;
 					}
 					break;
 				default:
 					break;
 				}
-				fid->size = fid->v.size();
+				fid.size = fid.v.size();
 				m_polys.push_back(fid);
 				subStr++;
 			}
@@ -384,7 +374,7 @@ bool OBJLoader::load_from_file(const string &filename)
 	int err;
 	char buff[255] = {};
 	char lineHeader[3] = {};
-	double val[3] = {};
+	float val[3] = {};
 	uint32_t indices[3];
 	char endflg;
 
@@ -399,30 +389,30 @@ bool OBJLoader::load_from_file(const string &filename)
 		// Vertex
 		if (strcmp(lineHeader, "v") == 0)
 		{
-			fscanf(fp, "%lf %lf %lf\n", val, val + 1, val + 2);
+			fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
 			m_verts.insert(m_verts.end(), val, val + 3);
 		}
 		// Texture Coordinate
 		else if (strcmp(lineHeader, "vt") == 0)
 		{
-			fscanf(fp, "%lf %lf\n", val, val + 1);
+			fscanf(fp, "%f %f\n", val, val + 1);
 			m_uvs.insert(m_uvs.end(), val, val + 2);
 		}
 		// Vertex Normal
 		else if (strcmp(lineHeader, "vn") == 0)
 		{
 			//float val[3];
-			fscanf(fp, "%lf %lf %lf\n", val, val + 1, val + 2);
+			fscanf(fp, "%f %f %f\n", val, val + 1, val + 2);
 			m_norms.insert(m_norms.end(), val, val + 3);
 		}
 		// Face Index
 		else if (strcmp(lineHeader, "f") == 0)
 		{
-			PolyIndex* fid = new PolyIndex;
+			PolyIndex fid;
 			err = fscanf(fp, "%s", &buff);
 			indices[1] = indices[2] = 0;
 			index_t ft = facetype(buff, indices);
-			fid->push_back(indices);
+			fid.push_back(indices);
 			endflg = fgetc(fp);
 			switch (ft)
 			{
@@ -431,7 +421,7 @@ bool OBJLoader::load_from_file(const string &filename)
 				{
 					ungetc(endflg, fp);
 					fscanf(fp, "%d/%d/%d", indices, indices + 1, indices + 2);
-					fid->push_back(indices);
+					fid.push_back(indices);
 					endflg = fgetc(fp);
 				}
 				break;
@@ -440,7 +430,7 @@ bool OBJLoader::load_from_file(const string &filename)
 				{
 					ungetc(endflg, fp);
 					fscanf(fp, "%d/%d", indices, indices + 1);
-					fid->push_back(indices);
+					fid.push_back(indices);
 					endflg = fgetc(fp);
 				}
 				break;
@@ -449,7 +439,7 @@ bool OBJLoader::load_from_file(const string &filename)
 				{
 					ungetc(endflg, fp);
 					fscanf(fp, "%d//%d", indices, indices + 2);
-					fid->push_back(indices);
+					fid.push_back(indices);
 					endflg = fgetc(fp);
 				}
 				break;
@@ -458,14 +448,14 @@ bool OBJLoader::load_from_file(const string &filename)
 				{
 					ungetc(endflg, fp);
 					fscanf(fp, "%d", indices);
-					fid->push_back(indices);
+					fid.push_back(indices);
 					endflg = fgetc(fp);
 				}
 				break;
 			default:
 				break;
 			}
-			fid->size = fid->v.size();
+			fid.size = fid.v.size();
 			m_polys.push_back(fid);
 		}
 		// Comment

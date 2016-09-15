@@ -34,8 +34,8 @@ public:
 	HDS_HalfEdge *cutTwin;  // pointer to its twin halfedge created in a cut event
 	HDS_HalfEdge *bridgeTwin;
 
-	int index;
-	int refid;
+	hdsid_t index;
+	hdsid_t refid;
 
 	union
 	{

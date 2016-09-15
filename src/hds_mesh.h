@@ -42,10 +42,13 @@ public:
 	};*/
 
 	HDS_Mesh();
+	HDS_Mesh(vector<vert_t> &&verts,
+			 vector<he_t>   &&hes,
+			 vector<face_t> &&faces);
 	HDS_Mesh(const HDS_Mesh& other);
 	~HDS_Mesh();
 
-	HDS_Mesh operator=(const HDS_Mesh& rhs);
+	HDS_Mesh operator=(const HDS_Mesh& rhs) = delete;
 	//void updateSortedFaces();
 	//void clearSortedFaces();
 
@@ -55,15 +58,15 @@ public:
 	void printMesh(const string &msg = "");
 	void releaseMesh();
 
-	void setMesh(const vector<face_t> &faces,
-					const vector<vert_t> &verts,
-					const vector<he_t> &hes);
+	void setMesh(vector<face_t> &&faces,
+				 vector<vert_t> &&verts,
+				 vector<he_t>   &&hes);
 
 
 	vector<vert_t> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
 	vector<vert_t> getSelectedVertices();
-	vector<he_t> getSelectedEdges(); //use one half edge to represent an edge
+	vector<he_t*> getSelectedEdges(); //use one half edge to represent an edge
 	vector<he_t> getSelectedHalfEdges(); //return all ispicked half edges
 	vector<face_t> getSelectedFaces();
 
@@ -100,11 +103,6 @@ public:
 	const vector<he_t>& halfedges() const { return heSet; }
 	const vector<face_t>& faces() const { return faceSet; }
 	const vector<vert_t>& verts() const { return vertSet; }
-
-
-	 //unordered_map<hdsid_t, he_t*>& hesMap()  { return heMap; }
-	 //unordered_map<hdsid_t, face_t*>& facesMap()  { return faceMap; }
-	 //unordered_map<hdsid_t, vert_t*>& vertsMap()  { return vertMap; }
 
 	void addHalfEdge(he_t);
 	void addVertex(vert_t);
@@ -152,9 +150,9 @@ protected:
 	friend class MeshIterator;
 	friend class MeshConnector;
 private:
-	vector<he_t> heSet;
-	vector<face_t> faceSet;
 	vector<vert_t> vertSet;
+	vector<he_t>   heSet;
+	vector<face_t> faceSet;
 
 	//vector<face_t*> sortedFaces;
 
@@ -164,7 +162,7 @@ private:
 
 	// pieces information
 	vector<set<hdsid_t>> pieceSet;
-	BBox3* bound;
+	unique_ptr<BBox3> bound;
 private:
 	//bool isHollowed;
 	uint16_t processType;

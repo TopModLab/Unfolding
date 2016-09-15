@@ -333,6 +333,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 bool MeshCutter::cutMeshAllFaces(HDS_Mesh *mesh)
 {
+	// TODO: Implement cut all faces
 	return false;
 }
 
@@ -428,21 +429,21 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 	set<int> cutEdges;
 
 	// find out all bad vertices
-	vector<HDS_Vertex> cutVertices = Utils::filter_set(mesh->vertSet, isBadVertex);
-	unordered_map<HDS_Vertex, int> cutVerticesIndex;
+	vector<HDS_Vertex> cutVertices = Utils::filter(mesh->vertSet, isBadVertex);
+	unordered_map<HDS_Vertex*, int> cutVerticesIndex;
 	// label the bad vertices
 	int vidx = 0;
-	for(auto x : cutVertices) {
-		cutVerticesIndex[x] = vidx;
+	for(auto &x : cutVertices) {
+		cutVerticesIndex[&x] = vidx;
 		++vidx;
 	}
 	cout << "#cut vertices: " << cutVertices.size() << endl;
 	PathInfo pathinfo = allPairShortestPath(mesh);
 	PQ edges;
-	for(auto x : cutVertices) {
-		for(auto y : cutVertices) {
+	for(auto &x : cutVertices) {
+		for(auto &y : cutVertices) {
 			if( x.index < y.index ) {
-				edges.push(Edge(cutVerticesIndex[x], cutVerticesIndex[y], 
+				edges.push(Edge(cutVerticesIndex[&x], cutVerticesIndex[&y], 
 					x.index, y.index, 
 					pathinfo[x.index][y.index].first));
 			}

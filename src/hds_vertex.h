@@ -21,7 +21,7 @@ public:
 	static hdsid_t assignIndex() { return uid++; }
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_VERTEX; }
 
-	HDS_Vertex(const QVector3D &pos = QVector3D(),
+	HDS_Vertex(const QVector3D &p = QVector3D(),
 		int idx = -1, int refid = 0);
 	HDS_Vertex(const HDS_Vertex &other);
 	~HDS_Vertex();
@@ -43,8 +43,8 @@ public:
 	QVector3D normal;
 	HDS_HalfEdge *he;
 
-	uint32_t index;
-	uint32_t refid;
+	hdsid_t index;
+	hdsid_t refid;
 	union
 	{
 		uint16_t flag;

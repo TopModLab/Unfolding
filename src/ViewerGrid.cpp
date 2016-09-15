@@ -99,7 +99,7 @@ void ViewerGrid::resize(size_t seg, GLfloat scale)
 	GLfloat segsize = 1.0 / static_cast<float>(segment);
 	size_t edgeVertsNum = segment << 1;
 	//size_t idxOff = segment << 2;// Verts index offset
-	size_t offset[] = { segment << 2, segment << 3, (segment << 3) + (segment << 2)};
+	ushort offset[] = { segment << 2, segment << 3, (segment << 3) + (segment << 2)};
 	size_t vidx = 0;
 	for (size_t i = 0; i < edgeVertsNum; i++)
 	{

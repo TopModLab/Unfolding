@@ -26,8 +26,6 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 {
 }
 
-
-
 HDS_Face HDS_Face::operator=(const HDS_Face &other)
 {
 	throw "Not implemented.";

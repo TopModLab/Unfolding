@@ -1,4 +1,11 @@
+#ifdef _MSC_VER
 #pragma once
+#pragma warning (disable:4996) // scanf_s error
+#endif // _MSVC
+#pragma warning (disable : 4305) // double constant assigned to float
+#pragma warning (disable : 4244) // int -> float conversion
+#pragma warning (disable : 4267) // size_t -> unsigned int conversion
+
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -27,6 +34,8 @@
 #include <math.h>
 
 using namespace std;
+
+
 
 //#if !defined(QT_NO_DEBUG) && !defined(QT_DEBUG)
 #if !defined(NDEBUG) && !defined(_DEBUG)

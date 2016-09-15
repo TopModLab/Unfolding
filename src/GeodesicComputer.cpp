@@ -4,7 +4,7 @@ GeodesicComputer::GeodesicComputer()
 {}
 
 GeodesicComputer::GeodesicComputer(const string &filename,
-	const doubles_t* verts, const ui32s_t* faces)
+	const floats_t* verts, const ui32s_t* faces)
 {
 	cout << "computing geodesics ..." << endl;
 	const int fixed_K = 50;

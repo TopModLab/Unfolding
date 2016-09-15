@@ -27,29 +27,28 @@ Makefile*
 *-build-*
 
 # QtCreator
-
 *.autosave
 
 #QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
 
-#no-shadow build
+# no-shadow build
 *.Debug
 *.Release
 
-#Visual Studio Build files
+# Visual Studio Build files
 *.user
+*.sdf
+*.suo
 bin/
 visual_studio/tmp/
 visual_studio/GeneratedFiles/
-visual_studio/*.sdf
-visual_studio/*.suo
+visual_studio/.vs/
 
-#Backup files
+# Backup files
 *.bak
-/fbo.png
 *.binary
 *.db
-/visual_studio/x64
+*.opendb
 /export/Archived

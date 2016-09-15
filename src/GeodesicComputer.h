@@ -14,7 +14,7 @@ class GeodesicComputer
 public:
 	GeodesicComputer();
 	GeodesicComputer(const string &filename,
-		const doubles_t* verts = nullptr,
+		const floats_t* verts = nullptr,
 		const ui32s_t* faces = nullptr);
 	
 	doubles_t distanceTo(int vIdx) const;

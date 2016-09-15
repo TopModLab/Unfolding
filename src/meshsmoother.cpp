@@ -84,8 +84,8 @@ void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 		cout << H.size() << ": " << H.front()->curvature << endl;
 	}
 
-	double sum_curvature = std::accumulate(mesh->vertSet.begin(), mesh->vertSet.end(), 0.0, [](double val, HDS_Vertex* v) {
-		return val + v->curvature;
+	double sum_curvature = std::accumulate(mesh->vertSet.begin(), mesh->vertSet.end(), 0.0, [](double val, const HDS_Vertex &v) {
+		return val + v.curvature;
 	});
 
 	cout << "sum = " << sum_curvature << endl;

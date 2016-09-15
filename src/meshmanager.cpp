@@ -150,103 +150,85 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		return false;
 	}
 }
-HDS_Mesh * MeshManager::buildHalfEdgeMesh(
-	const doubles_t &inVerts, const vector<PolyIndex*> &inFaces)
+HDS_Mesh* MeshManager::buildHalfEdgeMesh(
+	const floats_t &inVerts, const vector<PolyIndex> &inFaces)
 {
 #ifdef _DEBUG
 	cout << "Building the half edge mesh ..." << endl;
 #endif // _DEBUG
 
-	mesh_t *thismesh = new mesh_t;
-	int ss = 0;
 	size_t vertsCount = inVerts.size() / 3;
 	size_t facesCount = inFaces.size();
-	size_t curFaceCount = facesCount;
+	//size_t curFaceCount = facesCount;
 	size_t heCount = 0;
+	// Accumulate face size to get the number of half-edges
 	for (size_t i = 0; i < inFaces.size(); i++)
-		heCount += inFaces[i]->size;
+		heCount += inFaces[i].size;
 
-	// Half-Edge Data in Mesh
+	// Half-Edge arrays for actual HDS_Mesh
 	vector<vert_t> verts(vertsCount);
 	vector<face_t> faces(facesCount);
 	vector<he_t> hes(heCount);
 	// Temporary Half-Edge Pair Recorder
 	using hepair_t = pair<hdsid_t, hdsid_t>;
+	// TODO: replace by unordered_map
 	map<hepair_t, he_t*> heMap;
 
-	// Malloc Vertices
+	// Assign vertex positions and ids
 	for (size_t i = 0; i < vertsCount; i++)
 	{
 		size_t vid = i * 3;
-		verts[i].pos = (QVector3D(
-					static_cast<float>(inVerts[vid]),
-					static_cast<float>(inVerts[vid + 1]),
-					static_cast<float>(inVerts[vid + 2])));
+		verts[i].pos = QVector3D(inVerts[vid], inVerts[vid + 1], inVerts[vid + 2]);
+		verts[i].index = i;
 	}
 	// Malloc Faces
-//	for (size_t i = 0; i < facesCount; i++)
-//	{
-//		faces[i] = new face_t;
-//	}
-
-	for (size_t i = 0, heIdx = 0; i < facesCount; i++)
+	for (size_t i = 0, heOffset = 0; i < facesCount; i++)
 	{
-
-		auto& Fi = inFaces[i];
+		// Go through all faces
+		auto Fi = &inFaces[i];
+		int32_t fsize = Fi->size;
 		face_t* curFace = &faces[i];
 
-		for (size_t j = 0; j < Fi->size; j++)
+		for (size_t j = 0; j < fsize; j++)
 		{
-			he_t* curHe = new he_t;
+			// calculate current, prev and next edge id
+			//int32_t jcurr = j + heIdx;
+
+			// link current face and vertex of the edge
+			he_t* curHe = &hes[j + heOffset];
 			vert_t* curVert = &verts[Fi->v[j]];
 			curHe->v = curVert;
 			curHe->f = curFace;
 
-			if (curVert->he == nullptr)
-				curVert->he = curHe;
+			// Check index boundary
+			// first: prev=last,   next=1
+			// last : prev=last-1, next=0
+			int32_t jprev = (j == 0) ? fsize - 1 : j - 1;
+			int32_t jnext = (j == fsize - 1) ? 0 : j + 1;
+			// Connect current edge with previous and next
+			curHe->next = &hes[jnext + heOffset];
+			curHe->prev = &hes[jprev + heOffset];
 
-			hes[heIdx + j] = *curHe;
-		}
+			// connect current vertex to he
+			if (!curVert->he) curVert->he = curHe;
 
-		// link the half edge of the face
-		for (int j = 0; j < Fi->size; j++)
-		{
-			int jp = j - 1;
-			if (jp < 0) jp += Fi->size;
-			int jn = j + 1;
-			if (jn >= Fi->size) jn -= Fi->size;
-
-			hes[heIdx + j].prev = &hes[heIdx + jp];
-			hes[heIdx + j].next = &hes[heIdx + jn];
-
-			int vj = Fi->v[j];
-			//     cout<<"j = "<<j<<"  Fi.v[j] = "<<Fi.v[j]<<endl;//later added;
-			int vjn = Fi->v[jn];
-			//      cout<<"jn = "<<jn<<"  Fi.v[jn] = "<<Fi.v[jn]<<endl;//later added;
-			pair<int, int> vPair = make_pair(vj, vjn);
-			//cout<<"vPair.first = "<<vPair.first<<endl;  //later added;
-			//cout<<"vPair.sencond = "<<vPair.second<<endl;
+			// record edge for flip connection
+			int32_t vj = Fi->v[j];
+			int32_t vj_next = Fi->v[jnext];
+			pair<int32_t, int32_t> vPair = make_pair(vj, vj_next);
 			if (heMap.find(vPair) == heMap.end())
-			//?? true every time;for heMap.end() points to he_t*, equal to heMap.find(vpair);
 			{
-				heMap[vPair] = &hes[heIdx + j];
-				//address transport; hes[heIdx + j] = curHe; *****critical******
-				//      cout<<"heshes[heIdx+j]"<<hes[heIdx+j]<<endl; //later added;
-				//      ss+=1;  //later added;
-			}
-			else
-			{
-				return thismesh;
+				heMap[vPair] = &hes[heOffset + j];
 			}
 		}
-		//    cout<<"ss = "<<ss<<endl;    //later added;
-		curFace->he = &hes[heIdx];
+
+		curFace->he = &hes[heOffset];
 		curFace->computeNormal();
 
-		heIdx += Fi->size;
+		heOffset += Fi->size;
 	}
 	set<hepair_t> visitedHESet;
-	auto unvisitedHESet = heMap;
+	auto unvisitedHEs = heMap;
 	// for each half edge, find its flip
 	for (auto heit : heMap)
 	{
@@ -270,8 +252,8 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 
 				he->flip = hef;
 				hef->flip = he;
-				unvisitedHESet.erase(hePair);
-				unvisitedHESet.erase(invPair);
+				unvisitedHEs.erase(hePair);
+				unvisitedHEs.erase(invPair);
 			}
 
 			visitedHESet.insert(hePair);
@@ -279,7 +261,7 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 		}
 	}
 	// Check Holes and Fill with Null Faces
-	if (unvisitedHESet.size() > 0)
+	if (unvisitedHEs.size() > 0)
 	{
 		QMessageBox msgBox(QMessageBox::Warning, QString("Warning"),
 			QString("Current mesh has holes and can cause critical problems!\n"
@@ -288,41 +270,25 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 		msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
 		if (msgBox.exec() == QMessageBox::Cancel)
 		{
-			verts.clear();
-			faces.clear();
-			hes.clear();
-
-// 			for (auto v : verts)
-// 			{
-// 				delete v;
-// 			}
-// 			for (auto f : faces)
-// 			{
-// 				delete f;
-// 			}
-// 			for (auto he : hes)
-// 			{
-// 				delete he;
-// 			}
-			delete thismesh;
 			return nullptr;
 		}
-		while (unvisitedHESet.size() > 0)
+		while (unvisitedHEs.size() > 0)
 		{
-			auto heit = unvisitedHESet.begin();
+			auto heit = unvisitedHEs.begin();
 			he_t* he = heit->second;
-			unvisitedHESet.erase(heit);
+			unvisitedHEs.erase(heit);
 			// Skip checked edges, won't skip in first check
 			if (he->flip != nullptr) continue;
 			//he_t* hef = new he_t;
-			face_t* nullface = new face_t;
+
+			faces.emplace_back();
+			face_t* nullface = &faces.back();
 
 			auto curHE = he;
 			vector<he_t*> null_hes, null_hefs;
 			do 
 			{
 				null_hes.push_back(curHE);
-				null_hefs.push_back(new he_t);
 				
 				// Loop adjacent edges to find the exposed edge
 				while (curHE->flip != nullptr)
@@ -331,11 +297,14 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 				}
 			} while (curHE != he);
 			// Assign Null Edges
-			auto size = null_hes.size();
-			for (int i = 0; i < size; i++)
+			size_t initSize = hes.size();
+			size_t size = null_hes.size();
+			// Insert Null Edges
+			hes.resize(initSize + size);
+			for (size_t i = 0; i < size; i++)
 			{
 				he = null_hes[i];
-				he_t* hef = null_hefs[i];
+				he_t* hef = &hes[initSize+i];
 				he->isCutEdge = hef->isCutEdge = true;
 				he->flip = hef;
 				hef->flip = he;
@@ -346,13 +315,10 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 				hef->prev = hef_prev;
 				hef_prev->next = hef;
 			}
-			// Insert Null Edges
-			hes.insert(hes.end(), null_hefs.begin(), null_hefs.end());
 			// Assign Null Face
 			nullface->isCutFace = true;
 			nullface->he = he;
 			nullface->he = null_hefs[0];
-			faces.push_back(*nullface);
 		}
 	}
 	
@@ -365,7 +331,7 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 		he.computeCurvature();
 		if (he.isNegCurve) negCount++;
 	}
-	thismesh->setMesh(faces, verts, hes);
+	mesh_t* thismesh = new mesh_t(std::move(verts), std::move(hes), std::move(faces));
 
 #ifdef _DEBUG
 	cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;
@@ -479,7 +445,7 @@ bool MeshManager::initSparseGraph()
 	hds_mesh_smoothed.push_back(QSharedPointer<HDS_Mesh>(new HDS_Mesh(*tmp_mesh)));
 	for (int i = 0; i < nsmooth; ++i)
 	{
-		loadingProgress.setValue(30 + (double)i / (double)nsmooth * 50);
+		loadingProgress.setValue(30 + (float)i / (float)nsmooth * 50);
 
 		const int stepsize = 10;
 		string smesh_filename = filename.substr(0, filename.length() - 4) + "_smoothed_" + std::to_string((i + 1)*stepsize) + ".obj";
@@ -523,7 +489,7 @@ bool MeshManager::initSparseGraph()
 			//    gcomp_smoothed.push_back(QSharedPointer<GeodesicComputer>(new GeodesicComputer(smoothed_mesh_filenames[i])));//cancel this sentence, all became correct, what's it function?
 
 			//cout<<"smoothed_mesh_filenames ["<<i<<"]  =  "<<smoothed_mesh_filenames[i]<<endl;
-			loadingProgress.setValue(80 + (double)i / (double)smoothed_mesh_filenames.size() * 20);
+			loadingProgress.setValue(80 + (float)i / (float)smoothed_mesh_filenames.size() * 20);
 
 		}
 		cout << "SVGs computed." << endl;
@@ -800,6 +766,7 @@ bool MeshManager::exportSVGFile(
 
 void MeshManager::colorMeshByGeoDistance(int vidx)
 {
+	// TODO: Modify for project
 	auto laplacianSmoother = [&](const doubles_t &val, HDS_Mesh *mesh) {
 		const double lambda = 0.25;
 		const double sigma = 1.0;

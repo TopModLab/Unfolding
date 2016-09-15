@@ -38,10 +38,10 @@ public:
 
 	virtual ui32s_t* getTriangulatedIndices() const;
 	virtual const string& getFilename() const { return m_filename; }
-	virtual const doubles_t& getVerts() const { return m_verts; }
-	virtual const vector<PolyIndex*>& getFaces() const { return m_polys; }
-	virtual const doubles_t& getNormals() const { return m_norms; }
-	virtual const doubles_t& getTexcoords() const { return m_uvs; }
+	virtual const floats_t& getVerts() const { return m_verts; }
+	virtual const vector<PolyIndex>& getFaces() const { return m_polys; }
+	virtual const floats_t& getNormals() const { return m_norms; }
+	virtual const floats_t& getTexcoords() const { return m_uvs; }
 
 protected:
 	void clear();
@@ -54,10 +54,10 @@ protected:
 	bool hasVertexTexCoord;
 	bool hasVertexNormal;
 
-	doubles_t m_verts;
-	doubles_t m_uvs;
-	doubles_t m_norms;
-	vector<PolyIndex*> m_polys;
+	floats_t m_verts;
+	floats_t m_uvs;
+	floats_t m_norms;
+	vector<PolyIndex> m_polys;
 
 	string m_filename;
 };

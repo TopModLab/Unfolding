@@ -149,8 +149,7 @@ bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 
 void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 {
-	delete unfolded_mesh->bound;
-	unfolded_mesh->bound = new BBox3(0);
+	unfolded_mesh->bound.reset(new BBox3(0));
 	auto& bound = unfolded_mesh->bound;
 
 	int row_len_limit = static_cast<int>(sqrt(unfolded_mesh->pieceSet.size()));
@@ -160,7 +159,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
-		unordered_set<HDS_Vertex *> verts;
+		unordered_set<HDS_Vertex*> verts;
 		/************************************************************************/
 		/* Calculate Piece Orientation                                          */
 		/************************************************************************/
