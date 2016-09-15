@@ -18,32 +18,31 @@ void MeshWeaver::weaveLinearScaledPiece() {
 		do {
 			if (top_pieces.find(he->refid) == top_pieces.end())
 			{
+				vector<QVector3D> vpos;
+				QVector3D vn_max, vp_max;
+				computeDiamondCornerOnEdge(he, vpos, vn_max, vp_max);
+				vector<vert_t*> vertices;
+				for (QVector3D pos : vpos) {
+					vert_t* vertex = new vert_t(pos);
+					vertices.push_back(vertex);
+				}
+				vertices[0]->refid = he->v->refid;
+				vertices[1]->refid = he->flip->refid;
+				vertices[2]->refid = he->flip->v->refid;
+				vertices[3]->refid = he->refid;
 
-					vector<QVector3D> vpos;
-					QVector3D vn_max, vp_max;
-					computeDiamondCornerOnEdge(he, vpos, vn_max, vp_max);
-					vector<vert_t*> vertices;
-					for (QVector3D pos: vpos) {
-						vert_t* vertex = new vert_t(pos);
-						vertices.push_back(vertex);
-					}
-					vertices[0]->refid = he->v->refid;
-					vertices[1]->refid = he->flip->refid;
-					vertices[2]->refid = he->flip->v->refid;
-					vertices[3]->refid = he->refid;
+				verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
-					verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
+				face_t* cutFace = new face_t;
+				cutFace->isCutFace = true;
+				faces_new.push_back(cutFace);
 
-					face_t* cutFace = new face_t;
-					cutFace->isCutFace = true;
-					faces_new.push_back(cutFace);
-
-					face_t* newFace = createFace(vertices, cutFace);
-					newFace->refid = he->refid;
-					newFace->isJoint = true;
-					faces_new.push_back(newFace);
-					top_pieces[he->refid] = newFace;
-					top_piece_bounds[he->refid] = make_pair(vp_max, vn_max);
+				face_t* newFace = createFace(vertices, cutFace);
+				newFace->refid = he->refid;
+				newFace->isJoint = true;
+				faces_new.push_back(newFace);
+				top_pieces[he->refid] = newFace;
+				top_piece_bounds[he->refid] = make_pair(vp_max, vn_max);
 			}
 			he = he->next;
 		}while(he != f->he);

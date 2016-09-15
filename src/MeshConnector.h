@@ -132,9 +132,11 @@ public:
 		ADVSAW_CONNECTOR = 4,
 		// Hollow type
 		HOLLOW_CONNECTOR = 0,
-		// Rim type
+		// FBWalk type
 		ARCH_CONNECTOR = 0,
-		RING_CONNECTOR = 1
+		RING_CONNECTOR = 1,
+		// Woven type
+		WOVEN_HOLE_CONNECTOR = 0,
 	};
 	static bool genConnector(const mesh_t* unfolded_mesh,
 		const QString &filename, const confMap &conf);
@@ -149,7 +151,9 @@ private:
 		const mesh_t* unfolded_mesh, const confMap &conf);
 	static void exportRegularPiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);
-	static void exportRimmedPiece(FILE* fp,
+	static void exportFBWalkPiece(FILE* fp,
+		const mesh_t* unfolded_mesh, const confMap &conf);
+	static void exportWovenPiece(FILE* fp,
 		const mesh_t* unfolded_mesh, const confMap &conf);
 
 	
