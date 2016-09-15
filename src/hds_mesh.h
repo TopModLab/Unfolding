@@ -24,7 +24,8 @@ public:
 		WINGED_PROC,
 		GRS_PROC,
 		GES_PROC,
-		RIMMED_PROC
+		FBWALK_PROC,
+		WOVEN_PROC
 	};
 	enum SHOW_COMP : uint16_t
 	{

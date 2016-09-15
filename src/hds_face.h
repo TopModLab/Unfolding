@@ -67,6 +67,7 @@ public:
 			//bool isHole : 1;
 			bool isBridger : 1;
 			bool isNonPlanar : 1;
+			bool isJoint : 1; //woven joint face
 		};
 	};
 	

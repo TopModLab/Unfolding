@@ -18,34 +18,39 @@ void MeshWeaver::weaveLinearScaledPiece() {
 		do {
 			if (top_pieces.find(he->refid) == top_pieces.end())
 			{
+				vector<QVector3D> vpos;
+				QVector3D vn_max, vp_max;
+				computeDiamondCornerOnEdge(he, vpos, vn_max, vp_max);
+				vector<vert_t*> vertices;
+				for (QVector3D pos : vpos) {
+					vert_t* vertex = new vert_t(pos);
+					vertices.push_back(vertex);
+				}
+				vertices[0]->refid = he->v->refid;
+				vertices[1]->refid = he->flip->refid;
+				vertices[2]->refid = he->flip->v->refid;
+				vertices[3]->refid = he->refid;
 
-					vector<QVector3D> vpos;
-					QVector3D vn_max, vp_max;
-					computeDiamondCornerOnEdge(he, vpos, vn_max, vp_max);
-					vector<vert_t*> vertices;
-					for (QVector3D pos: vpos) {
-						vert_t* vertex = new vert_t(pos);
-						vertices.push_back(vertex);
-					}
-					vertices[0]->refid = he->v->refid;
-					vertices[1]->refid = he->flip->refid;
-					vertices[2]->refid = he->flip->v->refid;
-					vertices[3]->refid = he->refid;
+				verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
 
-					for (auto newv : vertices)
-					{
-						verts_new.push_back(*newv);
-					}
+				face_t* cutFace = new face_t;
+				cutFace->isCutFace = true;
+				faces_new.push_back(cutFace);
+				for (auto newv : vertices)
+				{
+					verts_new.push_back(*newv);
+				}
 
-					face_t* cutFace = new face_t;
-					cutFace->isCutFace = true;
-					faces_new.push_back(*cutFace);
+				face_t* cutFace = new face_t;
+				cutFace->isCutFace = true;
+				faces_new.push_back(*cutFace);
 
-					face_t* newFace = createFace(vertices, cutFace);
-					newFace->refid = he->refid;
-					faces_new.push_back(*newFace);
-					top_pieces[he->refid] = newFace;
-					top_piece_bounds[he->refid] = make_pair(vp_max, vn_max);
+				face_t* newFace = createFace(vertices, cutFace);
+				newFace->refid = he->refid;
+				newFace->isJoint = true;
+				faces_new.push_back(*newFace);
+				top_pieces[he->refid] = newFace;
+				top_piece_bounds[he->refid] = make_pair(vp_max, vn_max);
 			}
 			he = he->next;
 		}while(he != f.he);
@@ -85,6 +90,7 @@ void MeshWeaver::weaveLinearScaledPiece() {
 
 			face_t* newFace = createFace(vertices, cutFace);
 			newFace->refid = he->refid;
+			newFace->isJoint = true;
 			faces_new.push_back(*newFace);
 
 			//find bezier control points
@@ -241,6 +247,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 
 				he_t* he_mid = HDS_Mesh::insertEdge(vmid_up, vmid_down);
 				he_mid->refid = he->refid;
+				he_mid->isJoint = true;
 
 				hes_new.push_back(*he_mid);
 				control_edges[he->refid] = he_mid;
@@ -316,6 +323,8 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 
 			he_t* he_mid = HDS_Mesh::insertEdge(vmid_up, vmid_down);
 			he_mid->refid = he_nxt->refid;
+			he_mid->isJoint = true;
+
 			he_mid->f = cutFace;
 			he_mid->flip->f = cutFace;
 			hes_new.push_back(*he_mid);

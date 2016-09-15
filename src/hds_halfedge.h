@@ -47,6 +47,7 @@ public:
 			bool isCutEdge : 1;
 			bool isExtended : 1;//From hollower
 			bool isNegCurve : 1;
+			bool isJoint : 1;//From woven
 		};
 	};
 	

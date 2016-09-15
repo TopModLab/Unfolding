@@ -1043,7 +1043,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 	cout << "SVG file saved successfully!" << endl;
 }
 
-void MeshConnector::exportRimmedPiece(FILE* fp,
+void MeshConnector::exportFBWalkPiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
 	
@@ -1191,6 +1191,43 @@ void MeshConnector::exportRimmedPiece(FILE* fp,
 	fprintf(fp, "</svg>");
 }
 
+void MeshConnector::exportWovenPiece(FILE* fp,
+	const mesh_t* unfolded_mesh, const confMap &conf)
+{
+	/************************************************************************/
+	/* Scalors                                                              */
+	/************************************************************************/
+	double he_offset = 10;
+	double str_wd = conf.at("strokeWd");
+	double he_scale = conf.at("scale");
+	double wid_conn = conf.at("width");
+	double len_conn = conf.at("length");
+	double pin_radius = conf.at("pinSize");
+	int cn_t = static_cast<int>(conf.at("connector"));
+
+	double circle_offset = 3;
+	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
+
+	//SVG file head
+	// define the size of export graph
+	fprintf(fp, SVG_HEAD,
+		static_cast<int>(size_vec.x() * he_scale),
+		static_cast<int>(size_vec.y() * he_scale));
+
+	switch (cn_t)
+	{
+	case WOVEN_HOLE_CONNECTOR:
+		break;
+	default:
+		break;
+	}
+
+	/************************************************************************/
+	/* End of SVG File End                                                  */
+	/************************************************************************/
+	fprintf(fp, "</svg>");
+}
+
 void MeshConnector::writeCutLayer(
 	FILE* SVG_File, const vector<QVector2D> &cut,
 	double str_wd, int cuttype, int id)
@@ -1268,10 +1305,13 @@ bool MeshConnector::genConnector(
 		fclose(fp);
 		return false;
 		break;
-	case HDS_Mesh::RIMMED_PROC:
+	case HDS_Mesh::FBWALK_PROC:
 		//exportRimmedPiece(fp, unfolded_mesh, conf);
 		fclose(fp);
 		return false;
+		break;
+	case HDS_Mesh::WOVEN_PROC:
+		exportWovenPiece(fp, unfolded_mesh, conf);
 		break;
 	default:
 		break;

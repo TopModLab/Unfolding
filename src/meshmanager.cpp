@@ -683,7 +683,7 @@ bool MeshManager::rimMesh(double rimSize)
 	}
 
 	//cutted_mesh->isHollowed
-	outMesh->processType = HDS_Mesh::RIMMED_PROC;
+	//outMesh->processType = HDS_Mesh::RIMMED_PROC;
 	// cutting performed successfully
 	cout << "Rimming succeed!" << endl;
 	operationStack->push(outMesh);
@@ -703,6 +703,9 @@ bool MeshManager::set3DRimMesh(const confMap &conf)
 		MeshRimFace::rimMeshV(outMesh);
 	else
 		MeshRimFace::rimMeshF(outMesh);
+
+	outMesh->processType = HDS_Mesh::FBWALK_PROC;
+
 	operationStack->push(outMesh);
 
 	return true;
@@ -755,6 +758,7 @@ bool MeshManager::setWeaveMesh(const confMap &conf)
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
 	MeshWeaver::configWeaveMesh(conf);
 	MeshWeaver::weaveMesh(outMesh);
+	outMesh->processType = HDS_Mesh::WOVEN_PROC;
 
 	operationStack->push(outMesh);
 
