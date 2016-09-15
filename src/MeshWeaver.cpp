@@ -23,27 +23,17 @@ void MeshWeaver::weaveLinearScaledPiece() {
 				computeDiamondCornerOnEdge(he, vpos, vn_max, vp_max);
 				vector<vert_t*> vertices;
 				for (QVector3D pos : vpos) {
-					vert_t* vertex = new vert_t(pos);
-					vertices.push_back(vertex);
+					verts_new.emplace_back(pos);
+					vertices.push_back(&verts_new.back());
 				}
 				vertices[0]->refid = he->v->refid;
 				vertices[1]->refid = he->flip->refid;
 				vertices[2]->refid = he->flip->v->refid;
 				vertices[3]->refid = he->refid;
 
-				verts_new.insert(verts_new.end(), vertices.begin(), vertices.end());
-
-				face_t* cutFace = new face_t;
+				faces_new.emplace_back();
+				face_t* cutFace = &faces_new.back();
 				cutFace->isCutFace = true;
-				faces_new.push_back(cutFace);
-				for (auto newv : vertices)
-				{
-					verts_new.push_back(*newv);
-				}
-
-				face_t* cutFace = new face_t;
-				cutFace->isCutFace = true;
-				faces_new.push_back(*cutFace);
 
 				face_t* newFace = createFace(vertices, cutFace);
 				newFace->refid = he->refid;

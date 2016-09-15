@@ -40,7 +40,7 @@ const QVector3D BBox3::getDiagnal() const
 	return pMax - pMin;
 }
 
-void BBox3::expand(double delta)
+void BBox3::expand(float delta)
 {
 	pMin -= QVector3D(delta, delta, delta);
 	pMax += QVector3D(delta, delta, delta);

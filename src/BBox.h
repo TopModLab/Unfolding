@@ -30,7 +30,7 @@ public:
 	const QVector3D getDiagnal() const;
 	bool overlaps(const BBox3& box) const;
 	bool overlapon(const BBox3& box, PLANE over_plane = XY_PLANE) const;
-	void expand(double delta);
+	void expand(float delta);
 	void Union(const QVector3D& p);
 	void Union(const BBox3& box);
 	friend BBox3 Union(const BBox3& box, const QVector3D& p);

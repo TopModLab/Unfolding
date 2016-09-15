@@ -156,10 +156,12 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 #ifdef _DEBUG
 	cout << "Building the half edge mesh ..." << endl;
 #endif // _DEBUG
-
+	HDS_Vertex::resetIndex();
+	HDS_HalfEdge::resetIndex();
+	HDS_Face::resetIndex();
 	size_t vertsCount = inVerts.size() / 3;
 	size_t facesCount = inFaces.size();
-	//size_t curFaceCount = facesCount;
+
 	size_t heCount = 0;
 	// Accumulate face size to get the number of half-edges
 	for (size_t i = 0; i < inFaces.size(); i++)
