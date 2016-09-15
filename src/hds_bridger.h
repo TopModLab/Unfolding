@@ -24,7 +24,7 @@ public:
 	HDS_Bridger(const HDS_Bridger &other);
 	HDS_Bridger operator=(const HDS_Bridger &other);
 
-	vector<he_t>   hes; //corresponding half edges pointer
+	vector<he_t>   hes;   //corresponding half edges pointer
 	vector<vert_t> verts; //corresponding vertices pointer
 	vector<face_t> faces; //corresponding faces pointer
 

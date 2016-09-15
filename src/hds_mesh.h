@@ -113,7 +113,9 @@ public:
     static he_t* incidentEdge(face_t *f1, face_t *f2);
     static he_t* incidentEdge(vert_t *v1, vert_t *v2);
 
-	static he_t* insertEdge(vert_t* v1, vert_t* v2, he_t* he1 = nullptr, he_t* he2 = nullptr);
+	static he_t* insertEdge(
+		vector<he_t> &edges, vert_t* v1, vert_t* v2,
+		he_t* he1 = nullptr, he_t* he2 = nullptr);
 
 // 	template <typename T>
 // 	void flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m);

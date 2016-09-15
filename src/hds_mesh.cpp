@@ -1008,15 +1008,18 @@ HDS_HalfEdge* HDS_Mesh::incidentEdge(vert_t *v1, vert_t *v2)
 }
 
 HDS_HalfEdge* HDS_Mesh::insertEdge(
-	vert_t* v1, vert_t* v2, he_t* he1, he_t* he2)
+	vector<he_t> &edges, vert_t* v1, vert_t* v2, he_t* he1, he_t* he2)
 {
 	bool v1_isNew = false, v2_isNew = false;
 
 	if (v1->he == nullptr) v1_isNew = true;
 	if (v2->he == nullptr) v2_isNew = true;
 
-	he_t* he = new he_t;
-	he_t* he_flip = new he_t;
+	edges.emplace_back();
+	he_t* he = &edges.back();
+	edges.emplace_back();
+	he_t* he_flip = &edges.back();
+	//he_t* he_flip = new he_t;
 	he->setFlip(he_flip);
 
 	//link edge and vertices

@@ -72,15 +72,14 @@ void HDS_Bridger::createBridge()
 		//push back all internal edges
 		for (int i = 0; i < nSamples - 1; i++)
 		{
-			HDS_Vertex vs, ve;
+			verts.emplace_back();
+			HDS_Vertex* vs = &verts.back();
+			verts.emplace_back();
+			HDS_Vertex* ve = &verts.back();
 
-			vs.pos = bezierPos_front[i];
-			ve.pos = bezierPos_back[i];
-			HDS_HalfEdge* he_new = HDS_Mesh::insertEdge(&vs, &ve);
-
-			hes.push_back(*he_new);
-			verts.push_back(vs);
-			verts.push_back(ve);
+			vs->pos = bezierPos_front[i];
+			ve->pos = bezierPos_back[i];
+			HDS_HalfEdge* he_new = HDS_Mesh::insertEdge(hes, vs, ve);
 		}
 
 		//create bridge segments
