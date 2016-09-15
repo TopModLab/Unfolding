@@ -785,46 +785,44 @@ void MainWindow::slot_selectMultiple()
 
 void MainWindow::slot_toggleEdges()
 {
-	HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
+	// TODO: Check if toggleVertices/Edges/Faces/Normals work
+	/*HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
 	if (curMesh)
 	{
 		curMesh->flipShowEdges();
 	}
-	viewer->update();
+	viewer->update();*/
 
 }
 
 void MainWindow::slot_toggleVertices()
 {
-	HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
+	/*HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
 	if (curMesh)
 	{
 		curMesh->flipShowVertices();
 	}
 
-	viewer->update();
-
+	viewer->update();*/
 }
 void MainWindow::slot_toggleFaces()
 {
-	HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
+	/*HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
 	if (curMesh)
 	{
 		curMesh->flipShowFaces();
 	}
-	viewer->update();
-
+	viewer->update();*/
 }
 
 void MainWindow::slot_toggleNormals()
 {
-	HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
+	/*HDS_Mesh* curMesh = MeshManager::getInstance()->getMeshStack()->getCurrentMesh();
 	if (curMesh)
 	{
 		curMesh->flipShowNormals();
 	}
-	viewer->update();
-
+	viewer->update();*/
 }
 
 void MainWindow::slot_toggleCameraOperation()

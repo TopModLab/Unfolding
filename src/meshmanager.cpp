@@ -321,17 +321,25 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			nullface->he = null_hefs[0];
 		}
 	}
-	
+	vert_t::resetIndex();
 	for (auto &v : verts) {
+		v.index = vert_t::assignIndex();
 		v.computeCurvature();
 		v.computeNormal();
 	}
 	int negCount = 0;
+	he_t::resetIndex();
 	for (auto &he : hes) {
+		he.index = he_t::assignIndex();
 		he.computeCurvature();
 		if (he.isNegCurve) negCount++;
 	}
-	mesh_t* thismesh = new mesh_t(std::move(verts), std::move(hes), std::move(faces));
+	face_t::resetIndex();
+	for (auto &f : faces)
+	{
+		f.index = face_t::assignIndex();
+	}
+	mesh_t* thismesh = new mesh_t(verts, hes, faces);
 
 #ifdef _DEBUG
 	cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;

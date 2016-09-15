@@ -509,32 +509,6 @@ void MeshViewer::keyPressEvent(QKeyEvent* e)
 
 		break;
 	}
-	//    case Qt::Key_E:
-	//    {
-	//        if (heMesh) {
-	//            heMesh->flipShowEdges();
-	//        }
-	//        break;
-	//    }
-	//    case Qt::Key_V:
-	//    {
-	//        if (heMesh) {
-	//            heMesh->flipShowVertices();
-	//        }
-	//        break;
-	//    }
-	//    case Qt::Key_F:
-	//    {
-	//        if (heMesh) {
-	//            heMesh->flipShowFaces();
-	//        }
-	//        break;
-	//    }
-	//    case Qt::Key_L:
-	//    {
-	//        enableLighting = !enableLighting;
-	//        break;
-	//    }
 	//    case Qt::Key_R:
 	//    {
 	//        toggleCriticalPoints();

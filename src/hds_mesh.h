@@ -42,9 +42,9 @@ public:
 	};*/
 
 	HDS_Mesh();
-	HDS_Mesh(vector<vert_t> &&verts,
-			 vector<he_t>   &&hes,
-			 vector<face_t> &&faces);
+	HDS_Mesh(vector<vert_t> &verts,
+			 vector<he_t>   &hes,
+			 vector<face_t> &faces);
 	HDS_Mesh(const HDS_Mesh& other);
 	~HDS_Mesh();
 
@@ -80,10 +80,6 @@ public:
 	void drawEdgeIndices();
 	void drawFaceIndices();
 
-	void flipShowEdges();
-	void flipShowFaces();
-	void flipShowVertices();
-	void flipShowNormals();
 	/************************************************************************/
 	/* Modern Rendering Functions                                           */
 	/************************************************************************/
@@ -154,20 +150,15 @@ private:
 	vector<he_t>   heSet;
 	vector<face_t> faceSet;
 
-	//vector<face_t*> sortedFaces;
-
-	//unordered_map<hdsid_t, he_t*> heMap;
-	//unordered_map<hdsid_t, face_t*> faceMap;
-	//unordered_map<hdsid_t, vert_t*> vertMap;
-
 	// pieces information
 	vector<set<hdsid_t>> pieceSet;
 	unique_ptr<BBox3> bound;
 private:
-	//bool isHollowed;
 	uint16_t processType;
+#ifdef OPENGL_LEGACY
 	uint8_t showComponent;
-	bool showFace, showEdge, showVert, showNormals;
+	bool showVert, showEdge, showFace, showNormals;
+#endif
 };
 
 inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
