@@ -24,7 +24,8 @@ void MeshExtender::setOriMesh(const HDS_Mesh* mesh)
 	ori_mesh = mesh;
 }
 
-vector <QVector3D> MeshExtender::scaleBridgerEdge(vert_t v1, vert_t v2)
+vector<QVector3D> MeshExtender::scaleBridgerEdge(
+	const vert_t &v1, const vert_t &v2)
 {
     double scale = HDS_Bridger::getScale();
 	vector <QVector3D> vpair;
@@ -40,7 +41,8 @@ vector <QVector3D> MeshExtender::scaleBridgerEdge(vert_t v1, vert_t v2)
 	return vpair;
 }
 
-void MeshExtender::addBridger(HDS_HalfEdge* he1, HDS_HalfEdge* he2, vector<QVector3D> vpos)
+void MeshExtender::addBridger(
+	HDS_HalfEdge* he1, HDS_HalfEdge* he2, vector<QVector3D> vpos)
 {
 	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, vpos);
 	Bridger->setCutFace(he1->f, he2->f);

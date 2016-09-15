@@ -39,7 +39,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	, faceSet(other.faceSet)
 	, processType(other.processType)
 	, pieceSet(other.pieceSet)
-	, bound(new BBox3(*other.bound))
 #ifdef OPENGL_LEGACY
 	, showFace(other.showFace), showEdge(other.showEdge)
 	, showVert(other.showVert), showNormals(other.showNormals)
@@ -105,6 +104,8 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 		auto v_ref = other.vertMap.at(v->index);
 		v->he = heMap.at(v_ref->he->index);
 	}*/
+	if (other.bound.get())
+		bound.reset(new BBox3(*other.bound));
 }
 
 HDS_Mesh::~HDS_Mesh()

@@ -5,7 +5,7 @@ double MeshHollower::flapSize = 0.2;//[0 >> 1]
 double MeshHollower::shiftAmount = 0;//[-1 >> 1]
 
 holePosRefMap* MeshHollower::refMapPointer = nullptr;
-unordered_map<HDS_HalfEdge*, Flap> MeshHollower::flapMap;
+unordered_map<const HDS_HalfEdge*, Flap> MeshHollower::flapMap;
 
 double getT(QVector3D v_start, QVector3D v_t, QVector3D v_end)
 {
@@ -31,8 +31,8 @@ bool MeshHollower::hollowMesh(
     //HDS_Bridger::setSamples(3);
 
 
-	unordered_set<he_t*> old_edges;
-	for (auto he: ori_mesh->halfedges()) {
+	unordered_set<const he_t*> old_edges;
+	for (auto &he: ori_mesh->halfedges()) {
 		if (old_edges.find(he.flip) == old_edges.end())
 			old_edges.insert(&he);
 	}
@@ -159,7 +159,7 @@ bool MeshHollower::hollowMesh(
 
 
 HDS_Face* MeshHollower::addFlapFace(int type,
-	HDS_HalfEdge* originalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace )
+	const HDS_HalfEdge* originalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace )
 {
 	HDS_Face* he_f = originalHE->f;
 

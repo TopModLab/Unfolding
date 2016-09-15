@@ -21,13 +21,13 @@ public:
 		 double newFlapSize, int type, double shift);
 private:
 	static HDS_Face* addFlapFace(int type,
-		HDS_HalfEdge* orginalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace);
+		const HDS_HalfEdge* orginalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace);
 public:
 	static double flapSize;
 	static double shiftAmount;
 	static holePosRefMap* refMapPointer;
 private:
-	static unordered_map<HDS_HalfEdge*, Flap> flapMap;
+	static unordered_map<const HDS_HalfEdge*, Flap> flapMap;
 };
 
 
