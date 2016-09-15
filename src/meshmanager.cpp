@@ -666,8 +666,6 @@ bool MeshManager::setGRS(const confMap &conf)
 		return false;
 	}
 
-	//update sorted faces
-	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
 	return true;
@@ -724,7 +722,6 @@ bool MeshManager::set3DRimMesh(const confMap &conf)
 
 	outMesh->processType = HDS_Mesh::FBWALK_PROC;
 
-	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
 	return true;
@@ -763,7 +760,7 @@ bool MeshManager::setQuadEdge(double fsize, int type, double shift)
 		delete outMesh;
 		return false;
 	}
-	outMesh->updateSortedFaces();
+
 	operationStack->push(outMesh);
 
 	return true;
@@ -780,7 +777,6 @@ bool MeshManager::setWeaveMesh(const confMap &conf)
 	MeshWeaver::weaveMesh(outMesh);
 	outMesh->processType = HDS_Mesh::WOVEN_PROC;
 
-	outMesh->updateSortedFaces();
 	operationStack->push(outMesh);
 
 	return true;

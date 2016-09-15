@@ -327,8 +327,6 @@ void HDS_Mesh::setMesh(
 		he->flip->index = hefIdx;
 		heMap[hefIdx] = he->flip;
 	}
-
-	updateSortedFaces();
 }
 
 

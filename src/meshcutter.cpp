@@ -329,7 +329,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 	}
 
 	cuttingProgress.setValue(100);
-	mesh->updateSortedFaces();
+
 	mesh->updatePieceSet();
 	return true;
 }
