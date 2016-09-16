@@ -88,67 +88,25 @@
     <Filter Include="Shader Files">
       <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\extra">
+      <UniqueIdentifier>{5bb29481-af61-4b5c-8bfa-2cdc7bf0e675}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Factory">
+      <UniqueIdentifier>{7fa6d7a4-b457-4814-ada1-d04cbe6c8dc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Factory">
+      <UniqueIdentifier>{b48679cb-61a5-43b5-89fb-d130e7e9fcd1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\colormap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\colormap_editor\colormapeditor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\morsesmalecomplex.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_mainwindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_mainwindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_cutlocuspanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_cutlocuspanel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_criticalpointspanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_criticalpointspanel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_colormapeditor.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_colormapeditor.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshcutter.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MeshExtender.cpp">
-      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\meshloader.cpp">
       <Filter>Source Files\geometry</Filter>
@@ -161,24 +119,6 @@
     </ClCompile>
     <ClCompile Include="..\src\meshunfolder.cpp">
       <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\main.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mainwindow.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\hds_face.cpp">
-      <Filter>Source Files\HDS</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\hds_halfedge.cpp">
-      <Filter>Source Files\HDS</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\hds_mesh.cpp">
-      <Filter>Source Files\HDS</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\hds_vertex.cpp">
-      <Filter>Source Files\HDS</Filter>
     </ClCompile>
     <ClCompile Include="..\src\stringutils.cpp">
       <Filter>Source Files\utils</Filter>
@@ -195,32 +135,11 @@
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\criticalpointspanel.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\cutlocuspanel.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\discretegeocomputer.cpp">
       <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_bridgerpanel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bridgerpanel.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanelviewer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_bridgerpanelviewer.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bridgerpanelviewer.cpp">
-      <Filter>Source Files\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\src\hds_bridger.cpp">
       <Filter>Source Files\HDS</Filter>
@@ -228,11 +147,35 @@
     <ClCompile Include="..\src\BBox.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\meshhollower.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\MeshConnector.cpp">
       <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_resources.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\colormap_editor\colormapeditor.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mainwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\OperationStack.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_bridgerpanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanelviewer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_bridgerpanelviewer.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ConnectorPanel.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -240,62 +183,17 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ConnectorPanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ConnectorPanel.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\hds_common.cpp">
-      <Filter>Header Files\HDS</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Camera.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\OperationStack.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_rimfacepanel.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_criticalpointspanel.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_rimfacepanel.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_criticalpointspanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\rimfacepanel.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshrimface.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ViewerGrid.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_resources.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_cutlocuspanel.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\MeshViewer.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MeshViewer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MeshViewer.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_cutlocuspanel.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ViewerRuler.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_WeavePanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_WeavePanel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\WeavePanel.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MeshWeaver.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MeshDFormer.cpp">
-      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_GESPanel.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -303,8 +201,11 @@
     <ClCompile Include="GeneratedFiles\Release\moc_GESPanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\GESPanel.cpp">
-      <Filter>Source Files\UI</Filter>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MeshViewer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MeshViewer.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_QuadEdgePanel.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -312,37 +213,124 @@
     <ClCompile Include="GeneratedFiles\Release\moc_QuadEdgePanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\QuadEdgePanel.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_rimfacepanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_rimfacepanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_WeavePanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_WeavePanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\Camera.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\UI\bridgerpanelviewer.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\bridgerpanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\colormap.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\ConnectorPanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\criticalpointspanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\cutlocuspanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\GESPanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\MeshViewer.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\QuadEdgePanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\rimfacepanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\ViewerGrid.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\ViewerRuler.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\WeavePanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HDS\hds_common.cpp">
+      <Filter>Source Files\HDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HDS\hds_face.cpp">
+      <Filter>Source Files\HDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HDS\hds_halfedge.cpp">
+      <Filter>Source Files\HDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HDS\hds_mesh.cpp">
+      <Filter>Source Files\HDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HDS\hds_vertex.cpp">
+      <Filter>Source Files\HDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshWeaver.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\meshrimface.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\meshhollower.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp">
-      <Filter>Source Files\geometry</Filter>
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshExtender.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshDFormer.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\meshcutter.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
+      <Filter>Source Files\extra</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\colormap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <CustomBuild Include="..\extras\colormap_editor\colormapeditor.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\criticalpointspanel.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\cutlocuspanel.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <ClInclude Include="..\src\discretegeocomputer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\morsesmalecomplex.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\meshcutter.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\MeshExtender.h">
-      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\meshloader.h">
       <Filter>Header Files\geometry</Filter>
@@ -389,25 +377,10 @@
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\wxnTime.h">
       <Filter>Header Files\extras\LocalGeodesics</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\hds_face.h">
-      <Filter>Header Files\HDS</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\hds_halfedge.h">
-      <Filter>Header Files\HDS</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\hds_mesh.h">
-      <Filter>Header Files\HDS</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\hds_vertex.h">
-      <Filter>Header Files\HDS</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\stringutils.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\src\utils.hpp">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\glutils.hpp">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\src\mathutils.hpp">
@@ -428,38 +401,11 @@
     <ClInclude Include="..\src\BBox.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\meshhollower.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\MeshConnector.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\hds_common.h">
-      <Filter>Header Files\HDS</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Camera.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\OperationStack.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\meshrimface.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ViewerGrid.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ViewerRuler.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\MeshWeaver.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\UnfoldingAppException.h">
       <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\MeshDFormer.h">
-      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
       <Filter>Generated Files</Filter>
@@ -494,38 +440,62 @@
     <ClInclude Include="GeneratedFiles\ui_colormapeditor.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\OperationStack.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UI\Camera.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UI\colormap.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UI\glutils.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UI\ViewerGrid.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UI\ViewerRuler.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HDS\hds_common.h">
+      <Filter>Header Files\HDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HDS\hds_face.h">
+      <Filter>Header Files\HDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HDS\hds_halfedge.h">
+      <Filter>Header Files\HDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HDS\hds_mesh.h">
+      <Filter>Header Files\HDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HDS\hds_vertex.h">
+      <Filter>Header Files\HDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshWeaver.h">
+      <Filter>Header Files\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\meshcutter.h">
+      <Filter>Header Files\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshDFormer.h">
+      <Filter>Header Files\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshExtender.h">
+      <Filter>Header Files\Factory</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\MeshFactory\MeshFactory.h">
-      <Filter>Header Files\geometry</Filter>
+      <Filter>Header Files\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\meshhollower.h">
+      <Filter>Header Files\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\meshrimface.h">
+      <Filter>Header Files\Factory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\src\mainwindow.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\bridgerpanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\bridgerpanelviewer.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\ConnectorPanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\rimfacepanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\MeshViewer.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\WeavePanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\GESPanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\QuadEdgePanel.h">
-      <Filter>Header Files\UI</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\forms\bridgerpanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
@@ -558,6 +528,39 @@
     </CustomBuild>
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\extras\colormap_editor\colormapeditor.h">
+      <Filter>Header Files\extras</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\bridgerpanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\bridgerpanelviewer.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\ConnectorPanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\criticalpointspanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\cutlocuspanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\GESPanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\MeshViewer.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\QuadEdgePanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\rimfacepanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\WeavePanel.h">
+      <Filter>Header Files\UI</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

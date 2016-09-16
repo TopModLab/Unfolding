@@ -1,6 +1,6 @@
-#include "hds_face.h"
-#include "hds_vertex.h"
-#include "hds_halfedge.h"
+#include "HDS/hds_face.h"
+#include "HDS/hds_vertex.h"
+#include "HDS/hds_halfedge.h"
 #include <qdebug.h>
 
 hdsid_t HDS_Face::uid = 0;

@@ -1,7 +1,7 @@
 #ifndef HDS_FACE_H
 #define HDS_FACE_H
 
-#include "hds_common.h"
+#include "HDS/hds_common.h"
 #include "BBox.h"
 
 

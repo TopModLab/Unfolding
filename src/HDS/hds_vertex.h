@@ -1,7 +1,7 @@
 #ifndef HDS_VERTEX_H
 #define HDS_VERTEX_H
 
-#include "hds_common.h"
+#include "HDS/hds_common.h"
 
 class HDS_Vertex : public HDS_Common
 {
