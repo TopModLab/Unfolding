@@ -2,6 +2,7 @@
 #include "meshcutter.h"
 #include "meshunfolder.h"
 #include "meshsmoother.h"
+#include "MeshFactory/MeshFactory.h"
 #include "MeshExtender.h"
 #include "meshhollower.h"
 #include "meshrimface.h"

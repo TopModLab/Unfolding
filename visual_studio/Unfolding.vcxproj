@@ -344,6 +344,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\mainwindow.cpp" />
     <ClCompile Include="..\src\meshcutter.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp" />
     <ClCompile Include="..\src\meshhollower.cpp" />
     <ClCompile Include="..\src\meshloader.cpp" />
     <ClCompile Include="..\src\meshmanager.cpp" />
@@ -463,6 +464,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
   <ItemGroup>
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshFactory.h" />
     <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h" />
     <ClInclude Include="GeneratedFiles\ui_colormapeditor.h" />
     <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h" />

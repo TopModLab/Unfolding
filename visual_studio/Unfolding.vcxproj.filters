@@ -315,6 +315,9 @@
     <ClCompile Include="..\src\QuadEdgePanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colormap.h">
@@ -490,6 +493,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_colormapeditor.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshFactory\MeshFactory.h">
+      <Filter>Header Files\geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
