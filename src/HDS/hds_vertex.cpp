@@ -1,6 +1,6 @@
-#include "hds_vertex.h"
-#include "hds_halfedge.h"
-#include "hds_face.h"
+#include "HDS/hds_vertex.h"
+#include "HDS/hds_halfedge.h"
+#include "HDS/hds_face.h"
 #include "mathutils.hpp"
 
 hdsid_t HDS_Vertex::uid = 0;

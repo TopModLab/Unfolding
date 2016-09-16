@@ -1,6 +1,6 @@
 #ifndef HDS_EDGE_H
 #define HDS_EDGE_H
-#include "hds_common.h"
+#include "HDS/hds_common.h"
 
 class HDS_HalfEdge : public HDS_Common
 {

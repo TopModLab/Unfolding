@@ -19,9 +19,9 @@
 #include "OperationStack.h"
 
 #include "hds_mesh.h"
-#include "hds_face.h"
-#include "hds_halfedge.h"
-#include "hds_vertex.h"
+#include "HDS/hds_face.h"
+#include "HDS/hds_halfedge.h"
+#include "HDS/hds_vertex.h"
 #include "hds_bridger.h"
 
 #include "Graph.hpp"

@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-#include "hds_vertex.h"
+#include "HDS/hds_vertex.h"
 
 class MorseSmaleComplex
 {

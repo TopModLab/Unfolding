@@ -1,11 +1,11 @@
 #ifndef HDS_MESH_H
 #define HDS_MESH_H
 
-#include "hds_halfedge.h"
-#include "hds_vertex.h"
-#include "hds_face.h"
+#include "HDS/hds_halfedge.h"
+#include "HDS/hds_vertex.h"
+#include "HDS/hds_face.h"
 
-#include "colormap.h"
+#include "UI/colormap.h"
 
 #include "BBox.h"
 
