@@ -1221,6 +1221,14 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 	default:
 		break;
 	}
+	// for pieces
+	for (auto face : unfolded_mesh->faceSet)
+	{
+		if (face->isJoint)
+		{
+			fprintf(fp, "hahahahaha\n");
+		}
+	}
 
 	/************************************************************************/
 	/* End of SVG File End                                                  */
