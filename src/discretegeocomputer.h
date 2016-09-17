@@ -1,7 +1,7 @@
 #ifndef DISCRETEGEOCOMPUTER_H
 #define DISCRETEGEOCOMPUTER_H
 
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 #include <limits>
 #include <algorithm>
 

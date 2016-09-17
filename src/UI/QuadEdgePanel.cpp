@@ -1,4 +1,4 @@
-#include "QuadEdgePanel.h"
+#include "UI/QuadEdgePanel.h"
 #include "ui_QuadEdgePanel.h"
 
 QuadEdgePanel::QuadEdgePanel(QWidget *parent) :

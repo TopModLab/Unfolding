@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common.h"
-#include "MeshExtender.h"
+#include "Utils/common.h"
+#include "MeshFactory/MeshExtender.h"
 #include <unordered_map>
 
 typedef std::unordered_map<hdsid_t, double> holePosRefMap;

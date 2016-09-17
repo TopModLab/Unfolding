@@ -4,7 +4,7 @@
 #include "GeodesicComputer.h"
 #include "DiscreteGeoComputer.h"
 
-#include "common.h"
+#include "Utils/common.h"
 #include <QMutex>
 #include <QScopedPointer>
 #include <QSharedPointer>
@@ -12,15 +12,15 @@
 
 #include "meshloader.h"
 
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 #include "HDS/hds_face.h"
 #include "HDS/hds_halfedge.h"
 #include "HDS/hds_vertex.h"
 #include "hds_bridger.h"
-#include "mathutils.hpp"
+#include "Utils/mathutils.h"
 
 #include "Graph.hpp"
-#include "ConnectorPanel.h"
+#include "UI/ConnectorPanel.h"
 
 enum class UNIT_TYPE : int
 {

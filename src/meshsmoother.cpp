@@ -1,5 +1,5 @@
 #include "meshsmoother.h"
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 #include <iostream>
 
 

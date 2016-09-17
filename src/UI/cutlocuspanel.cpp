@@ -1,4 +1,4 @@
-#include "cutlocuspanel.h"
+#include "UI/cutlocuspanel.h"
 #include "ui_cutlocuspanel.h"
 
 CutLocusPanel::CutLocusPanel(QWidget *parent) :

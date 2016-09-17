@@ -326,29 +326,27 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\HDS\hds_vertex.cpp" />
     <ClCompile Include="..\src\hds_bridger.cpp" />
     <ClCompile Include="..\src\MeshConnector.cpp" />
-    <ClCompile Include="..\src\MeshDFormer.cpp" />
-    <ClCompile Include="..\src\MeshExtender.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.cpp" />
     <ClCompile Include="..\extras\colormap_editor\colormapeditor.cpp" />
-    <ClCompile Include="..\src\cutlocuspanel.cpp" />
     <ClCompile Include="..\src\discretegeocomputer.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\mainwindow.cpp" />
-    <ClCompile Include="..\src\meshcutter.cpp" />
+    <ClCompile Include="..\src\MeshFactory\meshcutter.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshDFormer.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshExtender.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp" />
-    <ClCompile Include="..\src\meshhollower.cpp" />
+    <ClCompile Include="..\src\MeshFactory\meshhollower.cpp" />
+    <ClCompile Include="..\src\MeshFactory\meshrimface.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshWeaver.cpp" />
     <ClCompile Include="..\src\meshloader.cpp" />
     <ClCompile Include="..\src\meshmanager.cpp" />
-    <ClCompile Include="..\src\meshrimface.cpp" />
     <ClCompile Include="..\src\meshsmoother.cpp" />
     <ClCompile Include="..\src\meshunfolder.cpp" />
-    <ClCompile Include="..\src\MeshWeaver.cpp" />
     <ClCompile Include="..\src\morsesmalecomplex.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp" />
     <ClCompile Include="..\src\OperationStack.cpp" />
-    <ClCompile Include="..\src\stringutils.cpp" />
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp" />
     <ClCompile Include="..\src\UI\bridgerpanel.cpp" />
     <ClCompile Include="..\src\UI\bridgerpanelviewer.cpp" />
@@ -364,7 +362,8 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\UI\ViewerGrid.cpp" />
     <ClCompile Include="..\src\UI\ViewerRuler.cpp" />
     <ClCompile Include="..\src\UI\WeavePanel.cpp" />
-    <ClCompile Include="..\src\unionfind.cpp" />
+    <ClCompile Include="..\src\Utils\stringutils.cpp" />
+    <ClCompile Include="..\src\Utils\unionfind.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -462,7 +461,13 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClInclude Include="..\src\HDS\hds_halfedge.h" />
     <ClInclude Include="..\src\HDS\hds_mesh.h" />
     <ClInclude Include="..\src\HDS\hds_vertex.h" />
+    <ClInclude Include="..\src\MeshFactory\meshcutter.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshDFormer.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshExtender.h" />
     <ClInclude Include="..\src\MeshFactory\MeshFactory.h" />
+    <ClInclude Include="..\src\MeshFactory\meshhollower.h" />
+    <ClInclude Include="..\src\MeshFactory\meshrimface.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshWeaver.h" />
     <ClInclude Include="..\src\OperationStack.h" />
     <CustomBuild Include="..\src\UI\bridgerpanel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -574,7 +579,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_CONSOLE -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL -DQT_SVG_LIB -D_UNICODE "-I$(SolutionDir)..\extras" "-I$(SolutionDir)..\src" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtSvg" "-I.\debug"</Command>
     </CustomBuild>
-    <ClInclude Include="..\src\UI\glutils.hpp" />
+    <ClInclude Include="..\src\UI\glutils.h" />
     <CustomBuild Include="..\src\UI\MeshViewer.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing MeshViewer.h...</Message>
@@ -649,6 +654,12 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_CONSOLE -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL -DQT_SVG_LIB -D_UNICODE "-I$(SolutionDir)..\extras" "-I$(SolutionDir)..\src" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtSvg" "-I.\debug"</Command>
     </CustomBuild>
+    <ClInclude Include="..\src\Utils\common.h" />
+    <ClInclude Include="..\src\Utils\mathutils.h" />
+    <ClInclude Include="..\src\Utils\stringutils.h" />
+    <ClInclude Include="..\src\Utils\UnfoldingAppException.h" />
+    <ClInclude Include="..\src\Utils\unionfind.h" />
+    <ClInclude Include="..\src\Utils\utils.h" />
     <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h" />
     <ClInclude Include="GeneratedFiles\ui_colormapeditor.h" />
     <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h" />
@@ -660,21 +671,15 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClInclude Include="GeneratedFiles\ui_rimfacepanel.h" />
     <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h" />
     <ClInclude Include="GeneratedFiles\ui_WeavePanel.h" />
-    <ClInclude Include="..\src\MeshDFormer.h" />
-    <ClInclude Include="..\src\MeshWeaver.h" />
     <ClInclude Include="..\src\MeshConnector.h" />
-    <ClInclude Include="..\src\meshrimface.h" />
-    <ClInclude Include="..\src\UnfoldingAppException.h" />
     <ClInclude Include="..\src\BBox.h" />
     <ClInclude Include="..\src\GeodesicComputer.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.h" />
     <ClInclude Include="..\src\hds_bridger.h" />
-    <ClInclude Include="..\src\MeshExtender.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.h" />
-    <ClInclude Include="..\src\meshhollower.h" />
     <CustomBuild Include="..\extras\colormap_editor\colormapeditor.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
@@ -709,21 +714,15 @@ endlocal
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
-    <ClInclude Include="..\src\common.h" />
     <ClInclude Include="..\src\discretegeocomputer.h" />
-    <ClInclude Include="..\src\mathutils.hpp" />
-    <ClInclude Include="..\src\meshcutter.h" />
     <ClInclude Include="..\src\meshloader.h" />
     <ClInclude Include="..\src\meshmanager.h" />
     <ClInclude Include="..\src\meshsmoother.h" />
     <ClInclude Include="..\src\meshunfolder.h" />
     <ClInclude Include="..\src\morsesmalecomplex.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.h" />
-    <ClInclude Include="..\src\stringutils.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.h" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\targetver.h" />
-    <ClInclude Include="..\src\unionfind.h" />
-    <ClInclude Include="..\src\utils.hpp" />
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\wxnTime.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,7 @@
 #ifndef STRINGUTILS_H
 #define STRINGUTILS_H
 
-#include "common.h"
+#include "Utils/common.h"
 
 enum CaseSensitivity{
 	CaseSensitive,

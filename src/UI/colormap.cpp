@@ -1,6 +1,6 @@
-#include "colormap.h"
+#include "UI/colormap.h"
 
-#include "mathutils.hpp"
+#include "Utils/mathutils.h"
 
 ColorMap::ColorMap(){}
 

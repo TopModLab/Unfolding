@@ -2,7 +2,7 @@
 #ifndef BRIDGERPANEL_H
 #define BRIDGERPANEL_H
 
-#include "common.h"
+#include "Utils/common.h"
 #include <QWidget>
 
 namespace Ui {

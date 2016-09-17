@@ -1,7 +1,7 @@
 #ifndef MESHSMOOTHER_H
 #define MESHSMOOTHER_H
 
-#include "common.h"
+#include "Utils/common.h"
 
 class HDS_Mesh;
 class HDS_Face;

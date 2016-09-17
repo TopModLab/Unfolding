@@ -4,7 +4,6 @@
 #undef OPENGL_LEGACY
 #endif
 
-#include "glutils.hpp"
 // Legacy OpenGL
 #include <QMatrix4x4>
 #include <QVector3D>
@@ -13,11 +12,12 @@
 #include <QMouseEvent>
 // Modern OpenGL
 #include <QOpenGLWidget>
-#include "common.h"
-#include "hds_mesh.h"
-#include "Camera.h"
-#include "ViewerGrid.h"
-#include "colormap.h"
+#include "UI/glutils.h"
+#include "Utils/common.h"
+#include "HDS/hds_mesh.h"
+#include "UI/Camera.h"
+#include "UI/ViewerGrid.h"
+#include "UI/colormap.h"
 #include "Graph.hpp"
 #include "morsesmalecomplex.h"
 

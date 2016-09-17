@@ -1,4 +1,4 @@
-#include "BridgerPanel.h"
+#include "UI/BridgerPanel.h"
 #include "ui_BridgerPanel.h"
 
 BridgerPanel::BridgerPanel(QWidget *parent) :

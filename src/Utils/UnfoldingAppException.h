@@ -2,7 +2,7 @@
 #ifndef UNFOLDING_APP_EXCEPTION
 #define UNFOLDING_APP_EXCEPTION
 
-#include "common.h"
+#include "Utils/common.h"
 class UnfoldingAppException : public exception {
 public:
 	UnfoldingAppException(const string& msg) :msg(msg) {}

@@ -1,7 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include "common.h"
+#include "Utils/common.h"
 #include <QVector3D>
 #include <QtGui/QColor>
 

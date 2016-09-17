@@ -1,7 +1,7 @@
 #include "meshcutter.h"
-#include "hds_mesh.h"
-#include "utils.hpp"
-#include "mathutils.hpp"
+#include "HDS/hds_mesh.h"
+#include "Utils/utils.h"
+#include "Utils/mathutils.h"
 
 bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 {

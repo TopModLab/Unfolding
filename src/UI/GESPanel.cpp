@@ -1,4 +1,4 @@
-#include "GESPanel.h"
+#include "UI/GESPanel.h"
 #include "ui_GESPanel.h"
 
 GESPanel::GESPanel(QWidget *parent) :

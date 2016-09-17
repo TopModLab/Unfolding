@@ -2,14 +2,14 @@
 #ifndef _ConnectorPanel_
 #define _ConnectorPanel_
 
-#include "common.h"
+#include "Utils/common.h"
 
 #include <QWidget>
 #include <QDialog>
 #include <QFileDialog>
 #include <QString>
 #include "ui_ConnectorPanel.h"
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 #include "MeshConnector.h"
 
 

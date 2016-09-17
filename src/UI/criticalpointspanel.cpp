@@ -1,4 +1,4 @@
-#include "criticalpointspanel.h"
+#include "UI/criticalpointspanel.h"
 
 CriticalPointsPanel::CriticalPointsPanel(QWidget *parent)
 	: QWidget(parent)

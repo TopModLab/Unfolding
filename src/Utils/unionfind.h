@@ -1,7 +1,7 @@
 #ifndef UNIONFIND_H
 #define UNIONFIND_H
 
-#include "common.h"
+#include "Utils/common.h"
 
 class UnionFind {
 public:

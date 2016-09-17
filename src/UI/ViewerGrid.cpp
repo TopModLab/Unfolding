@@ -1,4 +1,4 @@
-#include "ViewerGrid.h"
+#include "UI/ViewerGrid.h"
 
 const char* gridvs =
 "#version 330\n"\

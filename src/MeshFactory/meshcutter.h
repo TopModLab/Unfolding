@@ -1,8 +1,8 @@
 #ifndef MESHCUTTER_H
 #define MESHCUTTER_H
 
-#include "common.h"
-#include "unionfind.h"
+#include "Utils/common.h"
+#include "Utils/unionfind.h"
 
 #include <QProgressDialog>
 

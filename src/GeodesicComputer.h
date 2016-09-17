@@ -6,7 +6,7 @@
 // for sparse graph
 #include "../extras/SVG_LC_code/SVG_LC/wxn_dijstra.h"
 
-#include "common.h"
+#include "Utils/common.h"
 #include "meshloader.h"
 
 class GeodesicComputer

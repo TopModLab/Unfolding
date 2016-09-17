@@ -1,5 +1,5 @@
 #include "meshloader.h"
-#include "stringutils.h"
+#include "Utils/stringutils.h"
 
 #include <QFile>
 #include <QString>

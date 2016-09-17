@@ -1,4 +1,4 @@
-#include "unionfind.h"
+#include "Utils/unionfind.h"
 
 UnionFind::UnionFind(int sz){
 	count = sz;

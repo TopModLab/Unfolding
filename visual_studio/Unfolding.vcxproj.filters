@@ -120,12 +120,6 @@
     <ClCompile Include="..\src\meshunfolder.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\stringutils.cpp">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\unionfind.cpp">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\GeodesicComputer.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
@@ -133,9 +127,6 @@
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\cutlocuspanel.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\discretegeocomputer.cpp">
@@ -161,9 +152,6 @@
     </ClCompile>
     <ClCompile Include="..\src\mainwindow.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\OperationStack.cpp">
-      <Filter>Source Files\utils</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_bridgerpanel.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -243,9 +231,6 @@
     <ClCompile Include="..\src\UI\criticalpointspanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\UI\cutlocuspanel.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\UI\GESPanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
@@ -282,27 +267,6 @@
     <ClCompile Include="..\src\HDS\hds_vertex.cpp">
       <Filter>Source Files\HDS</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\MeshWeaver.cpp">
-      <Filter>Source Files\Factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshrimface.cpp">
-      <Filter>Source Files\Factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshhollower.cpp">
-      <Filter>Source Files\Factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp">
-      <Filter>Source Files\Factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MeshExtender.cpp">
-      <Filter>Source Files\Factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MeshDFormer.cpp">
-      <Filter>Source Files\Factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshcutter.cpp">
-      <Filter>Source Files\Factory</Filter>
-    </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
       <Filter>Source Files\extra</Filter>
     </ClCompile>
@@ -323,6 +287,39 @@
     </ClCompile>
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
       <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\OperationStack.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utils\stringutils.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utils\unionfind.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\meshcutter.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\MeshDFormer.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\MeshExtender.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\meshhollower.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\meshrimface.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\MeshWeaver.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\cutlocuspanel.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -377,21 +374,6 @@
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\wxnTime.h">
       <Filter>Header Files\extras\LocalGeodesics</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\stringutils.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\utils.hpp">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\mathutils.hpp">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\common.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\unionfind.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\GeodesicComputer.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
@@ -403,9 +385,6 @@
     </ClInclude>
     <ClInclude Include="..\src\MeshConnector.h">
       <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\UnfoldingAppException.h">
-      <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
       <Filter>Generated Files</Filter>
@@ -440,16 +419,10 @@
     <ClInclude Include="GeneratedFiles\ui_colormapeditor.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\OperationStack.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\UI\Camera.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\src\UI\colormap.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\UI\glutils.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\src\UI\ViewerGrid.h">
@@ -473,25 +446,49 @@
     <ClInclude Include="..\src\HDS\hds_vertex.h">
       <Filter>Header Files\HDS</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MeshWeaver.h">
+    <ClInclude Include="..\src\OperationStack.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utils\common.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utils\stringutils.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utils\UnfoldingAppException.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utils\unionfind.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utils\mathutils.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utils\utils.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UI\glutils.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshFactory\meshcutter.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\meshcutter.h">
+    <ClInclude Include="..\src\MeshFactory\MeshDFormer.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MeshDFormer.h">
-      <Filter>Header Files\Factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\MeshExtender.h">
+    <ClInclude Include="..\src\MeshFactory\MeshExtender.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
     <ClInclude Include="..\src\MeshFactory\MeshFactory.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\meshhollower.h">
+    <ClInclude Include="..\src\MeshFactory\meshhollower.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\meshrimface.h">
+    <ClInclude Include="..\src\MeshFactory\meshrimface.h">
+      <Filter>Header Files\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshFactory\MeshWeaver.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
-#include "rimfacepanel.h"
+#include "UI/rimfacepanel.h"
 #include "ui_rimfacepanel.h"
-#include "common.h"
+#include "Utils/common.h"
 
 RimFacePanel::RimFacePanel(QWidget *parent) :
 	QWidget(parent),

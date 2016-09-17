@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 #include "BaseModel.h"
-#include "common.h"
+#include "Utils/common.h"
 
 class CRichModel : virtual public CBaseModel 
 {

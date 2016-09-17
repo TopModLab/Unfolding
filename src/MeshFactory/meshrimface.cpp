@@ -1,5 +1,5 @@
-#include "meshrimface.h"
-#include "common.h"
+#include "MeshFactory/meshrimface.h"
+#include "Utils/common.h"
 
 
 float MeshRimFace::planeWidth = 0.2f;

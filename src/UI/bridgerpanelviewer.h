@@ -5,7 +5,7 @@
 #define OPENGL_LEGACY
 #endif
 #include <QGLWidget>
-#include "glutils.hpp"
+#include "UI/glutils.h"
 
 class BridgerPanelViewer : public QGLWidget
 {

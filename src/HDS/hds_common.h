@@ -1,7 +1,7 @@
 #pragma once
-#include "common.h"
+#include "Utils/common.h"
 #include <QString>
-#include "mathutils.hpp"
+#include "Utils/mathutils.h"
 #include <QVector3D>
 
 using hdsid_t = uint32_t;
