@@ -76,15 +76,6 @@
     <Filter Include="Header Files\utils">
       <UniqueIdentifier>{5e15f4b4-126d-481c-bdcd-06012f7a7408}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\utils">
-      <UniqueIdentifier>{406507e8-32fd-4f6c-9ddd-1572f858f836}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\geometry">
-      <UniqueIdentifier>{1fdcb9a7-d899-475b-9109-d463b4f81172}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\geometry">
-      <UniqueIdentifier>{57419b2c-ce31-4e11-8917-9a3e7fa9942b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader Files">
       <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
     </Filter>
@@ -97,49 +88,28 @@
     <Filter Include="Source Files\Factory">
       <UniqueIdentifier>{b48679cb-61a5-43b5-89fb-d130e7e9fcd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GeomUtils">
+      <UniqueIdentifier>{b05a8b3e-dd88-45de-8bde-1762db4fab41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{406507e8-32fd-4f6c-9ddd-1572f858f836}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GeomUtils">
+      <UniqueIdentifier>{94b0eb3e-a6a3-490a-b245-6c5f9b8e84b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GeomProc">
+      <UniqueIdentifier>{57419b2c-ce31-4e11-8917-9a3e7fa9942b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GeomProc">
+      <UniqueIdentifier>{1fdcb9a7-d899-475b-9109-d463b4f81172}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\morsesmalecomplex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_colormapeditor.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_colormapeditor.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshloader.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshmanager.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshsmoother.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\meshunfolder.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\GeodesicComputer.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\discretegeocomputer.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\hds_bridger.cpp">
-      <Filter>Source Files\HDS</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\BBox.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MeshConnector.cpp">
-      <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_resources.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -288,14 +258,11 @@
     <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
       <Filter>Source Files\extra</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\OperationStack.cpp">
-      <Filter>Source Files\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Utils\stringutils.cpp">
-      <Filter>Source Files\utils</Filter>
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Utils\unionfind.cpp">
-      <Filter>Source Files\utils</Filter>
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="..\src\MeshFactory\meshcutter.cpp">
       <Filter>Source Files\Factory</Filter>
@@ -321,26 +288,59 @@
     <ClCompile Include="..\src\UI\cutlocuspanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mainwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mainwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
+      <Filter>Source Files\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomUtils\BBox.cpp">
+      <Filter>Source Files\GeomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomUtils\discretegeocomputer.cpp">
+      <Filter>Source Files\GeomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomUtils\GeodesicComputer.cpp">
+      <Filter>Source Files\GeomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomUtils\hds_bridger.cpp">
+      <Filter>Source Files\GeomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomUtils\morsesmalecomplex.cpp">
+      <Filter>Source Files\GeomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomUtils\OperationStack.cpp">
+      <Filter>Source Files\GeomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomUtils\reebgraph.cpp">
+      <Filter>Source Files\GeomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomProc\meshunfolder.cpp">
+      <Filter>Source Files\GeomProc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomProc\MeshConnector.cpp">
+      <Filter>Source Files\GeomProc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomProc\MeshIterator.cpp">
+      <Filter>Source Files\GeomProc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomProc\meshloader.cpp">
+      <Filter>Source Files\GeomProc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomProc\meshmanager.cpp">
+      <Filter>Source Files\GeomProc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeomProc\meshsmoother.cpp">
+      <Filter>Source Files\GeomProc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\discretegeocomputer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\morsesmalecomplex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\meshloader.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\meshmanager.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\meshsmoother.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\meshunfolder.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h">
       <Filter>Header Files\extras\LocalGeodesics</Filter>
     </ClInclude>
@@ -373,18 +373,6 @@
     </ClInclude>
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\wxnTime.h">
       <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\GeodesicComputer.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\hds_bridger.h">
-      <Filter>Header Files\HDS</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\BBox.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\MeshConnector.h">
-      <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
       <Filter>Generated Files</Filter>
@@ -446,9 +434,6 @@
     <ClInclude Include="..\src\HDS\hds_vertex.h">
       <Filter>Header Files\HDS</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\OperationStack.h">
-      <Filter>Header Files\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Utils\common.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
@@ -490,6 +475,48 @@
     </ClInclude>
     <ClInclude Include="..\src\MeshFactory\MeshWeaver.h">
       <Filter>Header Files\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\BBox.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\discretegeocomputer.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\GeodesicComputer.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\Graph.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\hds_bridger.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\morsesmalecomplex.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\OperationStack.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomUtils\reebgraph.h">
+      <Filter>Header Files\GeomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomProc\MeshIterator.h">
+      <Filter>Header Files\GeomProc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomProc\meshloader.h">
+      <Filter>Header Files\GeomProc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomProc\meshmanager.h">
+      <Filter>Header Files\GeomProc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomProc\meshsmoother.h">
+      <Filter>Header Files\GeomProc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomProc\meshunfolder.h">
+      <Filter>Header Files\GeomProc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GeomProc\MeshConnector.h">
+      <Filter>Header Files\GeomProc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -558,6 +585,9 @@
     </CustomBuild>
     <CustomBuild Include="..\src\UI\WeavePanel.h">
       <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\mainwindow.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

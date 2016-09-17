@@ -1,5 +1,6 @@
-#include "reebgraph.h"
+#include "GeomUtils/reebgraph.h"
 
+#ifdef USE_REEB_GRAPH
 
 ReebGraph::ReebGraph()
 {
@@ -111,3 +112,5 @@ bool ReebGraph::isValidArc(Arc *a)
 {
   return false;
 }
+
+#endif

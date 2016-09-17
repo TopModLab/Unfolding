@@ -3,7 +3,7 @@
 #define MESHUNFOLDER_H
 
 #include "Utils/common.h"
-#include "BBox.h"
+#include "GeomUtils/BBox.h"
 //#include <QtGui/QVector3D>
 #include <QVector3D>
 #include <QProgressDialog>

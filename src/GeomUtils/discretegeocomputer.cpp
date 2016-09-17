@@ -1,4 +1,4 @@
-#include "discretegeocomputer.h"
+#include "GeomUtils/DiscreteGeoComputer.h"
 
 DiscreteGeoComputer::DiscreteGeoComputer()
 {

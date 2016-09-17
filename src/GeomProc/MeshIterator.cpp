@@ -1,6 +1,6 @@
-#include "MeshIterator.h"
+#include "GeomProc/MeshIterator.h"
 
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 
 queue<pair<HDS_Vertex*,int>> MeshIterator::BFS(HDS_Mesh* mesh, int vidx)
 {

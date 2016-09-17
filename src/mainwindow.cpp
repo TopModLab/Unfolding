@@ -1,6 +1,6 @@
 #define NOMINMAX
 #define MAX_PATH 100
-#include "meshmanager.h"
+#include "GeomProc/meshmanager.h"
 #include <windows.h>
 
 #include "mainwindow.h"
@@ -353,7 +353,8 @@ void MainWindow::createActions()
 
 		connect(ui->halfEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_performMeshCut);
 
-		connect(ui->unfoldBtn, &QToolButton::clicked, this, &MainWindow::slot_unfoldMesh);
+		// unfold action button signal is connected in mainwindow.ui file
+		connect(ui->actionUnfold, &QAction::triggered, this, &MainWindow::slot_unfoldMesh);
 
 		connect(ui->actionColormap, &QAction::triggered, this, &MainWindow::slot_triggerColormap);
 		connect(ui->actionCPts, &QAction::triggered, this, &MainWindow::slot_triggerCriticalPoints);

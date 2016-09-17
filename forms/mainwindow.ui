@@ -708,6 +708,7 @@
    <addaction name="actWeave"/>
    <addaction name="actDForms"/>
    <addaction name="actionCut"/>
+   <addaction name="separator"/>
    <addaction name="actionUnfold"/>
    <addaction name="separator"/>
    <addaction name="actionColormap"/>
@@ -1216,7 +1217,7 @@
     <string>Alt+U</string>
    </property>
    <property name="visible">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionColormap">
@@ -1359,5 +1360,22 @@
  <resources>
   <include location="../resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>unfoldBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>actionUnfold</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>583</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

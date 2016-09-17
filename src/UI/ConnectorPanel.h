@@ -10,7 +10,7 @@
 #include <QString>
 #include "ui_ConnectorPanel.h"
 #include "HDS/hds_mesh.h"
-#include "MeshConnector.h"
+#include "GeomProc/MeshConnector.h"
 
 
 class ConnectorPanel : public QDialog

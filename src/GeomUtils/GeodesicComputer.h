@@ -7,7 +7,7 @@
 #include "../extras/SVG_LC_code/SVG_LC/wxn_dijstra.h"
 
 #include "Utils/common.h"
-#include "meshloader.h"
+#include "GeomProc/meshloader.h"
 
 class GeodesicComputer
 {

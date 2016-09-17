@@ -1,11 +1,11 @@
-#include "meshmanager.h"
+#include "GeomProc/meshmanager.h"
 #include "MeshFactory/meshcutter.h"
-#include "meshunfolder.h"
+#include "GeomProc/meshunfolder.h"
 #include "meshsmoother.h"
 #include "MeshFactory/MeshExtender.h"
 #include "MeshFactory/meshhollower.h"
 #include "MeshIterator.h"
-#include "MeshConnector.h"
+#include "GeomProc/MeshConnector.h"
 #include "Utils/utils.h"
 
 #if USE_REEB_GRAPH

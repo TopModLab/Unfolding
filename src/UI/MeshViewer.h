@@ -18,8 +18,8 @@
 #include "UI/Camera.h"
 #include "UI/ViewerGrid.h"
 #include "UI/colormap.h"
-#include "Graph.hpp"
-#include "morsesmalecomplex.h"
+#include "GeomUtils/Graph.h"
+#include "GeomUtils/morsesmalecomplex.h"
 
 class MeshViewer;
 struct RenderBufferObject;

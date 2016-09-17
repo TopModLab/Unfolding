@@ -7,7 +7,7 @@
 
 #include "UI/colormap.h"
 
-#include "BBox.h"
+#include "GeomUtils/BBox.h"
 
 class HDS_Mesh
 {

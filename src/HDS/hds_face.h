@@ -2,7 +2,7 @@
 #define HDS_FACE_H
 
 #include "HDS/hds_common.h"
-#include "BBox.h"
+#include "GeomUtils/BBox.h"
 
 
 
