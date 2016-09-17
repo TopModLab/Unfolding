@@ -1,12 +1,12 @@
 #include "meshmanager.h"
-#include "meshcutter.h"
+#include "MeshFactory/meshcutter.h"
 #include "meshunfolder.h"
 #include "meshsmoother.h"
-#include "MeshExtender.h"
-#include "meshhollower.h"
+#include "MeshFactory/MeshExtender.h"
+#include "MeshFactory/meshhollower.h"
 #include "MeshIterator.h"
 #include "MeshConnector.h"
-#include "utils.hpp"
+#include "Utils/utils.h"
 
 #if USE_REEB_GRAPH
 #include <vtkPolyDataToReebGraphFilter.h>

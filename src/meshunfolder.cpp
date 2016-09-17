@@ -1,8 +1,8 @@
 #include "meshunfolder.h"
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 
-#include "utils.hpp"
-#include "mathutils.hpp"
+#include "Utils/utils.h"
+#include "Utils/mathutils.h"
 
 #include <QDebug>
 

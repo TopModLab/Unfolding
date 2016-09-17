@@ -1,6 +1,6 @@
 #pragma once
-#include "glutils.hpp"
-#include "common.h"
+#include "UI/glutils.h"
+#include "Utils/common.h"
 #include <QMatrix4x4>
 
 class ViewerGrid

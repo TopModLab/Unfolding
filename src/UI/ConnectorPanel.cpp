@@ -1,4 +1,4 @@
-#include "ConnectorPanel.h"
+#include "UI/ConnectorPanel.h"
 
 QFont ConnectorPanel::fontfamily = QFont("Arial");
 double ConnectorPanel::fontSize = 20.0;

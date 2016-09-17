@@ -11,8 +11,8 @@
 
 typedef double Float;
 
-#include "common.h"
-#include "mathutils.hpp"
+#include "Utils/common.h"
+#include "Utils/mathutils.h"
 #include <QVector3D>
 #include <QMatrix4x4>
 

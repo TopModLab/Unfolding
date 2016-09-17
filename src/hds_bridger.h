@@ -1,7 +1,7 @@
 #ifndef HDS_BRIDGER_H
 #define HDS_BRIDGER_H
 
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 
 #include <QString>
 

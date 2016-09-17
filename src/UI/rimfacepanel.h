@@ -1,7 +1,7 @@
 #ifndef RIMFACEPANEL_H
 #define RIMFACEPANEL_H
 
-#include "common.h"
+#include "Utils/common.h"
 #include <QWidget>
 
 namespace Ui {

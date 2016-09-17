@@ -1,7 +1,7 @@
 #ifndef COLORMAP_H
 #define COLORMAP_H
 
-#include "common.h"
+#include "Utils/common.h"
 
 #include <QColor>
 

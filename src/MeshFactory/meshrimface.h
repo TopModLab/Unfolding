@@ -1,7 +1,7 @@
 #ifndef MESHRIMFACE_H
 #define MESHRIMFACE_H
 
-#include "MeshExtender.h"
+#include "MeshFactory/MeshExtender.h"
 
 
 class MeshRimFace : public MeshExtender

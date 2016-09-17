@@ -5,7 +5,7 @@
 #include "GeodesicComputer.h"
 #include "DiscreteGeoComputer.h"
 
-#include "common.h"
+#include "Utils/common.h"
 #include <QMutex>
 #include <QScopedPointer>
 #include <QSharedPointer>
@@ -18,7 +18,7 @@
 #include "MeshConnector.h"
 #include "OperationStack.h"
 
-#include "hds_mesh.h"
+#include "HDS/hds_mesh.h"
 #include "HDS/hds_face.h"
 #include "HDS/hds_halfedge.h"
 #include "HDS/hds_vertex.h"

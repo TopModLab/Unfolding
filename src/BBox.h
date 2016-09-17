@@ -2,7 +2,7 @@
 #ifndef __BBox__
 #define __BBox__
 
-#include "common.h"
+#include "Utils/common.h"
 #include <QVector3D>
 
 // Bounding Box Class

@@ -5,7 +5,7 @@
 #ifndef MESHLOADER_H
 #define MESHLOADER_H
 
-#include "common.h"
+#include "Utils/common.h"
 #include <QVector2D>
 #include <QVector3D>
 

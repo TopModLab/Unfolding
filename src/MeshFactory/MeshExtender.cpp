@@ -1,8 +1,8 @@
-#include "MeshExtender.h"
-#include "hds_mesh.h"
+#include "MeshFactory/MeshExtender.h"
+#include "HDS/hds_mesh.h"
 
-#include "utils.hpp"
-#include "mathutils.hpp"
+#include "Utils/utils.h"
+#include "Utils/mathutils.h"
 
 
 const HDS_Mesh* MeshExtender::ori_mesh;

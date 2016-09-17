@@ -1,7 +1,7 @@
 #pragma once
 #ifndef WEAVEPANEL_H
 #define WEAVEPANEL_H
-#include "common.h"
+#include "Utils/common.h"
 #include <QWidget>
 
 namespace Ui {

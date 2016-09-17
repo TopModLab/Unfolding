@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Point3d.h"
-#include "common.h"
+#include "Utils/common.h"
 #include <algorithm>
 
 class CBaseModel  

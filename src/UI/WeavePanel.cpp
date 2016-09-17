@@ -1,4 +1,4 @@
-#include "WeavePanel.h"
+#include "UI/WeavePanel.h"
 #include "ui_WeavePanel.h"
 #include <QDebug>
 

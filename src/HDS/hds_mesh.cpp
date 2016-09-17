@@ -1,9 +1,13 @@
-#include "hds_mesh.h"
-#include "glutils.hpp"
-#include "mathutils.hpp"
-#include "utils.hpp"
-//#include "meshviewer.h"
+#include "HDS/hds_mesh.h"
+#include "Utils/mathutils.h"
+#include "Utils/utils.h"
+//#include "UI/MeshViewer.h"
+#ifdef OPENGL_LEGACY
 #include <GL/glu.h>
+#include "UI/glutilsLegacy.h"
+#else
+#include "UI/glutils.h"
+#endif
 #include<iostream>
 using namespace std;
 

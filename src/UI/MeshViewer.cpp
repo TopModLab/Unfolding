@@ -1,4 +1,4 @@
-#include "MeshViewer.h"
+#include "UI/MeshViewer.h"
 #include <QFileDialog>
 #include "meshunfolder.h"
 //MeshViewer* MeshViewer::instance = nullptr;

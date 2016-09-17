@@ -5,17 +5,17 @@
 #include <QTime>
 
 #include <tchar.h>
-#include "MeshViewer.h"
+#include "UI/MeshViewer.h"
 using viewer_t = MeshViewer;
 #include "../extras/colormap_editor/colormapeditor.h"
-#include "ConnectorPanel.h"
-#include "criticalpointspanel.h"
-#include "cutlocuspanel.h"
-#include "BridgerPanel.h"
-#include "QuadEdgePanel.h"
-#include "GESPanel.h"
-#include "rimfacepanel.h"
-#include "WeavePanel.h"
+#include "UI/ConnectorPanel.h"
+#include "UI/criticalpointspanel.h"
+#include "UI/cutlocuspanel.h"
+#include "UI/BridgerPanel.h"
+#include "UI/QuadEdgePanel.h"
+#include "UI/GESPanel.h"
+#include "UI/rimfacepanel.h"
+#include "UI/WeavePanel.h"
 #include <QScopedPointer>
 
 namespace Ui {
