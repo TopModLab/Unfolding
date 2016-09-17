@@ -1,4 +1,4 @@
-#include "GeodesicComputer.h"
+#include "GeomUtils/GeodesicComputer.h"
 
 GeodesicComputer::GeodesicComputer()
 {}

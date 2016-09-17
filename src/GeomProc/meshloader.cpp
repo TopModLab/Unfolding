@@ -1,4 +1,4 @@
-#include "meshloader.h"
+#include "GeomProc/meshloader.h"
 #include "Utils/stringutils.h"
 
 #include <QFile>

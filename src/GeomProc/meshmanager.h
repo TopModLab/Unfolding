@@ -2,8 +2,8 @@
 #ifndef MESHMANAGER_H
 #define MESHMANAGER_H
 
-#include "GeodesicComputer.h"
-#include "DiscreteGeoComputer.h"
+#include "GeomUtils/GeodesicComputer.h"
+#include "GeomUtils/DiscreteGeoComputer.h"
 
 #include "Utils/common.h"
 #include <QMutex>
@@ -14,17 +14,17 @@
 #include <QMessageBox>
 #include <QTime>
 
-#include "meshloader.h"
-#include "MeshConnector.h"
-#include "OperationStack.h"
+#include "GeomProc/meshloader.h"
+#include "GeomProc/MeshConnector.h"
+#include "GeomUtils/OperationStack.h"
 
 #include "HDS/hds_mesh.h"
 #include "HDS/hds_face.h"
 #include "HDS/hds_halfedge.h"
 #include "HDS/hds_vertex.h"
-#include "hds_bridger.h"
+#include "GeomUtils/hds_bridger.h"
 
-#include "Graph.hpp"
+#include "GeomUtils/Graph.h"
 
 #define USE_REEB_GRAPH 0
 #if USE_REEB_GRAPH

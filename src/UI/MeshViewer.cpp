@@ -1,6 +1,6 @@
 #include "UI/MeshViewer.h"
 #include <QFileDialog>
-#include "meshunfolder.h"
+#include "GeomProc/meshunfolder.h"
 //MeshViewer* MeshViewer::instance = nullptr;
 
 

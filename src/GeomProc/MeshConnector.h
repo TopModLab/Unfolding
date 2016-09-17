@@ -1,8 +1,8 @@
 #pragma once
 #ifndef __MESHCONNECTOR_H__
 #define __MESHCONNECTOR_H__
-#include "GeodesicComputer.h"
-#include "DiscreteGeoComputer.h"
+#include "GeomUtils/GeodesicComputer.h"
+#include "GeomUtils/DiscreteGeoComputer.h"
 
 #include "Utils/common.h"
 #include <QMutex>
@@ -10,16 +10,16 @@
 #include <QSharedPointer>
 #include <QProgressDialog>
 
-#include "meshloader.h"
+#include "GeomProc/meshloader.h"
 
 #include "HDS/hds_mesh.h"
 #include "HDS/hds_face.h"
 #include "HDS/hds_halfedge.h"
 #include "HDS/hds_vertex.h"
-#include "hds_bridger.h"
+#include "GeomUtils/hds_bridger.h"
 #include "Utils/mathutils.h"
 
-#include "Graph.hpp"
+#include "GeomUtils/Graph.h"
 #include "UI/ConnectorPanel.h"
 
 enum class UNIT_TYPE : int

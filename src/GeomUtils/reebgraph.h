@@ -1,9 +1,12 @@
 #pragma once
 
-#include "common.h"
-#include "hds_face.h"
-#include "hds_vertex.h"
-#include "hds_mesh.h"
+#include "Utils/common.h"
+#include "HDS/hds_vertex.h"
+#include "HDS/hds_halfedge.h"
+#include "HDS/hds_face.h"
+#include "HDS/hds_mesh.h"
+
+#ifdef USE_REEB_GRAPH
 
 class ReebGraph
 {
@@ -56,3 +59,4 @@ private:
   unordered_map<Edge, Arc*, EdgeHasher> edgeArcMap;
 };
 
+#endif

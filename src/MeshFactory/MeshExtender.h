@@ -2,7 +2,7 @@
 
 #include "Utils/utils.h"
 
-#include "hds_bridger.h"
+#include "GeomUtils/hds_bridger.h"
 
 class HDS_Mesh;
 class HDS_Face;

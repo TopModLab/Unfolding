@@ -1,4 +1,4 @@
-#include "morsesmalecomplex.h"
+#include "GeomUtils/morsesmalecomplex.h"
 #include "Utils/utils.h"
 
 //cut locus cutting method, follow gradient of saddle to min/maximum

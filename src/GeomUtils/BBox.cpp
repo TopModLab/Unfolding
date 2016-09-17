@@ -1,4 +1,4 @@
-#include "BBox.h"
+#include "GeomUtils/BBox.h"
 
 
 BBox3::BBox3()
