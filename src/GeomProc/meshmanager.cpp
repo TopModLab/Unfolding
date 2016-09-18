@@ -321,6 +321,20 @@ HDS_Mesh * MeshManager::buildHalfEdgeMesh(
 				null_hes.push_back(curHE);
 				null_hefs.push_back(new he_t);
 				
+				// if curHE->next->flip == null,
+				//     found the next exposed edge
+				///                    ___curHE___
+				///                   /
+				///  exposed edge--> / curHE->next
+				///                 /
+				// else, move to curHE->next->flip->next
+				///                    \    <--exposed edge
+				///         curHE->nex  \
+				///         ->flip->next \  ___curHE___
+				///                      / /
+				///         curHE->next / /curHE->next
+				///         ->flip     / /
+				curHE = curHE->next;
 				// Loop adjacent edges to find the exposed edge
 				while (curHE->flip != nullptr)
 				{
