@@ -5,6 +5,7 @@
 
 bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 {
+#ifdef USE_LEGACY_FACTORY
 	typedef HDS_HalfEdge he_t;
 	typedef HDS_Vertex vert_t;
 	typedef HDS_Face face_t;
@@ -81,40 +82,40 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 		// set two new edges to be cut edges and assign pointers(next, prev) to match two cut edges
 		// the flip of he
-		he_new_flip->flip = &he;
-		he_new_flip->f = nf;
-		//he_new_flip->f = he->f;
-		he_new_flip->v = ve;
-		he_new_flip->next = hef_new_flip;
-		he_new_flip->prev = hef_new_flip;
-		he_new_flip->isCutEdge = true;
+		he_new_flip()->flip = &he;
+		he_new_flip()->f = nf;
+		//he_new_flip()->f = he->f;
+		he_new_flip()->v = ve;
+		he_new_flip()->next = hef_new_flip;
+		he_new_flip()->prev = hef_new_flip;
+		he_new_flip()->isCutEdge = true;
 
 
 		he.flip = he_new_flip;
 
-		he_new_flip->index = HDS_HalfEdge::assignIndex();
+		he_new_flip()->index = HDS_HalfEdge::assignIndex();
 		mesh->addHalfEdge(*he_new_flip);
-		cutEdgesFlips.insert(he_new_flip->index);//record new half-edge
+		cutEdgesFlips.insert(he_new_flip()->index);//record new half-edge
 
 		// the flip of hef
-		hef_new_flip->flip = hef;
-		hef_new_flip->f = nf;
-		//hef_new_flip->f = hef->f;
-		hef_new_flip->v = vs;
-		hef_new_flip->next = he_new_flip;
-		hef_new_flip->prev = he_new_flip;
-		hef_new_flip->isCutEdge = true;
+		hef_new_flip()->flip = hef;
+		hef_new_flip()->f = nf;
+		//hef_new_flip()->f = hef->f;
+		hef_new_flip()->v = vs;
+		hef_new_flip()->next = he_new_flip;
+		hef_new_flip()->prev = he_new_flip;
+		hef_new_flip()->isCutEdge = true;
 
 		hef->flip = hef_new_flip;
 
-		hef_new_flip->index = HDS_HalfEdge::assignIndex();
+		hef_new_flip()->index = HDS_HalfEdge::assignIndex();
 
 		// Assign refid to new edge
-		he_new_flip->refid = hef_new_flip->refid = he.refid;
+		he_new_flip()->refid = hef_new_flip()->refid = he.refid;
 		// HDS_Common::assignRef_ID(he->index, HDS_Common::FROM_EDGE);
 
 		mesh->addHalfEdge(*hef_new_flip);
-		cutEdgesFlips.insert(hef_new_flip->index);//record new half-edge
+		cutEdgesFlips.insert(hef_new_flip()->index);//record new half-edge
 
 		// fix the new face
 		nf->he = he_new_flip;
@@ -124,8 +125,8 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 		cutFacesTotal.insert(nf->index);
 
 		// record this cut event using twin
-		he_new_flip->cutTwin = hef_new_flip;
-		hef_new_flip->cutTwin = he_new_flip;
+		he_new_flip()->cutTwin = hef_new_flip;
+		hef_new_flip()->cutTwin = he_new_flip;
 	}
 	cuttingProgress.setValue(30);
 
@@ -200,7 +201,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 			// verify incident edges
 			for(int i=0;i<incidentHEs.size();++i) {
 				int j = (i+1) % incidentHEs.size();
-				if( incidentHEs[i]->flip->next != incidentHEs[j] ) cout << "failed @" << i << endl;
+				if( incidentHEs[i]->flip()->next != incidentHEs[j] ) cout << "failed @" << i << endl;
 			}
 #endif
 
@@ -227,7 +228,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 				// put curHE into current group
 				heGroup[groupIdx].push_back(curHE);
 
-				curHE = curHE->flip->next;
+				curHE = curHE->flip()->next;
 				if( curHE == cutEdges[nextGroup] )
 				{
 					// switch to the next group
@@ -251,14 +252,14 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 				for(auto x : heGroup[i])
 				{
 					x->v = cv_new[i];
-					/*cout << x->flip->v->pos.x() << ", "
-							<< x->flip->v->pos.y() << ", "
-							<< x->flip->v->pos.z() << endl;*/
+					/*cout << x->flip()->v->pos.x() << ", "
+							<< x->flip()->v->pos.y() << ", "
+							<< x->flip()->v->pos.z() << endl;*/
 				}
 
 				// for this group, connect its tail with head
 				heGroup[i].front()->prev = heGroup[i].back()->flip;
-				heGroup[i].back()->flip->next = heGroup[i].front();
+				heGroup[i].back()->flip()->next = heGroup[i].front();
 			}
 
 			// remove the old vertex and add new vertices
@@ -328,6 +329,7 @@ bool MeshCutter::cutMeshUsingEdges(HDS_Mesh *mesh, set<int> &edges)
 
 	cuttingProgress.setValue(100);
 	mesh->updatePieceSet();
+#endif
 	return true;
 }
 
@@ -337,8 +339,10 @@ bool MeshCutter::cutMeshAllFaces(HDS_Mesh *mesh)
 	return false;
 }
 
-MeshCutter::PathInfo MeshCutter::allPairShortestPath(HDS_Mesh *mesh) {
+MeshCutter::PathInfo MeshCutter::allPairShortestPath(HDS_Mesh *mesh)
+{
 	PathInfo m;
+#ifdef USE_LEGACY_FACTORY
 	m.resize(mesh->vertSet.size());
 	const double realmax = 1e10;
 	for(auto &x:m) {
@@ -348,7 +352,7 @@ MeshCutter::PathInfo MeshCutter::allPairShortestPath(HDS_Mesh *mesh) {
 	// floyd-warshall
 	for(auto e : mesh->heSet) {
 		auto u = e.v;
-		auto v = e.flip->v;
+		auto v = e.flip()->v;
 		m[u->index][v->index] = make_pair(u->pos.distanceToPoint(v->pos), v->index);
 	}
 
@@ -362,11 +366,12 @@ MeshCutter::PathInfo MeshCutter::allPairShortestPath(HDS_Mesh *mesh) {
 			}
 		}
 	}
-
+#endif
 	return m;
 }
 
-vector<int> MeshCutter::retrivePath(PathInfo m, int u, int v) {
+vector<int> MeshCutter::retrivePath(PathInfo m, int u, int v)
+{
 	if( m[u][v].second == -1 ) return vector<int>();
 	vector<int> path;
 	path.push_back(u);
@@ -379,7 +384,8 @@ vector<int> MeshCutter::retrivePath(PathInfo m, int u, int v) {
 	return path;
 }
 
-vector<MeshCutter::Edge> MeshCutter::minimumSpanningTree(PQ &edges, int nVerts) {
+vector<MeshCutter::Edge> MeshCutter::minimumSpanningTree(PQ &edges, int nVerts)
+{
 	cout << "finding MST ..." << endl;
 	cout << edges.size() << endl;
 	vector<MeshCutter::Edge> mst;
@@ -399,17 +405,18 @@ vector<MeshCutter::Edge> MeshCutter::minimumSpanningTree(PQ &edges, int nVerts) 
 
 set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 {
+#ifdef USE_LEGACY_FACTORY
 	cout << "Finding cut edges..." << endl;
 	auto isBadVertex = [](HDS_Vertex v) -> bool {
 		double sum = 0;
 		auto he = v.he;
-		auto curHE = he->flip->next;
+		auto curHE = he->flip()->next;
 		bool hasCutFace = false;
 		do {
 			if( !curHE->f->isCutFace ) {
 				//calculate vertex angle defect
-				QVector3D v1 = he->flip->v->pos - he->v->pos;
-				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+				QVector3D v1 = he->flip()->v->pos - he->v->pos;
+				QVector3D v2 = curHE->flip()->v->pos - curHE->v->pos;
 				double nv1pnv2 = v1.length() * v2.length();
 				double inv_nv1pnv2 = 1.0 / nv1pnv2;
 				double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
@@ -419,7 +426,7 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 			else hasCutFace = true;
 			he = curHE;
 
-			curHE = he->flip->next;
+			curHE = he->flip()->next;
 		}while( he != v.he ) ;
 
 		// either sums up roughly 2 * Pi, or has a cut face connected.
@@ -474,12 +481,12 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 			auto he = vu.he;
 			auto curHE = he;
 			do {
-				if( curHE->flip->v == &vv ) {
+				if( curHE->flip()->v == &vv ) {
 					cutEdges.insert(curHE->index);
 					curHE->setCutEdge(true);
 					break;
 				}
-				curHE = curHE->flip->next;
+				curHE = curHE->flip()->next;
 			} while( curHE != he );
 		}
 	}
@@ -487,4 +494,7 @@ set<int> MeshCutter::findCutEdges(HDS_Mesh *mesh)
 	cout << "#cut edges = " << cutEdges.size() << endl;
 #endif // _DEBUG
 	return cutEdges;
+#else
+	return set<int>();
+#endif
 }

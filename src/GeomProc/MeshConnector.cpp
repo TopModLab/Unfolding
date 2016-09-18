@@ -45,6 +45,7 @@ MeshConnector::MeshConnector()
 void MeshConnector::exportQuadEdgePiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
+#ifdef USE_LEGACY_FACTORY
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -128,7 +129,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
 					{
 						printEtchEdges.push_back(curHE->v->pos.toVector2D() * he_scale);
-						printEtchEdges.push_back(curHE->next->v->pos.toVector2D() * he_scale);
+						printEtchEdges.push_back(curHE->next()->v->pos.toVector2D() * he_scale);
 						visitedEtchEdges.insert(curHE);
 						visitedEtchEdges.insert(curHE->flip);
 					}
@@ -148,7 +149,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 					{
 						refedge = curHE;
 					}
-					else if (curHE->prev->isCutEdge)
+					else if (curHE->prev()->isCutEdge)
 					{
 						cutedges.push_back(curHE);
 					}
@@ -163,12 +164,12 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 					{
 						targHE = refedge;
 						targetV = refedge->v;
-						targetNextV = refedge->flip->v;
+						targetNextV = refedge->flip()->v;
 					}
 					else
 					{
 						targHE = refedge->flip;
-						targetV = refedge->flip->v;
+						targetV = refedge->flip()->v;
 						targetNextV = refedge->v;
 					}
 					QVector2D targetVPos = targetV->pos.toVector2D();
@@ -183,7 +184,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 					{
 						printPinholes.push_back((startPos + dirPin * 0.5) * he_scale);
 						// Add orientation label
-						if (!cut_he->next->isCutEdge)
+						if (!cut_he->next()->isCutEdge)
 						{
 							printOrientLabel.push_back((startPos + dirPin * 0.75) * he_scale);
 						}
@@ -216,7 +217,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 							}
 						}
 						// Add orientation label
-						if (!cut_he->next->isCutEdge)
+						if (!cut_he->next()->isCutEdge)
 						{
 							printOrientLabel.push_back((startPos + dirPin * 0.5) * he_scale);
 						}
@@ -239,7 +240,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 					}
 				}
 				// Add labels for face
-				QVector2D faceDir = (refedge->v->pos - refedge->flip->v->pos).toVector2D();
+				QVector2D faceDir = (refedge->v->pos - refedge->flip()->v->pos).toVector2D();
 				printTextPos.push_back(curFace->center().toVector2D() * he_scale);
 				printTextRot.push_back(RadianToDegree(atan2(faceDir.y(), faceDir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
@@ -305,12 +306,13 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
+#endif
 }
 
 void MeshConnector::exportWingedEdgePiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-
+#ifdef USE_LEGACY_FACTORY
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -469,7 +471,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 					printTextRecord.insert(make_pair(curHE->v->refid, p0));
 				}
 				// Label for v1
-				res = printTextRecord.find(curHE->next->v->refid);
+				res = printTextRecord.find(curHE->next()->v->refid);
 				if (res != printTextRecord.end())
 				{
 					QVector2D midPos = (res->second + p1) * 0.5;
@@ -481,7 +483,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 				}
 				else
 				{
-					printTextRecord.insert(make_pair(curHE->next->v->refid, p1));
+					printTextRecord.insert(make_pair(curHE->next()->v->refid, p1));
 				}
 
 				// add face label
@@ -500,7 +502,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 						&& visitedEtchEdges.find(curHE)== visitedEtchEdges.end())
 					{
 						printEtchEdges.push_back(curHE->v->pos.toVector2D());
-						printEtchEdges.push_back(curHE->next->v->pos.toVector2D());
+						printEtchEdges.push_back(curHE->next()->v->pos.toVector2D());
 						visitedEtchEdges.insert(curHE);
 						visitedEtchEdges.insert(curHE->flip);
 					}
@@ -559,12 +561,13 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
+#endif
 }
 
 void MeshConnector::exportGESPiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-
+#ifdef USE_LEGACY_FACTORY
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -632,7 +635,7 @@ void MeshConnector::exportGESPiece(FILE* fp,
 						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
 					{
 						printEtchEdges.push_back(curHE->v->pos.toVector2D());
-						printEtchEdges.push_back(curHE->next->v->pos.toVector2D());
+						printEtchEdges.push_back(curHE->next()->v->pos.toVector2D());
 						visitedEtchEdges.insert(curHE);
 						visitedEtchEdges.insert(curHE->flip);
 					}
@@ -680,6 +683,7 @@ void MeshConnector::exportGESPiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
+#endif
 }
 
 void MeshConnector::exportGRSPiece(FILE *fp, const MeshConnector::mesh_t *unfolded_mesh, const confMap &conf)
@@ -690,7 +694,7 @@ void MeshConnector::exportGRSPiece(FILE *fp, const MeshConnector::mesh_t *unfold
 void MeshConnector::exportRegularPiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-
+#ifdef USE_LEGACY_FACTORY
 	auto faces = unfolded_mesh->faces();
 	unordered_set<const HDS_Mesh::face_t*> cutfaces;// , infaces;
 	for (auto &face : faces)
@@ -774,10 +778,10 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 			(QVector3D::dotProduct(curHE->v->pos, ny) + he_offset)*he_scale);*/
 		do
 		{
-			QVector3D faceCenter = curHE->flip->f->center();
+			QVector3D faceCenter = curHE->flip()->f->center();
 			QVector2D Pc(faceCenter.toVector2D() * he_scale);
 
-			QVector2D *Pnext = new QVector2D(curHE->next->v->pos.toVector2D() * he_scale);
+			QVector2D *Pnext = new QVector2D(curHE->next()->v->pos.toVector2D() * he_scale);
 
 			printEdgePts.push_back(Pthis);
 
@@ -818,7 +822,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 					printEdgePts.push_back(Pnsn);
 
 					cutedges.erase(curHE);
-					//cutedges.erase(curHE->flip->cutTwin->flip);
+					//cutedges.erase(curHE->flip()->cutTwin->flip);
 
 				}
 				else
@@ -860,7 +864,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 					printEdgePtsCarves.push_back(Psn);
 
 					//cutedges.erase(curHE);
-					//cutedges.erase(curHE->flip->cutTwin->flip);
+					//cutedges.erase(curHE->flip()->cutTwin->flip);
 				}
 				else
 				{
@@ -1041,12 +1045,13 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 		"</svg>");
 	fclose(fp);
 	cout << "SVG file saved successfully!" << endl;
+#endif
 }
 
 void MeshConnector::exportFBWalkPiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-	
+#ifdef USE_LEGACY_FACTORY
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -1105,7 +1110,7 @@ void MeshConnector::exportFBWalkPiece(FILE* fp,
 				auto curHE = he;
 
 				centerPt = curFace->center().toVector2D() * he_scale;
-				double edgeLen = (curHE->v->pos - curHE->next->v->pos).length() * he_scale;
+				double edgeLen = (curHE->v->pos - curHE->next()->v->pos).length() * he_scale;
 
 				outerR = edgeLen * 2.0 / 3.0;
 				innerR = outerR - wid_conn * 2.0 / 3.0 * sqrt(2);
@@ -1189,11 +1194,13 @@ void MeshConnector::exportFBWalkPiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
+#endif
 }
 
 void MeshConnector::exportWovenPiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
+#ifdef USE_LEGACY_FACTORY
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -1222,9 +1229,9 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 		break;
 	}
 	// for pieces
-	for (auto face : unfolded_mesh->faceSet)
+	for (auto &face : unfolded_mesh->faceSet)
 	{
-		if (face->isJoint)
+		if (face.isJoint)
 		{
 			fprintf(fp, "hahahahaha\n");
 		}
@@ -1234,6 +1241,7 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
+#endif
 }
 
 void MeshConnector::writeCutLayer(

@@ -48,66 +48,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	, showVert(other.showVert), showNormals(other.showNormals)
 #endif
 {
-	// copy the vertices set
-	for( int i = 0; i < vertSet.size(); i++ ) {
-		if (other.vertSet[i].he != nullptr)
-			vertSet[i].he = &heSet[other.vertSet[i].he->index];
-	}
-
-	for( int i = 0; i < other.faceSet.size(); i++ ) {
-		if (other.faceSet[i].he != nullptr)
-			faceSet[i].he = &heSet[other.faceSet[i].he->index];
-	}
-
-	for( int i = 0; i < other.heSet.size(); i++ ) {
-		// face, vertex, prev, next, and flip are not set yet
-		if (other.heSet[i].f != nullptr)
-			heSet[i].f = &faceSet[other.heSet[i].f->index];
-		if (other.heSet[i].v != nullptr)
-			heSet[i].v = &vertSet[other.heSet[i].v->index];
-		if (other.heSet[i].prev != nullptr)
-			heSet[i].prev = &heSet[other.heSet[i].prev->index];
-		if (other.heSet[i].next != nullptr)
-			heSet[i].next = &heSet[other.heSet[i].next->index];
-		if (other.heSet[i].flip != nullptr)
-			heSet[i].flip = &heSet[other.heSet[i].flip->index];
-		if (other.heSet[i].cutTwin != nullptr)
-			heSet[i].cutTwin = &heSet[other.heSet[i].cutTwin->index];
-		if (other.heSet[i].bridgeTwin != nullptr)
-			heSet[i].bridgeTwin = &heSet[other.heSet[i].bridgeTwin->index];
-	}
-
-/*
-	// fill in the pointers
-	for( auto &he : heSet ) {
-		auto he_ref = other.heMap.at(he->index);
-		//cout << he_ref->index << endl;
-		if (he_ref->flip != nullptr)
-			he->flip = heMap.at(he_ref->flip->index);
-		if (he_ref->prev != nullptr)
-			he->prev = heMap.at(he_ref->prev->index);
-		if (he_ref->next != nullptr)
-			he->next = heMap.at(he_ref->next->index);
-
-		if (he_ref->cutTwin != nullptr)
-			he->cutTwin = heMap.at(he_ref->cutTwin->index);
-
-		if (he_ref->f != nullptr)
-			he->f = faceMap.at(he_ref->f->index);
-		if (he_ref->v != nullptr)
-			he->v = vertMap.at(he_ref->v->index);
-	}
-	// set the half edges for faces
-	for( auto &f : faceSet ) {
-		auto f_ref = other.faceMap.at(f->index);
-		f->he = heMap.at(f_ref->he->index);
-	}
-
-	// set the half edges for vertices
-	for( auto &v : vertSet ) {
-		auto v_ref = other.vertMap.at(v->index);
-		v->he = heMap.at(v_ref->he->index);
-	}*/
 	if (other.bound.get())
 		bound.reset(new BBox3(*other.bound));
 }
@@ -186,14 +126,14 @@ void HDS_Mesh::updatePieceSet()
 bool HDS_Mesh::validateEdge(const he_t &e)
 {
 	//if( heMap.find(e->index) == heMap.end() ){cout<<"heMap invalid"<<endl; return false;}
-	if( e.index >= heSet.size()) {cout<<"he index out of range"<<endl; return false;}
-	if( e.flip->flip != &e ){cout<<"flip invalid"<<endl; return false;}
-	if( e.next->prev != &e ){cout<<"next invalid"<<endl; return false;}
-	if( e.prev->next != &e ){cout<<"prev invalid"<<endl; return false;}
-	if( e.f == nullptr ){cout<<"f invalid"<<endl; return false;}
-	if( e.v == nullptr ){cout<<"v invalid"<<endl; return false;}
-	if( e.f->index >= faceSet.size() || e.f != &faceSet[e.f->index] ){cout<<"->f invalid"<<endl; return false;}
-	if( e.v->index >= vertSet.size() || e.v != &vertSet[e.v->index] ) {cout<<"->v invalid"<<endl;return false;}
+	//if( e.index >= heSet.size()) {cout<<"he index out of range"<<endl; return false;}
+	if (e.flip()->flip() != &e) { cout << "flip invalid" << endl; return false; }
+	if (e.next()->prev() != &e) { cout << "next invalid" << endl; return false; }
+	if (e.prev()->next() != &e) { cout << "prev invalid" << endl; return false; }
+	if (e.fid < 0) { cout << "f invalid" << endl; return false; }
+	if (e.vid < 0) { cout << "v invalid" << endl; return false; }
+	//if( e.f->index >= faceSet.size() || e.f != &faceSet[e.f->index] ){cout<<"->f invalid"<<endl; return false;}
+	//if( e.v->index >= vertSet.size() || e.v != &vertSet[e.v->index] ) {cout<<"->v invalid"<<endl;return false;}
 	return true;
 }
 
@@ -204,11 +144,11 @@ bool HDS_Mesh::validateFace(const face_t &f)
 		return false;
 	}
 	int maxEdges = 1000;
-	he_t *he = f.he;
+	he_t *he = &heSet[f.heid];
 	he_t *curHe = he;
 	int edgeCount = 0;
 	do {
-		curHe = curHe->next;
+		curHe = curHe->next();
 		++edgeCount;
 		if (edgeCount > maxEdges)
 		{
@@ -224,11 +164,11 @@ bool HDS_Mesh::validateVertex(const vert_t &v)
 	if(v.index >= vertSet.size() || &v != &vertSet[v.index]) return false;
 
 	int maxEdges =100;
-	he_t *he = v.he;
+	he_t *he = &heSet[v.heid];
 	he_t *curHe = he;
 	int edgeCount = 0;
 	do {
-		curHe = curHe->flip->next;
+		curHe = curHe->flip()->next();
 		++edgeCount;
 		if( edgeCount > maxEdges ) return false;
 	} while( curHe != he );
@@ -643,10 +583,10 @@ void HDS_Mesh::exportEdgeVBO(
 				auto &he = heSet[i];
 				
 				visitiedHE[i] = true;
-				visitiedHE[he.flip->index] = true;
+				visitiedHE[he.flip()->index] = true;
 
-				heIBOs->push_back(he.v->index);
-				heIBOs->push_back(he.flip->v->index);
+				heIBOs->push_back(he.vid);
+				heIBOs->push_back(he.flip()->vid);
 
 				heIDs->push_back(he.index);
 				heFLAGs->push_back(he.getFlag());
@@ -669,7 +609,7 @@ void HDS_Mesh::exportEdgeVBO(
 				auto &he = heSet[i];
 
 				visitiedHE[i] = true;
-				visitiedHE[he.flip->index] = true;
+				visitiedHE[he.flip()->index] = true;
 
 				heFLAGs->push_back(he.getFlag());
 			}
@@ -721,12 +661,12 @@ void HDS_Mesh::exportFaceVBO(
 			ui32s_t vid_array;
 			auto fid = static_cast<uint32_t>(face.index);
 			uint16_t flag = face.getFlag();
-			auto he = face.he;
+			auto he = &heSet[face.heid];
 			auto curHE = he;
 			do
 			{
-				vid_array.push_back(curHE->v->index);
-				curHE = curHE->next;
+				vid_array.push_back(curHE->vid);
+				curHE = curHE->next();
 			} while (curHE != he);
 
 			// Operate differently depending on edge number
@@ -876,13 +816,13 @@ void HDS_Mesh::exportFaceVBO(
 				continue;
 			}
 			uint16_t flag = face.getFlag();
-			auto he = face.he;
+			auto he = &heSet[face.heid];
 			auto curHE = he;
 			size_t vidCount = 0;
 			do
 			{
 				vidCount++;
-				curHE = curHE->next;
+				curHE = curHE->next();
 			} while (curHE != he);
 			fFLAGs->insert(fFLAGs->end(), vidCount - 2, flag);
 		}
@@ -932,6 +872,7 @@ void HDS_Mesh::addFace(face_t face)
 	//faceMap.insert(make_pair(face->index, face));
 }
 
+/*
 void HDS_Mesh::deleteFace(face_t face)
 {
 	faceSet.erase(faceSet.begin() + face.index);
@@ -944,41 +885,43 @@ void HDS_Mesh::deleteHalfEdge(he_t edge)
 	heSet.erase(heSet.begin() + edge.index);
 	//heMap.erase(edge->index);
 	//delete edge;
-}
+}*/
 
 vector<HDS_Face*> HDS_Mesh::incidentFaces(vert_t *v)
 {
-	he_t *he = v->he;
-	he_t *curHe = he;
 	vector<face_t*> faces;
+
+	he_t *he = &heSet[v->heid];
+	he_t *curHe = he;
 	do {
-		faces.push_back(curHe->f);
-		curHe = curHe->flip->next;
+		faces.push_back(&faceSet[curHe->fid]);
+		curHe = curHe->flip()->next();
 	} while( curHe != he );
+
 	return faces;
 }
 
 // all outgoing half edges of vertex v
 vector<HDS_HalfEdge*> HDS_Mesh::incidentEdges(vert_t *v)
 {
-	he_t *he = v->he;
+	he_t *he = &heSet[v->heid];
 	he_t *curHe = he;
 	vector<he_t*> hes;
 	do {
 		hes.push_back(curHe);
-		curHe = curHe->flip->next;
+		curHe = curHe->flip()->next();
 	} while( curHe != he );
 	return hes;
 }
 
 vector<HDS_Face*> HDS_Mesh::incidentFaces(face_t *f)
 {
-	he_t *he = f->he;
+	he_t *he = &heSet[f->heid];
 	he_t *curHe = he;
 	vector<face_t*> faces;
 	do {
-		faces.push_back(curHe->flip->f);
-		curHe = curHe->next;
+		faces.push_back(&faceSet[curHe->flip()->fid]);
+		curHe = curHe->next();
 	} while( curHe != he );
 	return faces;
 }
@@ -986,34 +929,37 @@ vector<HDS_Face*> HDS_Mesh::incidentFaces(face_t *f)
 HDS_HalfEdge* HDS_Mesh::incidentEdge(face_t *f1, face_t *f2)
 {
 	if(f1 == f2) return nullptr;
-	he_t *he = f1->he;
+	he_t *he = &heSet[f1->heid];
 	he_t *curHe = he;
 	do {
-		if(curHe->flip->f == f2)
+		if(curHe->flip()->fid == f2->index)
 			return curHe;
-		curHe = curHe->next;
+		curHe = curHe->next();
 	} while( curHe != he );
+
 	return nullptr;
 }
 
 HDS_HalfEdge* HDS_Mesh::incidentEdge(vert_t *v1, vert_t *v2)
 {
 	if(v1 == v2) return nullptr;
-	if(v1->he == nullptr || v2->he == nullptr) return nullptr;
+	if(v1->heid == sInvalidHDS || v2->heid == sInvalidHDS) return nullptr;
 
-	he_t * he = v1->he;
+	he_t * he = &heSet[v1->heid];
 	he_t * curHE = he;
 	do {
-		if(curHE->flip->v == v2)
+		if(curHE->flip()->vid == v2->index)
 			return curHE;
-		curHE = curHE->flip->next;
+		curHE = curHE->flip()->next();
 	} while (curHE != he);
+
 	return nullptr;
 }
 
 HDS_HalfEdge* HDS_Mesh::insertEdge(
 	vector<he_t> &edges, vert_t* v1, vert_t* v2, he_t* he1, he_t* he2)
 {
+#ifdef USE_LEGACY_FACTORY
 	bool v1_isNew = false, v2_isNew = false;
 
 	if (v1->he == nullptr) v1_isNew = true;
@@ -1028,15 +974,15 @@ HDS_HalfEdge* HDS_Mesh::insertEdge(
 
 	//link edge and vertices
 	he->v = v1;
-	he_flip->v = v2;
+	he_flip()->v = v2;
 	if (v1_isNew) v1->he = he;
 	if (v2_isNew) v2->he = he_flip;
 
 	//link edge loop
 	he->next = he_flip;
 	he->prev = he_flip;
-	he_flip->next = he;
-	he_flip->prev = he;
+	he_flip()->next = he;
+	he_flip()->prev = he;
 
 	if(!v1_isNew) {
 		he_t* prevHE, *nextHE;
@@ -1044,10 +990,10 @@ HDS_HalfEdge* HDS_Mesh::insertEdge(
 			nextHE = he1->next;
 			prevHE = he1;
 		}else{
-			nextHE = v1->he->flip->next;
+			nextHE = v1->he->flip()->next;
 			prevHE = v1->he->flip;
 		}
-		he_flip->next = nextHE;
+		he_flip()->next = nextHE;
 		nextHE->prev = he_flip;
 		he->prev = prevHE;
 		prevHE->next = he;
@@ -1063,11 +1009,13 @@ HDS_HalfEdge* HDS_Mesh::insertEdge(
 		}
 		he->next = nextHE;
 		nextHE->prev = he;
-		he_flip->prev = prevHE;
+		he_flip()->prev = prevHE;
 		prevHE->next = he_flip;
 
 	}
 	return he;
+#endif
+	return nullptr;
 }
 
 // template <typename T>
@@ -1097,12 +1045,12 @@ void HDS_Mesh::selectVertex(hdsid_t idx)
 //	flipSelectionState(idx, vertMap);
 }
 
-vector<HDS_Vertex> HDS_Mesh::getSelectedVertices()
+vector<HDS_Vertex*> HDS_Mesh::getSelectedVertices()
 {
-	vector<vert_t> pickedVerts;
-	for(auto v: vertSet) {
+	vector<vert_t*> pickedVerts;
+	for(auto &v : vertSet) {
 		if (v.isPicked) {
-			pickedVerts.push_back(v);
+			pickedVerts.push_back(&v);
 		}
 	}
 	return pickedVerts;
@@ -1110,42 +1058,43 @@ vector<HDS_Vertex> HDS_Mesh::getSelectedVertices()
 
 vector<HDS_HalfEdge*> HDS_Mesh::getSelectedEdges()
 {
-	//TODO: currently not used
 	vector<he_t*> pickedHEs;
-	//vector<bool> pickedHEs(heSet.size(), false);
-	for(auto he: heSet) {
-		if (he.isPicked && 
-			find(pickedHEs.begin(), pickedHEs.end(), he.flip) == pickedHEs.end()) {
+	vector<bool>  unvisitedHE(heSet.size(), true);
+	for(auto &he : heSet)
+	{
+		if (he.isPicked && unvisitedHE[he.index])
+		{
+			unvisitedHE[he.index] = unvisitedHE[he.flip()->index] = false;
 			pickedHEs.push_back(&he);
 		}
 	}
 	return pickedHEs;
 }
 
-vector<HDS_HalfEdge> HDS_Mesh::getSelectedHalfEdges()
+vector<HDS_HalfEdge*> HDS_Mesh::getSelectedHalfEdges()
 {
-	vector<he_t> pickedHEs;
-	for(auto he: heSet) {
+	vector<he_t*> pickedHEs;
+	for(auto &he : heSet) {
 		if (he.isPicked) {
-			pickedHEs.push_back(he);
+			pickedHEs.push_back(&he);
 		}
 	}
 	return pickedHEs;
 }
 
-vector<HDS_Face> HDS_Mesh::getSelectedFaces()
+vector<HDS_Face*> HDS_Mesh::getSelectedFaces()
 {
-	vector<face_t> pickedFaces;
-	for(auto f: faceSet) {
+	vector<face_t*> pickedFaces;
+	for(auto &f : faceSet) {
 		if (f.isPicked) {
-			pickedFaces.push_back(f);
+			pickedFaces.push_back(&f);
 		}
 	}
 	return pickedFaces;
 }
 
 
-vector<HDS_Vertex> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
+vector<HDS_Vertex*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVector3D &normdir)
 {
 	//TODO: currently not used
 	auto moorseFunc = [&](vert_t* v, double a, double b, double c) -> double{
@@ -1307,7 +1256,13 @@ vector<HDS_Vertex> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVect
 		return true;
 	};
 
-	return Utils::filter(vertSet, isReebPoint);
+	//return Utils::filter(vertSet, isReebPoint);
+	vector<vert_t*> ret;
+	for (auto &x : vertSet) {
+		if (isReebPoint(x))
+			ret.push_back(&x);
+	}
+	return ret;
 }
 
 void HDS_Mesh::colorVertices(const doubles_t &val)

@@ -1,5 +1,6 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#pragma once
+#ifndef UTILS_H
+#define UTILS_H
 
 #include "Utils/common.h"
 #include <QVector3D>

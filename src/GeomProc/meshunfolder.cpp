@@ -30,33 +30,34 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	typedef HDS_Vertex vert_t;
 	typedef HDS_HalfEdge he_t;
 
+	auto &vertSet = unfolded_mesh->vertSet;
+	auto &heSet   = unfolded_mesh->heSet;
+	auto &faceSet = unfolded_mesh->faceSet;
+	auto &refVertSet = ref_mesh->vertSet;
+	auto &refHeSet   = ref_mesh->heSet;
+	auto &refFaceSet = ref_mesh->faceSet;
+
 	// use the previous face as reference, expand current face
-	face_t *face_prev = &unfolded_mesh->faceSet[fprev];
-	face_t *face_cur = &unfolded_mesh->faceSet[fcur];
+	face_t *face_prev = &faceSet[fprev];
+	face_t *face_cur = &faceSet[fcur];
 
 	// print the corners of the previous face
 	auto corners_prev = face_prev->corners();
 
-	//kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk comment
-	/*qDebug() << "corners of face_prev";
-	for(auto p : corners_prev) {
-		qDebug() << p->index << " @ " << p->pos;
-	}*/
-
 	// find the shared half edge
-	he_t *he_share = face_prev->he;
+	he_t *he_share = &heSet[face_prev->heid];
 	do {
-		if (he_share->flip->f == face_cur)
+		if (he_share->flip()->fid == face_cur->index)
 		{
 			break;
 		}
-		he_share = he_share->next;
-	} while( he_share != face_prev->he );
+		he_share = he_share->next();
+	} while( he_share->index != face_prev->heid );
 
 	// change the position of the vertices in the current face, except for the end points
 	// of he_share
-	vert_t *vs = he_share->v;
-	vert_t *ve = he_share->flip->v;
+	vert_t *vs = &vertSet[he_share->vid];
+	vert_t *ve = &vertSet[he_share->flip()->vid];
 
 	// compute the spanning vectors for the unfolded mesh
 	QVector3D xvec = vs->pos - ve->pos;
@@ -76,10 +77,10 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	}
 
 	// shared edge in the reference mesh
-	auto he_share_ref = &ref_mesh->heSet[he_share->index];
-	auto face_cur_ref = &ref_mesh->faceSet[face_cur->index];
-	auto vs_ref = he_share_ref->v;
-	auto ve_ref = he_share_ref->flip->v;
+	auto he_share_ref = &refHeSet[he_share->index];
+	auto face_cur_ref = &refFaceSet[face_cur->index];
+	auto vs_ref = &refVertSet[he_share_ref->vid];
+	auto ve_ref = &refVertSet[he_share_ref->flip()->vid];
 
 	// compute the spanning vectors for the face in the reference mesh
 	QVector3D cface_ref = face_cur_ref->center();
@@ -89,10 +90,10 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 	QVector3D yvec_ref = (cface_ref - vs_ref->pos) - QVector3D::dotProduct(cface_ref - vs_ref->pos, xvec_ref) * xvec_ref;
 	yvec_ref.normalize();
 
-	he_t *he = he_share->flip;
+	he_t *he = he_share->flip();
 	he_t *curHE = he;
 	do {
-		if( curHE->v == vs || curHE->v == ve )
+		if( curHE->vid == vs->index || curHE->vid == ve->index )
 		{
 			//continue;
 			// nothing to do, these two should not be modified
@@ -100,8 +101,8 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 		else
 		{
 			// compute the new position of the vertex
-			vert_t *v = curHE->v;
-			const vert_t *v_ref = &ref_mesh->vertSet[curHE->v->index];
+			vert_t *v = &vertSet[curHE->vid];
+			auto v_ref = &refVertSet[curHE->vid];
 
 			// compute the coordinates of this vertex using the reference mesh
 			QVector3D dvec_ref = v_ref->pos - vs_ref->pos;
@@ -111,22 +112,27 @@ void MeshUnfolder::unfoldFace(int fprev, int fcur,
 			v->pos = vs->pos + xcoord * xvec + ycoord * yvec;
 
 		}
-		curHE = curHE->next;
+		curHE = curHE->next();
 	} while( curHE != he );
 }
 
-bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
+bool MeshUnfolder::unfoldable(const HDS_Mesh* ref_mesh)
+{
 	// for each vertex in the cutted_mesh, check the condition
-	auto isBadVertex = [](const HDS_Vertex v) -> bool {
+	auto isBadVertex = [&](const HDS_Vertex &v) -> bool {
+		auto &vertSet = ref_mesh->vertSet;
+		auto &heSet   = ref_mesh->heSet;
+		auto &faceSet = ref_mesh->faceSet;
 		vector<double> sums;
 		double sum = 0;
-		auto he = v.he;
-		auto curHE = he->flip->next;
+		auto he = &heSet[v.heid];
+		auto curHE = he->flip()->next();
 		bool hasCutFace = false;
 		do {
-			if( !curHE->f->isCutFace ) {
-				QVector3D v1 = he->flip->v->pos - he->v->pos;
-				QVector3D v2 = curHE->flip->v->pos - curHE->v->pos;
+			if( faceSet[curHE->fid].isCutFace ) {
+				QVector3D v1 = vertSet[he->flip()->vid].pos - vertSet[he->vid].pos;
+				QVector3D v2 = vertSet[curHE->flip()->vid].pos
+							 - vertSet[curHE->vid].pos;
 				double nv1pnv2 = v1.length() * v2.length();
 				double inv_nv1pnv2 = 1.0 / nv1pnv2;
 				double cosVal = QVector3D::dotProduct(v1, v2) * inv_nv1pnv2;
@@ -136,8 +142,8 @@ bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 			else hasCutFace = true;
 
 			he = curHE;
-			curHE = he->flip->next;
-		} while(he != v.he);
+			curHE = he->flip()->next();
+		} while(he->index != v.heid);
 
 		// The sum of angles of an unfoldable vertex is smaller than pi*2 with CutFace
 		// Or equal to 2*pi without cutface
@@ -149,6 +155,11 @@ bool MeshUnfolder::unfoldable(const HDS_Mesh *ref_mesh) {
 
 void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 {
+	// Define alias to HDS buffers
+	auto &vertSet = unfolded_mesh->vertSet;
+	auto &heSet   = unfolded_mesh->heSet;
+	auto &faceSet = unfolded_mesh->faceSet;
+
 	unfolded_mesh->bound.reset(new BBox3(0));
 	auto& bound = unfolded_mesh->bound;
 
@@ -173,7 +184,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 			verts.insert(corners.begin(), corners.end());
 			if (!face->isCutFace && !checkedOrientation)
 			{
-				auto he = face->he;
+				auto he = &heSet[face->heid];
 				auto curHE = he;
 				do
 				{
@@ -181,11 +192,12 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 					{
 						break;
 					}
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
-				newY = (curHE->next->v->pos - curHE->v->pos).normalized();
+				newY = (vertSet[curHE->next()->vid].pos
+					  - vertSet[curHE->vid].pos).normalized();
 				newX = QVector3D(newY.y(), -newY.x(), 0);
-				newOrigin = curHE->v->pos;
+				newOrigin = vertSet[curHE->vid].pos;
 				checkedOrientation = true;
 			}
 		}
@@ -256,6 +268,14 @@ bool MeshUnfolder::unfold(
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
 		return false;
 	}
+
+	auto &vertSet = unfolded_mesh->vertSet;
+	auto &heSet   = unfolded_mesh->heSet;
+	auto &faceSet = unfolded_mesh->faceSet;
+	auto &refVertSet = ref_mesh->vertSet;
+	auto &refHeSet   = ref_mesh->heSet;
+	auto &refFaceSet = ref_mesh->faceSet;
+
 	// ref_mesh->updatePieceSet();
 	cout << "Unfold Piece Count:\t" << ref_mesh->pieceSet.size() << endl;
 	// If no face is selected, find one face in each piece and push into fixedFaces
@@ -362,26 +382,28 @@ bool MeshUnfolder::unfold(
 			
 			// Compute the spanning vectors for the first face
 			QVector3D uvec, vvec;
-			auto face0_ref = &ref_mesh->faceSet[expSeq.front()];
-			HDS_HalfEdge *he0_ref = face0_ref->he;
+			auto face0_ref = &refFaceSet[expSeq.front()];
+			auto he0_ref = &refHeSet[face0_ref->heid];
 			QVector3D cface0_ref = face0_ref->center();
 			
-			uvec = (he0_ref->next->v->pos - he0_ref->v->pos).normalized();
+			uvec = (refVertSet[he0_ref->next()->vid].pos
+				  - refVertSet[he0_ref->vid].pos).normalized();
 			vvec = QVector3D::crossProduct(face0_ref->computeNormal(), uvec);
 
 			// Project the first face to XY plane
-			HDS_Face *face0_unf = &unfolded_mesh->faceSet[expSeq.front()];
-			auto oriP = he0_ref->v->pos;// +QVector3D(rand() % 5, rand() % 5, 0);
-			auto he_unf = face0_unf->he;
+			HDS_Face *face0_unf = &faceSet[expSeq.front()];
+			auto oriP = refVertSet[he0_ref->vid].pos;// +QVector3D(rand() % 5, rand() % 5, 0);
+			auto he_unf = &heSet[face0_unf->heid];
 			auto curHE = he_unf;
 			do 
 			{
-				curHE->v->pos = QVector3D(QVector3D::dotProduct(curHE->v->pos - oriP, uvec),
-					QVector3D::dotProduct(curHE->v->pos - oriP, vvec), 0);
-				curHE = curHE->next;
+				vertSet[curHE->vid].pos = QVector3D(
+					QVector3D::dotProduct(vertSet[curHE->vid].pos - oriP, uvec),
+					QVector3D::dotProduct(vertSet[curHE->vid].pos - oriP, vvec), 0);
+				curHE = curHE->next();
 			} while (curHE != he_unf);
-			uvec = he_unf->v->pos - face0_unf->center();
-			vvec = he_unf->flip->v->pos - face0_unf->center();
+			uvec = vertSet[he_unf->vid].pos - face0_unf->center();
+			vvec = vertSet[he_unf->flip()->vid].pos - face0_unf->center();
 			// Unfold the mesh using the sequence
 			// Update the vertex positions of the unfolded mesh base on the geometry of the reference mesh
 			for (int i = 1; i < expSeq.size(); ++i)

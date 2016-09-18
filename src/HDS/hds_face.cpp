@@ -6,12 +6,13 @@
 hdsid_t HDS_Face::uid = 0;
 
 HDS_Face::HDS_Face()
-	: flag(0), index(-1), refid(0)
+	: heid(sInvalidHDS)
+	, index(uid++), refid(sInvalidHDS), flag(0)
 	, scalingFactor(1)
-	, he(nullptr)
 {
 }
 
+/*
 HDS_Face::~HDS_Face()
 {
 	//delete bound;
@@ -29,24 +30,25 @@ HDS_Face::HDS_Face(const HDS_Face &other)
 HDS_Face HDS_Face::operator=(const HDS_Face &other)
 {
 	throw "Not implemented.";
-}
+}*/
 
 set<HDS_Face *> HDS_Face::connectedFaces() const
 {
 	// Find all faces that are directly connected to current face
 	set<HDS_Face*> faces;
-		
+
+#ifdef USE_LEGACY_FACTORY
 	//TODO: force cast
 	faces.insert(const_cast<HDS_Face*>(this));
 	auto curHE = this->he;
 	do {
-		auto f = curHE->flip->f;
+		auto f = curHE->flip()->f;
 		if (faces.find(f) == faces.end()) {
 			faces.insert(f);
 		}
 		curHE = curHE->next;
 	} while (curHE != he);
-
+#endif
 	return faces;
 }
 
@@ -54,6 +56,8 @@ set<HDS_Face *> HDS_Face::linkedFaces()
 {
 	// Find all linked faces
 	set<HDS_Face*> faces;
+
+#ifdef USE_LEGACY_FACTORY
 	set<HDS_Face*> visitedFaces;
 	queue<HDS_Face*> Q;
 	Q.push(this);
@@ -70,7 +74,7 @@ set<HDS_Face *> HDS_Face::linkedFaces()
 		auto fhe = cur->he;
 		auto curHE = fhe;
 		do {
-			auto f = curHE->flip->f;
+			auto f = curHE->flip()->f;
 			if (faces.find(f) == faces.end() && visitedFaces.find(f)== visitedFaces.end())
 			{
 				faces.insert(f);
@@ -80,6 +84,7 @@ set<HDS_Face *> HDS_Face::linkedFaces()
 			curHE = curHE->next;
 		} while (curHE != fhe);
 	}
+#endif
 	return faces;
 }
 
@@ -96,28 +101,34 @@ QVector3D HDS_Face::center() const
 
 vector<HDS_Vertex*> HDS_Face::corners() const
 {
-	HDS_HalfEdge *curHE = he;
 	vector<HDS_Vertex*> corners;
+#ifdef USE_LEGACY_FACTORY
+	HDS_HalfEdge *curHE = he;
 	do {
 		corners.push_back(curHE->v);
 		curHE = curHE->next;
 	} while( curHE != he );
+#endif
 	return corners;
 }
 
 QVector3D HDS_Face::computeNormal() 
 {
+#ifdef USE_LEGACY_FACTORY
 	QVector3D c = center();
-	n = QVector3D::crossProduct(he->v->pos - c, he->next->v->pos - c);
+	n = QVector3D::crossProduct(he->v->pos - c, he->next()->v->pos - c);
 	n.normalize();
+#endif
 	return n;
 }
 
 QVector3D HDS_Face::computeNormal() const
 {
+#ifdef USE_LEGACY_FACTORY
 	QVector3D c = center();
-	QVector3D n = QVector3D::crossProduct(he->v->pos - c, he->next->v->pos - c);
+	QVector3D n = QVector3D::crossProduct(he->v->pos - c, he->next()->v->pos - c);
 	n.normalize();
+#endif
 	return n;
 }
 
@@ -156,10 +167,10 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
        curHe = curHe->next;
    } while( curHe != he );
 
-   QVector3D v1_n = curHe->next->v->pos;
-   QVector3D v2_n = curHe->next->next->v->pos;
-   QVector3D v1_p = curHe->prev->v->pos;
-   QVector3D v2_p = curHe->prev->prev->v->pos;
+   QVector3D v1_n = curHe->next()->v->pos;
+   QVector3D v2_n = curHe->next()->next()->v->pos;
+   QVector3D v1_p = curHe->prev()->v->pos;
+   QVector3D v2_p = curHe->prev()->prev()->v->pos;
 
    QVector3D v01_n = (1 - scalingFactor/2)* v0 + scalingFactor/2 *v1_n;
    QVector3D v12_p = (1 - scalingFactor/2)* v1_p + scalingFactor/2 *v2_p;
@@ -228,15 +239,17 @@ void HDS_Face::checkPlanar()
 
 bool HDS_Face::isConnected(const HDS_Face *other)
 {	
+#ifdef USE_LEGACY_FACTORY
 	auto curHe = he;
 	do 
 	{
-		if (curHe->flip->f == other)
+		if (curHe->flip()->f == other)
 		{
 			return true;
 		}
 		curHe = curHe->next;
 	} while (curHe != he);
+#endif
 
 	return false;
 }

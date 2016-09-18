@@ -20,16 +20,18 @@ bool MeshRimFace::avoidIntersect = false;
 void MeshRimFace::projectFaceCenter(
 	vert_t* v, he_t* he, QVector3D &vn_pos, QVector3D &vp_pos)
 {
+#ifdef USE_LEGACY_FACTORY
 	QVector3D n = he->computeNormal();
 
 	//get face_n face_p center
 	QVector3D fn_center = he->f->center();
-	QVector3D fp_center = he->flip->f->center();
+	QVector3D fp_center = he->flip()->f->center();
 
 	//get projected centers
 	//cout<<fn_center.distanceToPlane(v->pos,n)<<endl;
 	vn_pos = fn_center - n * fn_center.distanceToPlane(v->pos,n);
 	vp_pos = fp_center - n * fp_center.distanceToPlane(v->pos,n);
+#endif
 }
 
 /*project edge vertices inwards*/
@@ -37,20 +39,22 @@ void MeshRimFace::projectFaceCenter(
 void MeshRimFace::projectEdgeVertices(
 	vert_t* v, he_t* he, QVector3D &up_pos, QVector3D &down_pos)
 {
+#ifdef USE_LEGACY_FACTORY
 	QVector3D n = he->computeNormal();
 
 	//get face_n face_p center
 	QVector3D fn_center = he->f->center();
 
 	up_pos = v->pos - n * v->pos.distanceToPlane(fn_center,n);
-	down_pos = v->he->flip->v->pos - n * v->he->flip->v->pos.distanceToPlane(fn_center,n);
+	down_pos = v->he->flip()->v->pos - n * v->he->flip()->v->pos.distanceToPlane(fn_center,n);
+#endif
 }
 
 void MeshRimFace::computePlaneCornerOnEdge(
 	vert_t* v, he_t* he, vector<QVector3D> &vpos)
 {
-
-	vert_t* v1 = he->flip->v;
+#ifdef USE_LEGACY_FACTORY
+	vert_t* v1 = he->flip()->v;
 
 	//get middle point of the edge
 	QVector3D v_mid = (v->pos + v1->pos)/2;
@@ -90,18 +94,18 @@ void MeshRimFace::computePlaneCornerOnEdge(
 	vpos.push_back(vn_o_pos);
 	vpos.push_back(vp_i_pos);
 	vpos.push_back(vp_o_pos);
-
+#endif
 }
 
 void MeshRimFace::computePlaneCornerOnFace(
 	vert_t* v, he_t* he, vector<QVector3D> &vmid, vector<QVector3D> &vpos)
 {
-
+#ifdef USE_LEGACY_FACTORY
 	//get center of the face
 	QVector3D top = v->pos;
 	QVector3D center = he->f->center();
-	vert_t* vn = he->prev->v;
-	vert_t* vp = he->flip->v;
+	vert_t* vn = he->prev()->v;
+	vert_t* vp = he->flip()->v;
 
 	QVector3D bot;
 	Utils::LineLineIntersect(v->pos, center,vn->pos, vp->pos, &bot);
@@ -154,10 +158,12 @@ void MeshRimFace::computePlaneCornerOnFace(
 	vpos.push_back(v_down_prev);
 	vpos.push_back(v_up_next);
 	vpos.push_back(v_down_next);
+#endif
 }
 
 void MeshRimFace::computeDiamondCornerOnFace(he_t* he, vector<QVector3D> &vpos)
 {
+#ifdef USE_LEGACY_FACTORY
 	//planeHeight as thickness scale factor
 	face_t* f = he->f;
 	f->setScaleFactor(planeHeight);
@@ -167,25 +173,28 @@ void MeshRimFace::computeDiamondCornerOnFace(he_t* he, vector<QVector3D> &vpos)
 		vpos.push_back(f->scaleCorner(curHE->v));
 		curHE = curHE->next;
 	} while(curHE != he);
+#endif
 }
 
 void MeshRimFace::computeDiamondCornerOnEdge(he_t* he, vector<QVector3D> &vpos, QVector3D &vn_max, QVector3D &vp_max)
 {
+#ifdef USE_LEGACY_FACTORY
 	//get face centers
 	projectFaceCenter(he->v, he, vn_max, vp_max);
 
 	//scale down those corners
-	QVector3D c = (he->v->pos + he->flip->v->pos)/2;
+	QVector3D c = (he->v->pos + he->flip()->v->pos)/2;
 	//scale v
 	vpos.push_back(c + planeHeight * (he->v->pos - c));
 	vpos.push_back(c + planeHeight * (vp_max - c));
-	vpos.push_back(c + planeHeight * (he->flip->v->pos - c));
+	vpos.push_back(c + planeHeight * (he->flip()->v->pos - c));
 	vpos.push_back(c + planeHeight * (vn_max - c));
-
+#endif
 }
 
 void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 {
+#ifdef USE_LEGACY_FACTORY
 	initiate();
 	cur_mesh = mesh;
 
@@ -204,7 +213,7 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 
 		for (he_t* he: mesh->incidentEdges(&v))
 		{
-			vert_t* v1 = he->flip->v;
+			vert_t* v1 = he->flip()->v;
 			QVector3D v_mid = (v.pos + v1->pos)/2;
 			vector<QVector3D> vpos;
 
@@ -280,8 +289,8 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 					}
 					// Update vertices reference id
 					vertices[0]->refid = he->v->refid;
-					vertices[1]->refid = he->flip->refid;
-					vertices[2]->refid = he->flip->v->refid;
+					vertices[1]->refid = he->flip()->refid;
+					vertices[2]->refid = he->flip()->v->refid;
 					vertices[3]->refid = he->refid;
 
 					face_t* newFace = createFace(vertices, cutFace);
@@ -322,7 +331,7 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 						verts_new.emplace_back(vpos[1]);//1
 						verts_new.back().refid = v1->refid;
 						verts_new.emplace_back(vpos[3]);//3
-						verts_new.back().refid = he->prev->v->refid;
+						verts_new.back().refid = he->prev()->v->refid;
 						verts_new.emplace_back(vpos[2]);//2
 						verts_new.back().refid = v.refid;
 
@@ -377,10 +386,10 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 					{
 						//calculate control points
 						QVector3D vp_up, vp_down, vn_up, vn_down;
-						Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, he->next->v->pos, &vp_up);
-						Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, he->next->v->pos, &vp_down);
-						Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, he->prev->v->pos, &vn_up);
-						Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, he->prev->v->pos, &vn_down);
+						Utils::LineLineIntersect(vpos[0], vpos[3], he->v->pos, he->next()->v->pos, &vp_up);
+						Utils::LineLineIntersect(vpos[1], vpos[2], he->v->pos, he->next()->v->pos, &vp_down);
+						Utils::LineLineIntersect(vpos[0], vpos[1], he->v->pos, he->prev()->v->pos, &vn_up);
+						Utils::LineLineIntersect(vpos[3], vpos[2], he->v->pos, he->prev()->v->pos, &vn_down);
 
 
 						control_points_n.push_back(vn_up* planeWidth + (1- planeWidth)* vpos[0]);
@@ -442,8 +451,8 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 					// calculate angle between pieces' original he
 					he_t* curHE = &ori_map[(curFace->refid)>>2];
 					he_t* nxtHE = &ori_map[(nextFace->refid)>>2];
-					QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
-					QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
+					QVector3D curHE_v = curHE->flip()->v->pos - curHE->v->pos;
+					QVector3D nxtHE_v = nxtHE->flip()->v->pos - nxtHE->v->pos;
 					double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
 					double angle = acos (param);
 					angleSum += angle;
@@ -455,7 +464,7 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 				}
 
 				// update nextFace 's cutFace
-				if (nextFace->he->flip->f != cutFace) {
+				if (nextFace->he->flip()->f != cutFace) {
 					assignCutFace(nextFace, cutFace);
 				}
 
@@ -463,7 +472,7 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 				he_t* he1 = curFace->he;
 				// get nextFace he2
 				he_t* he2;
-				if(shapeType == 0) he2 = nextFace->he->next->next;
+				if(shapeType == 0) he2 = nextFace->he->next()->next;
 				else			   he2 = nextFace->he->prev;
 				he1->setCutEdge(false);
 				he2->setCutEdge(false);
@@ -532,8 +541,8 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 					// calculate angle between pieces' original he
 					he_t* curHE = &ori_map[(curEdge->refid)>>2];
 					he_t* nxtHE = &ori_map[(nxtEdge->refid)>>2];
-					QVector3D curHE_v = curHE->flip->v->pos - curHE->v->pos;
-					QVector3D nxtHE_v = nxtHE->flip->v->pos - nxtHE->v->pos;
+					QVector3D curHE_v = curHE->flip()->v->pos - curHE->v->pos;
+					QVector3D nxtHE_v = nxtHE->flip()->v->pos - nxtHE->v->pos;
 					double param = QVector3D::dotProduct(curHE_v, nxtHE_v);
 					double angle = acos (param);
 					angleSum += angle;
@@ -549,9 +558,9 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 						 control_points_n[2 * index + 1], control_points_n[2 * index] };
 
 				curEdge->f = cutFace;
-				curEdge->flip->f = cutFace;
+				curEdge->flip()->f = cutFace;
 				nxtEdge->f = cutFace;
-				nxtEdge->flip->f = cutFace;
+				nxtEdge->flip()->f = cutFace;
 				addBridger(curEdge->flip, nxtEdge, vpos);
 			}
 		}
@@ -559,10 +568,12 @@ void MeshRimFace::rimMeshV(HDS_Mesh *mesh)
 
 	//cur_mesh->processType = HDS_Mesh::RIMMED_PROC;
 	updateNewMesh();
+#endif
 }
 
 void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 {
+#ifdef USE_LEGACY_FACTORY
 	initiate();
 	cur_mesh = mesh;
 
@@ -582,7 +593,7 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 		do {
 			//get projection plane
 			QVector3D vu_max = he->v->pos;
-			QVector3D vd_max = he->flip->v->pos;
+			QVector3D vd_max = he->flip()->v->pos;
 			QVector3D vp_max, vn_max;
 			projectFaceCenter(he->v, he, vn_max, vp_max);
 
@@ -602,7 +613,7 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 			he_t* flap_he = HDS_Mesh::insertEdge(vflap_in, vflap_out);
 			hes_new.push_back(*flap_he);
 			flap_he->f = cutFace;
-			flap_he->flip->f = cutFace;
+			flap_he->flip()->f = cutFace;
 
 			//get planar piece height pivot
 			QVector3D pieceHeightPivot = Utils::Lerp(flap_in, vn_max, 0.5);
@@ -667,7 +678,7 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 				if (i == 0)
 				{
 					vector<QVector3D> vpos = {flap_in_ctl, flap_out_ctl};
-					addBridger(flap_he, newFace->he->next->next->flip, vpos);
+					addBridger(flap_he, newFace->he->next()->next()->flip, vpos);
 					control_edges_n.push_back(newFace->he->flip);
 					control_points_n.push_back(pieceWidth_in);
 					control_points_n.push_back(pieceWidth_out);
@@ -675,7 +686,7 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 				else
 				{
 					vector<QVector3D> vpos = {flap_out_ctl, flap_in_ctl};
-					addBridger(flap_he->flip, newFace->he->next->next->flip, vpos);
+					addBridger(flap_he->flip, newFace->he->next()->next()->flip, vpos);
 					control_edges_p.push_back(newFace->he->flip);
 					control_points_p.push_back(pieceWidth_out);
 					control_points_p.push_back(pieceWidth_in);
@@ -705,4 +716,5 @@ void MeshRimFace::rimMeshF(HDS_Mesh *mesh)
 		}
 	}
 	updateNewMesh();
+#endif
 }

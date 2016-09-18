@@ -17,10 +17,14 @@ public:
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_FACE; }
 
 	HDS_Face();
-	~HDS_Face();
+	~HDS_Face() {}
 
-	HDS_Face(const HDS_Face &other);
-	HDS_Face operator=(const HDS_Face &other);
+	//HDS_Face(const HDS_Face &other);
+	//HDS_Face operator=(const HDS_Face &other);
+
+	// Get the connected half-edge id
+	// Explicit pointer access is handled by HDS_Mesh
+	hdsid_t heID() const { return heid; }
 
 	void setPicked(bool v) { isPicked = v; }
 
@@ -50,10 +54,11 @@ public:
 	//void update_bbox();
 public:
 	QVector3D n;
-	HDS_HalfEdge *he;
+	//HDS_HalfEdge *he;
+	hdsid_t heid;
 
-	int index;
-	int refid;
+	hdsid_t index;
+	hdsid_t refid;
 
 	// Flags
 	union
@@ -72,8 +77,8 @@ public:
 	};
 	
 private:
-	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	double scalingFactor;
+	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	vector<QVector3D> scaledCorners;
 
 	// Bounding box for the objcet

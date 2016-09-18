@@ -27,26 +27,29 @@ void MeshExtender::setOriMesh(const HDS_Mesh* mesh)
 vector<QVector3D> MeshExtender::scaleBridgerEdge(
 	const vert_t &v1, const vert_t &v2)
 {
-    double scale = HDS_Bridger::getScale();
 	vector <QVector3D> vpair;
+#ifdef USE_LEGACY_FACTORY
+    double scale = HDS_Bridger::getScale();
     //obsolete scale function
 	QVector3D v1pos = v1.pos;
 	QVector3D v2pos = v2.pos;
 
 	QVector3D vmid = (v1pos + v2pos)/2.0;
 	vpair.push_back( (1 - scale)* vmid + scale *v1pos );
-	vpair.push_back( (1 - scale)* vmid + scale *v2pos );
+	vpair.push_back( (1 - scale)* vmid + scale *v2pos )
 
-
+#endif
 	return vpair;
 }
 
 void MeshExtender::addBridger(
 	HDS_HalfEdge* he1, HDS_HalfEdge* he2, vector<QVector3D> vpos)
 {
+#ifdef USE_LEGACY_FACTORY
 	HDS_Bridger* Bridger = new HDS_Bridger(he1, he2, vpos);
 	Bridger->setCutFace(he1->f, he2->f);
 	createBridger(Bridger);
+#endif
 }
 
 void MeshExtender::createBridger(HDS_Bridger* Bridger)
@@ -62,6 +65,7 @@ void MeshExtender::createBridger(HDS_Bridger* Bridger)
 
 void MeshExtender::scaleFaces()
 {
+#ifdef USE_LEGACY_FACTORY
 	for (auto f: cur_mesh->faces()) {
 		if (!f.isCutFace){
 			f.setScaleFactor(HDS_Bridger::getScale());
@@ -89,11 +93,11 @@ void MeshExtender::scaleFaces()
 
 			do {
 				newHE->refid = curHE->refid;
-				newHE->flip->refid = curHE->flip->refid;
+				newHE->flip()->refid = curHE->flip()->refid;
 				newHE->setCutEdge(curHE->isCutEdge);
 				if (newHE->isCutEdge){
-					face_t* newCutFace = new face_t(*(curHE->flip->f));
-					newHE->flip->f = newCutFace;
+					face_t* newCutFace = new face_t(*(curHE->flip()->f));
+					newHE->flip()->f = newCutFace;
 					faces_new.push_back(*newCutFace);
 				}
 				newHE = newHE->next;
@@ -101,12 +105,12 @@ void MeshExtender::scaleFaces()
 			}while(newHE!= newFace->he);
 		}
 	}
+#endif
 }
 
 HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace)
 {
-
-
+#ifdef USE_LEGACY_FACTORY
 	face_t * newFace = new face_t();
 	if (HDS_Mesh::incidentEdge(vertices.front(), vertices.back()) == nullptr) {
 		vertices.push_back(vertices.front());//form a loop
@@ -120,7 +124,7 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 		he_t* newHE = HDS_Mesh::insertEdge(preV, curV);
 
 		if (cutFace != nullptr){
-			newHE->flip->f = cutFace;
+			newHE->flip()->f = cutFace;
 			newHE->setCutEdge(true);
 			if (cutFace->he == nullptr)
 				cutFace->he = newHE->flip;
@@ -137,6 +141,9 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 	}
 
 	return newFace;
+#else
+	return nullptr;
+#endif
 }
 
 HDS_Face* MeshExtender::duplicateFace(face_t* face, face_t* cutFace)
@@ -158,9 +165,9 @@ HDS_Face* MeshExtender::duplicateFace(face_t* face, face_t* cutFace)
 
 HDS_HalfEdge* MeshExtender::duplicateEdge(he_t* edge)
 {
-
+#ifdef USE_LEGACY_FACTORY
 	vert_t* vs = new vert_t(edge->v->pos);
-	vert_t* ve = new vert_t(edge->flip->v->pos);
+	vert_t* ve = new vert_t(edge->flip()->v->pos);
 	verts_new.push_back(*vs);
 	verts_new.push_back(*ve);
 	he_t* newEdge = HDS_Mesh::insertEdge(vs, ve);
@@ -169,21 +176,26 @@ HDS_HalfEdge* MeshExtender::duplicateEdge(he_t* edge)
 	edge->setCutEdge(true);
 	newEdge->setCutEdge(true);
 	return newEdge;
+#else
+	return nullptr;
+#endif
 }
 
 void MeshExtender::assignCutFace(face_t* face, face_t* cutFace)
 {
+#ifdef USE_LEGACY_FACTORY
 	he_t* curHE = face->he;
 	do {
 		if (cutFace->he == nullptr)
 			cutFace->he = curHE->flip;
-		curHE->flip->f = cutFace;
+		curHE->flip()->f = cutFace;
 	}while(curHE != face->he);
-
+#endif
 }
 
 bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 {
+#ifdef USE_LEGACY_FACTORY
 	// TODO: store bridgeTwin locally
 	initiate();
 	cur_mesh = mesh;
@@ -198,10 +210,10 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 	//get bridge pairs
 	unordered_map<hdsid_t, he_t*> refidMap;
 	for (auto he: hes_new) {
-		if (refidMap.find(he.flip->refid) == refidMap.end()) {
+		if (refidMap.find(he.flip()->refid) == refidMap.end()) {
 			refidMap.insert(make_pair(he.refid, &he));
 		}else {
-			he.flip->setBridgeTwin(refidMap[he.refid]->flip);
+			he.flip()->setBridgeTwin(refidMap[he.refid]->flip);
 		}
 	}
 
@@ -255,11 +267,11 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			vert_t* flap_vs = new vert_t;
 			vert_t* flap_ve = new vert_t;
 			flap_vs->pos = twin_he->v->pos;
-			flap_ve->pos = twin_he->flip->v->pos;
+			flap_ve->pos = twin_he->flip()->v->pos;
 
 			//warning. assign refid, to be tested
 			flap_vs->refid = twin_he->v->refid;
-			flap_ve->refid = twin_he->flip->v->refid;
+			flap_ve->refid = twin_he->flip()->v->refid;
 
 			verts_new.push_back(*flap_vs);
 			verts_new.push_back(*flap_ve);
@@ -267,7 +279,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			he_t* flap_he = HDS_Mesh::insertEdge(flap_vs, flap_ve);
 			flap_he->setCutEdge(true);
 			flap_he->f = he->f;
-			flap_he->flip->f = he->f;
+			flap_he->flip()->f = he->f;
 			flap_he->refid = twin_he->refid;
 			hes_new.push_back(*flap_he);
 
@@ -279,11 +291,11 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			vert_t* twin_flap_vs = new vert_t;
 			vert_t* twin_flap_ve = new vert_t;
 			twin_flap_vs->pos = he->v->pos;
-			twin_flap_ve->pos = he->flip->v->pos;
+			twin_flap_ve->pos = he->flip()->v->pos;
 
 			//warning. assign refid, to be tested
 			twin_flap_vs->refid = he->v->refid;
-			twin_flap_ve->refid = he->flip->v->refid;
+			twin_flap_ve->refid = he->flip()->v->refid;
 
 			verts_new.push_back(*twin_flap_vs);
 			verts_new.push_back(*twin_flap_ve);
@@ -291,7 +303,7 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 			he_t* twin_flap_he = HDS_Mesh::insertEdge(twin_flap_vs, twin_flap_ve);
 			twin_flap_he->setCutEdge(true);
 			twin_flap_he->f = twin_he->f;
-			twin_flap_he->flip->f = twin_he->f;
+			twin_flap_he->flip()->f = twin_he->f;
 
 			twin_flap_he->refid = he->refid;
 			hes_new.push_back(*twin_flap_he);
@@ -309,12 +321,14 @@ bool MeshExtender::extendMesh(HDS_Mesh *mesh)
 #ifdef _DEBUG
 	cout << "extend succeed............." << endl;
 #endif
+#endif
 	return true;
 
 }
 
 bool MeshExtender::updateNewMesh()
 {
+#ifdef USE_LEGACY_FACTORY
 	//for debugging...
 	int bridgerCount = 0;
 
@@ -336,11 +350,14 @@ bool MeshExtender::updateNewMesh()
 	}
 	for (auto he : hes_new) {
 		he.index = HDS_HalfEdge::assignIndex();
-		he.flip->index = HDS_HalfEdge::assignIndex();
+		he.flip()->index = HDS_HalfEdge::assignIndex();
 		cur_mesh->addHalfEdge(he);
 		cur_mesh->addHalfEdge(*(he.flip));
 	}
 
 	if (cur_mesh->validate()) return true;
 	else return false;
+#else
+	return false;
+#endif
 }

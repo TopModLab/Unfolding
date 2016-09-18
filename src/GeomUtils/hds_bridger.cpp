@@ -40,19 +40,20 @@ void HDS_Bridger::setCutFace(face_t* face1, face_t* face2)
 
 HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, vector<QVector3D> controlPoints)
 {
-	if (he->flip->f != nullptr && !he->flip->f->isCutFace)
+#ifdef USE_LEGACY_FACTORY
+	if (he->flip()->f != nullptr && !he->flip()->f->isCutFace)
 		he->setCutEdge(false);
-	if (hef->flip->f != nullptr && !hef->flip->f->isCutFace)
+	if (hef->flip()->f != nullptr && !hef->flip()->f->isCutFace)
 		hef->setCutEdge(false);
 	this->he = he;
 	this->hef = hef;
 
 	if (shape != 2) {
 		QVector3D p10, p11, p20, p21;
-		p10 = he->flip->v->pos;
+		p10 = he->flip()->v->pos;
 		p20 = hef->v->pos;
 		p11 = he->v->pos;
-		p21 = hef->flip->v->pos;
+		p21 = hef->flip()->v->pos;
 
 		if (controlPoints.size() == 2) {
 			//quadratic bezier curve constructor
@@ -64,10 +65,12 @@ HDS_Bridger::HDS_Bridger(HDS_HalfEdge* he, HDS_HalfEdge* hef, vector<QVector3D> 
 			bezierPos_back = cubicBezierCurve(p11, controlPoints[0], controlPoints[2], p21);
 		}
 	}
+#endif
 }
 
 void HDS_Bridger::createBridge()
 {
+#ifdef USE_LEGACY_FACTORY
 	if (shape != 2) { // not flat
 		//push back all internal edges
 		for (int i = 0; i < nSamples - 1; i++)
@@ -85,7 +88,7 @@ void HDS_Bridger::createBridge()
 		//create bridge segments
 		vector<he_t> hes_ori;
 		hes_ori.reserve(hes.size() + 2);
-		hes_ori.push_back(*he->flip);
+		hes_ori.push_back(*he->flip());
 		hes_ori.insert(hes_ori.end(), hes.begin(), hes.end());
 		hes_ori.push_back(*hef);
 		for (auto he = hes_ori.begin(); he != prev(hes_ori.end()); he++) {
@@ -101,6 +104,7 @@ void HDS_Bridger::createBridge()
 				faces.push_back(*bridgeFace);
 		}
 	}
+#endif
 }
 
 QVector3D getPt( QVector3D n1 , QVector3D n2 , float perc )
@@ -167,14 +171,15 @@ vector<QVector3D> HDS_Bridger::cubicBezierCurve(QVector3D p0, QVector3D p1, QVec
 	return pos;
 }
 
-HDS_Face * HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
+HDS_Face* HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 {
+#ifdef USE_LEGACY_FACTORY
 	//get 4 vertices from h1 h2
 	HDS_Vertex* v1s, *v1e, *v2s, *v2e;
 	v1s = he1->v;
-	v1e = he1->flip->v;
+	v1e = he1->flip()->v;
 	v2s = he2->v;
-	v2e = he2->flip->v;
+	v2e = he2->flip()->v;
 
 
 	//build new face
@@ -192,8 +197,8 @@ HDS_Face * HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 	he_v1e_v2s->f = bridgeFace;
 	he_v2e_v1s->f = bridgeFace;
 
-	he_v2e_v1s->flip->f = cutFace1;
-	he_v1e_v2s->flip->f = cutFace2;
+	he_v2e_v1s->flip()->f = cutFace1;
+	he_v1e_v2s->flip()->f = cutFace2;
 	cutFace1->he = he_v2e_v1s->flip;
 	cutFace2->he = he_v1e_v2s->flip;
 
@@ -204,6 +209,9 @@ HDS_Face * HDS_Bridger::bridging(HDS_HalfEdge* he1, HDS_HalfEdge* he2)
 	hes.push_back(*he_v2e_v1s);
 
 	return bridgeFace;
+#else
+	return nullptr;
+#endif
 }
 
 HDS_Bridger::~HDS_Bridger()

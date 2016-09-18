@@ -200,8 +200,8 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			// link current face and vertex of the edge
 			he_t* curHe = &hes[j + heOffset];
 			vert_t* curVert = &verts[Fi->v[j]];
-			curHe->v = curVert;
-			curHe->f = curFace;
+			curHe->vid = Fi->v[j];
+			curHe->fid = i;
 
 			// Check index boundary
 			// first: prev=last,   next=1
@@ -209,11 +209,11 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			int32_t jprev = (j == 0) ? fsize - 1 : j - 1;
 			int32_t jnext = (j == fsize - 1) ? 0 : j + 1;
 			// Connect current edge with previous and next
-			curHe->next = &hes[jnext + heOffset];
-			curHe->prev = &hes[jprev + heOffset];
+			curHe->next_offset = jnext - j;
+			curHe->prev_offset = jprev - j;
 
 			// connect current vertex to he
-			if (!curVert->he) curVert->he = curHe;
+			if (curVert->heid == sInvalidHDS) curVert->heid = curHe->index;
 
 			// record edge for flip connection
 			int32_t vj = Fi->v[j];
@@ -225,7 +225,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			}
 		}
 
-		curFace->he = &hes[heOffset];
+		curFace->heid = heOffset;
 		curFace->computeNormal();
 
 		heOffset += Fi->size;
@@ -253,8 +253,8 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 				he_t* he = heit.second;
 				he_t* hef = invItem->second;
 
-				he->flip = hef;
-				hef->flip = he;
+				he->flip_offset = hef - he;
+				hef->flip_offset = -he->flip_offset;
 				unvisitedHEs.erase(hePair);
 				unvisitedHEs.erase(invPair);
 			}
@@ -281,7 +281,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			he_t* he = heit->second;
 			unvisitedHEs.erase(heit);
 			// Skip checked edges, won't skip in first check
-			if (he->flip != nullptr) continue;
+			if (he->flip_offset) continue;
 			//he_t* hef = new he_t;
 
 			faces.emplace_back();
@@ -294,9 +294,9 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 				null_hes.push_back(curHE);
 				
 				// Loop adjacent edges to find the exposed edge
-				while (curHE->flip != nullptr)
+				while (curHE->flip_offset)
 				{
-					curHE = curHE->flip->next;
+					curHE = curHE->flip()->next();
 				}
 			} while (curHE != he);
 			// Assign Null Edges
@@ -309,22 +309,22 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 				he = null_hes[i];
 				he_t* hef = &hes[initSize+i];
 				he->isCutEdge = hef->isCutEdge = true;
-				he->flip = hef;
-				hef->flip = he;
-				hef->v = he->next->v;
-				hef->f = nullface;
+				he->flip_offset = hef - he;
+				hef->flip_offset = -he->flip_offset;
+				hef->vid = he->next()->vid;
+				hef->fid = nullface->index;
 
 				he_t* hef_prev = null_hefs[(i + 1) % size];
-				hef->prev = hef_prev;
-				hef_prev->next = hef;
+				hef->prev_offset = hef_prev - hef;
+				hef_prev->next_offset = hef - hef_prev;
 			}
 			// Assign Null Face
 			nullface->isCutFace = true;
-			nullface->he = he;
-			nullface->he = null_hefs[0];
+			nullface->heid = he->index;
+			nullface->heid = null_hefs[0]->index;
 		}
 	}
-	vert_t::resetIndex();
+	/*vert_t::resetIndex();
 	for (auto &v : verts) {
 		v.index = vert_t::assignIndex();
 		v.computeCurvature();
@@ -341,11 +341,11 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 	for (auto &f : faces)
 	{
 		f.index = face_t::assignIndex();
-	}
+	}*/
 	mesh_t* thismesh = new mesh_t(verts, hes, faces);
 
 #ifdef _DEBUG
-	cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;
+	//cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;
 	cout << "\tFinished Building Half-Edge Structure." << endl;
 	cout << "\tHalf-Edge Count = " << thismesh->halfedges().size() << endl;
 #endif
@@ -375,7 +375,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 		{
 			he.setCutEdge(true);
 			if( selectedEdges.find(he.index) == selectedEdges.end() &&
-					selectedEdges.find(he.flip->index) == selectedEdges.end() )
+					selectedEdges.find(he.flip()->index) == selectedEdges.end() )
 			{
 				selectedEdges.insert(he.index);
 			}
@@ -390,7 +390,7 @@ void MeshManager::cutMeshWithSelectedEdges()
 				he.setCutEdge(true);
 
 				if( selectedEdges.find(he.index) == selectedEdges.end() &&
-						selectedEdges.find(he.flip->index) == selectedEdges.end() )
+						selectedEdges.find(he.flip()->index) == selectedEdges.end() )
 				{
 					selectedEdges.insert(he.index);
 				}
@@ -563,7 +563,7 @@ void MeshManager::mapToExtendedMesh()
 		}
 
 		if (f->isBridger) {
-			if (cutEdges.find(f->he->flip->index) != cutEdges.end()) {
+			if (cutEdges.find(f->he->flip()->index) != cutEdges.end()) {
 				f->he->setPicked(true);
 
 			}
@@ -670,7 +670,7 @@ bool MeshManager::rimMesh(double rimSize)
 	for (auto &he : ref_mesh->halfedges())
 	{
 		if (selectedEdges.find(he.index) == selectedEdges.end() &&
-			selectedEdges.find(he.flip->index) == selectedEdges.end())
+			selectedEdges.find(he.flip()->index) == selectedEdges.end())
 		{
 			selectedEdges.insert(he.index);
 		}

@@ -21,6 +21,7 @@ double getT(QVector3D v_start, QVector3D v_t, QVector3D v_end)
 bool MeshHollower::hollowMesh(
 	HDS_Mesh * mesh, double newFlapSize, int type, double shift)
 {
+#ifdef USE_LEGACY_FACTORY
 	initiate();
 	delete refMapPointer;
 	refMapPointer = new holePosRefMap;
@@ -49,9 +50,9 @@ bool MeshHollower::hollowMesh(
 	{
 		//get edge vertex, calculate scaled vertex
 		vert_t* he_v = he->v;
-		vert_t* he_flip_v = he->flip->v;
+		vert_t* he_flip_v = he->flip()->v;
 		face_t* he_f = he->f;
-		face_t* he_flip_f = he->flip->f;
+		face_t* he_flip_f = he->flip()->f;
 
 		vert_t* he1_v1 = new vert_t(he_f->scaleCorner(he_v));
 		vert_t* he1_v2 = new vert_t(he_f->scaleCorner(he_flip_v));
@@ -77,10 +78,10 @@ bool MeshHollower::hollowMesh(
 		// ||	->	| || |
 		// ||		\ || /
 		// *		  *
-		he1->refid = he1->flip->refid = he->refid;
+		he1->refid = he1->flip()->refid = he->refid;
 		//	= HDS_Common::assignRef_ID(he->index, HDS_Common::FROM_EDGE);
-		he2->refid = he2->flip->refid = he->flip->refid;
-		//	= HDS_Common::assignRef_ID(he->flip->index, HDS_Common::FROM_EDGE);
+		he2->refid = he2->flip()->refid = he->flip()->refid;
+		//	= HDS_Common::assignRef_ID(he->flip()->index, HDS_Common::FROM_EDGE);
 
 		hes_new.push_back(*he1);
 		hes_new.push_back(*he2);
@@ -94,15 +95,15 @@ bool MeshHollower::hollowMesh(
 		//cutFace->refid = he_f->refid;
 		he1->setCutEdge(true);
 		he2->f = cutFace;
-		he2->flip->f = cutFace;
+		he2->flip()->f = cutFace;
 		he2->setCutEdge(true);
 
 		he1->f = cutFace;
-		he1->flip->f = cutFace;
+		he1->flip()->f = cutFace;
 		faces_new.push_back(*cutFace);
 
 
-		vector <QVector3D> vpair = scaleBridgerEdge(*he->flip->v, *he->v);
+		vector <QVector3D> vpair = scaleBridgerEdge(*he->flip()->v, *he->v);
 
 		//add bridger
 		addBridger(he1->flip, he2->flip, vpair);
@@ -140,7 +141,7 @@ bool MeshHollower::hollowMesh(
 				QVector3D vp_of_flap_next = flap_next.vp_flap;
 				// get v of current flap
 				QVector3D v = flap_cur.flap_he->v->pos;
-				QVector3D flip_v = flap_cur.flap_he->flip->v->pos;
+				QVector3D flip_v = flap_cur.flap_he->flip()->v->pos;
 				// calculate t
 				double t = getT(v, vn_of_flap_prev, flip_v);
 				double flip_t = getT(flip_v, vp_of_flap_next, v);
@@ -148,12 +149,13 @@ bool MeshHollower::hollowMesh(
 				(*refMapPointer)[flap_cur.flap_he->index] = t;
 
 				//repeat for (he_flap->flip, t)
-				(*refMapPointer)[flap_cur.flap_he->flip->index] = flip_t;
+				(*refMapPointer)[flap_cur.flap_he->flip()->index] = flip_t;
 
 				curHE = curHE->next;
 			} while (curHE != f.he);
 		}
 	}
+#endif
 	return true;
 }
 
@@ -161,12 +163,13 @@ bool MeshHollower::hollowMesh(
 HDS_Face* MeshHollower::addFlapFace(int type,
 	const HDS_HalfEdge* originalHE, HDS_HalfEdge* startHE, HDS_Face* cutFace )
 {
+#ifdef USE_LEGACY_FACTORY
 	HDS_Face* he_f = originalHE->f;
 
-	QVector3D v0 = he_f->scaleCorner(originalHE->prev->v);
-	QVector3D v3 = he_f->scaleCorner(originalHE->next->flip->v);
+	QVector3D v0 = he_f->scaleCorner(originalHE->prev()->v);
+	QVector3D v3 = he_f->scaleCorner(originalHE->next()->flip()->v);
 	QVector3D v1 = startHE->v->pos;
-	QVector3D v2 = startHE->flip->v->pos;
+	QVector3D v2 = startHE->flip()->v->pos;
 
 	//calculate the center of flap face(quad)
 	QVector3D center = he_f->center();
@@ -207,7 +210,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 		HDS_Vertex* hv2_flap = new HDS_Vertex(v2_flap);
 
 		hv1_flap->refid = startHE->v->refid;
-		hv2_flap->refid = startHE->flip->v->refid;
+		hv2_flap->refid = startHE->flip()->v->refid;
 		vertices.push_back(hv2_flap);
 		vertices.push_back(hv1_flap);
 
@@ -275,8 +278,8 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 		do
 		{
 			HDS_Vertex* newV = new HDS_Vertex;
-			newV->pos = he_f->scaleCorner(curHE->flip->v);
-			newV->refid = curHE->flip->v->refid;
+			newV->pos = he_f->scaleCorner(curHE->flip()->v);
+			newV->refid = curHE->flip()->v->refid;
 			vertices.push_back(newV);
 
 			curHE = curHE->next;
@@ -290,7 +293,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	for (auto v: vertices)
 		verts_new.push_back(*v);
 
-	vertices.insert(vertices.begin(),startHE->flip->v);
+	vertices.insert(vertices.begin(),startHE->flip()->v);
 	vertices.push_back(startHE->v);
 
 	HDS_Face* newFace = createFace(vertices, cutFace);
@@ -299,4 +302,7 @@ HDS_Face* MeshHollower::addFlapFace(int type,
 	startHE->f = newFace;
 
 	return newFace;
+#else
+	return nullptr;
+#endif
 }

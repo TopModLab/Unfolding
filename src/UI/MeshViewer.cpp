@@ -344,7 +344,7 @@ void MeshViewer::drawMeshToFBO()
 		if (selected)
 		{
 			auto he = &heMesh->heSet[renderID];
-			auto hef = he->flip;
+			auto hef = he->flip();
 			selHE.push(renderID);
 			selHE.push(hef->index);
 			he->isPicked = hef->isPicked = true;
@@ -656,7 +656,7 @@ void MeshViewer::mouseReleaseEvent(QMouseEvent* e)
 			//for testing
 			if (interactionState == SelectEdge){
 				cout << "select edge's face index: " << heMesh->heMap[selectedElementIdx]->f->index << endl;
-				cout << "select edge flip's face index: " << heMesh->heMap[selectedElementIdx]->flip->f->index << endl;
+				cout << "select edge flip's face index: " << heMesh->heMap[selectedElementIdx]->flip()->f->index << endl;
 			}
 			if (interactionState == SelectFace) {
 				cout << "select face is cut face? " << heMesh->faceMap[selectedElementIdx]->isCutFace << endl;
@@ -762,27 +762,25 @@ void MeshViewer::selectInverse()
 	case SEL_FACE:
 	{
 		for (auto &f : heMesh->faces())
+		{
 			heMesh->selectFace(f.index);
+		}
 		break;
 	}
 	case SEL_EDGE:
 	{
-		vector<HDS_HalfEdge> selected = heMesh->getSelectedHalfEdges();
-
 		for (auto &e : heMesh->halfedges())
 		{
 			e.setPicked(!e.isPicked);
-// 			if (selected.find(&e) != selected.end())
-// 				e.setPicked(false);
-// 			else
-// 				e.setPicked(true);
 		}
 		break;
 	}
 	case SEL_VERT:
 	{
 		for (auto &v : heMesh->verts())
+		{
 			heMesh->selectVertex(v.index);
+		}
 		break;
 	}
 	default:

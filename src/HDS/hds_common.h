@@ -4,7 +4,8 @@
 #include "Utils/mathutils.h"
 #include <QVector3D>
 
-using hdsid_t = uint32_t;
+using hdsid_t = int32_t;
+const static hdsid_t sInvalidHDS = -1;
 
 class HDS_Common
 {

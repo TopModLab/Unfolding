@@ -8,7 +8,9 @@ float MeshWeaver::flapSize = 0.0;
 bool MeshWeaver::isBilinear = true;
 bool MeshWeaver::isCone = true;
 
-void MeshWeaver::weaveLinearScaledPiece() {
+void MeshWeaver::weaveLinearScaledPiece()
+{
+#ifdef USE_LEGACY_FACTORY
 	//for linear scaled piece
 	unordered_map<int, face_t*> top_pieces;
 	unordered_map<int, pair<QVector3D, QVector3D>> top_piece_bounds;
@@ -27,8 +29,8 @@ void MeshWeaver::weaveLinearScaledPiece() {
 					vertices.push_back(&verts_new.back());
 				}
 				vertices[0]->refid = he->v->refid;
-				vertices[1]->refid = he->flip->refid;
-				vertices[2]->refid = he->flip->v->refid;
+				vertices[1]->refid = he->flip()->refid;
+				vertices[2]->refid = he->flip()->v->refid;
 				vertices[3]->refid = he->refid;
 
 				faces_new.emplace_back();
@@ -51,8 +53,8 @@ void MeshWeaver::weaveLinearScaledPiece() {
 		he_t* he = f.he;
 		do {
 			//find next top piece
-			face_t* top_piece = top_pieces[he->next->refid];
-			face_t* cutFace = top_piece->he->flip->f;
+			face_t* top_piece = top_pieces[he->next()->refid];
+			face_t* cutFace = top_piece->he->flip()->f;
 
 			//create a bottom piece
 			vector<QVector3D> vpos;
@@ -69,8 +71,8 @@ void MeshWeaver::weaveLinearScaledPiece() {
 				vertices.push_back(vertex);
 			}
 			vertices[0]->refid = he->v->refid;
-			vertices[1]->refid = he->flip->refid;
-			vertices[2]->refid = he->flip->v->refid;
+			vertices[1]->refid = he->flip()->refid;
+			vertices[2]->refid = he->flip()->v->refid;
 			vertices[3]->refid = he->refid;
 
 			for (auto newv : vertices)
@@ -88,44 +90,47 @@ void MeshWeaver::weaveLinearScaledPiece() {
 			he_t* startHE = top_piece->he;
 			int offset = 0;
 			do {
-				if (startHE->v->refid == he->next->v->refid) {
+				if (startHE->v->refid == he->next()->v->refid) {
 					break;
 				}
 				startHE = startHE->next;
 				offset++;
 			}while (startHE != top_piece->he);
 
-			if (offset > 1) bound = top_piece_bounds[he->next->refid].first;//vp_max
-			else bound = top_piece_bounds[he->next->refid].second; //vn_max
+			if (offset > 1) bound = top_piece_bounds[he->next()->refid].first;//vp_max
+			else bound = top_piece_bounds[he->next()->refid].second; //vn_max
 
 			//find max cubic control points
 			QVector3D cur_v_up_max, cur_v_down_max;
-			Utils::LineLineIntersect(vpos[1], vpos[2], he->flip->v->pos, vn_max, &cur_v_down_max);
-			Utils::LineLineIntersect(vpos[0], vpos[3], he->flip->v->pos, vn_max, &cur_v_up_max);
+			Utils::LineLineIntersect(vpos[1], vpos[2], he->flip()->v->pos, vn_max, &cur_v_down_max);
+			Utils::LineLineIntersect(vpos[0], vpos[3], he->flip()->v->pos, vn_max, &cur_v_up_max);
 
 			QVector3D nxt_v_up_max, nxt_v_down_max;
-			Utils::LineLineIntersect(startHE->v->pos, startHE->next->v->pos, he->flip->v->pos, bound, &nxt_v_down_max);
-			Utils::LineLineIntersect(startHE->prev->v->pos, startHE->prev->prev->v->pos, he->flip->v->pos, bound, &nxt_v_up_max);
+			Utils::LineLineIntersect(startHE->v->pos, startHE->next()->v->pos, he->flip()->v->pos, bound, &nxt_v_down_max);
+			Utils::LineLineIntersect(startHE->prev()->v->pos, startHE->prev()->prev()->v->pos, he->flip()->v->pos, bound, &nxt_v_up_max);
 
 			QVector3D cur_v_down = Utils::Lerp(vpos[2], cur_v_down_max, roundness);
 			QVector3D cur_v_up = Utils::Lerp(vpos[3], cur_v_up_max, roundness);
 
 			QVector3D nxt_v_down = Utils::Lerp(startHE->v->pos, nxt_v_down_max, roundness);
-			QVector3D nxt_v_up = Utils::Lerp(startHE->prev->v->pos, nxt_v_up_max, roundness);
+			QVector3D nxt_v_up = Utils::Lerp(startHE->prev()->v->pos, nxt_v_up_max, roundness);
 
 			//add bridger
 
 			vpos = {nxt_v_down, nxt_v_up,
 					cur_v_down, cur_v_up};
 
-			addBridger(startHE->prev->flip, newFace->he->next->next->flip, vpos);
+			addBridger(startHE->prev()->flip, newFace->he->next()->next()->flip, vpos);
 
 			he = he->next;
 		}while (he != f.he);
 	}
+#endif
 }
 
-void MeshWeaver::weaveBilinearScaledPiece() {
+void MeshWeaver::weaveBilinearScaledPiece()
+{
+#ifdef USE_LEGACY_FACTORY
 	//for bilinear scaled piece
 
 	unordered_map<int, int> ori_v_id;
@@ -142,7 +147,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 		he_t* he = f.he;
 		do {
 			vert_t* v = he->v;
-			vert_t* flip_v = he->flip->v;
+			vert_t* flip_v = he->flip()->v;
 			if (control_edges.find(he->refid) == control_edges.end())
 			{
 				ori_v_id[he->refid] = v->refid;
@@ -247,7 +252,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 				cutFace->isCutFace = true;
 				faces_new.push_back(*cutFace);
 				he_mid->f = cutFace;
-				he_mid->flip->f = cutFace;
+				he_mid->flip()->f = cutFace;
 
 			}
 			he = he->next;
@@ -264,7 +269,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 			he_t* he_nxt = he->next;
 			//find top piece
 			he_t* top_piece = control_edges[he->refid];
-			face_t* cutFace = top_piece->f->isCutFace? top_piece->f: top_piece->flip->f;
+			face_t* cutFace = top_piece->f->isCutFace? top_piece->f: top_piece->flip()->f;
 			//find top piece control points
 			QVector3D cur_v_up, cur_v_down;
 
@@ -306,7 +311,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 
 			vert_t* vmid_up = new vert_t(mid_up);
 			vert_t* vmid_down = new vert_t(mid_down);
-			vmid_up->refid = he_nxt->flip->v->refid;
+			vmid_up->refid = he_nxt->flip()->v->refid;
 			vmid_down->refid = he_nxt->v->refid;
 			verts_new.push_back(*vmid_up);
 			verts_new.push_back(*vmid_down);
@@ -316,7 +321,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 			he_mid->isJoint = true;
 
 			he_mid->f = cutFace;
-			he_mid->flip->f = cutFace;
+			he_mid->flip()->f = cutFace;
 			hes_new.push_back(*he_mid);
 			he_mid->setCutEdge(true);
 
@@ -327,7 +332,7 @@ void MeshWeaver::weaveBilinearScaledPiece() {
 			he = he->next;
 		}while (he != f.he);
 	}
-
+#endif
 }
 
 void MeshWeaver::weaveMesh(HDS_Mesh *mesh)

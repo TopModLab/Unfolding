@@ -64,12 +64,12 @@ public:
 				 vector<he_t>   &&hes);
 
 
-	vector<vert_t> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
+	vector<vert_t*> getReebPoints(const doubles_t &val = doubles_t(), const QVector3D &normdir = QVector3D(0, 0, 1));
 
-	vector<vert_t> getSelectedVertices();
-	vector<he_t*> getSelectedEdges(); //use one half edge to represent an edge
-	vector<he_t> getSelectedHalfEdges(); //return all ispicked half edges
-	vector<face_t> getSelectedFaces();
+	vector<vert_t*> getSelectedVertices();
+	vector<he_t*>   getSelectedEdges(); //use one half edge to represent an edge
+	vector<he_t*>   getSelectedHalfEdges(); //return all ispicked half edges
+	vector<face_t*> getSelectedFaces();
 
 	void colorVertices(const doubles_t &val);
 
@@ -104,15 +104,15 @@ public:
 	void addHalfEdge(he_t);
 	void addVertex(vert_t);
 	void addFace(face_t);
-	void deleteFace(face_t);
-	void deleteHalfEdge(he_t);
+	//void deleteFace(face_t);
+	//void deleteHalfEdge(he_t);
 
-    static vector<face_t *> incidentFaces(vert_t *v);
-    static vector<he_t *> incidentEdges(vert_t *v);
-    static vector<face_t *> incidentFaces(face_t *f);
+    vector<face_t *> incidentFaces(vert_t *v);
+    vector<he_t *>   incidentEdges(vert_t *v);
+    vector<face_t *> incidentFaces(face_t *f);
 
-    static he_t* incidentEdge(face_t *f1, face_t *f2);
-    static he_t* incidentEdge(vert_t *v1, vert_t *v2);
+    he_t* incidentEdge(face_t *f1, face_t *f2);
+    he_t* incidentEdge(vert_t *v1, vert_t *v2);
 
 	static he_t* insertEdge(
 		vector<he_t> &edges, vert_t* v1, vert_t* v2,
@@ -168,29 +168,32 @@ inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
 	os << v.index
 		<< ": (" << v.pos.x() << ", " << v.pos.y() << ", " << v.pos.z() << ")"
 		<< "\t"
-		<< v.he;
+		<< "he index: " << v.heid;
 	return os;
 }
 
 inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
 	os << e.index << "::"
 
-		<< " prev: " << e.prev->index
-		<< " next: " << e.next->index
-		<< " flip: " << e.flip->index
-		<< " v: " << e.v->index
-		<< " f:" << e.f->index;
+		<< " prev: " << e.prev()->index
+		<< " next: " << e.next()->index
+		<< " flip: " << e.flip()->index
+		<< " v: " << e.vid
+		<< " f:" << e.fid;
 	return os;
 }
 
-inline ostream& operator<<(ostream &os, const HDS_Face& f) {
+inline ostream& operator<<(ostream &os, const HDS_Face& f)
+{
+#ifdef USE_LEGACY_FACTORY
 	os << "face #" << f.index << " " << f.n << " cut: " << f.isCutFace << endl;
 	HDS_HalfEdge *he = f.he;
 	HDS_HalfEdge *curHE = he;
 	do {
 		os << "(" << curHE->index << ", " << curHE->v->index << ") ";
 		curHE = curHE->next;
-	} while( curHE != he );
+	} while (curHE != he);
+#endif
 	return os;
 }
 
