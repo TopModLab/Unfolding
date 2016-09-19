@@ -7,10 +7,10 @@
 hdsid_t HDS_HalfEdge::uid = 0;
 
 HDS_HalfEdge::HDS_HalfEdge()
-	: fid(sInvalidHDS), vid(sInvalidHDS)
+	: index(uid++), refid(sInvalidHDS)
+	, fid(sInvalidHDS), vid(sInvalidHDS)
 	, prev_offset(0), next_offset(0), flip_offset(0)
 	, cutTwin_offset(0), brt_offset(0)
-	, index(uid++), refid(sInvalidHDS)
 	, flag(0), angle(0.0f)
 {
 }

@@ -42,14 +42,13 @@ public:
 	qreal y() { return pos.y(); }
 	qreal z() { return pos.z(); }
 
-	QVector3D pos;
-	QVector3D normal;
-
+public:
 	hdsid_t index;
 	hdsid_t refid;
 
 	//HDS_HalfEdge *he;
 	hdsid_t heid;
+
 	union
 	{
 		uint16_t flag;
@@ -59,6 +58,9 @@ public:
 			bool isPicked : 1;
 		};
 	};
+
+	QVector3D pos;
+	QVector3D normal;
 	double curvature;
 	double colorVal;
 

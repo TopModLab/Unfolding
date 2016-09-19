@@ -6,8 +6,8 @@
 hdsid_t HDS_Face::uid = 0;
 
 HDS_Face::HDS_Face()
-	: heid(sInvalidHDS)
-	, index(uid++), refid(sInvalidHDS), flag(0)
+	: index(uid++), refid(sInvalidHDS)
+	, heid(sInvalidHDS), flag(0)
 	, scalingFactor(1)
 {
 }

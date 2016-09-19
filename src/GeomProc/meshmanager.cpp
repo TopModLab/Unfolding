@@ -175,7 +175,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 	// Temporary Half-Edge Pair Recorder
 	using hepair_t = pair<hdsid_t, hdsid_t>;
 	// TODO: replace by unordered_map
-	map<hepair_t, he_t*> heMap;
+	unordered_map<hepair_t, hdsid_t, Utils::pair_hash> heMap;
 
 	// Assign vertex positions and ids
 	for (size_t i = 0; i < vertsCount; i++)
@@ -195,13 +195,13 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 		for (size_t j = 0; j < fsize; j++)
 		{
 			// calculate current, prev and next edge id
-			//int32_t jcurr = j + heIdx;
+			hdsid_t curIdx = j + heOffset;
 
 			// link current face and vertex of the edge
-			he_t* curHe = &hes[j + heOffset];
-			vert_t* curVert = &verts[Fi->v[j]];
-			curHe->vid = Fi->v[j];
-			curHe->fid = i;
+			auto &curHe = hes[curIdx];
+			auto &curVert = verts[Fi->v[j]];
+			curHe.vid = Fi->v[j];
+			curHe.fid = i;
 
 			// Check index boundary
 			// first: prev=last,   next=1
@@ -209,24 +209,25 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			int32_t jprev = (j == 0) ? fsize - 1 : j - 1;
 			int32_t jnext = (j == fsize - 1) ? 0 : j + 1;
 			// Connect current edge with previous and next
-			curHe->next_offset = jnext - j;
-			curHe->prev_offset = jprev - j;
+			curHe.next_offset = jnext - j;
+			curHe.prev_offset = jprev - j;
 
 			// connect current vertex to he
-			if (curVert->heid == sInvalidHDS) curVert->heid = curHe->index;
+			if (curVert.heid == sInvalidHDS) curVert.heid = curHe.index;
 
 			// record edge for flip connection
 			int32_t vj = Fi->v[j];
 			int32_t vj_next = Fi->v[jnext];
 			pair<int32_t, int32_t> vPair = make_pair(vj, vj_next);
+			// Record edge pair
 			if (heMap.find(vPair) == heMap.end())
 			{
-				heMap[vPair] = &hes[heOffset + j];
+				heMap[vPair] = curIdx;
 			}
 		}
 
 		curFace->heid = heOffset;
-		curFace->computeNormal();
+		//curFace->computeNormal();
 
 		heOffset += Fi->size;
 	}
@@ -250,11 +251,11 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 
 			if (invItem != heMap.end())
 			{
-				he_t* he = heit.second;
-				he_t* hef = invItem->second;
+				auto &he = hes[heit.second];
+				auto &hef = hes[invItem->second];
 
-				he->flip_offset = hef - he;
-				hef->flip_offset = -he->flip_offset;
+				he.flip_offset = hef.index - he.index;
+				hef.flip_offset = -he.flip_offset;
 				unvisitedHEs.erase(hePair);
 				unvisitedHEs.erase(invPair);
 			}
@@ -278,7 +279,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 		while (unvisitedHEs.size() > 0)
 		{
 			auto heit = unvisitedHEs.begin();
-			he_t* he = heit->second;
+			he_t* he = &hes[heit->second];
 			unvisitedHEs.erase(heit);
 			// Skip checked edges, won't skip in first check
 			if (he->flip_offset) continue;
@@ -288,17 +289,20 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			face_t* nullface = &faces.back();
 
 			auto curHE = he;
-			vector<he_t*> null_hes, null_hefs;
+			vector<hdsid_t> null_hes, null_hefs;
+			size_t heIdOffset = hes.size();
+			// Assign Null Edges
 			do 
 			{
-				null_hes.push_back(curHE);
+				null_hes.push_back(curHE->index);
+				null_hefs.push_back(heIdOffset++);
 				
-				// if curHE->next->flip == null,
+				// if curHE->next->flip == null (offset != 0),
 				//     found the next exposed edge
-				///                    ___curHE___
-				///                   /
-				///  exposed edge--> / curHE->next
-				///                 /
+				///                       ___curHE___
+				///                      /
+				///     exposed edge--> / curHE->next
+				///                    /
 				// else, move to curHE->next->flip->next
 				///                    \    <--exposed edge
 				///         curHE->nex  \
@@ -306,36 +310,42 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 				///                      / /
 				///         curHE->next / /curHE->next
 				///         ->flip     / /
-				curHE = curHE->next;
+				curHE = curHE->next();
 				// Loop adjacent edges to find the exposed edge
 				while (curHE->flip_offset)
 				{
 					curHE = curHE->flip()->next();
 				}
 			} while (curHE != he);
-			// Assign Null Edges
-			size_t initSize = hes.size();
-			size_t size = null_hes.size();
+			size_t curNullCount = null_hes.size();
 			// Insert Null Edges
-			hes.resize(initSize + size);
-			for (size_t i = 0; i < size; i++)
+			hes.resize(heIdOffset);
+			size_t initSize = heIdOffset - curNullCount;
+			for (size_t i = 0; i < curNullCount; i++)
 			{
-				he = null_hes[i];
-				he_t* hef = &hes[initSize+i];
+				he = &hes[null_hes[i]];
+				he_t* hef = &hes[initSize + i];
+				null_hefs[i] = initSize + i;
+				
 				he->isCutEdge = hef->isCutEdge = true;
 				he->flip_offset = hef - he;
 				hef->flip_offset = -he->flip_offset;
 				hef->vid = he->next()->vid;
 				hef->fid = nullface->index;
 
-				he_t* hef_prev = null_hefs[(i + 1) % size];
-				hef->prev_offset = hef_prev - hef;
-				hef_prev->next_offset = hef - hef_prev;
+				/// Buffer: ...(existing edges)..., 0, 1, 2, ..., n-1
+				/// Structure:   e(n-1)-> ... -> e1 -> e0 -> e(n-1)
+				// prev edge is the next one in buffer,
+				// except the last one, previous edge is the first one in buffer
+				hef->prev_offset = (i == curNullCount - 1) > 0 ? 1 : i;
+				// next edge is the previous one in buffer,
+				// except the first one, next edge is the last one in buffer
+				hef->next_offset = (i > 0) ? -1 : curNullCount - 1;
 			}
 			// Assign Null Face
 			nullface->isCutFace = true;
 			nullface->heid = he->index;
-			nullface->heid = null_hefs[0]->index;
+			nullface->heid = null_hefs[0];
 		}
 	}
 	/*vert_t::resetIndex();
@@ -350,11 +360,6 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 		he.index = he_t::assignIndex();
 		he.computeCurvature();
 		if (he.isNegCurve) negCount++;
-	}
-	face_t::resetIndex();
-	for (auto &f : faces)
-	{
-		f.index = face_t::assignIndex();
 	}*/
 	mesh_t* thismesh = new mesh_t(verts, hes, faces);
 

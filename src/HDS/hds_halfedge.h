@@ -44,10 +44,17 @@ public:
 	void computeCurvature();
 	QVector3D computeNormal();
 public:
+	hdsid_t index;
+	hdsid_t refid;
+
 	//HDS_Face *f;
 	hdsid_t fid;
 	hdsid_t vid;
 	//HDS_Vertex *v;
+
+	// Offset to index of previous/nex/flip edge
+	// previous/nex/flip edge doesn't exist
+	// when (previous/nex/flip == 0)
 	int32_t prev_offset, next_offset, flip_offset;
 	//HDS_HalfEdge *prev, *next, *flip;
 
@@ -56,8 +63,6 @@ public:
 	//HDS_HalfEdge *cutTwin;  // pointer to its twin halfedge created in a cut event
 	//HDS_HalfEdge *bridgeTwin;
 
-	hdsid_t index;
-	hdsid_t refid;
 
 	union
 	{

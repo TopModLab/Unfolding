@@ -53,12 +53,11 @@ public:
 	//bounding box related, should only work on cut face
 	//void update_bbox();
 public:
-	QVector3D n;
-	//HDS_HalfEdge *he;
-	hdsid_t heid;
-
 	hdsid_t index;
 	hdsid_t refid;
+
+	//HDS_HalfEdge *he;
+	hdsid_t heid;
 
 	// Flags
 	union
@@ -75,6 +74,8 @@ public:
 			bool isJoint : 1; //woven joint face
 		};
 	};
+
+	QVector3D n;
 	
 private:
 	double scalingFactor;
