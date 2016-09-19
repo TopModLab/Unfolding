@@ -96,10 +96,14 @@ public:
 	vector<he_t>& halfedges() { return heSet; }
 	vector<face_t>& faces() { return faceSet; }
 	vector<vert_t>& verts() { return vertSet; }
-
 	const vector<he_t>& halfedges() const { return heSet; }
 	const vector<face_t>& faces() const { return faceSet; }
 	const vector<vert_t>& verts() const { return vertSet; }
+	//////////////////////////////////////////////////////////////////////////
+	// Compute mesh properties
+	vector<hdsid_t> faceCorners(hdsid_t fid) const;
+	QVector3D faceCenter(hdsid_t fid) const;
+	QVector3D faceNormal(hdsid_t fid) const;
 
 	void addHalfEdge(he_t);
 	void addVertex(vert_t);
@@ -117,9 +121,6 @@ public:
 	static he_t* insertEdge(
 		vector<he_t> &edges, vert_t* v1, vert_t* v2,
 		he_t* he1 = nullptr, he_t* he2 = nullptr);
-
-	static void fillMeshHoles(vector<he_t> &hes, vector<face_t> &faces,
-							  unordered_set<hdsid_t> &exposedHEs);
 
 // 	template <typename T>
 // 	void flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m);

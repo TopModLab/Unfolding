@@ -8,17 +8,23 @@ struct BridgerConfig
 
 class MeshFactory
 {
-	typedef HDS_HalfEdge he_t;
-	typedef HDS_Vertex vert_t;
-	typedef HDS_Face face_t;
-	using mesh_t = HDS_Mesh;
 public:
+	using vert_t = HDS_Vertex;
+	using he_t = HDS_HalfEdge;
+	using face_t = HDS_Face;
+	using mesh_t = HDS_Mesh;
+
+	static HDS_Mesh* create(const mesh_t* ref, const BridgerConfig &config) {
+		return nullptr;
+	}
+
 	static void init();
 	static void setRefMesh(const mesh_t* ref);
 	static void constructEdge(vert_t* v1, vert_t* v2, he_t* he1, he_t* he2);
 	static void constructFace(he_t* unlinkedHE, size_t edgeCount, face_t* f);
-	static void fillNullFace(vector<he_t> &hes, vector<face_t> &fs,
-		const unordered_set<hdsid_t> &nullHEs);
+	static void fillNullFaces(
+		vector<he_t> &hes, vector<face_t> &faces,
+		unordered_set<hdsid_t> &nullHEs);
 	static void generateBridger(he_t* he1, he_t *he2, const BridgerConfig& config,
 		vector<vert_t> &verts, vector<he_t> &hes, vector<face_t> &fs);
 	

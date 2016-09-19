@@ -65,14 +65,12 @@
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
-    <Import Project="x64_build.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
-    <Import Project="x64_build.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
@@ -319,6 +317,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\GeomProc\MeshIterator.cpp" />
     <ClCompile Include="..\src\GeomProc\meshloader.cpp" />
     <ClCompile Include="..\src\GeomProc\meshmanager.cpp" />
+    <ClCompile Include="..\src\GeomProc\MeshNeoWeaver.cpp" />
     <ClCompile Include="..\src\GeomProc\meshsmoother.cpp" />
     <ClCompile Include="..\src\GeomProc\meshunfolder.cpp" />
     <ClCompile Include="..\src\GeomUtils\BBox.cpp" />
@@ -468,6 +467,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClInclude Include="..\src\GeomProc\MeshIterator.h" />
     <ClInclude Include="..\src\GeomProc\meshloader.h" />
     <ClInclude Include="..\src\GeomProc\meshmanager.h" />
+    <ClInclude Include="..\src\GeomProc\MeshNeoWeaver.h" />
     <ClInclude Include="..\src\GeomProc\meshsmoother.h" />
     <ClInclude Include="..\src\GeomProc\meshunfolder.h" />
     <ClInclude Include="..\src\GeomUtils\BBox.h" />

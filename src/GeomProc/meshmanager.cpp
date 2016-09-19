@@ -278,7 +278,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 			return nullptr;
 		}
 		// fill exposed edges (flip == null) with null faces
-		HDS_Mesh::fillMeshHoles(hes, faces, exposedHEs);
+		MeshFactory::fillNullFaces(hes, faces, exposedHEs);
 	}
 	/*vert_t::resetIndex();
 	for (auto &v : verts) {
