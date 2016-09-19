@@ -231,23 +231,23 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 
 		heOffset += Fi->size;
 	}
-	set<hepair_t> visitedHESet;
-	auto unvisitedHEs = heMap;
+	// hash table for visited edges
+	vector<bool> visitedHEs(heMap.size(), false);
+	// hash set to record exposed edges
+	unordered_set<hdsid_t> exposedHEs;
 	// for each half edge, find its flip
 	for (auto heit : heMap)
 	{
 		int from, to;
 
 		hepair_t hePair = heit.first;
+		hdsid_t heID = heit.second;
 
-		if (visitedHESet.find(hePair) == visitedHESet.end())
+		if (!visitedHEs[heID])
 		{
+			visitedHEs[heID] = true;
 
-			from = hePair.first;
-			to = hePair.second;
-			hepair_t invPair = make_pair(to, from);
-
-			auto invItem = heMap.find(invPair);
+			auto invItem = heMap.find(make_pair(hePair.second, hePair.first));
 
 			if (invItem != heMap.end())
 			{
@@ -256,97 +256,29 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 
 				he.flip_offset = hef.index - he.index;
 				hef.flip_offset = -he.flip_offset;
-				unvisitedHEs.erase(hePair);
-				unvisitedHEs.erase(invPair);
-			}
 
-			visitedHESet.insert(hePair);
-			visitedHESet.insert(invPair);
+				visitedHEs[invItem->second] = true;
+			}
+			else
+			{
+				exposedHEs.insert(heID);
+			}
 		}
 	}
 	// Check Holes and Fill with Null Faces
-	if (unvisitedHEs.size() > 0)
+	if (!exposedHEs.empty())
 	{
 		QMessageBox msgBox(QMessageBox::Warning, QString("Warning"),
 			QString("Current mesh has holes and can cause critical problems!\n"
 				"Do you still want to load it?"),
-			QMessageBox::Yes | QMessageBox::Cancel);
-		msgBox.setWindowFlags(Qt::WindowStaysOnTopHint);
+			QMessageBox::Yes | QMessageBox::Cancel, nullptr, Qt::WindowStaysOnTopHint);
+		
 		if (msgBox.exec() == QMessageBox::Cancel)
 		{
 			return nullptr;
 		}
-		while (unvisitedHEs.size() > 0)
-		{
-			auto heit = unvisitedHEs.begin();
-			he_t* he = &hes[heit->second];
-			unvisitedHEs.erase(heit);
-			// Skip checked edges, won't skip in first check
-			if (he->flip_offset) continue;
-			//he_t* hef = new he_t;
-
-			faces.emplace_back();
-			face_t* nullface = &faces.back();
-
-			auto curHE = he;
-			vector<hdsid_t> null_hes, null_hefs;
-			size_t heIdOffset = hes.size();
-			// Assign Null Edges
-			do 
-			{
-				null_hes.push_back(curHE->index);
-				null_hefs.push_back(heIdOffset++);
-				
-				// if curHE->next->flip == null (offset != 0),
-				//     found the next exposed edge
-				///                       ___curHE___
-				///                      /
-				///     exposed edge--> / curHE->next
-				///                    /
-				// else, move to curHE->next->flip->next
-				///                    \    <--exposed edge
-				///         curHE->nex  \
-				///         ->flip->next \  ___curHE___
-				///                      / /
-				///         curHE->next / /curHE->next
-				///         ->flip     / /
-				curHE = curHE->next();
-				// Loop adjacent edges to find the exposed edge
-				while (curHE->flip_offset)
-				{
-					curHE = curHE->flip()->next();
-				}
-			} while (curHE != he);
-			size_t curNullCount = null_hes.size();
-			// Insert Null Edges
-			hes.resize(heIdOffset);
-			size_t initSize = heIdOffset - curNullCount;
-			for (size_t i = 0; i < curNullCount; i++)
-			{
-				he = &hes[null_hes[i]];
-				he_t* hef = &hes[initSize + i];
-				null_hefs[i] = initSize + i;
-				
-				he->isCutEdge = hef->isCutEdge = true;
-				he->flip_offset = hef - he;
-				hef->flip_offset = -he->flip_offset;
-				hef->vid = he->next()->vid;
-				hef->fid = nullface->index;
-
-				/// Buffer: ...(existing edges)..., 0, 1, 2, ..., n-1
-				/// Structure:   e(n-1)-> ... -> e1 -> e0 -> e(n-1)
-				// prev edge is the next one in buffer,
-				// except the last one, previous edge is the first one in buffer
-				hef->prev_offset = (i == curNullCount - 1) > 0 ? 1 : i;
-				// next edge is the previous one in buffer,
-				// except the first one, next edge is the last one in buffer
-				hef->next_offset = (i > 0) ? -1 : curNullCount - 1;
-			}
-			// Assign Null Face
-			nullface->isCutFace = true;
-			nullface->heid = he->index;
-			nullface->heid = null_hefs[0];
-		}
+		// fill exposed edges (flip == null) with null faces
+		HDS_Mesh::fillMeshHoles(hes, faces, exposedHEs);
 	}
 	/*vert_t::resetIndex();
 	for (auto &v : verts) {

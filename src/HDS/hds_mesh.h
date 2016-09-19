@@ -118,6 +118,9 @@ public:
 		vector<he_t> &edges, vert_t* v1, vert_t* v2,
 		he_t* he1 = nullptr, he_t* he2 = nullptr);
 
+	static void fillMeshHoles(vector<he_t> &hes, vector<face_t> &faces,
+							  unordered_set<hdsid_t> &exposedHEs);
+
 // 	template <typename T>
 // 	void flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m);
 	void selectFace(hdsid_t idx);
