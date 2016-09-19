@@ -339,7 +339,7 @@
     <ClCompile Include="..\src\GeomProc\meshsmoother.cpp">
       <Filter>Source Files\GeomProc</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\GeomProc\MeshNeoWeaver.cpp">
+    <ClCompile Include="..\src\MeshFactory\MeshNeoWeaver.cpp">
       <Filter>Source Files\Factory</Filter>
     </ClCompile>
   </ItemGroup>
@@ -521,7 +521,7 @@
     <ClInclude Include="..\src\GeomProc\MeshConnector.h">
       <Filter>Header Files\GeomProc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\GeomProc\MeshNeoWeaver.h">
+    <ClInclude Include="..\src\MeshFactory\MeshNeoWeaver.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
   </ItemGroup>
