@@ -105,6 +105,17 @@ public:
 	QVector3D faceCenter(hdsid_t fid) const;
 	QVector3D faceNormal(hdsid_t fid) const;
 
+	he_t* heFromFace(hdsid_t fid) { return &heSet[faceSet[fid].heid]; }
+	he_t* heFromVert(hdsid_t vid) { return &heSet[vertSet[vid].heid]; }
+	vert_t* vertFromHe(hdsid_t heid) { return &vertSet[heSet[heid].vid]; }
+	face_t* faceFromHe(hdsid_t heid) { return &faceSet[heSet[heid].fid]; }
+
+	const he_t* heFromFace(hdsid_t fid) const { return &heSet[faceSet[fid].heid]; }
+	const he_t* heFromVert(hdsid_t vid) const { return &heSet[vertSet[vid].heid]; }
+	const vert_t* vertFromHe(hdsid_t heid) const { return &vertSet[heSet[heid].vid]; }
+	const face_t* faceFromHe(hdsid_t heid) const { return &faceSet[heSet[heid].fid]; }
+
+
 	void addHalfEdge(he_t);
 	void addVertex(vert_t);
 	void addFace(face_t);
