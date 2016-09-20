@@ -3,7 +3,7 @@
 
 OperationStack::OperationStack()
 	: curFlag(Undefined)
-	, canUnfold(false)
+	, canUnfold(true)
 	, canGRS(true)
 	, canCut(true)
 	, canGES(true)
@@ -108,6 +108,7 @@ void OperationStack::setCurrentFlag(Flag flag)
 	case GRS:
 	case Rimmed:
 	case QuadEdge:
+	case Woven:
 		canUnfold = true;
 		canGRS = false;
 		canCut = false;

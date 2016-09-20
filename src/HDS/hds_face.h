@@ -78,8 +78,8 @@ public:
 	QVector3D n;
 	
 private:
+	// TODO: remove from class member
 	double scalingFactor;
-	vector<HDS_HalfEdge*> internalHEs; //for non-planar faces
 	vector<QVector3D> scaledCorners;
 
 	// Bounding box for the objcet

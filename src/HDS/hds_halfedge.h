@@ -40,7 +40,7 @@ public:
 	void setBridgeTwin(HDS_HalfEdge* bt_e) { brt_offset = bt_e - this; bt_e->brt_offset = -brt_offset; }
 
 	uint16_t getFlag() const { return flag; }
-
+	// TODO: move to mesh factory
 	void computeCurvature();
 	QVector3D computeNormal();
 public:

@@ -1,6 +1,7 @@
 #include "MeshFactory.h"
 
 const HDS_Mesh* MeshFactory::refMesh = nullptr;
+confMap MeshFactory::config;
 
 void MeshFactory::init()
 {
@@ -12,27 +13,54 @@ void MeshFactory::setRefMesh(const mesh_t* ref)
 	refMesh = ref;
 }
 
-void MeshFactory::constructEdge(vert_t* v1, vert_t* v2, he_t* he1, he_t* he2)
+// Link edge between vertices
+// TODO: is it really needed??
+void MeshFactory::constructHE(vert_t* v, he_t* he)
 {
-	// Link edge between vertices
+	
+
 }
 
-void MeshFactory::constructFace(he_t* unlinkedHE, size_t edgeCount, face_t* f)
+// Functionality: 
+//	Link edge loops of a face, 
+//	hes from unlinkedHE to unlinkedHE+edgeCount will be assigned to face fid
+// Restriction: 
+//	unlinkedHE has to be stored in order
+// Input:
+//	start edge's address, num of edges to be assigned,
+//	face index of assigned face
+void MeshFactory::constructFace(
+	he_t* unlinkedHE, size_t edgeCount, 
+	const hdsid_t fid)
 {
-	// Link edge loops of a face 
-	// Restriction: unlinkedHE has to be stored in order
-	// TODO
+	
+
 }
 
+// Functionality: 
+//	Link edge loops of a face, 
+//	hes of indices will be assigned to face fid.
+// Input: 
+//	half-edges buffer, vector of indices of half edges to be assigned,
+//	face index of assigned face
+void MeshFactory::constructFace(
+	vector<he_t> hes, const vector<int> indices, 
+	const hdsid_t fid)
+{
+	
+}
+
+// Functionality: 
+//	Add null face and edges directly into original buffer to make mesh validate.
+// Input buffers: 
+//	half-edges, faces,
+//	hash set of indices of exposed edges(flip == null)
+// 
 void MeshFactory::fillNullFaces(
 	vector<he_t> &hes, vector<face_t> &faces,
 	unordered_set<hdsid_t> &exposedHEs)
 {
-	// Functionality
-	// Input buffers: half-edges, faces,
-	//                hash set of indices of exposed edges(flip == null)
-	// Add null face and edges directly into original buffer
-	// to make mesh validate.
+	
 
 	// record initial edge number
 	size_t initSize = hes.size();
@@ -113,7 +141,7 @@ void MeshFactory::fillNullFaces(
 }
 
 void MeshFactory::generateBridger(
-	he_t* he1, he_t *he2, const BridgerConfig& config,
+	he_t* he1, he_t *he2,
 	vector<vert_t> &verts, vector<he_t> &hes, vector<face_t> &fs)
 {
 	// TODO

@@ -342,6 +342,15 @@
     <ClCompile Include="..\src\MeshFactory\MeshNeoWeaver.cpp">
       <Filter>Source Files\Factory</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_NeoWeavePanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_NeoWeavePanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UI\NeoWeavePanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h">
@@ -524,6 +533,9 @@
     <ClInclude Include="..\src\MeshFactory\MeshNeoWeaver.h">
       <Filter>Header Files\Factory</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_NeoWeavePanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\forms\bridgerpanel.ui">
@@ -594,6 +606,12 @@
     </CustomBuild>
     <CustomBuild Include="..\src\mainwindow.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\NeoWeavePanel.h">
+      <Filter>Header Files\UI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\NeoWeavePanel.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

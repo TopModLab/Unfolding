@@ -67,6 +67,7 @@ bool MainWindow::createComponents()
 		ges_panel.reset(new GESPanel);
 		rim_panel.reset(new RimFacePanel);
 		wv_panel.reset(new WeavePanel);
+		neowv_panel.reset(new NeoWeavePanel);
 
 		createActions();
 		createMenus();
@@ -127,6 +128,8 @@ bool MainWindow::connectComponents()
 
 	connect(wv_panel.data(), &WeavePanel::sig_saved, this, &MainWindow::slot_weaveMesh);
 	connect(wv_panel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
+	
+	connect(neowv_panel.data(), &NeoWeavePanel::sig_saved, this, &MainWindow::slot_neoWeaveMesh);
 
 	connect (ui->panelCBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 			[=](int id){
@@ -350,6 +353,7 @@ void MainWindow::createActions()
 		connect(ui->FBWBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerRimmedMesh);
 
 		connect(ui->weaveBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerWeaveMesh);
+		connect(ui->neoWeaveBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerNeoWeaveMesh);
 
 		connect(ui->halfEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_performMeshCut);
 
@@ -640,6 +644,17 @@ void MainWindow::slot_triggerWeaveMesh()
 	}
 }
 
+void MainWindow::slot_triggerNeoWeaveMesh()
+{
+	MeshManager::getInstance()->getMeshStack()->reset();
+
+	if (MeshManager::getInstance()->getMeshStack()->canRim)
+	{
+		neowv_panel->show();
+		neowv_panel->activateWindow();
+	}
+}
+
 void MainWindow::slot_triggerDForms()
 {
 
@@ -694,7 +709,7 @@ void MainWindow::slot_rimmed3DMesh()
 
 void MainWindow::slot_weaveMesh()
 {
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Rimmed);
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Woven);
 
 	if (MeshManager::getInstance()->setWeaveMesh(wv_panel->getConfig()))
 	{
@@ -706,6 +721,23 @@ void MainWindow::slot_weaveMesh()
 		statusBar()->showMessage("Failed to generate Woven Mesh...", 5000);
 	}
 }
+
+void MainWindow::slot_neoWeaveMesh()
+{
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Woven);
+
+	if (MeshManager::getInstance()->setNeoWeaveMesh(neowv_panel->getConfig()))
+	{
+		statusBar()->showMessage("Succeeded to generate Woven Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate Woven Mesh...", 5000);
+	}
+}
+
 
 void MainWindow::slot_setBridger()
 {

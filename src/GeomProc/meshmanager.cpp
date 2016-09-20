@@ -294,10 +294,10 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 		he.computeCurvature();
 		if (he.isNegCurve) negCount++;
 	}*/
-	//mesh_t* thismesh = new mesh_t(verts, hes, faces);
-	mesh_t oriMesh(verts, hes, faces);
-	mesh_t::resetIndex();
-	mesh_t* thismesh = MeshNeoWeaver::create(&oriMesh);
+	mesh_t* thismesh = new mesh_t(verts, hes, faces);
+// 	mesh_t oriMesh(verts, hes, faces);
+// 	mesh_t::resetIndex();
+// 	mesh_t* thismesh = MeshNeoWeaver::create(&oriMesh);
 
 #ifdef _DEBUG
 	//cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;
@@ -726,7 +726,7 @@ bool MeshManager::setWeaveMesh(const confMap &conf)
 bool MeshManager::setNeoWeaveMesh(const confMap &conf)
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
-
+	mesh_t::resetIndex();
 	HDS_Mesh* outMesh = MeshNeoWeaver::create(inMesh);
 	if (!outMesh)
 	{

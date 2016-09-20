@@ -4,10 +4,9 @@
 class MeshNeoWeaver : public MeshFactory
 {
 public:
-	static HDS_Mesh* create(const mesh_t* ref,
-		const BridgerConfig &config = BridgerConfig());
+	static HDS_Mesh* create(const mesh_t* ref);
 private:
 	static HDS_Mesh* createWeaving(
-		const mesh_t* ref_mesh, const BridgerConfig &config);
+		const mesh_t* ref_mesh);
 };
 

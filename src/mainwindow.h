@@ -16,6 +16,8 @@ using viewer_t = MeshViewer;
 #include "UI/GESPanel.h"
 #include "UI/rimfacepanel.h"
 #include "UI/WeavePanel.h"
+#include "UI/NeoWeavePanel.h"
+
 #include <QScopedPointer>
 
 namespace Ui {
@@ -81,6 +83,7 @@ private slots:
 	void slot_triggerRimmedMesh();
 	void slot_triggerGES();
 	void slot_triggerWeaveMesh();
+	void slot_triggerNeoWeaveMesh();
 	void slot_triggerDForms();
 
 	void slot_setBridger();
@@ -89,6 +92,7 @@ private slots:
 	void slot_GES();
 	void slot_rimmed3DMesh();
 	void slot_weaveMesh();
+	void slot_neoWeaveMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);
@@ -133,6 +137,7 @@ private:
 	QScopedPointer<GESPanel> ges_panel;
 	QScopedPointer<RimFacePanel> rim_panel;
 	QScopedPointer<WeavePanel> wv_panel;
+	QScopedPointer<NeoWeavePanel> neowv_panel;
 
 private:
 
