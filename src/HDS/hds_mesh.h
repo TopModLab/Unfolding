@@ -52,6 +52,11 @@ public:
 	HDS_Mesh operator=(const HDS_Mesh& rhs) = delete;
 	//void updateSortedFaces();
 	//void clearSortedFaces();
+	static void resetIndex() {
+		vert_t::resetIndex();
+		he_t::resetIndex();
+		face_t::resetIndex();
+	}
 
 	void updatePieceSet();	/* Find linked faces and store in pieceSet */
 	

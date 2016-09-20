@@ -92,6 +92,7 @@ public:
 	bool rimMesh(double rimSize = 0.0);
 	bool set3DRimMesh(const confMap &conf);
 	bool setWeaveMesh(const confMap &conf);
+	bool setNeoWeaveMesh(const confMap &conf);
 	bool createDFormMesh();
 	// Export as SVG files
 	bool exportSVGFile(const QString &filename, const confMap &conf);

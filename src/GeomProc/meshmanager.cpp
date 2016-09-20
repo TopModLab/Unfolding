@@ -2,7 +2,6 @@
 #include "MeshFactory/meshcutter.h"
 #include "GeomProc/meshunfolder.h"
 #include "meshsmoother.h"
-#include "MeshFactory/MeshFactory.h"
 #include "MeshFactory/MeshExtender.h"
 #include "MeshFactory/meshhollower.h"
 #include "MeshFactory/meshrimface.h"
@@ -10,6 +9,10 @@
 #include "MeshFactory/MeshDFormer.h"
 #include "MeshIterator.h"
 #include "GeomProc/MeshConnector.h"
+// New MeshFactory
+#include "MeshFactory/MeshFactory.h"
+#include "MeshFactory/MeshNeoWeaver.h"
+
 
 #include "Utils/utils.h"
 
@@ -157,9 +160,7 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 #ifdef _DEBUG
 	cout << "Building the half edge mesh ..." << endl;
 #endif // _DEBUG
-	HDS_Vertex::resetIndex();
-	HDS_HalfEdge::resetIndex();
-	HDS_Face::resetIndex();
+	mesh_t::resetIndex();
 	size_t vertsCount = inVerts.size() / 3;
 	size_t facesCount = inFaces.size();
 
@@ -293,7 +294,10 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 		he.computeCurvature();
 		if (he.isNegCurve) negCount++;
 	}*/
-	mesh_t* thismesh = new mesh_t(verts, hes, faces);
+	//mesh_t* thismesh = new mesh_t(verts, hes, faces);
+	mesh_t oriMesh(verts, hes, faces);
+	mesh_t::resetIndex();
+	mesh_t* thismesh = MeshNeoWeaver::create(&oriMesh);
 
 #ifdef _DEBUG
 	//cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;
@@ -712,6 +716,22 @@ bool MeshManager::setWeaveMesh(const confMap &conf)
 	HDS_Mesh* outMesh = new HDS_Mesh(*inMesh);
 	MeshWeaver::configWeaveMesh(conf);
 	MeshWeaver::weaveMesh(outMesh);
+	outMesh->processType = HDS_Mesh::WOVEN_PROC;
+
+	operationStack->push(outMesh);
+
+	return true;
+}
+
+bool MeshManager::setNeoWeaveMesh(const confMap &conf)
+{
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
+
+	HDS_Mesh* outMesh = MeshNeoWeaver::create(inMesh);
+	if (!outMesh)
+	{
+		return false;
+	}
 	outMesh->processType = HDS_Mesh::WOVEN_PROC;
 
 	operationStack->push(outMesh);
