@@ -4,6 +4,7 @@
 struct BridgerConfig
 {
 	uint32_t sample;
+	BridgerConfig() {}
 };
 
 class MeshFactory
@@ -14,7 +15,8 @@ public:
 	using face_t = HDS_Face;
 	using mesh_t = HDS_Mesh;
 
-	static HDS_Mesh* create(const mesh_t* ref, const BridgerConfig &config) {
+	static HDS_Mesh* create(const mesh_t* ref,
+		const BridgerConfig &config = BridgerConfig()) {
 		return nullptr;
 	}
 
