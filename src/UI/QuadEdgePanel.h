@@ -1,6 +1,7 @@
+#pragma once
 #ifndef QUADEDGEPANEL_H
 #define QUADEDGEPANEL_H
-
+#include "Utils/common.h"
 #include <QWidget>
 
 namespace Ui {
@@ -15,9 +16,9 @@ public:
 	explicit QuadEdgePanel(QWidget *parent = 0);
 	~QuadEdgePanel();
 
-	double getFlapSize();
-	double getBridgerSize();
-	double getShift();
+	Float getFlapSize();
+	Float getBridgerSize();
+	Float getShift();
 	int getType();
 
 signals:

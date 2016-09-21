@@ -46,7 +46,7 @@ protected:
 	void createDock();
 	void createStatusBar();
 
-private slots:
+private:
 	void newFile();
 	void closeFile();
 	void saveFile();
@@ -105,7 +105,6 @@ private slots:
 	void slot_triggerCutLocusPanel();
 	void slot_updateCutLocusMethod(int);
 	void slot_disableclp();
-
 
 private:
 	void closeEvent(QCloseEvent *e);

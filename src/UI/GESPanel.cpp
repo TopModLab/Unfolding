@@ -29,7 +29,8 @@ GESPanel::setPanelType(int type)
 void
 GESPanel::slot_setSize(int value)
 {
-	ui->sizeText->setText(QString::number((float)value/ui->sizeSlider->maximum()));
+	ui->sizeText->setText(QString::number(
+		value/static_cast<Float>(ui->sizeSlider->maximum())));
 }
 
 void
@@ -39,8 +40,8 @@ GESPanel::slot_saved()
 	close();
 }
 
-double
+Float
 GESPanel::getBridgerSize()
 {
-	return (double)bridgerSize / (double)ui->sizeSlider->maximum();
+	return bridgerSize / static_cast<Float>(ui->sizeSlider->maximum());
 }

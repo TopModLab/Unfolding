@@ -7,12 +7,12 @@ NeoWeavePanel::NeoWeavePanel(QWidget *parent) :
 {
 	ui->setupUi(this);
 	setWindowTitle(tr("Weave Panel"));
-	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(close()));
-	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(slot_setConfig()));
-	connect(ui->okButton, SIGNAL(clicked()), this, SIGNAL(sig_saved()));
+	connect(ui->okButton, &QPushButton::clicked, this, &QWidget::close);
+	connect(ui->okButton, &QPushButton::clicked, this, &NeoWeavePanel::setConfig);
+	connect(ui->okButton, &QPushButton::clicked, this, &NeoWeavePanel::sig_saved);
 
-	connect(ui->patchSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_setPatchSize(int)));
-
+	connect(ui->patchSizeSlider, &QSlider::valueChanged,
+		this, &NeoWeavePanel::setPatchSize);
 }
 
 NeoWeavePanel::~NeoWeavePanel()
@@ -20,12 +20,14 @@ NeoWeavePanel::~NeoWeavePanel()
 	delete ui;
 }
 
-void NeoWeavePanel::slot_setPatchSize(int value)
+void NeoWeavePanel::setPatchSize(int value)
 {
-	ui->patchSizeLabel->setText(QString::number((double)value / ui->patchSizeSlider ->maximum(), 'f', 2));
+	ui->patchSizeLabel->setText(QString::number(value
+		/ static_cast<Float>(ui->patchSizeSlider->maximum()), 'f', 2));
 }
 
-void NeoWeavePanel::slot_setConfig()
+void NeoWeavePanel::setConfig()
 {
-	config["patchSize"] = (double)ui->patchSizeSlider->value() / ui->patchSizeSlider->maximum();
+	config["patchSize"] = ui->patchSizeSlider->value()
+		/ static_cast<Float>(ui->patchSizeSlider->maximum());
 }

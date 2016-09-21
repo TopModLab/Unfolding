@@ -42,7 +42,8 @@ void QuadEdgePanel::setPanelType(int type)
 
 void QuadEdgePanel::slot_setbridgerLabel(int value)
 {
-	ui->bridgerSizeLabel->setText(QString::number((float)value/ui->bridgerSizeSlider->maximum()));
+	ui->bridgerSizeLabel->setText(QString::number(
+		value/static_cast<Float>(ui->bridgerSizeSlider->maximum())));
 }
 
 void QuadEdgePanel::slot_setflapLabel(int value)
@@ -62,18 +63,18 @@ void QuadEdgePanel::slot_saved()
 	shiftAmount = ui->shiftSlider->value();
 	close();
 }
-double QuadEdgePanel::getFlapSize()
+float QuadEdgePanel::getFlapSize()
 {
-	return (double)flapSize / (double)ui->flapSizeSlider->maximum();
+	return flapSize / static_cast<float>(ui->flapSizeSlider->maximum());
 }
-double QuadEdgePanel::getBridgerSize()
+float QuadEdgePanel::getBridgerSize()
 {
-	return (double)bridgerSize / (double)ui->bridgerSizeSlider->maximum();
+	return bridgerSize / static_cast<float>(ui->bridgerSizeSlider->maximum());
 }
 
-double QuadEdgePanel::getShift()
+float QuadEdgePanel::getShift()
 {
-	return (double)shiftAmount / (double)ui->shiftSlider->maximum();
+	return shiftAmount / static_cast<float>(ui->shiftSlider->maximum());
 }
 
 int QuadEdgePanel::getType()

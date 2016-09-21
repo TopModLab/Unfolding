@@ -1,7 +1,7 @@
 #include "UI/ConnectorPanel.h"
 
 QFont ConnectorPanel::fontfamily = QFont("Arial");
-double ConnectorPanel::fontSize = 20.0;
+Float ConnectorPanel::fontSize = 20.0f;
 
 ConnectorPanel::ConnectorPanel(int procType)
 	: ui(new Ui::ConnectorPanel)
@@ -87,10 +87,10 @@ void ConnectorPanel::save()
 	fontfamily = ui->font_val->currentFont();
 	fontSize = ui->font_size_val->value();
 
-	conf["connector"] = (double)ui->connector_type->currentIndex();
+	conf["connector"] = static_cast<Float>(ui->connector_type->currentIndex());
 	// Material Connections
 	conf["matConnLen"] = ui->matconn_len_val->value();
-	conf["matConnUnit"] = (double)ui->matconn_unit_type->currentIndex();
+	conf["matConnUnit"] = static_cast<Float>(ui->matconn_unit_type->currentIndex());
 
 	// Export Graph Stroke Width
 	conf["strokeWd"] = ui->stroke_wd_val->value();
@@ -100,16 +100,16 @@ void ConnectorPanel::save()
 	conf["length"] = ui->length_val->value();
 
 	// Pinhole Utilities
-	conf["pinUnit"] = (double)ui->pinholeunit_type->currentIndex();
+	conf["pinUnit"] = static_cast<Float>(ui->pinholeunit_type->currentIndex());
 	conf["pinSize"] = ui->pinholesize_val->value();
-	conf["pinCount"] = (double)ui->pinholecount_type->currentIndex();
+	conf["pinCount"] = static_cast<Float>(ui->pinholecount_type->currentIndex());
 
 	// Etch Utilities
-	conf["etchSeg"] = (double)ui->etchseg_val->value();
-	conf["scoreType"] = (double)ui->score_type->currentIndex();
+	conf["etchSeg"] = static_cast<Float>(ui->etchseg_val->value());
+	conf["scoreType"] = static_cast<Float>(ui->score_type->currentIndex());
 	conf["dashLen"] = ui->scoredash_len->value();
 	conf["dashGap"] = ui->scoredash_gap->value();
-	conf["dashUnit"] = (double)ui->scoredash_unit->currentIndex();
+	conf["dashUnit"] = static_cast<Float>(ui->scoredash_unit->currentIndex());
 
 	emit sig_saved();
 }

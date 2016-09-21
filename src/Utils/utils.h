@@ -93,19 +93,19 @@ inline void printColor(QColor clr) {
 template<typename T, typename mesh_t>
 vector<T> laplacianSmooth(
 	const vector<T> &val, mesh_t *mesh,
-	double lambda = 0.25, double sigma = 1.0)
+	Float lambda = 0.25f, Float sigma = 1.0f)
 {
-	unordered_map<typename mesh_t::vert_t*, double> L(mesh->verts().size());
+	unordered_map<typename mesh_t::vert_t*, Float> L(mesh->verts().size());
 	vector<T> newval(mesh->verts().size());
 	for (auto vi : mesh->verts()) {
 	auto neighbors = vi->neighbors();
 
-	double denom = 0.0;
-	double numer = 0.0;
+	Float denom = 0;
+	Float numer = 0;
 
 	for (auto vj : neighbors) {
-		//double wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
-		double wij = 1.0 / neighbors.size();
+		//Float wij = 1.0 / (vi->pos.distanceToPoint(vj->pos) + sigma);
+		Float wij = 1.0 / neighbors.size();
 		denom += wij;
 		numer += wij * val[vj->index];
 	}
@@ -133,9 +133,9 @@ inline void LineLineIntersect(
 {
 	//QVector3D *pb;
 	QVector3D p13, p43, p21;
-	double d1343, d4321, d1321, d4343, d2121;
-	double numer, denom;
-	//   double EPS = 0.0001;
+	Float d1343, d4321, d1321, d4343, d2121;
+	Float numer, denom;
+	//   Float EPS = 0.0001;
 
 	p13 = p1 - p3;
 	p43 = p4 - p3;
@@ -157,8 +157,8 @@ inline void LineLineIntersect(
 	//	  return(false);
 	numer = d1343 * d4321 - d1321 * d4343;
 
-	double mua = numer / denom;
-	//double mub = (d1343 + d4321 * (mua)) / d4343;
+	Float mua = numer / denom;
+	//Float mub = (d1343 + d4321 * (mua)) / d4343;
 	*pa = p1 + mua * p21;
 	//*pb = p3 + mub * p43;
 }

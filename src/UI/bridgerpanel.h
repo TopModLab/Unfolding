@@ -16,7 +16,7 @@ class BridgerPanel : public QWidget
 public:
 	explicit BridgerPanel(QWidget *parent = 0);
 	~BridgerPanel();
-	//std::map<QString, double> getConfigValues();
+	//std::map<QString, Float> getConfigValues();
 	confMap getConfigValues() const { return bridgerConfig; }
 	void setSaveMode(bool);
 
@@ -31,7 +31,7 @@ public slots:
 
 private:
 	Ui::BridgerPanel *ui;
-	//std::map<QString, double> bridgerConfig;
+	//std::map<QString, Float> bridgerConfig;
 	confMap bridgerConfig;
 };
 

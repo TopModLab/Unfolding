@@ -43,11 +43,11 @@ public:
 	// Check if 
 	bool isConnected(const HDS_Face *other);
 
-	void setScaleFactor(double factor);
+	void setScaleFactor(Float factor);
 	QVector3D scaleCorner(HDS_Vertex* v);
 	vector<QVector3D> getScaledCorners();
 	void scaleDown();
-	double getScalingFactor(){ return scalingFactor; }
+	Float getScalingFactor() { return scalingFactor; }
 
 	uint16_t getFlag() const { return flag; }
 	//bounding box related, should only work on cut face
@@ -79,7 +79,7 @@ public:
 	
 private:
 	// TODO: remove from class member
-	double scalingFactor;
+	Float scalingFactor;
 	vector<QVector3D> scaledCorners;
 
 	// Bounding box for the objcet

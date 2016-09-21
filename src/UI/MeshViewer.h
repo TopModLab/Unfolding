@@ -287,7 +287,7 @@ private:
 
 	HDS_Mesh* heMesh;   // not own
 	bool mesh_changed;
-	double view_scale;
+	GLfloat view_scale;
 	//QMatrix4x4 model_matrix;
 
 	// VBOs and VAOs

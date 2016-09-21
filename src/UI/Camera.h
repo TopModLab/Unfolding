@@ -8,9 +8,6 @@
 #ifndef __Camera__
 #define __Camera__
 
-
-typedef double Float;
-
 #include "Utils/common.h"
 #include "Utils/mathutils.h"
 #include <QVector3D>

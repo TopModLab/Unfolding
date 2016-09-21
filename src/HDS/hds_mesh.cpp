@@ -65,7 +65,7 @@ void HDS_Mesh::updateSortedFaces()
 	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
 		auto ca = fa->corners();
 		auto cb = fb->corners();
-		float minZa = 1e9, minZb = 1e9;
+		Float minZa = 1e9, minZb = 1e9;
 		for (auto va : ca) {
 			minZa = std::min(va->pos.z(), minZa);
 		}
@@ -466,8 +466,8 @@ void HDS_Mesh::drawVertexIndices()
 #else
 		glPointSize(15.0);
 
-		float r, g, b;
-		encodeIndex<float>(v->index, r, g, b);
+		Float r, g, b;
+		encodeIndex<Float>(v->index, r, g, b);
 		glColor4f(r, g, b, 1.0);
 
 		glBegin(GL_POINTS);
@@ -490,8 +490,8 @@ void HDS_Mesh::drawEdgeIndices()
 		// draw only odd index half edges
 		if (e->index & 0x1) continue;
 
-		float r, g, b;
-		encodeIndex<float>(e->index, r, g, b);
+		Float r, g, b;
+		encodeIndex<Float>(e->index, r, g, b);
 		glLineWidth(2.0);
 		GLUtils::drawLine(e->v->pos, en->v->pos, QColor::fromRgbF(r, g, b));
 	}
@@ -502,8 +502,8 @@ void HDS_Mesh::drawFaceIndices()
 {
 #ifdef OPENGL_LEGACY
 	for (auto &f : faceSet) {
-		float r, g, b;
-		encodeIndex<float>(f->index, r, g, b);
+		Float r, g, b;
+		encodeIndex<Float>(f->index, r, g, b);
 		glColor4f(r, g, b, 1.0);
 
 		he_t* he = f->he;
@@ -1162,9 +1162,6 @@ vector<HDS_Vertex*> HDS_Mesh::getReebPoints(const doubles_t &funcval, const QVec
 		double b = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.y();
 		double c = (rand() / (double)RAND_MAX - 0.5) * 1e-8 + normdir.z();
 		randvals.push_back(make_tuple(a, b, c));
-
-
-
 	}
 
 	int s11=0,s22=0,s33=0;

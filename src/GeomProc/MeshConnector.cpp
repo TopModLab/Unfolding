@@ -30,7 +30,7 @@
 //			
 //////////////////////////////////////////////////////////////////////////
 auto printText = [&](FILE* file,
-	double x, double y, double angle, double str_wd, const QString &text)
+	Float x, Float y, Float angle, Float str_wd, const QString &text)
 {
 	fprintf(file, SVG_TEXT, x, y, angle, x, y,
 		ConnectorPanel::fontSize,
@@ -49,17 +49,17 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
-	double str_wd = conf.at("strokeWd");
-	double he_scale = conf.at("scale");
-	//double uncut_len = ConvertToPt((int)UNIT_TYPE::INCH, 0.1);
+	Float str_wd = conf.at("strokeWd");
+	Float he_scale = conf.at("scale");
+	//Float uncut_len = ConvertToPt((int)UNIT_TYPE::INCH, 0.1);
 	//int matConnLen = static_cast<int>(conf.at("connectMat"));
 	int segCount = static_cast<int>(conf.at("etchSeg"));
 	//int cn_t = static_cast<int>(conf.at("connector"));
 	//int unit_type = static_cast<int>(conf.at("pinUnit"));
-	double uncut_len = ConvertToPt(
+	Float uncut_len = ConvertToPt(
 		static_cast<int>(conf.at("matConnUnit")),
 		conf.at("matConnLen"));
-	double pin_radius = ConvertToPt(
+	Float pin_radius = ConvertToPt(
 		static_cast<int>(conf.at("pinUnit")), conf.at("pinSize")) * 0.5;
 	int pinholecount_type = static_cast<int>(conf.at("pinCount"));
 	int score_type = static_cast<int>(conf.at("scoreType"));
@@ -70,11 +70,10 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 	}
 	else
 	{
-		double score_len = conf.at("dashLen");
-		double score_gap = conf.at("dashGap");
+		Float score_len = conf.at("dashLen");
+		Float score_gap = conf.at("dashGap");
 	}
-	
-	
+
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
@@ -94,7 +93,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 		vector<QVector2D> printPinholes;
 
 		vector<QVector2D> printTextPos;
-		doubles_t printTextRot;
+		floats_t printTextRot;
 		vector<QString> printTextIfo;
 		unordered_map<int, QVector2D> printTextRecord;
 
@@ -173,7 +172,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 						targetNextV = refedge->v;
 					}
 					QVector2D targetVPos = targetV->pos.toVector2D();
-					double tpin = MeshHollower::refMapPointer->at(targHE->index);
+					Float tpin = MeshHollower::refMapPointer->at(targHE->index);
 					QVector2D targPos = targetVPos * (1 - tpin)
 						+ targetNextV->pos.toVector2D() * tpin;
 					QVector2D startPos = cut_he->v->pos.toVector2D();
@@ -316,19 +315,19 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
-	double he_offset = 10;
-	double str_wd = conf.at("strokeWd");
-	double he_scale = conf.at("scale");
-	double wid_conn = conf.at("width");
-	double len_conn = conf.at("length");
+	Float he_offset = 10;
+	Float str_wd = conf.at("strokeWd");
+	Float he_scale = conf.at("scale");
+	Float wid_conn = conf.at("width");
+	Float len_conn = conf.at("length");
 	int unit_type = static_cast<int>(conf.at("pinUnit"));
-	double pin_radius = ConvertToPt(unit_type,
+	Float pin_radius = ConvertToPt(unit_type,
 		conf.at("pinSize")) * 0.5;
-	double scale = MeshHollower::flapSize;
-	double shift = (MeshHollower::shiftAmount + 1) * 0.5;
+	Float scale = MeshHollower::flapSize;
+	Float shift = (MeshHollower::shiftAmount + 1) * 0.5;
 	int pinnum = shift > 0.8 ? 2 : 1;
 
-	double circle_offset = 3;
+	Float circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
@@ -349,7 +348,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 		vector<QVector2D> printPinholes;
 
 		vector<QVector2D> printTextPos;
-		doubles_t printTextRot;
+		floats_t printTextRot;
 		vector<QString> printTextIfo;
 		unordered_map<int, QVector2D> printTextRecord;
 
@@ -571,15 +570,15 @@ void MeshConnector::exportGESPiece(FILE* fp,
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
-	double he_offset = 10;
-	double str_wd = conf.at("strokeWd");
-	double he_scale = conf.at("scale");
-	double wid_conn = conf.at("width");
-	double len_conn = conf.at("length");
-	double pin_radius = conf.at("pinSize");
+	Float he_offset = 10;
+	Float str_wd = conf.at("strokeWd");
+	Float he_scale = conf.at("scale");
+	Float wid_conn = conf.at("width");
+	Float len_conn = conf.at("length");
+	Float pin_radius = conf.at("pinSize");
 
 
-	double circle_offset = 3;
+	Float circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
@@ -707,11 +706,11 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
-	double he_offset = 10;
-	double str_wd = conf.at("strokeWd");
-	double he_scale = conf.at("scale");
-	double wid_conn = conf.at("width");
-	double len_conn = conf.at("length");
+	Float he_offset = 10;
+	Float str_wd = conf.at("strokeWd");
+	Float he_scale = conf.at("scale");
+	Float wid_conn = conf.at("width");
+	Float len_conn = conf.at("length");
 	int cn_t = static_cast<int>(conf.at("connector"));
 	
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
@@ -765,7 +764,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 
 		// Connection label
 		vector<QVector2D> printTextPos;
-		doubles_t printTextRot;
+		floats_t printTextRot;
 		vector<QString> printTextIfo;
 		do
 		{
@@ -889,7 +888,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 				// Gear count
 				int ndiv = 8;
 				//connector segment length
-				double len_seg = Pthis->distanceToPoint(*Pnext) / ndiv * 0.5;
+				Float len_seg = Pthis->distanceToPoint(*Pnext) / ndiv * 0.5f;
 
 				QVector2D *Pst = Pthis;
 				for (int i = 0; i < ndiv; i++)
@@ -942,7 +941,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 			case ADVSAW_CONNECTOR:
 			{
 				//calculate 
-				double edge_len = Pthis->distanceToPoint(*Pnext);
+				Float edge_len = Pthis->distanceToPoint(*Pnext);
 				/*QVector2D T = (*Pnext - *Pthis).normalized();
 				QVector2D d = (Pc - *Pthis);
 				QVector2D a = QVector2D::dotProduct(d, T) * T;
@@ -952,7 +951,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 				QVector2D Psc = Pn + n * wid_conn * 1.5;
 
 				//connector segment length				
-				double edgeConn_len = edge_len * 0.5;
+				Float edgeConn_len = edge_len * 0.5f;
 
 				QVector2D *Pst = new QVector2D(Pn - edgeConn_len * T * 0.5);
 				QVector2D *Psn = new QVector2D(Pn + edgeConn_len * T * 0.1);
@@ -1055,15 +1054,15 @@ void MeshConnector::exportFBWalkPiece(FILE* fp,
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
-	double he_offset = 10;
-	double str_wd = conf.at("strokeWd");
-	double he_scale = conf.at("scale");
-	double wid_conn = conf.at("width");
-	double len_conn = conf.at("length");
-	double pin_radius = conf.at("pinSize");
+	Float he_offset = 10;
+	Float str_wd = conf.at("strokeWd");
+	Float he_scale = conf.at("scale");
+	Float wid_conn = conf.at("width");
+	Float len_conn = conf.at("length");
+	Float pin_radius = conf.at("pinSize");
 	int cn_t = static_cast<int>(conf.at("connector"));
 
-	double circle_offset = 3;
+	Float circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
@@ -1096,7 +1095,7 @@ void MeshConnector::exportFBWalkPiece(FILE* fp,
 		QVector2D centerPt; // piece center position
 		vector<QVector2D> printRimPts;//Edges on the boundary
 		vector<QVector2D> printPinholes;
-		double outerR, innerR, innerPinR, outerPinR, offRad, offPinRad;
+		Float outerR, innerR, innerPinR, outerPinR, offRad, offPinRad;
 
 		// Group current piece
 		fprintf(fp, "<g>\n");
@@ -1110,7 +1109,7 @@ void MeshConnector::exportFBWalkPiece(FILE* fp,
 				auto curHE = he;
 
 				centerPt = curFace->center().toVector2D() * he_scale;
-				double edgeLen = (curHE->v->pos - curHE->next()->v->pos).length() * he_scale;
+				Float edgeLen = (curHE->v->pos - curHE->next()->v->pos).length() * he_scale;
 
 				outerR = edgeLen * 2.0 / 3.0;
 				innerR = outerR - wid_conn * 2.0 / 3.0 * sqrt(2);
@@ -1134,7 +1133,7 @@ void MeshConnector::exportFBWalkPiece(FILE* fp,
 
 				for (int i = 0; i < n_pinhole; i++)
 				{
-					double rad = i * offRad + offPinRad;
+					Float rad = i * offRad + offPinRad;
 					QVector2D pinDir(cos(rad), -sin(rad));
 					printPinholes.push_back(centerPt + innerPinR * pinDir);
 					printPinholes.push_back(centerPt + outerPinR * pinDir);
@@ -1204,15 +1203,15 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
-	double he_offset = 10;
-	double str_wd = conf.at("strokeWd");
-	double he_scale = conf.at("scale");
-	double wid_conn = conf.at("width");
-	double len_conn = conf.at("length");
-	double pin_radius = conf.at("pinSize");
+	Float he_offset = 10;
+	Float str_wd = conf.at("strokeWd");
+	Float he_scale = conf.at("scale");
+	Float wid_conn = conf.at("width");
+	Float len_conn = conf.at("length");
+	Float pin_radius = conf.at("pinSize");
 	int cn_t = static_cast<int>(conf.at("connector"));
 
-	double circle_offset = 3;
+	Float circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
 
 	//SVG file head
@@ -1246,7 +1245,7 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 
 void MeshConnector::writeCutLayer(
 	FILE* SVG_File, const vector<QVector2D> &cut,
-	double str_wd, int cuttype, int id)
+	Float str_wd, int cuttype, int id)
 {
 	switch (cuttype)
 	{
@@ -1274,14 +1273,14 @@ void MeshConnector::writeCutLayer(
 
 void MeshConnector::wrtieEtchLayer(
 	FILE* SVG_File, const vector<QVector2D> &etch,
-	double str_wd, int seg)
+	Float str_wd, int seg)
 {
-	double halfSegLen = ConvertToPt((int)UNIT_TYPE::INCH, 0.02);
+	Float halfSegLen = ConvertToPt((int)UNIT_TYPE::INCH, 0.02f);
 	for (int isec = 0; isec < etch.size(); isec += 2)
 	{
 		for (int iseg = 0; iseg <= seg; iseg++)
 		{
-			double offset = (iseg * 2 - seg) * halfSegLen;
+			Float offset = (iseg * 2 - seg) * halfSegLen;
 			fprintf(SVG_File, SVG_LINE, isec / 2,
 				etch[isec].x() + offset, etch[isec].y(),
 				etch[isec + 1].x() + offset, etch[isec + 1].y(),

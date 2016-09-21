@@ -78,7 +78,7 @@ public:
 		};
 	};
 	
-	float angle;
+	Float angle;
 };
 
 #endif // HDS_EDGE_H

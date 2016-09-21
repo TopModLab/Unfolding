@@ -19,9 +19,9 @@ public:
 signals:
 	void sig_saved();
 
-public slots:
-	void slot_setConfig();
-	void slot_setPatchSize(int);
+public:
+	void setConfig();
+	void setPatchSize(int);
 
 private:
 	Ui::NeoWeavePanel *ui;

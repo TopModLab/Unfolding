@@ -66,10 +66,13 @@ void BridgerPanel::slot_restrainSliders(int index)
 void BridgerPanel::slot_saved()
 {
 	 bridgerConfig["shape"] = ui->shapeComboBox->currentIndex();
-	 bridgerConfig["curv"] = (double)ui->curvSlider->value()/(double)ui->curvSlider->maximum();
+	 bridgerConfig["curv"] = ui->curvSlider->value()
+		 / static_cast<Float>(ui->curvSlider->maximum());
 	 bridgerConfig["samples"] = ui->samplesSlider->value();
-	 bridgerConfig["size"] = (double)ui->sizeSlider->value()/(double)ui->sizeSlider->maximum();
-	 bridgerConfig["cp"] = (double)ui->convergeSlider->value()/(double)ui->convergeSlider->maximum();
+	 bridgerConfig["size"] = ui->sizeSlider->value()
+		 / static_cast<Float>(ui->sizeSlider->maximum());
+	 bridgerConfig["cp"] = ui->convergeSlider->value()
+		 / static_cast<Float>(ui->convergeSlider->maximum());
 
 }
 

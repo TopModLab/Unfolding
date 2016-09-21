@@ -1,18 +1,18 @@
 #include "MeshNeoWeaver.h"
 
 HDS_Mesh* MeshNeoWeaver::create(
-	const mesh_t* ref)
+	const mesh_t* ref, const confMap &conf)
 {
-	return createWeaving(ref);
+	return createWeaving(ref, conf);
 }
 
 HDS_Mesh* MeshNeoWeaver::createWeaving(
-	const mesh_t* ref_mesh)
+	const mesh_t* ref_mesh, const confMap &conf)
 {
 	if (!ref_mesh) return nullptr;
 
 	// scaling should be passed in as configuration
-	const double patchScale = config["patchSize"];
+	const float patchScale =  static_cast<float>(conf.at("patchSize"));
 
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();

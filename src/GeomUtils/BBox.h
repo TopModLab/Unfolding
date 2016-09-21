@@ -18,7 +18,7 @@ public:
 	QVector3D pMin, pMax;
 
 	BBox3();
-	BBox3(float val);
+	BBox3(Float val);
 	BBox3(const QVector3D& p);
 	BBox3(const QVector3D& p1, const QVector3D& p2);
 	BBox3(const BBox3 &bound);
@@ -30,7 +30,7 @@ public:
 	const QVector3D getDiagnal() const;
 	bool overlaps(const BBox3& box) const;
 	bool overlapon(const BBox3& box, PLANE over_plane = XY_PLANE) const;
-	void expand(float delta);
+	void expand(Float delta);
 	void Union(const QVector3D& p);
 	void Union(const BBox3& box);
 	friend BBox3 Union(const BBox3& box, const QVector3D& p);

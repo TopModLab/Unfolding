@@ -2,7 +2,7 @@
 #define GESPANEL_H
 
 #include <QWidget>
-
+#include "Utils/common.h"
 namespace Ui {
 class GESPanel;
 }
@@ -15,7 +15,7 @@ public:
 	explicit GESPanel(QWidget *parent = 0);
 	~GESPanel();
 
-	double getBridgerSize();
+	Float getBridgerSize();
 	void setPanelType(int);
 signals:
 	void sig_saved();

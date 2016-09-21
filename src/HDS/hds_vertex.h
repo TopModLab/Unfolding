@@ -15,7 +15,7 @@ public:
 		Maximum,
 		Saddle,
 		Regular
-	} rtype;
+	};
 
 	static void resetIndex() { uid = 0; }
 	static hdsid_t assignIndex() { return uid++; }
@@ -61,11 +61,12 @@ public:
 
 	QVector3D pos;
 	QVector3D normal;
-	double curvature;
-	double colorVal;
+	ReebsPointType rtype;
+	Float curvature;
+	Float colorVal;
 
-	int sdegree;  // the degree of saddle point
-	double morseFunctionVal;
+	Float morseFunctionVal;
+	int32_t sdegree;  // the degree of saddle point
 };
 
 #endif // HDS_VERTEX_H

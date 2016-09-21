@@ -8,7 +8,7 @@ hdsid_t HDS_Vertex::uid = 0;
 HDS_Vertex::HDS_Vertex(const QVector3D &p)
 	: index(uid++), refid(sInvalidHDS)
 	, heid(sInvalidHDS), flag(0)
-	, pos(p), colorVal(0)
+	, pos(p), rtype(Regular), colorVal(0)
 {
 }
 

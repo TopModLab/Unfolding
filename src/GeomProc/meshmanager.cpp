@@ -727,7 +727,7 @@ bool MeshManager::setNeoWeaveMesh(const confMap &conf)
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
 	mesh_t::resetIndex();
-	HDS_Mesh* outMesh = MeshNeoWeaver::create(inMesh);
+	HDS_Mesh* outMesh = MeshNeoWeaver::create(inMesh, conf);
 	if (!outMesh)
 	{
 		return false;

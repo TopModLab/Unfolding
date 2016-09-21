@@ -36,12 +36,16 @@
 
 using namespace std;
 
-
-
 //#if !defined(QT_NO_DEBUG) && !defined(QT_DEBUG)
 #if !defined(NDEBUG) && !defined(_DEBUG)
 #	define _DEBUG
 #endif
+
+#ifdef DOUBLE_AS_FLOAT
+using Float = double;
+#else
+using Float = float;
+#endif // DOUBLE_AS_FLOAT
 
 using floats_t = vector<float>;
 using doubles_t = vector<double>;
@@ -53,6 +57,6 @@ using int16s_t = vector<int16_t>;
 using int32s_t = vector<int32_t>;
 
 
-typedef std::unordered_map<string, double> confMap;
+typedef std::unordered_map<string, Float> confMap;
 
 #endif // COMMON_H

@@ -1,16 +1,8 @@
 #include "MeshFactory.h"
 
-const HDS_Mesh* MeshFactory::refMesh = nullptr;
-confMap MeshFactory::config;
-
 void MeshFactory::init()
 {
 	// TODO
-}
-
-void MeshFactory::setRefMesh(const mesh_t* ref)
-{
-	refMesh = ref;
 }
 
 // Link edge between vertices

@@ -3,8 +3,8 @@
 
 BBox3::BBox3()
 {
-	float max_val = std::numeric_limits<float>::max();
-	float min_val = std::numeric_limits<float>::lowest();
+	Float max_val = std::numeric_limits<Float>::max();
+	Float min_val = std::numeric_limits<Float>::lowest();
 	pMin = QVector3D(max_val, max_val, max_val);
 	pMax = QVector3D(min_val, min_val, min_val);
 }
@@ -22,7 +22,7 @@ BBox3::BBox3(const BBox3& bound)
 {
 }
 
-BBox3::BBox3(float val)
+BBox3::BBox3(Float val)
 	: pMin(val, val, val), pMax(val, val, val)
 {
 }
@@ -40,7 +40,7 @@ const QVector3D BBox3::getDiagnal() const
 	return pMax - pMin;
 }
 
-void BBox3::expand(float delta)
+void BBox3::expand(Float delta)
 {
 	pMin -= QVector3D(delta, delta, delta);
 	pMax += QVector3D(delta, delta, delta);

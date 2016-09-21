@@ -82,15 +82,15 @@ struct TextLabel
 };
 
 // Unit conversion
-inline double MM2Pt(double mm)
+inline Float MM2Pt(Float mm)
 {
 	return mm * 72.0 / 25.4;
 }
-inline double Inch2Pt(double inch)
+inline Float Inch2Pt(Float inch)
 {
 	return inch * 72.0;
 }
-inline double ConvertToPt(int src_type, double len)
+inline Float ConvertToPt(int src_type, Float len)
 {
 	if (len == 0) return 0;
 	switch (src_type)
@@ -105,13 +105,13 @@ inline double ConvertToPt(int src_type, double len)
 		return len;
 	}
 }
-inline double Pt2MM(double pt)
+inline Float Pt2MM(Float pt)
 {
-	return pt * 25.4 / 72.0;
+	return pt * 25.4f / 72.0f;
 }
-inline double Pt2Inch(double pt)
+inline Float Pt2Inch(Float pt)
 {
-	return pt / 72.0;
+	return pt / 72.0f;
 }
 class MeshConnector
 {
@@ -161,14 +161,14 @@ private:
 
 	static void writeCutLayer(
 		FILE* SVG_File, const vector<QVector2D> &cut,
-		double str_wd = 0.01, int cuttype = 0, int id = 0);
+		Float str_wd = 0.01f, int cuttype = 0, int id = 0);
 	static void wrtieEtchLayer(
 		FILE* SVG_File, const vector<QVector2D> &etch,
-		double str_wd = 0.01, int seg = 0);
+		Float str_wd = 0.01f, int seg = 0);
 
 private:
-	/*static double pinholesize;
-	static double he_scale;*/
+	/*static Float pinholesize;
+	static Float he_scale;*/
 };
 
 #endif

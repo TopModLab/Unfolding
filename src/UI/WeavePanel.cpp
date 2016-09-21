@@ -29,31 +29,39 @@ WeavePanel::~WeavePanel()
 
 void WeavePanel::slot_setRoundness(int value)
 {
-	ui->roundLabel->setText(QString::number((float)value/ui->roundSlider->maximum(), 'f', 2));
+	ui->roundLabel->setText(QString::number(
+		value / static_cast<Float>(ui->roundSlider->maximum(), 'f', 2)));
 }
 
 void WeavePanel::slot_setThickness(int value)
 {
-	ui->thickLabel->setText(QString::number((float)value/ui->thickSlider->maximum(), 'f', 2));
+	ui->thickLabel->setText(QString::number(
+		value / static_cast<Float>(ui->thickSlider->maximum(), 'f', 2)));
 }
 
 void WeavePanel::slot_setPivot(int value)
 {
-	ui->pivotLabel->setText(QString::number((float)value/ui->pivotSlider->maximum(), 'f', 2));
+	ui->pivotLabel->setText(QString::number(
+		value/static_cast<Float>(ui->pivotSlider->maximum(), 'f', 2)));
 }
 
 void WeavePanel::slot_setFlap(int value)
 {
-	ui->flapLabel->setText(QString::number((float)value/ui->flapSlider->maximum(), 'f', 2));
+	ui->flapLabel->setText(QString::number(
+		value/static_cast<Float>(ui->flapSlider->maximum(), 'f', 2)));
 }
 
 void WeavePanel::slot_setType()
 {
-	config["shapeCone"] = ui->shapeConeBtn->isChecked()? 1: 0;
-	config["scaleBilinear"] = ui->scaleBilinearBtn->isChecked()? 1:0;
-	config["roundness"] = (float)ui->roundSlider->value()/ui->roundSlider->maximum();
-	config["thickness"] = (float)ui->thickSlider->value()/ui->thickSlider->maximum();
-	config["depth"] = (float)ui->depthSpinBox->value();
-	config["pivot"] = ((float)ui->pivotSlider->value()/ui->pivotSlider->maximum() +1.0 )/2.0;
-	config["flap"] = (float)ui->flapSlider->value()/ui->flapSlider->maximum();
+	config["shapeCone"] = static_cast<Float>(ui->shapeConeBtn->isChecked());
+	config["scaleBilinear"] = static_cast<Float>(ui->scaleBilinearBtn->isChecked());
+	config["roundness"] = ui->roundSlider->value()
+						/ static_cast<Float>(ui->roundSlider->maximum());
+	config["thickness"] = ui->thickSlider->value()
+						/ static_cast<Float>(ui->thickSlider->maximum());
+	config["depth"] = static_cast<Float>(ui->depthSpinBox->value());
+	config["pivot"] = (ui->pivotSlider->value()
+					/ static_cast<Float>(ui->pivotSlider->maximum()) + 1.0f) / 2.0f;
+	config["flap"] = ui->flapSlider->value()
+					/ static_cast<Float>(ui->flapSlider->maximum());
 }

@@ -69,7 +69,7 @@ public:
 
 protected:
 	struct vert_t {
-		float x, y, z;
+		Float x, y, z;
 		unsigned char r, g, b;
 	};
 

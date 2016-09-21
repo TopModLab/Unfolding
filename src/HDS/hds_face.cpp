@@ -132,7 +132,7 @@ QVector3D HDS_Face::computeNormal() const
 	return n;
 }
 
-void HDS_Face::setScaleFactor(double factor)
+void HDS_Face::setScaleFactor(Float factor)
 {
 	scalingFactor = factor;
 }
@@ -229,7 +229,7 @@ void HDS_Face::checkPlanar()
 	QVector3D normal = QVector3D::crossProduct(vertices[1]->pos - vertices[0]->pos, vertices[2]->pos - vertices[0]->pos);
 
 	for(int i = 3; i < vertices.size(); i++) {
-		float dot = QVector3D::dotProduct(normal, vertices[i]->pos - vertices[0]->pos);
+		Float dot = QVector3D::dotProduct(normal, vertices[i]->pos - vertices[0]->pos);
 		if (fabsf(dot) > 0.3){
 			isNonPlanar = true;
 			break;

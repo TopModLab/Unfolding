@@ -216,7 +216,7 @@ void MeshViewer::drawMeshToFBO()
 	uid_shader.bind();
 	uid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 	uid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
-	uid_shader.setUniformValue("scale", static_cast<float>(view_scale));
+	uid_shader.setUniformValue("scale", static_cast<Float>(view_scale));
 
 	switch (interactionState)
 	{
@@ -424,7 +424,7 @@ void MeshViewer::paintGL()
 				vtx_solid_shader.bind();
 				vtx_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				vtx_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera); 
-				vtx_solid_shader.setUniformValue("scale", static_cast<float>(view_scale));
+				vtx_solid_shader.setUniformValue("scale", view_scale);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, vRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, vRBO.flag_tbo);
@@ -447,7 +447,7 @@ void MeshViewer::paintGL()
 				face_solid_shader.setUniformValue("proj_matrix", view_cam.CameraToScreen);
 				face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 				glUniform1ui(oglUniLoc(face_solid_shader, "hl_comp"), hlComp);
-				face_solid_shader.setUniformValue("scale", static_cast<float>(view_scale));
+				face_solid_shader.setUniformValue("scale", view_scale);
 				// Bind Texture Buffer
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
@@ -471,7 +471,7 @@ void MeshViewer::paintGL()
 				edge_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 				//edge_solid_shader.setUniformValue("hl_comp", (GLuint)hlComp);
 				glUniform1ui(oglUniLoc(edge_solid_shader, "hl_comp"), hlComp);
-				edge_solid_shader.setUniformValue("scale", static_cast<float>(view_scale));
+				edge_solid_shader.setUniformValue("scale", view_scale);
 				// Bind Texture Buffer
 				glBindTexture(GL_TEXTURE_BUFFER, heRBO.flag_tex);
 				glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, heRBO.flag_tbo);
@@ -488,7 +488,7 @@ void MeshViewer::paintGL()
 
 void MeshViewer::resizeGL(int w, int h)
 {
-	view_cam.resizeViewport(w / static_cast<double>(h));
+	view_cam.resizeViewport(w / static_cast<Float>(h));
 
 	initializeFBO();
 }
@@ -503,7 +503,7 @@ void MeshViewer::keyPressEvent(QKeyEvent* e)
 		const int maxLev = 10;
 		if (lev1 > 10) return;
 
-		double ratio = (cp_smoothing_times - lev0) / (double)(lev1 - lev0);
+		double ratio = (cp_smoothing_times - lev0) / static_cast<Float>(lev1 - lev0);
 		//emit updateMeshColorByGeoDistance(lastSelectedIndex, lev0, lev1, ratio);
 		emit updateMeshColorByGeoDistance(lastSelectedIndex); //changed to non-smoothing method due to bug in smoothed method*/
 

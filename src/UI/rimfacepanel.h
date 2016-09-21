@@ -32,9 +32,9 @@ public slots:
 
 private:
 	Ui::RimFacePanel *ui;
-	float width;
-	float height;
-	float flap;
+	Float width;
+	Float height;
+	Float flap;
 	confMap config;
 };
 
