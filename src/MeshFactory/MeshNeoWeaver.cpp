@@ -12,8 +12,8 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	if (!ref_mesh) return nullptr;
 
 	// scaling should be passed in as configuration
-	const float patchScale =  static_cast<float>(conf.at("patchSize"));
-
+	const float patchScale =  static_cast<float>(conf.at("patchScale"));
+	const bool patchUniform = static_cast<float>(conf.at("patchUniform")) == 1.0f;
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();
 	auto &ref_faces = ref_mesh->faces();
@@ -105,7 +105,8 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		planeVecs[3] *= -QVector3D::dotProduct(planeVecs[2], heTans[compID[0]])
 			/ QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
 
-		float edgeLen = heDirLens[compID[0]] * patchScale;
+		float edgeLen = patchUniform? patchScale : heDirLens[compID[0]] * patchScale;
+
 		float scale[2]{
 			edgeLen / (planeVecs[0] + planeVecs[1]).length(),
 			edgeLen / (planeVecs[2] + planeVecs[3]).length()
@@ -118,10 +119,12 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		// padded index for verts and HEs
 		auto paddingIdx = outputOffset * 4;
 		// Update vertex position
-		// Uniform Length
-		//verts[paddingIdx].pos = heMid[compID[0]] + heDirs[compID[0]] * patchScale * 0.5f;
-		// Edge Varying Length
-		verts[paddingIdx].pos = heMid[compID[0]] + heDirs[compID[0]] * edgeLen * 0.5f;
+
+		// Edge Length
+		verts[paddingIdx].pos = patchUniform? 
+			heMid[compID[0]] + heDirs[compID[0]] * patchScale * 0.5f 
+			: heMid[compID[0]] + heDirs[compID[0]] * edgeLen * 0.5f;
+
 		verts[paddingIdx + 1].pos = verts[paddingIdx].pos + planeVecs[0];
 		verts[paddingIdx + 2].pos = verts[paddingIdx + 1].pos + planeVecs[1];
 		verts[paddingIdx + 3].pos = verts[paddingIdx + 2].pos + planeVecs[2];

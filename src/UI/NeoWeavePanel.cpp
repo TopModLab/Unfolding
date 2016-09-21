@@ -11,8 +11,19 @@ NeoWeavePanel::NeoWeavePanel(QWidget *parent) :
 	connect(ui->okButton, &QPushButton::clicked, this, &NeoWeavePanel::setConfig);
 	connect(ui->okButton, &QPushButton::clicked, this, &NeoWeavePanel::sig_saved);
 
-	connect(ui->patchSizeSlider, &QSlider::valueChanged,
-		this, &NeoWeavePanel::setPatchSize);
+	connect(ui->patchSizeSlider, &QSlider::valueChanged, [&](int value) {
+		ui->patchSizeSpinBox->setValue(
+			value / static_cast<double>(ui->patchSizeSlider->maximum()));
+	});
+
+	connect(ui->patchSizeSpinBox,
+		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[&](double value) { 
+		ui->patchSizeSlider->setValue(
+			value * (ui->patchSizeSlider->maximum()));
+	});
+
+
 }
 
 NeoWeavePanel::~NeoWeavePanel()
@@ -20,14 +31,10 @@ NeoWeavePanel::~NeoWeavePanel()
 	delete ui;
 }
 
-void NeoWeavePanel::setPatchSize(int value)
-{
-	ui->patchSizeLabel->setText(QString::number(value
-		/ static_cast<Float>(ui->patchSizeSlider->maximum()), 'f', 2));
-}
 
 void NeoWeavePanel::setConfig()
 {
-	config["patchSize"] = ui->patchSizeSlider->value()
+	config["patchScale"] = ui->patchSizeSlider->value()
 		/ static_cast<Float>(ui->patchSizeSlider->maximum());
+	config["patchUniform"] = static_cast<Float>(ui->uniformSizeBtn->isChecked());
 }

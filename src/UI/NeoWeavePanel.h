@@ -21,7 +21,6 @@ signals:
 
 public:
 	void setConfig();
-	void setPatchSize(int);
 
 private:
 	Ui::NeoWeavePanel *ui;
