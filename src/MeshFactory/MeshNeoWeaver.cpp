@@ -49,6 +49,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 						+ fNorms[hef->fid]).normalized();
 		heTans[it] = QVector3D::crossProduct(
 						heNorms[it], heDirs[it]).normalized();
+		heNorms[it] = QVector3D::crossProduct(heDirs[it], heTans[it]).normalized();
 		heCompMap[he->index] = heCompMap[hef->index] = it;
 
 		heDirLens[it] = heDirs[it].length();
@@ -79,9 +80,13 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 			QVector3D::crossProduct(heNorms[compID[0]], heNorms[compID[4]]),
 		};
 
+
 		// Special Cases: normals are parallel to each other
 		auto isZeroVec = [](const QVector3D &vec) {
-			return (vec.x() == vec.y() == vec.z() == 0.f);
+			float threshold = 0.01f;
+			return vec.lengthSquared() < sqr(threshold)/*(vec.x() < threshold && vec.x() > -threshold)
+				&& (vec.y() < threshold && vec.y() > -threshold)
+				&& (vec.z() < threshold && vec.z() > -threshold)*/;
 		};
 		if (isZeroVec(planeVecs[0]))
 		{
@@ -106,10 +111,19 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 			/ QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
 
 		float edgeLen = heDirLens[compID[0]] * patchScale;
+		float vecLen[2]{
+			(planeVecs[0] + planeVecs[1]).length(),
+			(planeVecs[2] + planeVecs[3]).length()
+		};
 		float scale[2]{
 			edgeLen / (planeVecs[0] + planeVecs[1]).length(),
 			edgeLen / (planeVecs[2] + planeVecs[3]).length()
 		};
+		if (vecLen[0] < 0.01f && vecLen[0] > -0.01f)
+		{
+			cout << "Null Vec: " << planeVecs[0] << ", " << planeVecs[1] << endl;
+		}
+		//printf("scale: %f, %f; len: %f, %f\n", scale[0], scale[1], vecLen[0], vecLen[1]);
 		planeVecs[0] *= scale[0];
 		planeVecs[1] *= scale[0];
 		planeVecs[2] *= scale[1];

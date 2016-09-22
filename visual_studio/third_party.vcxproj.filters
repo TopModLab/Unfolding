@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{76b20c8a-11b8-4045-8dfe-18ed506e3aa9}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{e7a87b82-de67-46cc-84f7-41ce138f14de}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SVG_LC">
+      <UniqueIdentifier>{fa71d806-b11c-419c-896c-ce7a42d2a6b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SVG_LC\LocalGeodesics">
+      <UniqueIdentifier>{27dbe5da-d836-4806-b899-dc2b65f1a6d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ColorMapEditor">
+      <UniqueIdentifier>{d1c518a2-ae1e-4bb1-b400-6b2658930646}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ColorMapEditor">
+      <UniqueIdentifier>{9f45833a-33d5-44dc-8aef-a3e06fb34de2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SVG_LC">
+      <UniqueIdentifier>{b56ade54-9baf-417d-8974-17abe86bd2fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SVG_LC\LC">
+      <UniqueIdentifier>{4d65bdaf-052a-494d-9150-027e9e1ce7a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SVG_LC\LocalGeodesics">
+      <UniqueIdentifier>{3a57d404-735a-4e0d-a2e1-21ed5134b598}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GeneratedFiles\Debug\moc_colormapeditor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_colormapeditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_resources.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
+      <Filter>Source Files\SVG_LC\LocalGeodesics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\third_party\colormap_editor\colormapeditor.cpp">
+      <Filter>Source Files\ColorMapEditor</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\targetver.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_precompute\LocalGeodesics\wxnTime.h">
+      <Filter>Header Files\SVG_LC\LocalGeodesics</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ConnectorPanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_criticalpointspanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_cutlocuspanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_GESPanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_QuadEdgePanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_rimfacepanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_unfoldviewer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_WeavePanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_colormapeditor.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_NeoWeavePanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\third_party\SVG_LC_code\SVG_LC\wxn_dijstra.h">
+      <Filter>Header Files\SVG_LC\LC</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\forms\bridgerpanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\ConnectorPanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\criticalpointspanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\cutlocuspanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\GESPanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\mainwindow.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\QuadEdgePanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\rimfacepanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\unfoldviewer.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\WeavePanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\third_party\colormap_editor\colormapeditor.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\NeoWeavePanel.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\third_party\colormap_editor\colormapeditor.h">
+      <Filter>Header Files\ColorMapEditor</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\resources.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <None Include="..\shaders\edge_fs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\edge_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\face_fs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\face_gs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\face_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\uid_fs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\uid_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\edge_gs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\vtx_fs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\shaders\vtx_vs.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\icons\_Unfolding.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

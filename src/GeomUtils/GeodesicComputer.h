@@ -1,10 +1,10 @@
 #pragma once
 
 // for sparse graph computing
-#include "../extras/SVG_LC_code/SVG_precompute/LocalGeodesics/svg_precompute.h"
+#include "SVG_LC_code/SVG_precompute/LocalGeodesics/svg_precompute.h"
 
 // for sparse graph
-#include "../extras/SVG_LC_code/SVG_LC/wxn_dijstra.h"
+#include "SVG_LC_code/SVG_LC/wxn_dijstra.h"
 
 #include "Utils/common.h"
 #include "GeomProc/meshloader.h"

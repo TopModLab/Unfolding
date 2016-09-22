@@ -51,6 +51,12 @@ inline QColor operator+(QColor c1, QColor c2) {
 }
 
 template <typename T>
+__forceinline T sqr(T val)
+{
+	return val * val;
+}
+
+template <typename T>
 T interpolate(Float c, T v1, T v2) {
 	return v1 * (1.0-c) + v2 * c;
 }

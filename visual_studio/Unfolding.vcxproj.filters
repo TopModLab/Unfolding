@@ -58,12 +58,6 @@
     <Filter Include="Header Files\UI">
       <UniqueIdentifier>{39d9dd59-d5e7-4161-bee3-6274cfa501c3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\extras">
-      <UniqueIdentifier>{9face1b9-97c4-4e31-8e29-6b23fb92cd2d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\extras\LocalGeodesics">
-      <UniqueIdentifier>{3a57d404-735a-4e0d-a2e1-21ed5134b598}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\HDS">
       <UniqueIdentifier>{8b0f3f5f-892e-4642-b0ab-0059dca2a737}</UniqueIdentifier>
     </Filter>
@@ -78,9 +72,6 @@
     </Filter>
     <Filter Include="Shader Files">
       <UniqueIdentifier>{0f37bc7b-950b-40ef-aa0b-11eeb7be1c35}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\extra">
-      <UniqueIdentifier>{5bb29481-af61-4b5c-8bfa-2cdc7bf0e675}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Factory">
       <UniqueIdentifier>{7fa6d7a4-b457-4814-ada1-d04cbe6c8dc4}</UniqueIdentifier>
@@ -105,17 +96,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\Debug\moc_colormapeditor.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_colormapeditor.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_resources.cpp">
       <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\colormap_editor\colormapeditor.cpp">
-      <Filter>Source Files\extra</Filter>
     </ClCompile>
     <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files</Filter>
@@ -237,27 +219,6 @@
     <ClCompile Include="..\src\HDS\hds_vertex.cpp">
       <Filter>Source Files\HDS</Filter>
     </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Utils\stringutils.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
@@ -293,12 +254,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_mainwindow.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.cpp">
-      <Filter>Source Files\extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.cpp">
-      <Filter>Source Files\extra</Filter>
     </ClCompile>
     <ClCompile Include="..\src\GeomUtils\BBox.cpp">
       <Filter>Source Files\GeomUtils</Filter>
@@ -353,39 +308,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ExactMethodForDGP.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ICHWithFurtherPriorityQueue.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\ImprovedCHWithEdgeValve.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\Point3D.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\PreviousCH.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\RichModel.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\stdafx.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\svg_precompute.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\targetver.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\wxnTime.h">
-      <Filter>Header Files\extras\LocalGeodesics</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -568,11 +490,8 @@
     <CustomBuild Include="..\forms\WeavePanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\extras\colormap_editor\colormapeditor.ui">
+    <CustomBuild Include="..\third_party\colormap_editor\colormapeditor.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\extras\colormap_editor\colormapeditor.h">
-      <Filter>Header Files\extras</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\UI\bridgerpanel.h">
       <Filter>Header Files\UI</Filter>

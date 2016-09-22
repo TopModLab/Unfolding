@@ -7,7 +7,7 @@
 #include <tchar.h>
 #include "UI/MeshViewer.h"
 using viewer_t = MeshViewer;
-#include "../extras/colormap_editor/colormapeditor.h"
+#include "colormap_editor/colormapeditor.h"
 #include "UI/ConnectorPanel.h"
 #include "UI/criticalpointspanel.h"
 #include "UI/cutlocuspanel.h"
