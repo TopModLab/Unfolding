@@ -152,14 +152,22 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		//construct edge loop
 		constructFace(&hes[paddingIdx], edgeCount, &faces[outputOffset]);
 
+		//for testing bridger
+
 		outputOffset++;
 		//normID[0] = heNorms[compID];
 	}
-	unordered_set<hdsid_t> exposedHEs(hes.size());
-	for (hdsid_t i = 0; i < hes.size() ; i++)
+	
+	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
+	generateBridger(&newMesh->halfedges()[0 + 2], &newMesh->halfedges()[0 + 4], newMesh);
+
+	unordered_set<hdsid_t> exposedHEs;
+	for (auto he: newMesh->halfedges())
 	{
-		exposedHEs.insert(i);
+		if (!he.flip_offset)
+			exposedHEs.insert(he.index);
 	}
-	fillNullFaces(hes, faces, exposedHEs);
-	return new HDS_Mesh(verts, hes, faces);
+	fillNullFaces(newMesh->halfedges(), newMesh->faces(), exposedHEs);
+
+	return newMesh;
 }

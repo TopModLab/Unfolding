@@ -5,8 +5,12 @@ void MeshFactory::init()
 	// TODO
 }
 
-// Link edge between vertices
-// TODO: is it really needed??
+// Functionality:
+//	Link edge with vertex, v->he = he, he->v = v
+///	o --------->
+///	v		he
+// Input:
+//	vertex pointer, half edge pointer
 void MeshFactory::constructHE(vert_t* v, he_t* he)
 {
 	v->heid = he->index;
@@ -45,7 +49,13 @@ void MeshFactory::constructFace(
 	vector<he_t> hes, const vector<int> indices, 
 	face_t* face)
 {
-	
+	int edgeCount = indices.size();
+	for (int i = 0; i < edgeCount; i++) {
+		(hes[indices[i]]).next_offset = (i < edgeCount - 1) ? 1 : 1 - edgeCount;
+		(hes[indices[i]]).prev_offset = (i > 0) ? -1 : edgeCount - 1;
+		(hes[indices[i]]).fid = face->index;
+	}
+	face->heid = indices[0];
 }
 
 // Functionality: 
@@ -138,9 +148,53 @@ void MeshFactory::fillNullFaces(
 	}
 }
 
+// Functionality:
+//	generate a new bridger(all quads) connecting he1 and he2
+//	newly generated faces->he is in same direction as he1.flip
+///				--------> he1
+///				<-------- he1.flip
+///		vpos1[0] *		* vpos2[0]
+///				 Bridger
+///		vpos1[1] *		* vpos2[1]
+///				--------> he2.flip 
+///				<-------- he2
+// Restrictions:
+//	vpos1.size = vpos2.size
+// Input:
+//	half edge pointers,
+//	positions for all the intra-vertices	
+//	buffers for mesh
 void MeshFactory::generateBridger(
-	he_t* he1, he_t *he2,
-	vector<vert_t> &verts, vector<he_t> &hes, vector<face_t> &fs)
+	he_t* he1, he_t *he2, 
+	mesh_t* mesh,
+	vector<QVector3D> &vpos1, vector<QVector3D> &vpos2)
 {
-	// TODO
+	//add edge flip vpos to vectors
+	vpos1.insert(vpos1.begin(), mesh->vertFromHe(he1->index)->pos);
+	vpos2.insert(vpos2.begin(), mesh->vertFromHe(he1->next()->index)->pos);
+	vpos1.push_back(mesh->vertFromHe(he2->next()->index)->pos);
+	vpos2.push_back(mesh->vertFromHe(he2->index)->pos);
+
+	for (int i = 0; i < vpos1.size()-1 ; i++)
+	{
+		vector<QVector3D> vpos({ vpos2[i], vpos1[i] , vpos1[i + 1] , vpos2[i + 1] });
+		int size = vpos.size();
+		//construct HEs
+		for (auto pos: vpos)
+		{
+			he_t e;
+			vert_t v(pos);
+			constructHE(&v, &e);
+			mesh->verts().push_back(v);
+			mesh->halfedges().push_back(e);
+		}
+
+		//construct faces
+		face_t* f = new face_t();
+		constructFace(&(mesh->halfedges().rbegin()[size-1]), size, f);
+		mesh->faces().push_back(*f);
+	}
+	//set flip of he1, he2
+	he1->setFlip(&mesh->halfedges().rbegin()[3+(vpos1.size()-2)*4]);
+	he2->setFlip(&mesh->halfedges().rbegin()[1]);
 }
