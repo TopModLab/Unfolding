@@ -9,7 +9,8 @@ void MeshFactory::init()
 // TODO: is it really needed??
 void MeshFactory::constructHE(vert_t* v, he_t* he)
 {
-	
+	v->heid = he->index;
+	he->vid = v->index;
 
 }
 
@@ -23,9 +24,14 @@ void MeshFactory::constructHE(vert_t* v, he_t* he)
 //	face index of assigned face
 void MeshFactory::constructFace(
 	he_t* unlinkedHE, size_t edgeCount, 
-	const hdsid_t fid)
+	face_t* face)
 {
-	
+	for (int i = 0; i < edgeCount; i++) {
+		(unlinkedHE + i)->next_offset = (i < edgeCount - 1) ? 1 : 1 - edgeCount;
+		(unlinkedHE + i)->prev_offset = (i > 0) ? -1 : edgeCount - 1;
+		(unlinkedHE + i)->fid = face->index;
+	}
+	face->heid = unlinkedHE->index;
 
 }
 
@@ -37,7 +43,7 @@ void MeshFactory::constructFace(
 //	face index of assigned face
 void MeshFactory::constructFace(
 	vector<he_t> hes, const vector<int> indices, 
-	const hdsid_t fid)
+	face_t* face)
 {
 	
 }

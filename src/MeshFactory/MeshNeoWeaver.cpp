@@ -130,7 +130,8 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		//planeVecs[3] *= scale[1];
 
 		// padded index for verts and HEs
-		auto paddingIdx = outputOffset * 4;
+		int edgeCount = 4;
+		auto paddingIdx = outputOffset * edgeCount;
 		// Update vertex position
 
 		// Edge Length
@@ -141,37 +142,16 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		verts[paddingIdx + 1].pos = verts[paddingIdx].pos + planeVecs[0];
 		verts[paddingIdx + 2].pos = verts[paddingIdx + 1].pos + planeVecs[1];
 		verts[paddingIdx + 3].pos = verts[paddingIdx + 2].pos + planeVecs[2];
-		// Update vertex heid
-		verts[paddingIdx    ].heid = paddingIdx;
-		verts[paddingIdx + 1].heid = paddingIdx + 1;
-		verts[paddingIdx + 2].heid = paddingIdx + 2;
-		verts[paddingIdx + 3].heid = paddingIdx + 3;
 		
-
-		// Update edge connections
-		hes[paddingIdx].prev_offset = 3;
-		hes[paddingIdx + 1].prev_offset = hes[paddingIdx + 2].prev_offset
-			= hes[paddingIdx + 3].prev_offset = -1;
-		hes[paddingIdx].next_offset = hes[paddingIdx + 1].next_offset
-			= hes[paddingIdx + 2].next_offset = 1;
-		hes[paddingIdx + 3].next_offset = -3;
-
-		// Update fid of edges
-		hes[paddingIdx].fid
-			= hes[paddingIdx + 1].fid
-			= hes[paddingIdx + 2].fid
-			= hes[paddingIdx + 3].fid
-			= outputOffset;
-
-		// Update vertex heid
-		verts[paddingIdx    ].heid = hes[paddingIdx    ].vid = paddingIdx;
-		verts[paddingIdx + 1].heid = hes[paddingIdx + 1].vid = paddingIdx + 1;
-		verts[paddingIdx + 2].heid = hes[paddingIdx + 2].vid = paddingIdx + 2;
-		verts[paddingIdx + 3].heid = hes[paddingIdx + 3].vid = paddingIdx + 3;
-
-		// Update edge id of each face
-		faces[outputOffset].heid = paddingIdx;
+		// Construct edges
+		for (int i = 0; i < edgeCount ; i++)
+		{
+			constructHE(&verts[paddingIdx + i], &hes[paddingIdx + i]);
+		}
 		
+		//construct edge loop
+		constructFace(&hes[paddingIdx], edgeCount, &faces[outputOffset]);
+
 		outputOffset++;
 		//normID[0] = heNorms[compID];
 	}

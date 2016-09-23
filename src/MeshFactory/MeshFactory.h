@@ -16,8 +16,12 @@ public:
 
 	static void init();
 	static void constructHE(vert_t* v, he_t* he);
-	static void constructFace(he_t* unlinkedHE, size_t edgeCount, const hdsid_t fid);
-	static void constructFace(vector<he_t> hes, const vector<int> indices, const hdsid_t fid);
+	static void constructFace(
+		he_t* unlinkedHE, size_t edgeCount,
+		face_t* fid);
+	static void constructFace(
+		vector<he_t> hes, const vector<int> indices, 
+		face_t* fid);
 	static void fillNullFaces(
 		vector<he_t> &hes, vector<face_t> &faces,
 		unordered_set<hdsid_t> &nullHEs);
