@@ -45,6 +45,8 @@ bin/
 visual_studio/tmp/
 visual_studio/GeneratedFiles/
 visual_studio/.vs/
+libs/
+visual_studio/x64/
 
 # Backup files
 *.bak
