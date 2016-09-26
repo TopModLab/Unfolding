@@ -12,8 +12,8 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	if (!ref_mesh) return nullptr;
 
 	// scaling should be passed in as configuration
-	const float patchScale =  static_cast<float>(conf.at("patchScale"));
-	const bool patchUniform = static_cast<float>(conf.at("patchUniform")) == 1.0f;
+	const float patchScale =  conf.at("patchScale");
+	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();
 	auto &ref_faces = ref_mesh->faces();
@@ -27,7 +27,11 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	vector<float> heDirLens(refEdgeCount);
 	vector<QVector3D> heNorms(refEdgeCount);
 	vector<QVector3D> heTans(refEdgeCount);
+	// key: original edge id, value: edge id in new mesh
 	unordered_map<hdsid_t, hdsid_t> heCompMap;
+
+	// Number of edges in each new patch
+	int edgeCount = 4;
 
 	for (int i = 0; i < refFaceCount; i++)
 	{
@@ -109,7 +113,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		planeVecs[3] *= -QVector3D::dotProduct(planeVecs[2], heTans[compID[0]])
 			/ QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
 
-		float edgeLen = patchUniform? patchScale : heDirLens[compID[0]] * patchScale;
+		float edgeLen = patchUniform ? patchScale : heDirLens[compID[0]] * patchScale;
 
 		float vecLen[2]{
 			(planeVecs[0] + planeVecs[1]).length(),
@@ -130,13 +134,12 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		//planeVecs[3] *= scale[1];
 
 		// padded index for verts and HEs
-		int edgeCount = 4;
 		auto paddingIdx = outputOffset * edgeCount;
 		// Update vertex position
 
 		// Edge Length
-		verts[paddingIdx].pos = patchUniform? 
-			heMid[compID[0]] + heDirs[compID[0]] * patchScale * 0.5f 
+		verts[paddingIdx].pos = patchUniform ?
+			heMid[compID[0]] + heDirs[compID[0]] * patchScale * 0.5f
 			: heMid[compID[0]] + heDirs[compID[0]] * edgeLen * 0.5f;
 
 		verts[paddingIdx + 1].pos = verts[paddingIdx].pos + planeVecs[0];
@@ -159,10 +162,24 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	}
 	
 	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
-	generateBridger(&newMesh->halfedges()[0 + 2], &newMesh->halfedges()[0 + 4], newMesh);
+	vector<QVector3D> bridge_pos1, bridge_pos2;
+	//generateBridger(&newMesh->halfedges()[0 + 2], &newMesh->halfedges()[0 + 4], newMesh);
+	for (int i = 0; i < refHeCount; i++)
+	{
+		auto he = &ref_hes[i];
+		auto he_next = he->next();
+
+		hdsid_t he1id, he2id;
+		he1id = he->flip_offset > 0
+			? heCompMap.at(he->index) * edgeCount
+			: heCompMap.at(he->flip()->index) * edgeCount + 2;
+		he2id = he_next->flip_offset > 0
+			? heCompMap.at(he_next->index) * edgeCount
+			: heCompMap.at(he_next->flip()->index) * edgeCount + 2;
+	}
 
 	unordered_set<hdsid_t> exposedHEs;
-	for (auto he: newMesh->halfedges())
+	for (auto &he: newMesh->halfedges())
 	{
 		if (!he.flip_offset)
 			exposedHEs.insert(he.index);
