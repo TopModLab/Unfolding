@@ -25,10 +25,11 @@ public:
 	static void fillNullFaces(
 		vector<he_t> &hes, vector<face_t> &faces,
 		unordered_set<hdsid_t> &nullHEs);
-	static void generateBridger(
-		he_t* he1, he_t *he2, 
-		mesh_t* mesh,
+	static void generateBridge(
+		hdsid_t he1, hdsid_t he2, 
+		vector<he_t> &hes, vector<vert_t> &verts, vector<face_t> &fs,
 		vector<QVector3D> &vpos1 = vector<QVector3D>(),
-		vector<QVector3D> &vpos2 = vector<QVector3D>());
+		vector<QVector3D> &vpos2 = vector<QVector3D>()
+		);
 };
 

@@ -6,15 +6,16 @@ void MeshFactory::init()
 }
 
 // Functionality:
-//	Link edge with vertex, v->he = he, he->v = v
+//	Link edge with vertex, 
+//	v->he = he, he->v = v when the he and v pointers are not assigned
 ///	o --------->
 ///	v		he
 // Input:
 //	vertex pointer, half edge pointer
 void MeshFactory::constructHE(vert_t* v, he_t* he)
 {
-	v->heid = he->index;
-	he->vid = v->index;
+	if (v->heid == sInvalidHDS) v->heid = he->index;
+	if (he->vid == sInvalidHDS) he->vid = v->index;
 
 }
 
@@ -164,37 +165,67 @@ void MeshFactory::fillNullFaces(
 //	half edge pointers,
 //	positions for all the intra-vertices	
 //	buffers for mesh
-void MeshFactory::generateBridger(
-	he_t* he1, he_t *he2, 
-	mesh_t* mesh,
+void MeshFactory::generateBridge(
+	hdsid_t he1, hdsid_t he2, 
+	vector<he_t> &hes, vector<vert_t> &verts, vector<face_t> &fs,
 	vector<QVector3D> &vpos1, vector<QVector3D> &vpos2)
 {
-	//add edge flip vpos to vectors
-	vpos1.insert(vpos1.begin(), mesh->vertFromHe(he1->index)->pos);
-	vpos2.insert(vpos2.begin(), mesh->vertFromHe(he1->next()->index)->pos);
-	vpos1.push_back(mesh->vertFromHe(he2->next()->index)->pos);
-	vpos2.push_back(mesh->vertFromHe(he2->index)->pos);
+	//resize vectors
+	size_t size = vpos1.size();
+	size_t vOriSize = verts.size();
+	size_t heOriSize = hes.size();
+	size_t fOriSize = fs.size();
+	verts.resize(vOriSize + 2 * size);
+	hes.resize(heOriSize + (size + 1) * 4);
+	fs.resize(fOriSize + size + 1);
 
-	for (int i = 0; i < vpos1.size()-1 ; i++)
+	//assign new v's pos
+	for (int i = 0; i < size ; i++)
 	{
-		vector<QVector3D> vpos({ vpos2[i], vpos1[i] , vpos1[i + 1] , vpos2[i + 1] });
-		int size = vpos.size();
-		//construct HEs
-		for (auto pos: vpos)
-		{
-			he_t e;
-			vert_t v(pos);
-			constructHE(&v, &e);
-			mesh->verts().push_back(v);
-			mesh->halfedges().push_back(e);
-		}
-
-		//construct faces
-		face_t* f = new face_t();
-		constructFace(&(mesh->halfedges().rbegin()[size-1]), size, f);
-		mesh->faces().push_back(*f);
+		verts[vOriSize + 2 * i].pos = vpos1[i];
+		verts[vOriSize + 2 * i + 1].pos = vpos2[i];
 	}
-	//set flip of he1, he2
-	he1->setFlip(&mesh->halfedges().rbegin()[3+(vpos1.size()-2)*4]);
-	he2->setFlip(&mesh->halfedges().rbegin()[1]);
+
+	//link v and he
+	hdsid_t vid11 = hes[he1].vertID();
+	hdsid_t vid12 = hes[he1].next()->vertID();
+	hdsid_t vid21 = hes[he2].next()->vertID();
+	hdsid_t vid22 = hes[he2].vertID();
+
+	//link edge loop
+	for (int face = 0; face < size + 1; face++)
+	{
+		for (int heOffset = 0; heOffset < 4 ; heOffset++)
+		{
+			hdsid_t vid = 0;
+			if (heOffset == 0) {
+				if (face == 0) vid = vid12;
+				else vid = vOriSize + 2 * face + 1;
+			}
+			else if (heOffset == 1) {
+				if (face == 0) vid = vid11;
+				else vid = vOriSize + 2 * face;
+			}
+			else if (heOffset == 2) {
+				if (face == size) vid = vid21;
+				else vid = vOriSize + 2 * face;
+			}
+			else {
+				if (face == size) vid = vid22;
+				else vid = vOriSize + 2 * face + 1;
+			}
+
+			constructHE(&verts[vid], &hes[heOriSize + 4 * face + heOffset]);
+		}
+		constructFace(&hes[heOriSize + 4 * face], 4, &fs[fOriSize + face]);
+	}
+
+	//set flip
+	hes[he1].setFlip(&hes[heOriSize]);
+	hes[he2].setFlip(&hes[hes.size() - 2]);
+	for (int i = 0; i < size ; i++)
+	{
+		hes[verts[vOriSize + 2 * i].heID()].setFlip(
+			&hes[verts[vOriSize + 2 * i + 1].heID()]);
+	}
 }
