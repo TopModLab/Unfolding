@@ -7,15 +7,15 @@ void MeshFactory::init()
 
 // Functionality:
 //	Link edge with vertex, 
-//	v->he = he, he->v = v when the he and v pointers are not assigned
+//	v->he = he, he->v = v
 ///	o --------->
 ///	v		he
 // Input:
 //	vertex pointer, half edge pointer
 void MeshFactory::constructHE(vert_t* v, he_t* he)
 {
-	if (v->heid == sInvalidHDS) v->heid = he->index;
-	if (he->vid == sInvalidHDS) he->vid = v->index;
+	if(v->heid == sInvalidHDS) v->heid = he->index;
+	he->vid = v->index;
 
 }
 
@@ -170,6 +170,7 @@ void MeshFactory::generateBridge(
 	vector<he_t> &hes, vector<vert_t> &verts, vector<face_t> &fs,
 	vector<QVector3D> &vpos1, vector<QVector3D> &vpos2)
 {
+
 	//resize vectors
 	size_t size = vpos1.size();
 	size_t vOriSize = verts.size();

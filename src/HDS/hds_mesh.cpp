@@ -898,19 +898,19 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 	return n;
 }
 
-void HDS_Mesh::addHalfEdge(he_t he)
+void HDS_Mesh::addHalfEdge(he_t &he)
 {
 	heSet.push_back(he);
 	//heMap.insert(make_pair(he->index, he));
 }
 
-void HDS_Mesh::addVertex(vert_t vert)
+void HDS_Mesh::addVertex(vert_t &vert)
 {
 	vertSet.push_back(vert);
 	//vertMap.insert(make_pair(vert->index, vert));
 }
 
-void HDS_Mesh::addFace(face_t face)
+void HDS_Mesh::addFace(face_t &face)
 {
 	faceSet.push_back(face);
 	//faceMap.insert(make_pair(face->index, face));

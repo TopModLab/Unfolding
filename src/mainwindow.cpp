@@ -357,6 +357,8 @@ void MainWindow::createActions()
 
 		connect(ui->halfEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_performMeshCut);
 
+		connect(ui->origamiBtn, &QToolButton::clicked, this, &MainWindow::slot_origamiMesh);
+
 		// unfold action button signal is connected in mainwindow.ui file
 		connect(ui->actionUnfold, &QAction::triggered, this, &MainWindow::slot_unfoldMesh);
 
@@ -660,6 +662,13 @@ void MainWindow::slot_triggerDForms()
 
 }
 
+void MainWindow::slot_triggerOrigamiMesh()
+{
+	MeshManager::getInstance()->getMeshStack()->reset();
+
+	
+}
+
 void MainWindow::slot_quadEdge()
 {
 	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::QuadEdge);
@@ -738,6 +747,21 @@ void MainWindow::slot_neoWeaveMesh()
 	}
 }
 
+void MainWindow::slot_origamiMesh()
+{
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Woven);
+	confMap conf;
+	if (MeshManager::getInstance()->setOrigamiMesh(conf))
+	{
+		statusBar()->showMessage("Succeeded to generate Origami Mesh!", 5000);
+		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+
+	}
+	else
+	{
+		statusBar()->showMessage("Failed to generate Woven Mesh...", 5000);
+	}
+}
 
 void MainWindow::slot_setBridger()
 {

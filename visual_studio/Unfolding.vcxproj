@@ -341,6 +341,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp" />
     <ClCompile Include="..\src\MeshFactory\meshhollower.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshNeoWeaver.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshOrigami.cpp" />
     <ClCompile Include="..\src\MeshFactory\meshrimface.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshWeaver.cpp" />
     <ClCompile Include="..\src\UI\bridgerpanel.cpp" />
@@ -501,6 +502,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClInclude Include="..\src\MeshFactory\MeshFactory.h" />
     <ClInclude Include="..\src\MeshFactory\meshhollower.h" />
     <ClInclude Include="..\src\MeshFactory\MeshNeoWeaver.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshOrigami.h" />
     <ClInclude Include="..\src\MeshFactory\meshrimface.h" />
     <ClInclude Include="..\src\MeshFactory\MeshWeaver.h" />
     <CustomBuild Include="..\src\UI\bridgerpanel.h">

@@ -25,7 +25,8 @@ public:
 		GRS_PROC,
 		GES_PROC,
 		FBWALK_PROC,
-		WOVEN_PROC
+		WOVEN_PROC,
+		ORIGAMI_PROC
 	};
 	enum SHOW_COMP : uint16_t
 	{
@@ -122,9 +123,9 @@ public:
 	const face_t* faceFromHe(hdsid_t heid) const { return &faceSet[heSet[heid].fid]; }
 
 
-	void addHalfEdge(he_t);
-	void addVertex(vert_t);
-	void addFace(face_t);
+	void addHalfEdge(he_t &he);
+	void addVertex(vert_t &v);
+	void addFace(face_t &f);
 	//void deleteFace(face_t);
 	//void deleteHalfEdge(he_t);
 

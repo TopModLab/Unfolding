@@ -85,6 +85,7 @@ private:
 	void slot_triggerWeaveMesh();
 	void slot_triggerNeoWeaveMesh();
 	void slot_triggerDForms();
+	void slot_triggerOrigamiMesh();
 
 	void slot_setBridger();
 	void slot_GRS();
@@ -93,6 +94,7 @@ private:
 	void slot_rimmed3DMesh();
 	void slot_weaveMesh();
 	void slot_neoWeaveMesh();
+	void slot_origamiMesh();
 
 	void slot_updateMeshColorByGeoDistance(int vidx);
 	void slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio);

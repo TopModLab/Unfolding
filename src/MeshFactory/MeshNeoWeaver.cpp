@@ -11,7 +11,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 {
 	if (!ref_mesh) return nullptr;
 
-	// scaling should be passed in as configuration
+	// scaling 
 	const float patchScale =  conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
 	auto &ref_verts = ref_mesh->verts();
@@ -21,6 +21,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	size_t refEdgeCount = refHeCount >> 1;
 	size_t refFaceCount = ref_faces.size();
 
+	mesh_t::resetIndex();
 	vector<QVector3D> fNorms(refFaceCount);
 	vector<QVector3D> heMid(refEdgeCount);
 	vector<QVector3D> heDirs(refEdgeCount);
