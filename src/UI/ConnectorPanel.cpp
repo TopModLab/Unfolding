@@ -13,6 +13,15 @@ ConnectorPanel::ConnectorPanel(int procType)
 	connect(ui->file_button, &QAbstractButton::clicked, this, &ConnectorPanel::setFileName);
 	connect(ui->save_button, &QDialogButtonBox::clicked, this, &QDialog::close);
 	connect(ui->save_button, &QDialogButtonBox::clicked, this, &ConnectorPanel::save);
+
+	connect(ui->etchseg_val,
+		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		[&](int value) {
+		bool res = value == 0;
+		ui->etchsegwid_label->setDisabled(res);
+		ui->etchsegwid_val->setDisabled(res);
+		ui->etchsegwid_unit->setDisabled(res);
+	});
 }
 
 QString ConnectorPanel::getFilename() const
@@ -106,6 +115,8 @@ void ConnectorPanel::save()
 
 	// Etch Utilities
 	conf["etchSeg"] = (double)ui->etchseg_val->value();
+	conf["etchSegWidth"] = ui->etchsegwid_val->value();
+
 	conf["scoreType"] = (double)ui->score_type->currentIndex();
 	conf["dashLen"] = ui->scoredash_len->value();
 	conf["dashGap"] = ui->scoredash_gap->value();
