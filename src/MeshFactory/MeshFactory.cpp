@@ -201,11 +201,11 @@ void MeshFactory::generateBridge(
 			hdsid_t vid = 0;
 			if (heOffset == 0) {
 				if (face == 0) vid = vid12;
-				else vid = vOriSize + 2 * face + 1;
+				else vid = vOriSize + 2 * (face-1) + 1;
 			}
 			else if (heOffset == 1) {
 				if (face == 0) vid = vid11;
-				else vid = vOriSize + 2 * face;
+				else vid = vOriSize + 2 * (face-1);
 			}
 			else if (heOffset == 2) {
 				if (face == size) vid = vid21;
@@ -226,7 +226,7 @@ void MeshFactory::generateBridge(
 	hes[he2].setFlip(&hes[hes.size() - 2]);
 	for (int i = 0; i < size ; i++)
 	{
-		hes[verts[vOriSize + 2 * i].heID()].setFlip(
-			&hes[verts[vOriSize + 2 * i + 1].heID()]);
+		hes[heOriSize + 4 * ( i + 1 ) - 2].setFlip(
+			&hes[heOriSize + 4 * (i + 1)]);
 	}
 }
