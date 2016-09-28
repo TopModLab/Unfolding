@@ -48,8 +48,16 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	, showVert(other.showVert), showNormals(other.showNormals)
 #endif
 {
-	if (other.bound.get())
-		bound.reset(new BBox3(*other.bound));
+	if (other.bound.get()) bound.reset(new BBox3(*other.bound));
+
+	if (!pieceSet.empty())
+	{
+		pieceSet.resize(other.pieceSet.size());
+		for (size_t i = 0; i < pieceSet.size(); i++)
+		{
+			pieceSet[i] = other.pieceSet[i];
+		}
+	}
 }
 
 HDS_Mesh::~HDS_Mesh()
@@ -94,24 +102,22 @@ void HDS_Mesh::updatePieceSet()
 	vector<bool> visitedFaces(faceSet.size(), false);
 
 	// Find all faces
-	for (size_t i = 0; i < faceSet.size(); i++)
+	for (size_t fid = 0; fid < faceSet.size(); fid++)
 	//for (auto f : faceSet)
 	{
-		auto &f = faceSet[i];
+		//auto &f = faceSet[i];
 		// If f has not been visited yet
 		// Add to selected faces
-		if (!visitedFaces[f.index])
+		if (!visitedFaces[fid])
 		//if (visitedFaces.find(f.index) == visitedFaces.end())
 		{
-			visitedFaces[f.index] = true;
+			visitedFaces[fid] = true;
 			// Find all linked faces except cut face
-			set<HDS_Face*> linkedFaces = f.linkedFaces();
+			auto curPiece = linkedFaces(fid);
 
-			set<hdsid_t> curPiece;
-			for (auto cf : linkedFaces)
+			for (auto cf : curPiece)
 			{
-				curPiece.insert(cf->index);
-				visitedFaces[cf->index] = true;
+				visitedFaces[cf] = true;
 			}
 			pieceSet.push_back(curPiece);
 		}
@@ -898,22 +904,68 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 	return n;
 }
 
+// Find all connected faces from input face
+// Input face must NOT be CutFace
+// BFS Tree
+vector<hdsid_t> HDS_Mesh::linkedFaces(hdsid_t inFaceId) const
+{
+	// Return face indices
+	vector<hdsid_t> retFaceSet;
+	// Hash table to record visited faces
+	vector<bool> visitedFaces(faceSet.size(), false);
+
+	queue<hdsid_t> ProcQueue;
+	ProcQueue.push(inFaceId);
+	// Input face should be marked as visited
+	visitedFaces[inFaceId] = true;
+	while (!ProcQueue.empty())
+	{
+		auto cur_fid = ProcQueue.front();
+		ProcQueue.pop();
+
+		// If CutFace is not the last face,
+		// move it to the end of the queue
+		// TODO: Potential issue: current piece can have multiple CutFace
+		if (faceSet[cur_fid].isCutFace && !ProcQueue.empty())
+		{
+			ProcQueue.push(cur_fid);
+			continue;
+		}
+		// Otherwise, add to result
+		else
+		{
+			retFaceSet.push_back(cur_fid);
+		}
+
+		// Loop face and record all unvisited face into queue
+		auto fhe = heFromFace(cur_fid);
+		auto curHE = fhe;
+		do {
+			auto adj_fid = curHE->flip()->fid;
+			curHE = curHE->next();
+			if (!visitedFaces[adj_fid])
+			{
+				visitedFaces[adj_fid] = true;
+				ProcQueue.push(adj_fid);
+			}
+		} while (curHE != fhe);
+	}
+	return retFaceSet;
+}
+
 void HDS_Mesh::addHalfEdge(he_t he)
 {
 	heSet.push_back(he);
-	//heMap.insert(make_pair(he->index, he));
 }
 
 void HDS_Mesh::addVertex(vert_t vert)
 {
 	vertSet.push_back(vert);
-	//vertMap.insert(make_pair(vert->index, vert));
 }
 
 void HDS_Mesh::addFace(face_t face)
 {
 	faceSet.push_back(face);
-	//faceMap.insert(make_pair(face->index, face));
 }
 
 /*
@@ -1075,19 +1127,16 @@ void HDS_Mesh::flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m) {
 void HDS_Mesh::selectFace(hdsid_t idx)
 {
 	faceSet[idx].setPicked(!faceSet[idx].isPicked);
-//	flipSelectionState(idx, faceSet);
 }
 
 void HDS_Mesh::selectEdge(hdsid_t idx)
 {
 	heSet[idx].setPicked(!heSet[idx].isPicked);
-//	flipSelectionState(idx, heMap);
 }
 
 void HDS_Mesh::selectVertex(hdsid_t idx)
 {
 	vertSet[idx].setPicked(!vertSet[idx].isPicked);
-//	flipSelectionState(idx, vertMap);
 }
 
 vector<HDS_Vertex*> HDS_Mesh::getSelectedVertices()

@@ -1,7 +1,7 @@
 #pragma once
 #include "Utils/common.h"
-#include <QString>
 #include "Utils/mathutils.h"
+#include <QString>
 #include <QVector3D>
 
 using hdsid_t = int32_t;
@@ -53,3 +53,4 @@ inline QString HDS_Common::ref_ID2String(hdsid_t refid)
 class HDS_Vertex;
 class HDS_HalfEdge;
 class HDS_Face;
+class HDS_Mesh;

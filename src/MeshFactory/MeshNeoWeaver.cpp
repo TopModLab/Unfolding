@@ -186,5 +186,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	}
 	fillNullFaces(newMesh->halfedges(), newMesh->faces(), exposedHEs);
 
+	newMesh->updatePieceSet();
+
 	return newMesh;
 }

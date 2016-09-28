@@ -232,11 +232,6 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		/************************************************************************/
 		/* Assembling Offset                                                    */
 		/************************************************************************/
-/*
-		if (unfolded_mesh->processType == HDS_Mesh::FBWALK_PROC)
-		{
-			piece_offset *= 1.5;
-		}*/
 		curBound.pMin += piece_offset;
 		curBound.pMax += piece_offset;
 		for (auto vert : verts)
@@ -252,7 +247,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 
 bool MeshUnfolder::unfold(
 	HDS_Mesh* unfolded_mesh, const HDS_Mesh *ref_mesh,
-	set<int> fixedFaces)
+	set<hdsid_t> fixedFaces)
 {
 	//progress dialog
 	QProgressDialog unfoldingProgress("Unfolding...", "", 0, 100);
@@ -276,8 +271,10 @@ bool MeshUnfolder::unfold(
 	auto &refHeSet   = ref_mesh->heSet;
 	auto &refFaceSet = ref_mesh->faceSet;
 
-	// ref_mesh->updatePieceSet();
+#ifdef _DEBUG
 	cout << "Unfold Piece Count:\t" << ref_mesh->pieceSet.size() << endl;
+#endif
+
 	// If no face is selected, find one face in each piece and push into fixedFaces
 	if( fixedFaces.empty() )
 	{
@@ -285,33 +282,36 @@ bool MeshUnfolder::unfold(
 		cout << "No face is selected, finding fixed faces..." << endl;
 #endif
 		// find all fixed faces
-		unordered_set<int> visitedFaces;
+		vector<bool> visitedFaces(refFaceSet.size(), false);
 
 		int progressIndex = 0;
 		// Find all faces
 		for(auto f : ref_mesh->faceSet)
 		{
+			hdsid_t fid = f.index;
 			if (f.isCutFace)
 			{
+				visitedFaces[fid] = true;
 				continue;
 			}
 
 			// If f has not been visited yet
 			// Add to selected faces
-			if( visitedFaces.find(f.index) == visitedFaces.end() )
+			if(!visitedFaces[fid])
 			{
-				visitedFaces.insert(f.index);
-				fixedFaces.insert(f.index);
+				visitedFaces[fid] = true;
+				fixedFaces.insert(fid);
 				// Find all linked faces except cut face
-				set<HDS_Face*> connectedFaces = Utils::filter_set(f.linkedFaces(), [](HDS_Face* f){
-						return !(f->isCutFace);
+				auto connectedFaces = Utils::filter(ref_mesh->linkedFaces(fid),
+					[&](hdsid_t face_index) {
+						return !(faceSet[face_index].isCutFace);
 				});
 				// record the pieces
 				//pieces.insert(&connectedFaces);
 
-				for(auto cf : connectedFaces)
+				for(auto cfid : connectedFaces)
 				{
-					visitedFaces.insert(cf->index);
+					visitedFaces[cfid] = true;
 				}
 			}
 			unfoldingProgress.setValue((double)progressIndex/(double)ref_mesh->faceSet.size()*10);
@@ -355,10 +355,8 @@ bool MeshUnfolder::unfold(
 			// Get all neighbor faces
 			vector<HDS_Face*> neighborFaces = unfolded_mesh->incidentFaces(cur);
 			// Get all non-cut neighbor faces
-			vector<HDS_Face*> nonCutNeighborFaces = Utils::filter(neighborFaces, [](HDS_Face* f) {
-					return !(f->isCutFace);
-			});
-
+			vector<HDS_Face*> nonCutNeighborFaces = Utils::filter(neighborFaces,
+				[](HDS_Face* f) { return !(f->isCutFace); });
 
 			for( auto f : nonCutNeighborFaces )
 			{

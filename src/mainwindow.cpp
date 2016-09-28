@@ -34,8 +34,11 @@ MainWindow::~MainWindow()
 void MainWindow::initialization()
 {
 	isExtended = false;
-	
+#ifdef _DEBUG
+	initMesh("meshes/cube.obj");
+#else
 	initMesh(":meshes/cube.obj");
+#endif // _DEBUG
 }
 
 void MainWindow::initMesh(const string& filename)
@@ -557,7 +560,7 @@ void MainWindow::slot_performMeshCut() {
 
 void MainWindow::slot_unfoldMesh() {
 
-	if (MeshManager::getInstance()->getMeshStack()->canUnfold)
+	//if (MeshManager::getInstance()->getMeshStack()->canUnfold)
 	{
 		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Unfolded);
 		MeshManager::getInstance()->unfoldMesh();

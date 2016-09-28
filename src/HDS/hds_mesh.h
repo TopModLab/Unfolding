@@ -46,10 +46,10 @@ public:
 	HDS_Mesh(vector<vert_t> &verts,
 			 vector<he_t>   &hes,
 			 vector<face_t> &faces);
-	HDS_Mesh(const HDS_Mesh& other);
+	HDS_Mesh(const HDS_Mesh &other);
 	~HDS_Mesh();
 
-	HDS_Mesh operator=(const HDS_Mesh& rhs) = delete;
+	//HDS_Mesh operator=(const HDS_Mesh &rhs) = delete;
 	//void updateSortedFaces();
 	//void clearSortedFaces();
 
@@ -121,6 +121,7 @@ public:
 	const vert_t* vertFromHe(hdsid_t heid) const { return &vertSet[heSet[heid].vid]; }
 	const face_t* faceFromHe(hdsid_t heid) const { return &faceSet[heSet[heid].fid]; }
 
+	vector<hdsid_t> linkedFaces(hdsid_t fid) const;
 
 	void addHalfEdge(he_t);
 	void addVertex(vert_t);
@@ -175,7 +176,7 @@ private:
 	vector<face_t> faceSet;
 
 	// pieces information
-	vector<set<hdsid_t>> pieceSet;
+	vector<vector<hdsid_t>> pieceSet;
 	unique_ptr<BBox3> bound;
 private:
 	uint16_t processType;
