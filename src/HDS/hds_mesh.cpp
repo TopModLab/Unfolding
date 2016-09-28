@@ -953,17 +953,17 @@ vector<hdsid_t> HDS_Mesh::linkedFaces(hdsid_t inFaceId) const
 	return retFaceSet;
 }
 
-void HDS_Mesh::addHalfEdge(he_t he)
+void HDS_Mesh::addHalfEdge(he_t &he)
 {
 	heSet.push_back(he);
 }
 
-void HDS_Mesh::addVertex(vert_t vert)
+void HDS_Mesh::addVertex(vert_t &vert)
 {
 	vertSet.push_back(vert);
 }
 
-void HDS_Mesh::addFace(face_t face)
+void HDS_Mesh::addFace(face_t &face)
 {
 	faceSet.push_back(face);
 }

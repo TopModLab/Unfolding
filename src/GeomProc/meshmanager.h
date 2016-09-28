@@ -93,6 +93,8 @@ public:
 	bool set3DRimMesh(const confMap &conf);
 	bool setWeaveMesh(const confMap &conf);
 	bool setNeoWeaveMesh(const confMap &conf);
+	bool setOrigamiMesh(const confMap &conf);
+
 	bool createDFormMesh();
 	// Export as SVG files
 	bool exportSVGFile(const QString &filename, const confMap &conf);

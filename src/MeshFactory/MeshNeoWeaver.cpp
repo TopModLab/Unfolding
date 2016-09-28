@@ -11,7 +11,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 {
 	if (!ref_mesh) return nullptr;
 
-	// scaling should be passed in as configuration
+	// scaling 
 	const float patchScale =  conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
 	auto &ref_verts = ref_mesh->verts();
@@ -21,6 +21,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	size_t refEdgeCount = refHeCount >> 1;
 	size_t refFaceCount = ref_faces.size();
 
+	mesh_t::resetIndex();
 	vector<QVector3D> fNorms(refFaceCount);
 	vector<QVector3D> heMid(refEdgeCount);
 	vector<QVector3D> heDirs(refEdgeCount);
@@ -161,10 +162,10 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		//normID[0] = heNorms[compID];
 	}
 	
+	//for testing
+	generateBridge(3, 6, hes, verts, faces);
 	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
-	vector<QVector3D> bridge_pos1, bridge_pos2;
-	//generateBridger(&newMesh->halfedges()[0 + 2], &newMesh->halfedges()[0 + 4], newMesh);
-	for (int i = 0; i < refHeCount; i++)
+	/*for (int i = 0; i < refHeCount; i++)
 	{
 		auto he = &ref_hes[i];
 		auto he_next = he->next();
@@ -176,7 +177,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		he2id = he_next->flip_offset > 0
 			? heCompMap.at(he_next->index) * edgeCount
 			: heCompMap.at(he_next->flip()->index) * edgeCount + 2;
-	}
+	}*/
 
 	unordered_set<hdsid_t> exposedHEs;
 	for (auto &he: newMesh->halfedges())

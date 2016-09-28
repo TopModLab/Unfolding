@@ -12,7 +12,7 @@
 // New MeshFactory
 #include "MeshFactory/MeshFactory.h"
 #include "MeshFactory/MeshNeoWeaver.h"
-
+#include "MeshFactory/MeshOrigami.h"
 
 #include "Utils/utils.h"
 
@@ -726,13 +726,27 @@ bool MeshManager::setWeaveMesh(const confMap &conf)
 bool MeshManager::setNeoWeaveMesh(const confMap &conf)
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
-	mesh_t::resetIndex();
 	HDS_Mesh* outMesh = MeshNeoWeaver::create(inMesh, conf);
 	if (!outMesh)
 	{
 		return false;
 	}
 	outMesh->processType = HDS_Mesh::WOVEN_PROC;
+
+	operationStack->push(outMesh);
+
+	return true;
+}
+
+bool MeshManager::setOrigamiMesh(const confMap &conf)
+{
+	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
+	HDS_Mesh* outMesh = MeshOrigami::create(inMesh, conf);
+	if (!outMesh)
+	{
+		return false;
+	}
+	outMesh->processType = HDS_Mesh::ORIGAMI_PROC;
 
 	operationStack->push(outMesh);
 

@@ -306,6 +306,9 @@
     <ClCompile Include="..\src\UI\NeoWeavePanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\MeshOrigami.cpp">
+      <Filter>Source Files\Factory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_bridgerpanel.h">
@@ -457,6 +460,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NeoWeavePanel.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshFactory\MeshOrigami.h">
+      <Filter>Header Files\Factory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
