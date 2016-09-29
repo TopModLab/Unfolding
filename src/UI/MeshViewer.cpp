@@ -1,6 +1,7 @@
 #include "UI/MeshViewer.h"
 #include <QFileDialog>
 #include "GeomProc/meshunfolder.h"
+#include "UI/SelectByRefIdPanel.h"
 //MeshViewer* MeshViewer::instance = nullptr;
 
 
@@ -813,4 +814,30 @@ void MeshViewer::selectInverse()
 		break;
 	}
 	update();
+}
+
+void MeshViewer::selectByRefID()
+{
+	SelectByRefIdPanel optDialog;
+	if (optDialog.exec())
+	{
+		hdsid_t refid = (optDialog.id() << 2) + optDialog.type();
+
+		for_each(heMesh->vertSet.begin(), heMesh->vertSet.end(),
+			[&](HDS_Vertex* v) { v->setPicked(v->refid == refid); });
+		heMesh->exportVertVBO(nullptr, &vRBO.flags);
+		vRBO.allocateTBO(1);
+
+		for_each(heMesh->heSet.begin(), heMesh->heSet.end(),
+			[&](HDS_HalfEdge* he) { he->setPicked(he->refid == refid); });
+		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
+		heRBO.allocateTBO();
+
+		for_each(heMesh->faceSet.begin(), heMesh->faceSet.end(),
+			[&](HDS_Face* f) { f->setPicked(f->refid == refid); });
+		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
+		fRBO.allocateTBO();
+
+		update();
+	}
 }

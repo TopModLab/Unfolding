@@ -52,7 +52,7 @@ private slots:
 	void triggerExportSVG();
 	void exportSVG();
 
-	void slot_selectMultiple();
+	void selectMultiple();
 
 	void slot_toggleEdges();
 	void slot_toggleFaces();

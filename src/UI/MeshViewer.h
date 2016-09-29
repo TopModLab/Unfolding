@@ -146,6 +146,8 @@ public:// slots functions
 	void selectShrink();
 	void selectClear();
 
+	void selectByRefID();
+	
 	void toggleCriticalPoints();
 	void toggleCutLocusCut();
 	void toggleCutLocusCutMode();
