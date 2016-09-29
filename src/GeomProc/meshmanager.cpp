@@ -14,6 +14,8 @@
 #include "MeshFactory/MeshNeoWeaver.h"
 #include "MeshFactory/MeshOrigami.h"
 
+#include "UI/MeshViewer.h"
+
 #include "Utils/utils.h"
 
 #if USE_REEB_GRAPH
@@ -555,6 +557,7 @@ bool MeshManager::unfoldMesh()
 		// unfolded successfully
 		outMesh->printInfo("unfolded mesh:");
 		operationStack->push(outMesh);
+		MeshViewer::getInstance()->unfoldView(outMesh);
 		return true;
 	}
 	else
