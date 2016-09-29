@@ -162,8 +162,6 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		//normID[0] = heNorms[compID];
 	}
 	
-	//for testing
-	generateBridge(3, 6, hes, verts, faces);
 	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
 	/*for (int i = 0; i < refHeCount; i++)
 	{

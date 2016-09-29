@@ -12,8 +12,8 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	if (!ref_mesh) return nullptr;
 
 	// TODO: conf should be passed in as configuration
-	const float patchScale = 0.8;
-	const float foldDepth = 0.1;
+	const float patchScale = conf.at("patchScale");
+	const float foldDepth = conf.at("foldDepth");
 
 	HDS_Vertex::resetIndex();
 	auto &ref_verts = ref_mesh->verts();
@@ -24,6 +24,7 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	vector<vert_t> verts(refHeCount);
 	vector<he_t> hes(ref_hes);
 	vector<face_t> faces(ref_mesh->faces());
+	mesh_t* m = new HDS_Mesh(verts, hes, faces);
 
 	//calculate and store face normals
 	vector<QVector3D> fNorms(refFaceCount);
@@ -32,36 +33,40 @@ HDS_Mesh* MeshOrigami::createOrigami(
 		fNorms[i] = ref_mesh->faceNormal(i);
 	}
 
-	size_t heSize = hes.size();
+	size_t heSize = m->halfedges().size();
 	for (int i = 0; i < heSize ; i++)
 	{
 		//reconstruct verts, unlink faces
-		verts[i].pos = patchScale * ref_verts[ref_hes[i].vid].pos 
+		m->verts()[i].pos = patchScale * ref_verts[ref_hes[i].vid].pos 
 			+ (1-patchScale) * ref_mesh->faceCenter(ref_hes[i].fid);
-		constructHE(&verts[i], &hes[i]);
+		constructHE(&m->verts()[i], &m->halfedges()[i]);
 		
 	}
 
 	for (int i = 0; i < heSize; i++) {
 		hdsid_t flipid = ref_hes[i].flip()->index;
 		if (flipid > i) {
-			he_t &he1 = hes[i];
-			he_t &he2 = hes[flipid];
-			cout << flipid << " not visited " << i << endl;
+			he_t &he1 = m->halfedges()[i];
+			he_t &he2 = m->halfedges()[flipid];
 			// calculate the bridge pos
 			QVector3D n = (fNorms[he1.fid]
 				+ fNorms[he2.fid]).normalized();
 			vector<QVector3D> vpos1({
-				(verts[he1.vid].pos + verts[he2.next()->vertID()].pos) /2.0
+				(m->verts()[he1.vid].pos + m->verts()[he2.next()->vertID()].pos) /2.0
 				- foldDepth * n});
 			vector<QVector3D> vpos2({ 
-				(verts[he1.next()->vertID()].pos + verts[he2.vid].pos) / 2.0
+				(m->verts()[he1.next()->vertID()].pos + m->verts()[he2.vid].pos) / 2.0
 				- foldDepth * n });
+			size_t heOriSize = m->halfedges().size();
 			// generate bridge
-			generateBridge(i, flipid, hes, verts, faces, vpos1, vpos2);
-			//if selected edge, unlink bridge edge pairs to make flaps
-			if (hes[i].isPicked) {
+			generateBridge(i, flipid, m, vpos1, vpos2);
 
+			//if selected edge, unlink bridge edge pairs to make flaps
+			if (m->halfedges()[i].isPicked) {
+				for (int index = 0; index < vpos1.size(); index++)
+				{
+					m->splitHeFromFlip(heOriSize + 4 * (index + 1) - 2);
+				}
 			}
 		}
 	}
@@ -69,14 +74,14 @@ HDS_Mesh* MeshOrigami::createOrigami(
 
 
 	unordered_set<hdsid_t> exposedHEs;
-	for (auto &he : hes)
+	for (auto &he : m->halfedges())
 	{
 		if (!he.flip_offset)
 			exposedHEs.insert(he.index);
 	}
-	fillNullFaces(hes, faces, exposedHEs);
+	fillNullFaces(m->halfedges(), m->faces(), exposedHEs);
 
-	return new HDS_Mesh(verts, hes, faces);
+	return m;
 
 }
 

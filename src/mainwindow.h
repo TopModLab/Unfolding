@@ -17,7 +17,7 @@ using viewer_t = MeshViewer;
 #include "UI/rimfacepanel.h"
 #include "UI/WeavePanel.h"
 #include "UI/NeoWeavePanel.h"
-
+#include "UI/OrigamiPanel.h"
 #include <QScopedPointer>
 
 namespace Ui {
@@ -138,6 +138,8 @@ private:
 	QScopedPointer<RimFacePanel> rim_panel;
 	QScopedPointer<WeavePanel> wv_panel;
 	QScopedPointer<NeoWeavePanel> neowv_panel;
+	QScopedPointer<OrigamiPanel> origami_panel;
+
 
 private:
 

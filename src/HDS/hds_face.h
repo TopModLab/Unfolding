@@ -13,6 +13,8 @@ private:
 
 public:
 	static void resetIndex() { uid = 0; }
+	static void matchIndexToSize(size_t	size) { uid = size; }
+
 	static hdsid_t assignIndex() { return uid++; }
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_FACE; }
 

@@ -16,6 +16,7 @@ public:
 
 	static void init();
 	static void constructHE(vert_t* v, he_t* he);
+
 	static void constructFace(
 		he_t* unlinkedHE, size_t edgeCount,
 		face_t* fid);
@@ -27,7 +28,7 @@ public:
 		unordered_set<hdsid_t> &nullHEs);
 	static void generateBridge(
 		hdsid_t he1, hdsid_t he2, 
-		vector<he_t> &hes, vector<vert_t> &verts, vector<face_t> &fs,
+		mesh_t* mesh,
 		vector<QVector3D> &vpos1 = vector<QVector3D>(),
 		vector<QVector3D> &vpos2 = vector<QVector3D>()
 		);
