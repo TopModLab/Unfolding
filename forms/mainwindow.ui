@@ -657,6 +657,8 @@
     <addaction name="actionGrowSel"/>
     <addaction name="actionShrinkSel"/>
     <addaction name="actionClearSel"/>
+    <addaction name="separator"/>
+    <addaction name="actSelRefID"/>
    </widget>
    <widget class="QMenu" name="menuCreate">
     <property name="title">
@@ -1353,6 +1355,11 @@
    </property>
    <property name="toolTip">
     <string>Calculate D-Form Parameters</string>
+   </property>
+  </action>
+  <action name="actSelRefID">
+   <property name="text">
+    <string>Select by Reference ID</string>
    </property>
   </action>
  </widget>

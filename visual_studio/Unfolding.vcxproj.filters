@@ -339,6 +339,15 @@
     <ClCompile Include="..\src\GeomProc\meshsmoother.cpp">
       <Filter>Source Files\GeomProc</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\UI\SelectByRefIdPanel.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SelectByRefIdPanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SelectByRefIdPanel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extras\SVG_LC_code\SVG_precompute\LocalGeodesics\BaseModel.h">
@@ -518,6 +527,9 @@
     <ClInclude Include="..\src\GeomProc\MeshConnector.h">
       <Filter>Header Files\GeomProc</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_selbyrefid.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\forms\bridgerpanel.ui">
@@ -588,6 +600,12 @@
     </CustomBuild>
     <CustomBuild Include="..\src\mainwindow.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\forms\selbyrefid.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\UI\SelectByRefIdPanel.h">
+      <Filter>Header Files\UI</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
