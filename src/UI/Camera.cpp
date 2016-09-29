@@ -10,10 +10,6 @@ perspCamera::perspCamera(const QVector3D& eyePos, const QVector3D& targetPos,
 	CameraToScreen.perspective(verticalAngle, aspectRatio, nearPlane, farPlane);
 }
 
-QVector3D perspCamera::getTarget() const
-{
-	return target;
-}
 
 void perspCamera::zoom(Float x_val, Float y_val, Float z_val)
 {

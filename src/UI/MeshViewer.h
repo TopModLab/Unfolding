@@ -105,11 +105,21 @@ class MeshViewer
 	: public QOpenGLWidget, oglFuncs
 {
 	Q_OBJECT
-public:
+private:
 	explicit MeshViewer(QWidget *parent = nullptr);
+	MeshViewer(const MeshViewer &) = delete;
+	MeshViewer& operator = (const MeshViewer &) = delete;
+
 	~MeshViewer();
 public:
-	//void getInstance();
+	static MeshViewer* getInstance()
+	{
+		if (!instance)
+		{
+			instance = new MeshViewer;
+		}
+		return instance;
+	}
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	
@@ -157,6 +167,7 @@ public:// slots functions
 	void toggleLightingWireframe();
 	void toggleText();
 
+	void unfoldView(const HDS_Mesh* inMesh);
 private: // paint function
 	void allocateGL();
 
@@ -279,7 +290,7 @@ private:
 	uint32_t dispComp;//Display Components Flag
 	uint32_t hlComp;// Highlight Components Flag
 private:
-	//static MeshViewer* instance;
+	static MeshViewer* instance;
 	//viewer status
 	perspCamera view_cam;
 

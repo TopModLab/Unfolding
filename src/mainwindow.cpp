@@ -51,7 +51,7 @@ void MainWindow::initMesh(const string& filename)
 		//manager->getMeshStack()->setCurrentFlag(OperationStack::Original);
 		if (manager->loadOBJFile(filename))
 		{
-			viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+			MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 		}
 	}
 }
@@ -59,8 +59,7 @@ void MainWindow::initMesh(const string& filename)
 bool MainWindow::createComponents()
 {
 	try {
-		viewer.reset(new viewer_t(this));
-		viewer->setFocusPolicy(Qt::StrongFocus);
+		MeshViewer::getInstance()->setFocusPolicy(Qt::StrongFocus);
 		color_editor.reset(new ColormapEditor);
 		conn_panel.reset(new ConnectorPanel);
 		cp_panel.reset(new CriticalPointsPanel);
@@ -87,14 +86,14 @@ bool MainWindow::createComponents()
 bool MainWindow::layoutComponents()
 {
 	//setCentralWidget(viewer);
-	ui->viewerLayout->addWidget(viewer.data());
+	ui->viewerLayout->addWidget(MeshViewer::getInstance());
 	return true;
 }
 
 bool MainWindow::connectComponents()
 {
 	connect(color_editor.data(), &ColormapEditor::colorChanged, this, &MainWindow::slot_updateViewerColormap);
-	//kkkkkkkkkkkkkkkkkkkkkkkkkkk
+	// TODO: add support for updateMeshColorByGeoDistance()
 	/*connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int)));
 	connect(viewer, SIGNAL(updateMeshColorByGeoDistance(int, int, int, double)), this, &MainWindow::slot_updateMeshColorByGeoDistance(int, int, int, double)));*/
 	connect(conn_panel.data(), &ConnectorPanel::sig_saved, this, &MainWindow::exportSVG);
@@ -186,10 +185,10 @@ void MainWindow::createActions()
 		connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::slot_redo);
 
 		//selection menu
-		connect(ui->actionSelAll, &QAction::triggered, viewer.data(), &viewer_t::selectAll);
-		connect(ui->actionSelInv, &QAction::triggered, viewer.data(), &viewer_t::selectInverse);
+		connect(ui->actionSelAll, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectAll);
+		connect(ui->actionSelInv, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectInverse);
 		connect(ui->actionSelMulti, &QAction::triggered, this, &MainWindow::selectMultiple);
-		connect(ui->actSelRefID, &QAction::triggered, viewer.data(), &viewer_t::selectByRefID);
+		connect(ui->actSelRefID, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectByRefID);
 		// TODO: Support all section options
 		/*connect(ui->actionSelTwinP, &QAction::triggered, viewer, &viewer_t::selectTwinPair()));
 		connect(ui->actionSelNE, &QAction::triggered, viewer, &viewer_t::selectNextEdge()));
@@ -203,7 +202,7 @@ void MainWindow::createActions()
 
 		//display menu
 		connect(ui->actionDispGrid, &QAction::triggered,
-			[&] { viewer->showComp(viewer_t::DISP_GRID); });
+			[] { MeshViewer::getInstance()->showComp(viewer_t::DISP_GRID); });
 		// Shading State
 		QActionGroup *shadingGroup = new QActionGroup(ui->menuShading);
 		shadingGroup->addAction(ui->actWireframe);
@@ -211,20 +210,20 @@ void MainWindow::createActions()
 		shadingGroup->addAction(ui->actWfShaded);
 		shadingGroup->setExclusive(true);
 		connect(ui->actShaded, &QAction::triggered,
-			[&] { viewer->showShading(viewer_t::SHADE_FLAT); });
+			[] { MeshViewer::getInstance()->showShading(viewer_t::SHADE_FLAT); });
 		connect(ui->actWireframe, &QAction::triggered,
-			[&] { viewer->showShading(viewer_t::SHADE_WF); });
+			[] { MeshViewer::getInstance()->showShading(viewer_t::SHADE_WF); });
 		connect(ui->actWfShaded, &QAction::triggered,
-			[&] { viewer->showShading(viewer_t::SHADE_WF_FLAT); });
+			[] { MeshViewer::getInstance()->showShading(viewer_t::SHADE_WF_FLAT); });
 		connect(ui->actDispVert, &QAction::triggered,
-			[&] { viewer->showShading(viewer_t::SHADE_VERT); });
+			[] { MeshViewer::getInstance()->showShading(viewer_t::SHADE_VERT); });
 		
 
 		// Highlight
 		connect(ui->actHL_CutEdge, &QAction::triggered,
-			[&] { viewer->highlightComp(viewer_t::HIGHLIGHT_CUTEDGE); });
+			[] { MeshViewer::getInstance()->highlightComp(viewer_t::HIGHLIGHT_CUTEDGE); });
 		connect(ui->actHL_Bridger, &QAction::triggered,
-			[&] { viewer->highlightComp(viewer_t::HIGHLIGHT_BRIDGER); });
+			[] { MeshViewer::getInstance()->highlightComp(viewer_t::HIGHLIGHT_BRIDGER); });
 		//"E: edges  V : vertices  F : faces  N: Normals L : lighting  C : critical points"
 		QAction *showEdgesAct = new QAction(tr("Show Edges"), this);
 		showEdgesAct->setShortcut(Qt::Key_E);
@@ -448,6 +447,7 @@ void MainWindow::createToolBar()
 
 		connect(scaleValBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			[&](double val) {
+			auto viewer = MeshViewer::getInstance();
 			viewer->view_scale = val; viewer->update(); });
 		ui->displayToolBar->addWidget(scaleValBox);
 		ui->displayToolBar->addSeparator();
@@ -495,13 +495,13 @@ void MainWindow::newFile()
 		qDebug("Loading Object Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 		
 #if USE_REEB_GRAPH
-		viewer->bindReebGraph(MeshManager::getInstance()->getReebGraph());
+		MeshViewer::getInstance()->bindReebGraph(MeshManager::getInstance()->getReebGraph());
 #endif
 
-		viewer->update();
+		MeshViewer::getInstance()->update();
 #ifdef _DEBUG
 		qDebug("Render New Object Takes %d ms In Total.", clock.elapsed());
 #endif
@@ -556,7 +556,7 @@ void MainWindow::slot_performMeshCut() {
 		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Cutted);
 
 		MeshManager::getInstance()->cutMeshWithSelectedEdges();
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 	}
 
@@ -568,7 +568,7 @@ void MainWindow::slot_unfoldMesh() {
 	{
 		MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Unfolded);
 		MeshManager::getInstance()->unfoldMesh();
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 	}
 }
 
@@ -688,7 +688,7 @@ void MainWindow::slot_quadEdge()
 			quad_panel->getFlapSize(), quad_panel->getType(), quad_panel->getShift()))
 	{
 		statusBar()->showMessage("Succeeded to generate Quad-Edge Mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 	}
 	else
 	{
@@ -704,7 +704,7 @@ void MainWindow::slot_GES()
 	if (MeshManager::getInstance()->setGES())
 	{
 		statusBar()->showMessage("Succeeded to generate GES Mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 	}
 	else
 	{
@@ -718,7 +718,7 @@ void MainWindow::slot_rimmed3DMesh()
 	if (MeshManager::getInstance()->set3DRimMesh(rim_panel->getConfig()))
 	{
 		statusBar()->showMessage("Succeeded to generate Rim Mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 	}
 	else
 	{
@@ -733,7 +733,7 @@ void MainWindow::slot_weaveMesh()
 	if (MeshManager::getInstance()->setWeaveMesh(wv_panel->getConfig()))
 	{
 		statusBar()->showMessage("Succeeded to generate Woven Mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 	}
 	else
 	{
@@ -748,7 +748,7 @@ void MainWindow::slot_neoWeaveMesh()
 	if (MeshManager::getInstance()->setNeoWeaveMesh(neowv_panel->getConfig()))
 	{
 		statusBar()->showMessage("Succeeded to generate Woven Mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 	}
 	else
@@ -764,7 +764,7 @@ void MainWindow::slot_origamiMesh()
 	if (MeshManager::getInstance()->setOrigamiMesh(origami_panel->getConfig()))
 	{
 		statusBar()->showMessage("Succeeded to generate Origami Mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 	}
 	else
@@ -787,7 +787,7 @@ void MainWindow::slot_GRS()
 	if (MeshManager::getInstance()->setGRS(grs_panel->getConfigValues()))
 	{
 		statusBar()->showMessage("Succeeded to generate GRS Mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 	}
 	else
 	{
@@ -801,7 +801,7 @@ void MainWindow::slot_smoothMesh()
 	if (MeshManager::getInstance()->smoothMesh())
 	{
 		statusBar()->showMessage("Succeeded to smooth mesh!", 5000);
-		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+		MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 	}
 	else
 	{
@@ -814,7 +814,7 @@ void MainWindow::slot_undo()
 {
 
 	MeshManager::getInstance()->getMeshStack()->undo();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 
 }
@@ -822,7 +822,7 @@ void MainWindow::slot_undo()
 void MainWindow::slot_redo()
 {
 	MeshManager::getInstance()->getMeshStack()->redo();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 }
 
@@ -838,7 +838,7 @@ void MainWindow::slot_reset()
 	//MeshManager::getInstance()->resetMesh();
 
 	MeshManager::getInstance()->getMeshStack()->reset();
-	viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
+	MeshViewer::getInstance()->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
 
 }
 
@@ -846,8 +846,8 @@ void MainWindow::slot_reset()
 
 void MainWindow::selectMultiple()
 {
-	//kkkkkkkkkkkkkkkkkkkkkk
-	//viewer->setSelectionMode(viewer_t::MultiSelect);
+	// TODO: Remove redunant function, by default is multple
+	//MeshViewer::getInstance()->setSelectionMode(viewer_t::MultiSelect);
 }
 
 
@@ -860,7 +860,7 @@ void MainWindow::slot_toggleEdges()
 	{
 		curMesh->flipShowEdges();
 	}
-	viewer->update();*/
+	MeshViewer::getInstance()->update();*/
 
 }
 
@@ -872,7 +872,7 @@ void MainWindow::slot_toggleVertices()
 		curMesh->flipShowVertices();
 	}
 
-	viewer->update();*/
+	MeshViewer::getInstance()->update();*/
 }
 void MainWindow::slot_toggleFaces()
 {
@@ -881,7 +881,8 @@ void MainWindow::slot_toggleFaces()
 	{
 		curMesh->flipShowFaces();
 	}
-	viewer->update();*/
+	MeshViewer::getInstance()->update();*/
+
 }
 
 void MainWindow::slot_toggleNormals()
@@ -891,27 +892,27 @@ void MainWindow::slot_toggleNormals()
 	{
 		curMesh->flipShowNormals();
 	}
-	viewer->update();*/
+	MeshViewer::getInstance()->update();*/
 }
 
 void MainWindow::slot_toggleCameraOperation()
 {
-	viewer->setInteractionMode(viewer_t::ROAM_CAMERA);
+	MeshViewer::getInstance()->setInteractionMode(viewer_t::ROAM_CAMERA);
 }
 
 void MainWindow::slot_toggleFaceSelection()
 {
-	viewer->setInteractionMode(viewer_t::SEL_FACE);
+	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_FACE);
 }
 
 void MainWindow::slot_toggleEdgeSelection()
 {
-	viewer->setInteractionMode(viewer_t::SEL_EDGE);
+	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_EDGE);
 }
 
 void MainWindow::slot_toggleVertexSelection()
 {
-	viewer->setInteractionMode(viewer_t::SEL_VERT);
+	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_VERT);
 }
 
 
@@ -924,9 +925,9 @@ void MainWindow::slot_triggerColormap() {
 void MainWindow::slot_triggerCriticalPoints() {
 	actionsMap["show CP"]->setChecked(true);
 	//kkkkkkkkkkk
-	//viewer->setCriticalPointsMethod(viewer->getCmode());
-	//viewer->showCriticalPoints();
-	viewer->update();
+	//MeshViewer::getInstance()->setCriticalPointsMethod(MeshViewer::getInstance()->getCmode());
+	//MeshViewer::getInstance()->showCriticalPoints();
+	MeshViewer::getInstance()->update();
 	cp_panel->show();
 }
 
@@ -934,13 +935,13 @@ void MainWindow::slot_triggerCutLocusPanel() {
 	actionsMap["show CP"]->setChecked(cl_panel->isMinMaxChecked());
 
 	//kkkkkkkkkkk
-	//viewer->setCutLocusMethod(viewer->getLmode());
+	//MeshViewer::getInstance()->setCutLocusMethod(MeshViewer::getInstance()->getLmode());
 	if (cl_panel->isMinMaxChecked()) {
 		//kkkkkkkkkkk
-		//viewer->showCutLocusPoints();
+		//MeshViewer::getInstance()->showCutLocusPoints();
 	}
-	//viewer->showCutLocusCut();
-	viewer->update();
+	//MeshViewer::getInstance()->showCutLocusCut();
+	MeshViewer::getInstance()->update();
 	cl_panel->show();
 }
 
@@ -953,17 +954,17 @@ void MainWindow::slot_updateViewerColormap()
 {
 	// TODO: Implement Update Colormap with New Viewer
 	// or Remove it
-	//viewer->setCurvatureColormap(ceditor->getColormap());
+	//MeshViewer::getInstance()->setCurvatureColormap(ceditor->getColormap());
 }
 
 void MainWindow::slot_updateMeshColorByGeoDistance(int vidx) {
 	MeshManager::getInstance()->colorMeshByGeoDistance(vidx);
-	viewer->update();
+	MeshViewer::getInstance()->update();
 }
 
 void MainWindow::slot_updateMeshColorByGeoDistance(int vidx, int lev0, int lev1, double ratio) {
 	MeshManager::getInstance()->colorMeshByGeoDistance(vidx, lev0, lev1, ratio);
-	viewer->update();
+	MeshViewer::getInstance()->update();
 }
 
 
@@ -984,30 +985,30 @@ void MainWindow::updateCurrentMesh()
 
 void MainWindow::slot_updateCriticalPointsMethod(int midx) {
 	// TODO: Implement Critical Point Method with New Viewer
-	//viewer->setCriticalPointsMethod(midx);
-	viewer->update();
+	//MeshViewer::getInstance()->setCriticalPointsMethod(midx);
+	MeshViewer::getInstance()->update();
 }
 
 void MainWindow::slot_updateCriticalPointsSmoothingTimes(int times) {
 
 	// TODO: Implement Critical Point Smooth Time Method with New Viewer
-	//viewer->setCriticalPointsSmoothingTimes(times);
-	viewer->update();
+	//MeshViewer::getInstance()->setCriticalPointsSmoothingTimes(times);
+	MeshViewer::getInstance()->update();
 }
 
 void MainWindow::slot_updateCriticalPointsSmoothingType(int t) {
 	cout << "Smoothing type = " << t << endl;
 	// TODO: Implement Critical Point Smoothing Type Method with New Viewer
-	//viewer->setCriticalPointsSmoothingType(t);
+	//MeshViewer::getInstance()->setCriticalPointsSmoothingType(t);
 
-	viewer->update();
+	MeshViewer::getInstance()->update();
 }
 
 void MainWindow::slot_updateCutLocusMethod(int midx)
 {
 	// TODO: Implement Cut Locus Method with New Viewer
-	//viewer->setCutLocusMethod(midx);
-	viewer->update();
+	//MeshViewer::getInstance()->setCutLocusMethod(midx);
+	MeshViewer::getInstance()->update();
 
 }
 

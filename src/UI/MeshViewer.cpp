@@ -2,8 +2,8 @@
 #include <QFileDialog>
 #include "GeomProc/meshunfolder.h"
 #include "UI/SelectByRefIdPanel.h"
-//MeshViewer* MeshViewer::instance = nullptr;
 
+MeshViewer* MeshViewer::instance = nullptr;
 
 MeshViewer::MeshViewer(QWidget *parent)
 	: QOpenGLWidget(parent)
@@ -130,6 +130,18 @@ void MeshViewer::initializeGL()
 	glGenBuffers(2, heRBO.tbo);
 	glGenTextures(2, fRBO.tex);
 	glGenBuffers(2, fRBO.tbo);
+}
+
+void MeshViewer::unfoldView(const HDS_Mesh* inMesh)
+{
+	QVector3D boundMid = inMesh->bound->getMidPoint();
+	view_cam.setTarget(boundMid);
+	boundMid.setZ(10);
+
+	view_cam.WorldToCamera.setToIdentity();
+	view_cam.WorldToCamera.lookAt(
+		boundMid, view_cam.getTarget(), QVector3D(0, 1, 0));
+	view_cam.CameraToWorld = view_cam.WorldToCamera.inverted();
 }
 
 void MeshViewer::allocateGL()

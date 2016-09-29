@@ -128,7 +128,6 @@ private:
 	Ui::MainWindow *ui;
 	QMap<QString, QAction*> actionsMap;
 
-	QScopedPointer<viewer_t> viewer;
 	QScopedPointer<ColormapEditor> color_editor;
 	QScopedPointer<ConnectorPanel> conn_panel;
 	QScopedPointer<CriticalPointsPanel> cp_panel;
