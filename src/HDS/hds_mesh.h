@@ -117,6 +117,7 @@ public:
 	vector<hdsid_t> faceCorners(hdsid_t fid) const;
 	QVector3D faceCenter(hdsid_t fid) const;
 	QVector3D faceNormal(hdsid_t fid) const;
+	vector<QVector3D> allVertNormal() const;
 
 	he_t* heFromFace(hdsid_t fid) { return &heSet[faceSet[fid].heid]; }
 	he_t* heFromVert(hdsid_t vid) { return &heSet[vertSet[vid].heid]; }

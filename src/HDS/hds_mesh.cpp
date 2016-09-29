@@ -904,6 +904,34 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 	return n;
 }
 
+vector<QVector3D> HDS_Mesh::allVertNormal() const
+{
+	vector<QVector3D> ret(vertSet.size(), QVector3D());
+
+	for ( hdsid_t fid = 0; fid < faceSet.size(); fid++)
+	{
+		auto corners = faceCorners(fid);
+		QVector3D c;
+		for (auto vid : corners) {
+			c += vertSet[vid].pos;
+		}
+		c /= (qreal)corners.size();
+
+		QVector3D n = QVector3D::crossProduct(
+			vertSet[corners[0]].pos - c,
+			vertSet[corners[1]].pos - c);
+		n.normalize();
+
+		for (auto vid : corners)
+		{
+			ret[vid] += n;
+		}
+	}
+	for (auto n : ret) n.normalize();
+
+	return ret;
+}
+
 // Find all connected faces from input face
 // Input face must NOT be CutFace
 // BFS Tree

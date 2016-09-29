@@ -39,24 +39,26 @@ HDS_Mesh* MeshOrigami::createOrigami(
 		//reconstruct verts, unlink faces
 		m->verts()[i].pos = patchScale * ref_verts[ref_hes[i].vid].pos 
 			+ (1-patchScale) * ref_mesh->faceCenter(ref_hes[i].fid);
+		m->verts()[i].setRefId(ref_hes[i].vid);
 		constructHE(&m->verts()[i], &m->halfedges()[i]);
 		
 	}
-
+	vector<QVector3D> vn = ref_mesh->allVertNormal();
 	for (int i = 0; i < heSize; i++) {
 		hdsid_t flipid = ref_hes[i].flip()->index;
 		if (flipid > i) {
 			he_t &he1 = m->halfedges()[i];
 			he_t &he2 = m->halfedges()[flipid];
 			// calculate the bridge pos
-			QVector3D n = (fNorms[he1.fid]
-				+ fNorms[he2.fid]).normalized();
+			QVector3D n1 = vn[(m->verts()[he1.vid]).refid >> 2];
+			QVector3D n2 = vn[(m->verts()[he2.vid]).refid >> 2];
+
 			vector<QVector3D> vpos1({
 				(m->verts()[he1.vid].pos + m->verts()[he2.next()->vertID()].pos) /2.0
-				- foldDepth * n});
+				- foldDepth * n1});
 			vector<QVector3D> vpos2({ 
 				(m->verts()[he1.next()->vertID()].pos + m->verts()[he2.vid].pos) / 2.0
-				- foldDepth * n });
+				- foldDepth * n2 });
 			size_t heOriSize = m->halfedges().size();
 			// generate bridge
 			generateBridge(i, flipid, m, vpos1, vpos2);
