@@ -164,7 +164,7 @@ private:
 		Float str_wd = 0.01f, int cuttype = 0, int id = 0);
 	static void wrtieEtchLayer(
 		FILE* SVG_File, const vector<QVector2D> &etch,
-		Float str_wd = 0.01f, int seg = 0);
+		Float str_wd = 0.01, int seg = 0, Float segLen = 0.0005f);
 
 private:
 	/*static Float pinholesize;
