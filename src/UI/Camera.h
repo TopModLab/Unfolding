@@ -25,7 +25,8 @@ public:
 		Float verticalAngle = 54.3, Float aspectRatio = 1.67,
 		Float nearPlane = 0.01, Float farPlane = 100);
 
-	QVector3D getTarget() const;
+	QVector3D getTarget() const { return target; }
+	void setTarget(const QVector3D &vec) { target = vec; }
 
 	void zoom(Float x_val = 0, Float y_val = 0, Float z_val = 0);
 	void rotate(Float x_rot = 0, Float y_rot = 0, Float z_rot = 0);

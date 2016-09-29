@@ -10,6 +10,7 @@
 #include "MeshFactory/MeshDFormer.h"
 #include "MeshIterator.h"
 #include "GeomProc/MeshConnector.h"
+#include "UI/MeshViewer.h"
 
 #include "Utils/utils.h"
 
@@ -628,6 +629,7 @@ bool MeshManager::unfoldMesh()
 		// unfolded successfully
 		outMesh->printInfo("unfolded mesh:");
 		operationStack->push(outMesh);
+		MeshViewer::getInstance()->unfoldView(outMesh);
 		return true;
 	}
 	else
