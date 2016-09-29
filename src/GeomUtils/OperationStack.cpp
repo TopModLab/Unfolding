@@ -17,6 +17,8 @@ void OperationStack::undo()
 	if (opStack.size() > 1){
 		redoStack.push(opStack.top());
 		opStack.pop();
+		getCurrentMesh()->matchIndexToSize();
+
 		setCurrentFlag(getCurrentFlag());
 
 		cout<<"undo to flag "<<getCurrentFlag()<<endl;
@@ -66,6 +68,7 @@ void OperationStack::reset()
 	while (opStack.size() > 1)
 		opStack.pop();
 	unfolded_mesh.reset();
+	getCurrentMesh()->matchIndexToSize();
 	setCurrentFlag(OperationStack::Original);
 }
 

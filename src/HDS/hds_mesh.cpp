@@ -953,6 +953,34 @@ vector<hdsid_t> HDS_Mesh::linkedFaces(hdsid_t inFaceId) const
 	return retFaceSet;
 }
 
+// Functionality:
+//	Split he and he->flip so that they become cut edges
+// Input:
+//	heid: the id of the he that needs to be split up
+void HDS_Mesh::splitHeFromFlip(hdsid_t heid)
+{
+	auto &he = heSet[heid];
+	//duplicate verts
+	int oriSize = vertSet.size();
+	vertSet.resize(oriSize + 2);
+	auto &v = vertSet[he.vertID()];
+	auto &flipv = vertSet[he.flip()->vertID()];
+	auto fliphe = he.flip();
+	vertSet[oriSize].pos = flipv.pos;
+	vertSet[oriSize + 1].pos = v.pos;
+
+	//assign them to he->flip
+	flipv.heid = he.next_offset + heid;
+	v.heid = heid;
+	fliphe->vid = oriSize;
+	fliphe->next()->vid = oriSize + 1;
+	vertSet[oriSize].heid = fliphe->index;
+	vertSet[oriSize + 1].heid = fliphe->next()->index;
+	//reset flips
+	he.flip_offset = 0;
+	fliphe->flip_offset = 0;
+}
+
 void HDS_Mesh::addHalfEdge(he_t &he)
 {
 	heSet.push_back(he);

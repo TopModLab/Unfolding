@@ -60,6 +60,12 @@ public:
 		face_t::resetIndex();
 	}
 
+	void matchIndexToSize() {
+		vert_t::matchIndexToSize(vertSet.size());
+		he_t::matchIndexToSize(heSet.size());
+		face_t::matchIndexToSize(faceSet.size());
+
+	}
 	void updatePieceSet();	/* Find linked faces and store in pieceSet */
 	
 	void printInfo(const string &msg = "");
@@ -123,6 +129,7 @@ public:
 	const face_t* faceFromHe(hdsid_t heid) const { return &faceSet[heSet[heid].fid]; }
 
 	vector<hdsid_t> linkedFaces(hdsid_t fid) const;
+	void splitHeFromFlip(hdsid_t heid);
 
 	void addHalfEdge(he_t &he);
 	void addVertex(vert_t &v);

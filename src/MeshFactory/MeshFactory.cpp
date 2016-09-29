@@ -19,6 +19,8 @@ void MeshFactory::constructHE(vert_t* v, he_t* he)
 
 }
 
+
+
 // Functionality: 
 //	Link edge loops of a face, 
 //	hes from unlinkedHE to unlinkedHE+edgeCount will be assigned to face fid
@@ -167,10 +169,12 @@ void MeshFactory::fillNullFaces(
 //	buffers for mesh
 void MeshFactory::generateBridge(
 	hdsid_t he1, hdsid_t he2, 
-	vector<he_t> &hes, vector<vert_t> &verts, vector<face_t> &fs,
+	mesh_t* mesh,
 	vector<QVector3D> &vpos1, vector<QVector3D> &vpos2)
 {
-
+	vector<he_t> &hes = mesh->halfedges();
+	vector<vert_t> &verts = mesh->verts();
+	vector<face_t> &fs = mesh->faces();
 	//resize vectors
 	size_t size = vpos1.size();
 	size_t vOriSize = verts.size();
