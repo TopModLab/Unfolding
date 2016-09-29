@@ -187,8 +187,9 @@ void MainWindow::createActions()
 		//selection menu
 		connect(ui->actionSelAll, &QAction::triggered, viewer.data(), &viewer_t::selectAll);
 		connect(ui->actionSelInv, &QAction::triggered, viewer.data(), &viewer_t::selectInverse);
-		connect(ui->actionSelMulti, &QAction::triggered, this, &MainWindow::slot_selectMultiple);
-		//kkkkkkkkkkk
+		connect(ui->actionSelMulti, &QAction::triggered, this, &MainWindow::selectMultiple);
+		connect(ui->actSelRefID, &QAction::triggered, viewer.data(), &viewer_t::selectByRefID);
+		// TODO: Support all section options
 		/*connect(ui->actionSelTwinP, &QAction::triggered, viewer, &viewer_t::selectTwinPair()));
 		connect(ui->actionSelNE, &QAction::triggered, viewer, &viewer_t::selectNextEdge()));
 		connect(ui->actionSelCPts, &QAction::triggered, viewer, &viewer_t::selectCP()));
@@ -837,11 +838,13 @@ void MainWindow::slot_reset()
 
 //========================================//
 
-void MainWindow::slot_selectMultiple()
+void MainWindow::selectMultiple()
 {
 	//kkkkkkkkkkkkkkkkkkkkkk
 	//viewer->setSelectionMode(viewer_t::MultiSelect);
 }
+
+
 
 void MainWindow::slot_toggleEdges()
 {
