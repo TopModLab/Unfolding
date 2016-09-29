@@ -71,7 +71,7 @@ bool MainWindow::createComponents()
 		rim_panel.reset(new RimFacePanel);
 		wv_panel.reset(new WeavePanel);
 		neowv_panel.reset(new NeoWeavePanel);
-
+		origami_panel.reset(new OrigamiPanel);
 		createActions();
 		createMenus();
 		createToolBar();
@@ -133,6 +133,7 @@ bool MainWindow::connectComponents()
 	connect(wv_panel.data(), &WeavePanel::sig_setBridger, this, &MainWindow::slot_triggerGRS);
 	
 	connect(neowv_panel.data(), &NeoWeavePanel::sig_saved, this, &MainWindow::slot_neoWeaveMesh);
+	connect(origami_panel.data(), &OrigamiPanel::sig_saved, this, &MainWindow::slot_origamiMesh);
 
 	connect (ui->panelCBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 			[=](int id){
@@ -361,7 +362,7 @@ void MainWindow::createActions()
 
 		connect(ui->halfEdgeBtn, &QToolButton::clicked, this, &MainWindow::slot_performMeshCut);
 
-		connect(ui->origamiBtn, &QToolButton::clicked, this, &MainWindow::slot_origamiMesh);
+		connect(ui->origamiBtn, &QToolButton::clicked, this, &MainWindow::slot_triggerOrigamiMesh);
 
 		// unfold action button signal is connected in mainwindow.ui file
 		connect(ui->actionUnfold, &QAction::triggered, this, &MainWindow::slot_unfoldMesh);
@@ -670,6 +671,11 @@ void MainWindow::slot_triggerOrigamiMesh()
 {
 	MeshManager::getInstance()->getMeshStack()->reset();
 
+	if (MeshManager::getInstance()->getMeshStack()->canRim)
+	{
+		origami_panel->show();
+		origami_panel->activateWindow();
+	}
 	
 }
 
@@ -753,9 +759,9 @@ void MainWindow::slot_neoWeaveMesh()
 
 void MainWindow::slot_origamiMesh()
 {
-	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Woven);
+	MeshManager::getInstance()->getMeshStack()->setCurrentFlag(OperationStack::Origami);
 	confMap conf;
-	if (MeshManager::getInstance()->setOrigamiMesh(conf))
+	if (MeshManager::getInstance()->setOrigamiMesh(origami_panel->getConfig()))
 	{
 		statusBar()->showMessage("Succeeded to generate Origami Mesh!", 5000);
 		viewer->bindHalfEdgeMesh(MeshManager::getInstance()->getMeshStack()->getCurrentMesh());
@@ -763,7 +769,7 @@ void MainWindow::slot_origamiMesh()
 	}
 	else
 	{
-		statusBar()->showMessage("Failed to generate Woven Mesh...", 5000);
+		statusBar()->showMessage("Failed to generate Origami Mesh...", 5000);
 	}
 }
 

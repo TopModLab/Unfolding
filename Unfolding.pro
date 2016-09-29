@@ -77,7 +77,8 @@ SOURCES += src/main.cpp\
     src/QuadEdgePanel.cpp \
     src/BridgerPanel.cpp \
     src/GESPanel.cpp \
-    forms/NeoWeavePanel.cpp
+    forms/NeoWeavePanel.cpp \
+    forms/OrigamiPanel.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -136,7 +137,8 @@ HEADERS  += src/mainwindow.h \
     src/QuadEdgePanel.h \
     src/BridgerPanel.h \
     src/GESPanel.h \
-    forms/NeoWeavePanel.h
+    forms/NeoWeavePanel.h \
+    forms/OrigamiPanel.h
 
 FORMS    += extras/colormap_editor/colormapeditor.ui \
     forms/mainwindow.ui \
@@ -148,7 +150,8 @@ FORMS    += extras/colormap_editor/colormapeditor.ui \
     forms/QuadEdgePanel.ui \
     forms/BridgerPanel.ui \
     forms/GESPanel.ui \
-    forms/NeoWeavePanel.ui
+    forms/NeoWeavePanel.ui \
+    forms/OrigamiPanel.ui
 
 RESOURCES += \
     resources.qrc

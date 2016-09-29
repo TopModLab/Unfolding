@@ -12,8 +12,8 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	if (!ref_mesh) return nullptr;
 
 	// TODO: conf should be passed in as configuration
-	const float patchScale = 0.8;
-	const float foldDepth = 0.1;
+	const float patchScale = conf.at("patchScale");
+	const float foldDepth = conf.at("foldDepth");
 
 	HDS_Vertex::resetIndex();
 	auto &ref_verts = ref_mesh->verts();

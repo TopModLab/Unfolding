@@ -112,6 +112,7 @@ void OperationStack::setCurrentFlag(Flag flag)
 	case Rimmed:
 	case QuadEdge:
 	case Woven:
+	case Origami:
 		canUnfold = true;
 		canGRS = false;
 		canCut = false;
