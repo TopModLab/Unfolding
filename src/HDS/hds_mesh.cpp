@@ -932,6 +932,7 @@ vector<QVector3D> HDS_Mesh::allVertNormal() const
 	return ret;
 }
 
+
 // Find all connected faces from input face
 // Input face must NOT be CutFace
 // BFS Tree
