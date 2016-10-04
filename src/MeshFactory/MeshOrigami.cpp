@@ -53,19 +53,22 @@ HDS_Mesh* MeshOrigami::createOrigami(
 			// project vertex normal to edge normal's plane to ensure planar bridge
 			QVector3D vn1 = vns[(m->verts()[he1.vid]).refid >> 2];
 			QVector3D vn2 = vns[(m->verts()[he2.vid]).refid >> 2];
-			QVector3D en = (fNorms[he1.faceID()] + fNorms[he2.faceID()]) / 2.0;
-			QVector3D e = ref_verts[(m->verts()[he2.vid]).refid >> 2].pos
-				- ref_verts[(m->verts()[he1.vid]).refid >> 2].pos;
+			QVector3D en = (fNorms[he1.faceID()] + fNorms[he2.faceID()]).normalized();
+			QVector3D e = (ref_verts[(m->verts()[he2.vid]).refid >> 2].pos
+				- ref_verts[(m->verts()[he1.vid]).refid >> 2].pos).normalized();
 			QVector3D pn = QVector3D::normal(e, en);
 			QVector3D n1 = (vn1 - (QVector3D::dotProduct(vn1, pn)) * pn).normalized();
 			QVector3D n2 = (vn2 - (QVector3D::dotProduct(vn2, pn)) * pn).normalized();
+			QVector3D v11 = m->verts()[he1.vid].pos;
+			QVector3D v12 = m->verts()[he1.next()->vertID()].pos;
+			QVector3D v21 = m->verts()[he2.next()->vertID()].pos;
+			QVector3D v22 = m->verts()[he2.vid].pos;
 			
 			vector<QVector3D> vpos1({
-				(m->verts()[he1.vid].pos + m->verts()[he2.next()->vertID()].pos) /2.0
-				- foldDepth * n1});
+				v11 - foldDepth * n1, v21 - foldDepth * n1 });
 			vector<QVector3D> vpos2({ 
-				(m->verts()[he1.next()->vertID()].pos + m->verts()[he2.vid].pos) / 2.0
-				- foldDepth * n2 });
+				v12 - foldDepth * n2, v22 - foldDepth * n2 });
+
 			size_t heOriSize = m->halfedges().size();
 			// generate bridge
 			generateBridge(i, flipid, m, vpos1, vpos2);
