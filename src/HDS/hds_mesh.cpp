@@ -60,10 +60,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	}
 }
 
-HDS_Mesh::~HDS_Mesh()
-{
-}
-
 #if 0 // Legacy code
 void HDS_Mesh::updateSortedFaces()
 {

@@ -101,8 +101,7 @@ struct RenderBufferObject// : protected oglFuncs
 	ui32s_t ids;// he id, for querying
 	ui16s_t flags;// he flag data
 };
-class MeshViewer
-	: public QOpenGLWidget, oglFuncs
+class MeshViewer : public QOpenGLWidget, oglFuncs
 {
 	Q_OBJECT
 private:

@@ -5,7 +5,9 @@
 #include <limits>
 
 //#include <QtGui/QColor>
+#include <QGlobalStatic>
 #include <QColor>
+#include <QVector3D>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -49,7 +51,24 @@ inline QColor operator+(QColor c1, QColor c2) {
 				clamp<int>(c1.green() + c2.green(), 0, 255),
 				clamp<int>(c1.blue() + c2.blue(), 0, 255));
 }
-
+inline int maxExtent(const QVector3D &vec)
+{
+	int ret = vec[0] > vec[1] ? 0 : 1;
+	return vec[ret] > vec[2] ? ret : 2;
+}
+inline bool isFuzzyNull(const QVector3D &v)
+{
+	return qFuzzyIsNull(v.x()) && qFuzzyIsNull(v.y()) && qFuzzyIsNull(v.z());
+}
+// Check if two vectors parallel to each other
+inline bool isParallel(const QVector3D &v1, const QVector3D &v2)
+{
+	return isFuzzyNull(QVector3D::crossProduct(v1, v2));
+}
+inline float dot(const QVector3D& v1, const QVector3D& v2)
+{
+	return v1.x() * v2.x() + v1.y() * v2.y() + v1.z() * v2.z();
+}
 template <typename T>
 __forceinline T sqr(T val)
 {

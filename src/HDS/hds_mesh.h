@@ -48,16 +48,15 @@ public:
 			 vector<he_t>   &hes,
 			 vector<face_t> &faces);
 	HDS_Mesh(const HDS_Mesh &other);
-	~HDS_Mesh();
+	~HDS_Mesh() {}
 
-	//HDS_Mesh operator=(const HDS_Mesh &rhs) = delete;
-	//void updateSortedFaces();
-	//void clearSortedFaces();
-
-	static void resetIndex() {
-		vert_t::resetIndex();
-		he_t::resetIndex();
-		face_t::resetIndex();
+	// Reset UID in each component
+	// Mask(Bitwise Operation): face|edge|vertex
+	//    e.g. All(111==3), Vertex Only(001==1), Vertex+Edge(011==3)
+	static void resetIndex(uint8_t reset_mask = 7) {
+		if (reset_mask & 1) vert_t::resetIndex();
+		if (reset_mask & 2) he_t::resetIndex();
+		if (reset_mask & 4) face_t::resetIndex();
 	}
 
 	void matchIndexToSize() {

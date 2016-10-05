@@ -314,7 +314,7 @@ bool MeshUnfolder::unfold(
 					visitedFaces[cfid] = true;
 				}
 			}
-			unfoldingProgress.setValue((double)progressIndex/(double)ref_mesh->faceSet.size()*10);
+			unfoldingProgress.setValue(10.0f * progressIndex / ref_mesh->faceSet.size());
 		}
 
 #ifdef _DEBUG
