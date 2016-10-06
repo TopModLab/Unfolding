@@ -149,8 +149,10 @@ HDS_Face* MeshExtender::createFace(vector<HDS_Vertex*> vertices, face_t* cutFace
 HDS_Face* MeshExtender::duplicateFace(face_t* face, face_t* cutFace)
 {
 	vector<vert_t*> vertices;
-	auto fCorners = face->corners();
-	for (auto v: fCorners) {
+
+	// TODO: replace by hds_mesh function
+	vector<vert_t*> fCorners;// = face->corners();
+	for (auto v : fCorners) {
 		vertices.push_back(new vert_t(v->pos));
 	}
 	face_t* newFace = createFace(vertices, cutFace);

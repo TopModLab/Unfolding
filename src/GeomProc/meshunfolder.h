@@ -21,7 +21,7 @@ public:
 	static void reset_layout(HDS_Mesh* unfolded_mesh);
 
 private:
-	static void unfoldFace(int fprev, int fcur,
+	static void unfoldFace(hdsid_t fprev, hdsid_t fcur,
 		HDS_Mesh* unfolded_mesh, const HDS_Mesh* ref_mesh,
 		const QVector3D &uvec, const QVector3D &vvec);
 	

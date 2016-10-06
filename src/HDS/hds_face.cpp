@@ -11,27 +11,7 @@ HDS_Face::HDS_Face()
 	, scalingFactor(1)
 {
 }
-
 /*
-HDS_Face::~HDS_Face()
-{
-	//delete bound;
-}
-
-HDS_Face::HDS_Face(const HDS_Face &other)
-	: flag(other.flag)
-	, index(other.index), refid(other.refid)
-	, n(other.n)
-	, scalingFactor(other.scalingFactor)
-	, he(nullptr)
-{
-}
-
-HDS_Face HDS_Face::operator=(const HDS_Face &other)
-{
-	throw "Not implemented.";
-}*/
-
 set<HDS_Face *> HDS_Face::connectedFaces() const
 {
 	// Find all faces that are directly connected to current face
@@ -131,7 +111,7 @@ QVector3D HDS_Face::computeNormal() const
 #endif
 	return n;
 }
-
+*/
 void HDS_Face::setScaleFactor(Float factor)
 {
 	scalingFactor = factor;
@@ -149,7 +129,9 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 	//    n/p
 
 	//scale down based on center point
-    QVector3D c = center();
+
+	// TODO: replace by hds_mesh function
+	QVector3D c;// = center();
     QVector3D vec_cv = v->pos - c;
     return c + scalingFactor * vec_cv;
 
@@ -189,6 +171,7 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 
 vector<QVector3D> HDS_Face::getScaledCorners()
 {
+#ifdef USE_LEGACY_FACTORY
 	checkPlanar();
 
 	if(!isNonPlanar) {
@@ -200,31 +183,24 @@ vector<QVector3D> HDS_Face::getScaledCorners()
 	} else {
 		//scale down non-planar face
 	}
+#endif
 	return scaledCorners;
 }
 
 void HDS_Face::scaleDown()
 {
+#ifdef USE_LEGACY_FACTORY
 	int n = 0;
 	for (auto v : corners()) {
 		v->pos = scaledCorners.at(n);
 		n++;
 	}
+#endif
 }
 
-/*
-void HDS_Face::update_bbox()
-{
-	auto curHE = he;
-	while(curHE->next != he)
-	{
-		bound->Union(curHE->v->pos);
-		curHE = curHE->next;
-	}
-
-}*/
 void HDS_Face::checkPlanar()
 {
+#ifdef USE_LEGACY_FACTORY
 	auto vertices = corners();
 	QVector3D normal = QVector3D::crossProduct(vertices[1]->pos - vertices[0]->pos, vertices[2]->pos - vertices[0]->pos);
 
@@ -235,6 +211,7 @@ void HDS_Face::checkPlanar()
 			break;
 		}
 	}
+#endif
 }
 
 bool HDS_Face::isConnected(const HDS_Face *other)

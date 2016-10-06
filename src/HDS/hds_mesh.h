@@ -137,9 +137,11 @@ public:
 	//void deleteFace(face_t);
 	//void deleteHalfEdge(he_t);
 
-    vector<face_t *> incidentFaces(vert_t *v);
-    vector<he_t *>   incidentEdges(vert_t *v);
-    vector<face_t *> incidentFaces(face_t *f);
+    vector<face_t*> incidentFaces(vert_t *v);
+    vector<he_t*>   incidentEdges(vert_t *v);
+    vector<face_t*> incidentFaces(face_t *f);
+
+	vector<hdsid_t> incidentFaceIDs(hdsid_t fid);
 
     he_t* incidentEdge(face_t *f1, face_t *f2);
     he_t* incidentEdge(vert_t *v1, vert_t *v2);
@@ -161,7 +163,7 @@ public:
 	void setProcessType(int type){processType = type;}
 
 private:
-	bool validateVertex(const vert_t &v);
+	bool validateVertex(hdsid_t vid);
 	bool validateFace(const face_t &f);
 	bool validateEdge(const he_t &e);
 

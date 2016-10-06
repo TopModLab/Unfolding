@@ -161,19 +161,20 @@ bool HDS_Mesh::validateFace(const face_t &f)
 	return true;
 }
 
-bool HDS_Mesh::validateVertex(const vert_t &v)
+bool HDS_Mesh::validateVertex(hdsid_t vid)
 {
-	if(v.index >= vertSet.size() || &v != &vertSet[v.index]) return false;
+	if (vid >= vertSet.size()) return false;
+	if (vertSet[vid].index != vid) return false;
 
-	int maxEdges =100;
-	he_t *he = &heSet[v.heid];
-	he_t *curHe = he;
+	const int maxEdges = 100;
+	auto he = heFromVert(vid);
+	auto curHE = he;
 	int edgeCount = 0;
 	do {
-		curHe = curHe->flip()->next();
+		curHE = curHE->flip()->next();
 		++edgeCount;
-		if( edgeCount > maxEdges ) return false;
-	} while( curHe != he );
+		if (edgeCount > maxEdges) return false;
+	} while(curHE != he);
 	return true;
 }
 
@@ -181,13 +182,13 @@ bool HDS_Mesh::validate()
 {
 	bool validated = true;
 	// verify that the mesh has good topology, ie has loop
-	for( auto v : vertSet ) {
-		if( !validateVertex(v) ) {
-			cout << "vertex #" << v.index << " is invalid." << endl;
+	for (int vid = 0; vid < vertSet.size(); vid++)
+	{
+		if (!validateVertex(vid)) {
+			cout << "vertex #" << vid << " is invalid." << endl;
 			validated = false;
 		}
 	}
-
 	for( auto f : faceSet ) {
 		if( !validateFace(f) ) {
 			cout << "face #" << f.index << " is invalid." << endl;
@@ -895,9 +896,8 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 	QVector3D n = QVector3D::crossProduct(
 		vertSet[corners[0]].pos - c,
 		vertSet[corners[1]].pos - c);
-	n.normalize();
 
-	return n;
+	return n.normalized();
 }
 
 vector<QVector3D> HDS_Mesh::allVertNormal() const
@@ -1048,6 +1048,20 @@ vector<HDS_Face*> HDS_Mesh::incidentFaces(vert_t *v)
 	} while( curHe != he );
 
 	return faces;
+}
+
+std::vector<hdsid_t> HDS_Mesh::incidentFaceIDs(hdsid_t fid)
+{
+	vector<hdsid_t> ret;
+	auto he = heFromFace(fid);
+	auto curHE = he;
+	do 
+	{
+		ret.push_back(curHE->flip()->fid);
+		curHE = curHE->next();
+	} while (curHE != he);
+
+	return ret;
 }
 
 // all outgoing half edges of vertex v
@@ -1435,13 +1449,13 @@ void HDS_Mesh::save(const string &filename)
 	}
 
 	// save the faces
-	for (auto curFace : faceSet) {
+	for (auto &curFace : faceSet) {
 		if (curFace.isCutFace) continue;
 
-		auto corners = curFace.corners();
+		auto corners = faceCorners(curFace.index);
 		ss << "f ";
-		for (auto v : corners) {
-			ss << v->index + 1 << ' ';
+		for (auto vid : corners) {
+			ss << vid + 1 << ' ';
 		}
 		ss << endl;
 	}

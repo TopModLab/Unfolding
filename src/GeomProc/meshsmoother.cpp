@@ -201,8 +201,9 @@ void MeshSmoother::smoothMesh_wholeMesh(HDS_Mesh *mesh)
 	}
 
 	// update face normals
-	for (auto f : mesh->faceSet) {
-		f.computeNormal();
+	for (auto &f : mesh->faceSet) {
+		// TODO: replace by hds_mesh function
+		//f.computeNormal();
 	}
 
 	// find out the set of zero curvature and static curvature
