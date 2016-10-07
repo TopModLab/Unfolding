@@ -534,8 +534,11 @@ void MeshManager::mapToExtendedMesh()
 bool MeshManager::unfoldMesh()
 {
 	auto ref_mesh = operationStack->getCurrentMesh();
+#ifdef _DEBUG
 	ref_mesh->validate();
 	cout << "unfolded mesh set" << endl;
+#endif // _DEBUG
+
 	ref_mesh->updatePieceSet();
 
 	// cut the mesh using the selected edges
@@ -567,7 +570,6 @@ bool MeshManager::unfoldMesh()
 		cout << "Failed to unfold." << endl;
 		return false;
 	}
-
 }
 
 /* legacy code, not sure what it's doing,

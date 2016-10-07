@@ -3,11 +3,12 @@
 HDS_Mesh* MeshNeoWeaver::create(
 	const mesh_t* ref, const confMap &conf)
 {
-	//return createWeaving(ref, conf);
-	return createHexWeaving(ref, conf);
+	return createWeaving(ref, conf);
+	//return createOctWeaving(ref, conf);
 }
 
-HDS_Mesh* MeshNeoWeaver::createHexWeaving(const mesh_t* ref_mesh, const confMap &conf)
+HDS_Mesh* MeshNeoWeaver::createOctWeaving(
+	const mesh_t* ref_mesh, const confMap &conf)
 {
 	if (!ref_mesh) return nullptr;
 
@@ -109,25 +110,64 @@ HDS_Mesh* MeshNeoWeaver::createHexWeaving(const mesh_t* ref_mesh, const confMap 
 		// from 1 to 4
 		for (int i = 1; i < 5; i++)
 		{
-			planeVecs[i] = (heIsPlanar[compID[i]]
+			planeVecs[i] = heIsPlanar[compID[i]]
 				? ((i < 3) ? -curHeDir : curHeDir)
 				: QVector3D::crossProduct(heNorms[compID[0]],
-					heNorms[compID[i]]).normalized()) * patchScale;
+					heNorms[compID[i]]).normalized();
 			planeVecs[0] += planeVecs[i];
 		}
+		if (QVector3D::dotProduct(curHeDir, planeVecs[1]) > 0.0f)
+			cout << "dir x 1 wrong!" << endl;
+		if (QVector3D::dotProduct(curHeDir, planeVecs[2]) > 0.0f)
+			cout << "dir x 2 wrong!" << endl;
+		if (QVector3D::dotProduct(curHeDir, planeVecs[3]) < 0.0f)
+			cout << "dir x 3 wrong!" << endl;
+		if (QVector3D::dotProduct(curHeDir, planeVecs[4]) < 0.0f)
+			cout << "dir x 4 wrong!" << endl;
+		if (QVector3D::dotProduct(curHeDir, planeVecs[1]) < 0.0f)
+			cout << "tan x 1 wrong!" << endl;
+		if (QVector3D::dotProduct(curHeTan, planeVecs[2]) > 0.0f)
+			cout << "tan x 2 wrong!" << endl;
+		if (QVector3D::dotProduct(curHeTan, planeVecs[3]) > 0.0f)
+			cout << "tan x 3 wrong!" << endl;
+		if (QVector3D::dotProduct(curHeTan, planeVecs[4]) < 0.0f)
+			cout << "tan x 4 wrong!" << endl;
 		// Special Cases: normals are parallel to each other
-		float dx_2 = QVector3D::dotProduct(planeVecs[0], curHeDir) * 0.5f;
-		float dy_2 = QVector3D::dotProduct(planeVecs[0], curHeTan) * 0.5f;
-		planeVecs[5] = -curHeDir * (patchScale + dx_2);
-		planeVecs[6] = -curHeTan * (patchScale + dy_2);
-		planeVecs[7] = curHeDir * (patchScale - dx_2);
-		planeVecs[8] = curHeTan * (patchScale - dy_2);
+		float dx_2 = QVector3D::dotProduct(planeVecs[0], curHeDir);
+		float dy_2 = QVector3D::dotProduct(planeVecs[0], curHeTan);
+		const float gapLen = 0.0f;// tinny gap for non zero edges
+		float lenX_gap5, lenX_gap6, lenX_gap7, lenX_gap8;// edge length 5, 6, 7, 8
+		if (dx_2 > 0.0f)
+		{
+			lenX_gap5 = -gapLen;
+			lenX_gap7 = dx_2 + gapLen;
+		}
+		else
+		{
+			lenX_gap5 = dx_2 - gapLen;
+			lenX_gap7 = gapLen;
+		}
+		if (dy_2 > 0.0f)
+		{
+			lenX_gap6 = -gapLen;
+			lenX_gap8 = dy_2 + gapLen;
+		}
+		else
+		{
+			lenX_gap6 = dy_2 - gapLen;
+			lenX_gap8 = gapLen;
+		}
+		planeVecs[5] = curHeDir * lenX_gap5;
+		planeVecs[6] = curHeTan * lenX_gap6;
+		planeVecs[7] = curHeDir * lenX_gap7;
+		planeVecs[8] = curHeTan * lenX_gap8;
 
-		float xlen = patchScale + dx_2
-			- QVector3D::dotProduct(curHeDir, planeVecs[1] + planeVecs[2]);
-		/*float ylen = 1 + dy_2
-			- QVector3D::dotProduct(curHeDir, planeVecs[2] + planeVecs[3]);*/
-		
+		float xlen = -QVector3D::dotProduct(curHeDir, planeVecs[1] + planeVecs[2] + planeVecs[5]);
+		float patchAbsLen = patchUniform
+			? patchScale : heDirLens[compID[0]] * patchScale;
+		float vecScale = patchAbsLen / xlen;
+		//printf("dxdy (%f, %f), lenx gap(%f, %f, %f, %f), vecScale: %f\n",
+		//	dx_2, dy_2, lenX_gap5, lenX_gap6, lenX_gap7, lenX_gap8, vecScale);
 
 		// padded index for verts and HEs
 		auto paddingIdx = outputOffset * edgeCount;
@@ -135,15 +175,15 @@ HDS_Mesh* MeshNeoWeaver::createHexWeaving(const mesh_t* ref_mesh, const confMap 
 
 		// Edge Length
 		verts[paddingIdx].pos = heMid[compID[0]]
-			+ curHeDir * xlen * 0.5f + planeVecs[8] * 0.5f;
+			+ curHeDir * patchAbsLen * 0.5f + planeVecs[8] * 0.5f * vecScale;
 
-		verts[paddingIdx + 1].pos = verts[paddingIdx].pos + planeVecs[1];
-		verts[paddingIdx + 2].pos = verts[paddingIdx + 1].pos + planeVecs[5];
-		verts[paddingIdx + 3].pos = verts[paddingIdx + 2].pos + planeVecs[2];
-		verts[paddingIdx + 4].pos = verts[paddingIdx + 3].pos + planeVecs[6];
-		verts[paddingIdx + 5].pos = verts[paddingIdx + 4].pos + planeVecs[3];
-		verts[paddingIdx + 6].pos = verts[paddingIdx + 5].pos + planeVecs[7];
-		verts[paddingIdx + 7].pos = verts[paddingIdx + 6].pos + planeVecs[4];
+		verts[paddingIdx + 1].pos = verts[paddingIdx].pos + planeVecs[1] * vecScale;
+		verts[paddingIdx + 2].pos = verts[paddingIdx + 1].pos + planeVecs[5] * vecScale;
+		verts[paddingIdx + 3].pos = verts[paddingIdx + 2].pos + planeVecs[2] * vecScale;
+		verts[paddingIdx + 4].pos = verts[paddingIdx + 3].pos + planeVecs[6] * vecScale;
+		verts[paddingIdx + 5].pos = verts[paddingIdx + 4].pos + planeVecs[3] * vecScale;
+		verts[paddingIdx + 6].pos = verts[paddingIdx + 5].pos + planeVecs[7] * vecScale;
+		verts[paddingIdx + 7].pos = verts[paddingIdx + 6].pos + planeVecs[4] * vecScale;
 
 		// Construct edges
 		for (int i = 0; i < edgeCount; i++)

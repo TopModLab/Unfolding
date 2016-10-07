@@ -164,8 +164,8 @@ public:
 
 private:
 	bool validateVertex(hdsid_t vid);
-	bool validateFace(const face_t &f);
-	bool validateEdge(const he_t &e);
+	bool validateFace(hdsid_t fid);
+	bool validateEdge(hdsid_t heid);
 
 protected:
 	friend class ReebGraph;

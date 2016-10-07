@@ -137,7 +137,7 @@ void MeshFactory::fillNullFaces(
 			/// Structure:   e(n-1)-> ... -> e1 -> e0 -> e(n-1)
 			// prev edge is the next one in buffer,
 			// except the last one, previous edge is the first one in buffer
-			curHEF->prev_offset = (i == nNullEdges - 1) > 0 ? 1 : i;
+			curHEF->prev_offset = (i < nNullEdges - 1) ? 1 : 1 - nNullEdges;
 			// next edge is the previous one in buffer,
 			// except the first one, next edge is the last one in buffer
 			curHEF->next_offset = (i > 0) ? -1 : nNullEdges - 1;

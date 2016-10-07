@@ -125,28 +125,46 @@ void HDS_Mesh::updatePieceSet()
 #endif // _DEBUG
 }
 
-bool HDS_Mesh::validateEdge(const he_t &e)
+bool HDS_Mesh::validateEdge(hdsid_t heid)
 {
-	//if( heMap.find(e->index) == heMap.end() ){cout<<"heMap invalid"<<endl; return false;}
-	//if( e.index >= heSet.size()) {cout<<"he index out of range"<<endl; return false;}
-	if (e.flip()->flip() != &e) { cout << "flip invalid" << endl; return false; }
-	if (e.next()->prev() != &e) { cout << "next invalid" << endl; return false; }
-	if (e.prev()->next() != &e) { cout << "prev invalid" << endl; return false; }
-	if (e.fid < 0) { cout << "f invalid" << endl; return false; }
-	if (e.vid < 0) { cout << "v invalid" << endl; return false; }
-	//if( e.f->index >= faceSet.size() || e.f != &faceSet[e.f->index] ){cout<<"->f invalid"<<endl; return false;}
-	//if( e.v->index >= vertSet.size() || e.v != &vertSet[e.v->index] ) {cout<<"->v invalid"<<endl;return false;}
+	if (heid >= heSet.size()) return false;
+	auto e = &heSet[heid];
+	if (e->index != heid)
+	{
+		printf("edge id #%d doesn't match offset.\n", heid);
+		return false;
+	}
+	if (e->flip()->flip() != e) { cout << "flip invalid" << endl; return false; }
+	if (e->next()->prev() != e) { cout << "next invalid" << endl; return false; }
+	if (e->prev()->next() != e) { cout << "prev invalid" << endl; return false; }
+	if (e->fid == sInvalidHDS || e->fid >= faceSet.size())
+	{
+		cout << "face id invalid\n";
+		return false;
+	}
+	if (e->vid == sInvalidHDS || e->vid >= vertSet.size())
+	{
+		cout << "vertex id invalid\n";
+		return false;
+	}
 	return true;
 }
 
-bool HDS_Mesh::validateFace(const face_t &f)
+bool HDS_Mesh::validateFace(hdsid_t fid)
 {
-	if( f.index >= faceSet.size() || &f != &faceSet[f.index] ) {
-        cout<<"cant find in face map"<<endl;
+	if (fid >= faceSet.size())
+	{
+		printf("face id #%d out of range\n", fid);
+		return false;
+	}
+	auto f = &faceSet[fid];
+	if (f->index != fid)
+	{
+		printf("face id #%d doesn't match offset.\n", fid);
 		return false;
 	}
 	int maxEdges = 1000;
-	he_t *he = &heSet[f.heid];
+	he_t *he = &heSet[f->heid];
 	he_t *curHe = he;
 	int edgeCount = 0;
 	do {
@@ -154,10 +172,10 @@ bool HDS_Mesh::validateFace(const face_t &f)
 		++edgeCount;
 		if (edgeCount > maxEdges)
 		{
-            cout<<"edge count error"<<endl;
+			printf("edge count exceed maximum\n");
 			return false;
 		}
-	} while( curHe != he );
+	} while (curHe != he);
 	return true;
 }
 
@@ -174,7 +192,7 @@ bool HDS_Mesh::validateVertex(hdsid_t vid)
 		curHE = curHE->flip()->next();
 		++edgeCount;
 		if (edgeCount > maxEdges) return false;
-	} while(curHE != he);
+	} while (curHE != he);
 	return true;
 }
 
@@ -184,20 +202,25 @@ bool HDS_Mesh::validate()
 	// verify that the mesh has good topology, ie has loop
 	for (int vid = 0; vid < vertSet.size(); vid++)
 	{
-		if (!validateVertex(vid)) {
-			cout << "vertex #" << vid << " is invalid." << endl;
+		if (!validateVertex(vid))
+		{
+			cout << "vertex #" << vid << " is invalid.\n";
 			validated = false;
 		}
 	}
-	for( auto f : faceSet ) {
-		if( !validateFace(f) ) {
-			cout << "face #" << f.index << " is invalid." << endl;
+	for (hdsid_t fid = 0; fid < faceSet.size(); fid++)
+	{
+		if (!validateFace(fid))
+		{
+			cout << "face #" << fid << " is invalid.\n";
 			validated = false;
 		}
 	}
-	for( auto e : heSet ) {
-		if( !validateEdge(e) ) {
-			cout << "half edge #" << e.index << " is invalid." << endl;
+	for (hdsid_t heid = 0; heid < heSet.size(); heid++)
+	{
+		if (!validateEdge(heid))
+		{
+			cout << "half edge #" << heid << " is invalid.\n";
 			validated = false;
 		}
 	}
