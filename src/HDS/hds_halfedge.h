@@ -23,11 +23,15 @@ public:
 	HDS_HalfEdge* prev() { return this + prev_offset; }
 	HDS_HalfEdge* next() { return this + next_offset; }
 	HDS_HalfEdge* flip() { return this + flip_offset; }
+	HDS_HalfEdge* rotCW() { return flip()->next(); }
+	HDS_HalfEdge* rotCCW() { return prev()->flip(); }
 	HDS_HalfEdge* cutTwin() { return this + cutTwin_offset; }
 	HDS_HalfEdge* bridgeTwin() { return this + brt_offset; }
 	const HDS_HalfEdge* prev() const { return this + prev_offset; }
 	const HDS_HalfEdge* next() const { return this + next_offset; }
 	const HDS_HalfEdge* flip() const { return this + flip_offset; }
+	const HDS_HalfEdge* rotCW() const { return flip()->next(); }
+	const HDS_HalfEdge* rotCCW() const { return prev()->flip(); }
 	const HDS_HalfEdge* cutTwin() const { return this + cutTwin_offset; }
 	const HDS_HalfEdge* bridgeTwin() const { return this + brt_offset; }
 

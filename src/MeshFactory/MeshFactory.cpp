@@ -114,7 +114,7 @@ void MeshFactory::fillNullFaces(
 			// Loop adjacent edges to find the exposed edge
 			while (curHE->flip_offset)
 			{
-				curHE = curHE->flip()->next();
+				curHE = curHE->rotCW();
 			}
 		} while (curHE != he);
 		// get edge number of current null face

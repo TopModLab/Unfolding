@@ -113,10 +113,12 @@ public:
 	const vector<vert_t>& verts() const { return vertSet; }
 	//////////////////////////////////////////////////////////////////////////
 	// Compute mesh properties
-	vector<hdsid_t> faceCorners(hdsid_t fid) const;
+	vector<QVector3D> allVertNormal() const;
+	QVector3D edgeVector(hdsid_t heid) const;
+	QVector3D edgeVector(const he_t &he) const;
 	QVector3D faceCenter(hdsid_t fid) const;
 	QVector3D faceNormal(hdsid_t fid) const;
-	vector<QVector3D> allVertNormal() const;
+	vector<hdsid_t> faceCorners(hdsid_t fid) const;
 
 	he_t* heFromFace(hdsid_t fid) { return &heSet[faceSet[fid].heid]; }
 	he_t* heFromVert(hdsid_t vid) { return &heSet[vertSet[vid].heid]; }
@@ -134,14 +136,11 @@ public:
 	void addHalfEdge(he_t &he);
 	void addVertex(vert_t &v);
 	void addFace(face_t &f);
-	//void deleteFace(face_t);
-	//void deleteHalfEdge(he_t);
 
+#ifdef USE_LEGACY_FACTORY
     vector<face_t*> incidentFaces(vert_t *v);
     vector<he_t*>   incidentEdges(vert_t *v);
     vector<face_t*> incidentFaces(face_t *f);
-
-	vector<hdsid_t> incidentFaceIDs(hdsid_t fid);
 
     he_t* incidentEdge(face_t *f1, face_t *f2);
     he_t* incidentEdge(vert_t *v1, vert_t *v2);
@@ -149,9 +148,11 @@ public:
 	static he_t* insertEdge(
 		vector<he_t> &edges, vert_t* v1, vert_t* v2,
 		he_t* he1 = nullptr, he_t* he2 = nullptr);
+#endif // LEGACY_FACTORY
 
-// 	template <typename T>
-// 	void flipSelectionState(hdsid_t idx, unordered_map<hdsid_t, T> &m);
+	vector<hdsid_t> incidentFaceIDs(hdsid_t fid);
+
+
 	void selectFace(hdsid_t idx);
 	void selectEdge(hdsid_t idx);
 	void selectVertex(hdsid_t idx);
@@ -160,7 +161,7 @@ public:
 
 	void save(const string &filename);
 
-	void setProcessType(int type){processType = type;}
+	void setProcessType(uint16_t type) { processType = type; }
 
 private:
 	bool validateVertex(hdsid_t vid);
@@ -188,12 +189,8 @@ private:
 	// pieces information
 	vector<vector<hdsid_t>> pieceSet;
 	unique_ptr<BBox3> bound;
-private:
+
 	uint16_t processType;
-#ifdef OPENGL_LEGACY
-	uint8_t showComponent;
-	bool showVert, showEdge, showFace, showNormals;
-#endif
 };
 
 inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
@@ -217,15 +214,9 @@ inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
 
 inline ostream& operator<<(ostream &os, const HDS_Face& f)
 {
-#ifdef USE_LEGACY_FACTORY
-	os << "face #" << f.index << " " << f.n << " cut: " << f.isCutFace << endl;
-	HDS_HalfEdge *he = f.he;
-	HDS_HalfEdge *curHE = he;
-	do {
-		os << "(" << curHE->index << ", " << curHE->v->index << ") ";
-		curHE = curHE->next;
-	} while (curHE != he);
-#endif
+	os << "face #" << f.index << " cut: " << f.isCutFace
+		<< "\n\tconnected edge: " << f.heID() << endl;
+
 	return os;
 }
 

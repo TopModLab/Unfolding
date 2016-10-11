@@ -11,6 +11,9 @@
 
 class MeshUnfolder
 {
+	typedef HDS_Face face_t;
+	typedef HDS_Vertex vert_t;
+	typedef HDS_HalfEdge he_t;
 public:
 	static MeshUnfolder* getInstance();
 
