@@ -9,8 +9,9 @@ public:
 	static HDS_Mesh* unfold(const HDS_Mesh* ref_mesh);
 
 private:
-	static bool unfoldable(const HDS_Mesh* ref_mesh);
-	static void unfoldFace(hdsid_t prevFid, hdsid_t curFid,
+	static bool hasBadVertex(const HDS_Mesh* ref_mesh);
+	static void unfoldFace(
+		hdsid_t sharedHEid, hdsid_t curFid,
 		HDS_Mesh* unfolded_mesh, const HDS_Mesh* ref_mesh);
 	static void reset_layout(HDS_Mesh* unfolded_mesh);
 };
