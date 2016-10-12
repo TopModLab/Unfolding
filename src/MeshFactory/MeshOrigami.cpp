@@ -11,7 +11,6 @@ HDS_Mesh* MeshOrigami::createOrigami(
 {
 	if (!ref_mesh) return nullptr;
 
-	// TODO: conf should be passed in as configuration
 	const float patchScale = conf.at("patchScale");
 	const float foldDepth = conf.at("foldDepth");
 
@@ -75,10 +74,12 @@ HDS_Mesh* MeshOrigami::createOrigami(
 
 			//if selected edge, unlink bridge edge pairs to make flaps
 			if (m->halfedges()[i].isPicked) {
-				for (int index = 0; index < vpos1.size(); index++)
-				{
-					m->splitHeFromFlip(heOriSize + 4 * (index + 1) - 2);
-				}
+				//for (int index = 0; index < vpos1.size(); index++)
+				//{
+					m->splitHeFromFlip(heOriSize + 2);
+				//}
+					m->halfedges()[i].isPicked = false;
+					m->halfedges()[flipid].isPicked = false;
 			}
 		}
 	}
