@@ -283,23 +283,8 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 		// fill exposed edges (flip == null) with null faces
 		MeshFactory::fillNullFaces(hes, faces, exposedHEs);
 	}
-	/*vert_t::resetIndex();
-	for (auto &v : verts) {
-		v.index = vert_t::assignIndex();
-		v.computeCurvature();
-		v.computeNormal();
-	}
-	int negCount = 0;
-	he_t::resetIndex();
-	for (auto &he : hes) {
-		he.index = he_t::assignIndex();
-		he.computeCurvature();
-		if (he.isNegCurve) negCount++;
-	}*/
+	
 	mesh_t* thismesh = new mesh_t(verts, hes, faces);
-// 	mesh_t oriMesh(verts, hes, faces);
-// 	mesh_t::resetIndex();
-// 	mesh_t* thismesh = MeshNeoWeaver::create(&oriMesh);
 
 #ifdef _DEBUG
 	//cout << "\tNegative Edge Count ::" << negCount / 2.0 << endl;
@@ -316,7 +301,6 @@ void MeshManager::cutMeshWithSelectedEdges()
 
 	QScopedPointer<HDS_Mesh> ref_mesh(new HDS_Mesh(*inMesh));
 
-
 	//cout << "validating reference mesh" << endl;
 	//ref_mesh->validate();
 
@@ -324,11 +308,14 @@ void MeshManager::cutMeshWithSelectedEdges()
 	set<int> selectedEdges;
 
 
-	if (panelType == 0) {
+	if (panelType == 0)
+	{
 		//select no edge
-	}else if (panelType == 1) {
+	}
+	else if (panelType == 1)
+	{
 		//select all edges
-		for(auto &he : ref_mesh->halfedges())
+		for (auto &he : ref_mesh->halfedges())
 		{
 			he.setCutEdge(true);
 			if( selectedEdges.find(he.index) == selectedEdges.end() &&
@@ -337,17 +324,19 @@ void MeshManager::cutMeshWithSelectedEdges()
 				selectedEdges.insert(he.index);
 			}
 		}
-	}else {
-		for(auto &he : ref_mesh->halfedges())
+	}
+	else
+	{
+		for (auto &he : ref_mesh->halfedges())
 		{
-			if( he.isPicked )
+			if (he.isPicked)
 			{
 				// use picked edges as cut edges
 				he.setPicked(false);
 				he.setCutEdge(true);
 
-				if( selectedEdges.find(he.index) == selectedEdges.end() &&
-						selectedEdges.find(he.flip()->index) == selectedEdges.end() )
+				if (selectedEdges.find(he.index) == selectedEdges.end() &&
+					selectedEdges.find(he.flip()->index) == selectedEdges.end())
 				{
 					selectedEdges.insert(he.index);
 				}
@@ -359,9 +348,9 @@ void MeshManager::cutMeshWithSelectedEdges()
 	bool isUnfoldable = false;
 	HDS_Mesh* outMesh = ref_mesh.take();
 
-	while( !isUnfoldable )
+	while (!isUnfoldable)
 	{
-		if(MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges))
+		if (MeshCutter::cutMeshUsingEdges(outMesh, selectedEdges))
 		{
 			// cutting performed successfully
 			//cutted_mesh->printInfo("cutted mesh:");
@@ -477,7 +466,6 @@ bool MeshManager::initSparseGraph()
 
 		return true;
 	}
-	//*/
 #ifdef _DEBUG
 	qDebug("Sparsing Graph Takes %d ms In Total.", clock.elapsed());
 	clock.restart();
@@ -542,30 +530,18 @@ bool MeshManager::unfoldMesh()
 	ref_mesh->updatePieceSet();
 
 	// cut the mesh using the selected edges
-	set<int> selectedFaces;
-	for (auto &f : ref_mesh->faces())
-	{
-		if (f.isPicked) {
-			// use picked edges as cut edges
-			f.setPicked(false);
-			if (selectedFaces.find(f.index) == selectedFaces.end()) {
-				selectedFaces.insert(f.index);
-			}
-		}
-	}
-	HDS_Mesh* outMesh = new HDS_Mesh(*ref_mesh);
+	HDS_Mesh* unfolded_mesh = MeshUnfolder::unfold(ref_mesh);
 
-	if (MeshUnfolder::unfold(outMesh, ref_mesh, selectedFaces))
+	if (unfolded_mesh)
 	{
 		// unfolded successfully
-		outMesh->printInfo("unfolded mesh:");
-		operationStack->push(outMesh);
-		MeshViewer::getInstance()->unfoldView(outMesh);
+		unfolded_mesh->printInfo("Unfolded Mesh:");
+		operationStack->push(unfolded_mesh);
+		MeshViewer::getInstance()->unfoldView(unfolded_mesh);
 		return true;
 	}
 	else
 	{
-		delete outMesh;
 		// failed to unfold
 		cout << "Failed to unfold." << endl;
 		return false;

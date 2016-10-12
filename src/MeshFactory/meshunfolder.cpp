@@ -1,124 +1,24 @@
-#include "GeomProc/meshunfolder.h"
+#include "MeshFactory/meshunfolder.h"
 #include "HDS/hds_mesh.h"
 
 #include "Utils/utils.h"
 #include "Utils/mathutils.h"
 
 #include <QDebug>
+#include <QVector3D>
 #include <QMessageBox>
+#include <QProgressDialog>
 
-MeshUnfolder* MeshUnfolder::instance = nullptr;
-
-MeshUnfolder::MeshUnfolder()
+void MeshUnfolder::unfoldFace(
+	hdsid_t prevFid, hdsid_t curFid,
+	HDS_Mesh *unfolded_mesh, const HDS_Mesh *ref_mesh)
 {
-}
-
-MeshUnfolder* MeshUnfolder::getInstance()
-{
-	if (!instance)
-	{
-		instance = new MeshUnfolder;
-	}
-
-	return instance;
-}
-#if 0
-void MeshUnfolder::unfoldFace(hdsid_t fprev, hdsid_t fcur,
-	HDS_Mesh *unfolded_mesh, const HDS_Mesh *ref_mesh,
-	const QVector3D &uvec, const QVector3D &vvec)
-{
-	auto verts = unfolded_mesh->verts();
-	auto hes   = unfolded_mesh->halfedges();
-	auto faces = unfolded_mesh->faces();
-	auto refVerts = ref_mesh->verts();
-	auto refHEs   = ref_mesh->halfedges();
-	auto refFaces = ref_mesh->faces();
-
-	// use the previous face as reference, expand current face
-	face_t* face_prev = &faces[fprev];
-	face_t* face_cur = &faces[fcur];
-
-	// start from he in previous face
-	// find the shared half edge
-	he_t* he_share = &hes[face_prev->heid];
-	while (he_share->flip()->fid != fcur)
-	{
-		he_share = he_share->next();
-	}
-
-	// change the position of the vertices in the current face
-	// except for the end points of he_share
-	vert_t* vs = &verts[he_share->vid];
-	vert_t* ve = &verts[he_share->flip()->vid];
-
-	// compute the spanning vectors for the unfolded mesh
-	QVector3D xvec = vs->pos - ve->pos;
-	xvec.normalize();
-	QVector3D yvec = uvec - QVector3D::dotProduct(uvec, xvec) * xvec;
-	const qreal eps = 1e-6;
-	// To avoid precision issue, check if yvec is too short
-	if (yvec.length() < eps)
-	{
-		yvec = vvec - QVector3D::dotProduct(vvec, xvec) * xvec;
-	}
-	yvec.normalize();
-
-	QVector3D cface_prev = unfolded_mesh->faceCenter(fprev);
-	if (QVector3D::dotProduct(cface_prev - vs->pos, yvec) > 0)
-	{
-		yvec = -yvec;
-	}
-
-	// shared edge in the reference mesh
-	auto he_share_ref = &refHEs[he_share->index];
-	auto face_cur_ref = &refFaces[fcur];
-	auto vs_ref = &refVerts[he_share_ref->vid];
-
-	// compute the spanning vectors for the face in the reference mesh
-	QVector3D cface_ref = ref_mesh->faceCenter(fcur);
-	QVector3D faceN_ref = ref_mesh->faceNormal(fcur);
-
-	QVector3D xvec_ref = ref_mesh->edgeVector(*he_share_ref).normalized();
-	QVector3D yvec_ref = (cface_ref - vs_ref->pos)
-		- QVector3D::dotProduct(cface_ref - vs_ref->pos, xvec_ref) * xvec_ref;
-	yvec_ref.normalize();
-
-	he_t* he = he_share->flip();
-	he_t* curHE = he;
-	do
-	{
-		if (curHE->vid == vs->index || curHE->vid == ve->index)
-		{
-			//continue;
-			// nothing to do, these two should not be modified
-		}
-		else
-		{
-			// compute the new position of the vertex
-			vert_t *v = &verts[curHE->vid];
-			auto v_ref = &refVerts[curHE->vid];
-
-			// compute the coordinates of this vertex using the reference mesh
-			QVector3D dvec_ref = v_ref->pos - vs_ref->pos;
-			qreal xcoord = QVector3D::dotProduct(dvec_ref, xvec_ref);
-			qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec_ref);
-			
-			v->pos = vs->pos + xcoord * xvec + ycoord * yvec;
-		}
-		curHE = curHE->next();
-	} while (curHE != he);
-}
-#endif
-void MeshUnfolder::unfoldFace(hdsid_t prevFid, hdsid_t curFid,
-	HDS_Mesh *unfolded_mesh, const HDS_Mesh *ref_mesh,
-	const QVector3D &uvec, const QVector3D &vvec)
-{
-	auto verts = unfolded_mesh->verts();
-	auto hes = unfolded_mesh->halfedges();
-	auto faces = unfolded_mesh->faces();
-	auto refVerts = ref_mesh->verts();
-	auto refHEs = ref_mesh->halfedges();
-	auto refFaces = ref_mesh->faces();
+	auto &verts = unfolded_mesh->verts();
+	auto &hes = unfolded_mesh->halfedges();
+	auto &faces = unfolded_mesh->faces();
+	auto &refVerts = ref_mesh->verts();
+	auto &refHEs = ref_mesh->halfedges();
+	auto &refFaces = ref_mesh->faces();
 
 	// use the previous face as reference, expand current face
 	face_t* face_prev = &faces[prevFid];
@@ -136,8 +36,8 @@ void MeshUnfolder::unfoldFace(hdsid_t prevFid, hdsid_t curFid,
 	const QVector3D xvec = ref_mesh->edgeVector(*he_share).normalized();
 	const QVector3D yvec = QVector3D::crossProduct(ref_mesh->faceNormal(curFid), xvec);
 
-	const QVector3D udir = -unfolded_mesh->edgeVector(he_share->flip()->index).normalized();
-	const QVector3D vdir = QVector3D::crossProduct(QVector3D(0, 0, 1), udir);
+	const QVector3D udir = unfolded_mesh->edgeVector(he_share->index).normalized();
+	const QVector3D vdir = QVector3D(-udir.y(), udir.x(), 0);
 
 
 	he_t* he = he_share->next()->next();
@@ -146,7 +46,7 @@ void MeshUnfolder::unfoldFace(hdsid_t prevFid, hdsid_t curFid,
 	{
 		// compute the new position of the vertex
 		vert_t* v = &verts[curHE->vid];
-		vert_t* v_ref = &refVerts[curHE->vid];
+		const vert_t* v_ref = &refVerts[curHE->vid];
 
 		// compute the coordinates of this vertex using the reference mesh
 		QVector3D dvec_ref = v_ref->pos - ori_ref;
@@ -203,9 +103,9 @@ bool MeshUnfolder::unfoldable(const HDS_Mesh* ref_mesh)
 void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 {
 	// Define alias to HDS buffers
-	auto &vertSet = unfolded_mesh->vertSet;
-	auto &heSet   = unfolded_mesh->heSet;
-	auto &faceSet = unfolded_mesh->faceSet;
+	auto &vertSet = unfolded_mesh->verts();
+	auto &heSet   = unfolded_mesh->halfedges();
+	auto &faceSet = unfolded_mesh->faces();
 
 	unfolded_mesh->bound.reset(new BBox3(0));
 	auto& bound = unfolded_mesh->bound;
@@ -283,6 +183,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 		/************************************************************************/
 		curBound.pMin += piece_offset;
 		curBound.pMax += piece_offset;
+
 		for (auto vid : verts)
 		{
 			// Apply Orientation to all vertices
@@ -294,9 +195,7 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 }
 
 
-bool MeshUnfolder::unfold(
-	HDS_Mesh* unfolded_mesh, const HDS_Mesh *ref_mesh,
-	set<hdsid_t> fixedFaces)
+HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
 {
 	//progress dialog
 	QProgressDialog unfoldingProgress("Unfolding...", "", 0, 100);
@@ -310,20 +209,18 @@ bool MeshUnfolder::unfold(
 	if (!unfoldable(ref_mesh))
 	{
 		cout << "Mesh can not be unfolded. Check if the cuts are well defined." << endl;
-		return false;
+		return nullptr;
 	}
 
-	auto vertSet = unfolded_mesh->verts();
-	auto heSet   = unfolded_mesh->halfedges();
-	auto faceSet = unfolded_mesh->faces();
-	auto refVertSet = ref_mesh->verts();
-	auto refHeSet   = ref_mesh->halfedges();
-	auto refFaceSet = ref_mesh->faces();
+	mesh_t* unfolded_mesh = new mesh_t(*ref_mesh);
 
-#ifdef _DEBUG
-	cout << "Unfold Piece Count:\t" << ref_mesh->pieceSet.size() << endl;
-#endif
-
+	auto &vertSet = unfolded_mesh->verts();
+	auto &heSet   = unfolded_mesh->halfedges();
+	auto &faceSet = unfolded_mesh->faces();
+	auto &refVertSet = ref_mesh->verts();
+	auto &refHeSet   = ref_mesh->halfedges();
+	auto &refFaceSet = ref_mesh->faces();
+	
 	int progressIndex = 0; // Qt display progress
 	// Hash Table for marking visited face
 	vector<bool> visitedFaces(faceSet.size(), false);
@@ -338,14 +235,12 @@ bool MeshUnfolder::unfold(
 
 		// Start from a face, expand all faces
 		queue<hdsid_t> ProcQueue;
-		//unfolded_mesh->printInfo();
 		ProcQueue.push(initFID);
 
 		vector<hdsid_t> expSeq;     // sequence of expansion
 		unordered_map<hdsid_t, hdsid_t> parentMap;
-		//set<hdsid_t> visited;
-		//set<hdsid_t> frontier;
-		while( !ProcQueue.empty() )
+
+		while (!ProcQueue.empty())
 		{
 			auto cur_fid = ProcQueue.front();
 			ProcQueue.pop();
@@ -358,9 +253,6 @@ bool MeshUnfolder::unfold(
 			expSeq.push_back(cur_fid);
 			// Get all neighbor faces
 			auto neighborFaces = unfolded_mesh->incidentFaceIDs(cur_fid);
-			// Get all non-cut neighbor faces
-			//vector<HDS_Face*> nonCutNeighborFaces = Utils::filter(neighborFaces,
-			//	[](HDS_Face* f) { return !(f->isCutFace); });
 
 			for( auto adjFid : neighborFaces )
 			{
@@ -373,30 +265,26 @@ bool MeshUnfolder::unfold(
 		}
 		
 		// Qt display progress
-		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / fixedFaces.size()));
-
-		// Print out the sequence of performing unfolding
-		//Utils::print(expSeq);
+		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / ref_mesh->pieceSet.size()));
 		
 		if (!expSeq.empty())
 		{
 			hdsid_t frontFid = expSeq.front();
-			// Compute the spanning vectors for the first face
-			QVector3D uvec, vvec;
-			auto face0_ref = &refFaceSet[frontFid];
-			auto he0_ref = &refHeSet[face0_ref->heid];
-			QVector3D cface0_ref = ref_mesh->faceCenter(frontFid);//face0_ref->center();
+
+			//auto face0_ref = &refFaceSet[frontFid];
+			auto he0_ref = ref_mesh->heFromFace(frontFid);
+			QVector3D cface0_ref = ref_mesh->faceCenter(frontFid);
 			
+			// Compute the spanning vectors for the first face
 			// ^ vvec
 			// | 
 			// *---> uvec
-			uvec = ref_mesh->edgeVector(*he0_ref).normalized();
-			vvec = QVector3D::crossProduct(ref_mesh->faceNormal(frontFid), uvec);
+			QVector3D uvec = ref_mesh->edgeVector(*he0_ref).normalized();
+			QVector3D vvec = QVector3D::crossProduct(ref_mesh->faceNormal(frontFid), uvec);
 
 			// Project the first face to XY plane
-			face_t* face0_unf = &faceSet[frontFid];
 			QVector3D oriP = refVertSet[he0_ref->vid].pos;
-			he_t* he_unf = &heSet[face0_unf->heid];
+			he_t* he_unf = unfolded_mesh->heFromFace(frontFid);
 			he_t* curHE = he_unf;
 			do 
 			{
@@ -406,29 +294,24 @@ bool MeshUnfolder::unfold(
 					0);
 				curHE = curHE->next();
 			} while (curHE != he_unf);
-			QVector3D cface0_unf = unfolded_mesh->faceCenter(frontFid);
-			uvec = vertSet[he_unf->vid].pos - cface0_unf;
-			vvec = vertSet[he_unf->flip()->vid].pos - cface0_unf;
+
 			// Unfold the mesh using the sequence
-			// Update the vertex positions of the unfolded mesh base on the geometry of the reference mesh
+			// Update the vertex positions of the unfolded mesh
+			// base on the geometry of the reference mesh
 			for (size_t i = 1; i < expSeq.size(); ++i)
 			{
-				unfoldFace(
-					parentMap.at(expSeq[i]), expSeq[i],
-					unfolded_mesh, ref_mesh, uvec, vvec
-				);
+				unfoldFace(parentMap.at(expSeq[i]), expSeq[i],
+					unfolded_mesh, ref_mesh);
 			}
 		}
 		// Qt display progress
-		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / fixedFaces.size()));
+		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / ref_mesh->pieceSet.size()));
 	}
 
-	//unfolded_mesh->updatePieceSet();
 	// Layout pieces
-	//unfolded_mesh->bound.reset(new BBox3);
 	reset_layout(unfolded_mesh);
 	// Qt display progress
 	unfoldingProgress.setValue(100);
 
-	return true;
+	return unfolded_mesh;
 }

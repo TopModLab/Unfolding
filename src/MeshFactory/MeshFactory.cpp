@@ -16,7 +16,6 @@ void MeshFactory::constructHE(vert_t* v, he_t* he)
 {
 	if(v->heid == sInvalidHDS) v->heid = he->index;
 	he->vid = v->index;
-
 }
 
 
@@ -39,7 +38,6 @@ void MeshFactory::constructFace(
 		(unlinkedHE + i)->fid = face->index;
 	}
 	face->heid = unlinkedHE->index;
-
 }
 
 // Functionality: 

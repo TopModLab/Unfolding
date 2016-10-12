@@ -320,7 +320,6 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\GeomProc\meshloader.cpp" />
     <ClCompile Include="..\src\GeomProc\meshmanager.cpp" />
     <ClCompile Include="..\src\GeomProc\meshsmoother.cpp" />
-    <ClCompile Include="..\src\GeomProc\meshunfolder.cpp" />
     <ClCompile Include="..\src\GeomUtils\BBox.cpp" />
     <ClCompile Include="..\src\GeomUtils\discretegeocomputer.cpp" />
     <ClCompile Include="..\src\GeomUtils\GeodesicComputer.cpp" />
@@ -343,6 +342,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\MeshFactory\MeshNeoWeaver.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshOrigami.cpp" />
     <ClCompile Include="..\src\MeshFactory\meshrimface.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshUnfolder.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshWeaver.cpp" />
     <ClCompile Include="..\src\UI\bridgerpanel.cpp" />
     <ClCompile Include="..\src\UI\bridgerpanelviewer.cpp" />
@@ -482,7 +482,6 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClInclude Include="..\src\GeomProc\meshloader.h" />
     <ClInclude Include="..\src\GeomProc\meshmanager.h" />
     <ClInclude Include="..\src\GeomProc\meshsmoother.h" />
-    <ClInclude Include="..\src\GeomProc\meshunfolder.h" />
     <ClInclude Include="..\src\GeomUtils\BBox.h" />
     <ClInclude Include="..\src\GeomUtils\discretegeocomputer.h" />
     <ClInclude Include="..\src\GeomUtils\GeodesicComputer.h" />
@@ -522,6 +521,7 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClInclude Include="..\src\MeshFactory\MeshNeoWeaver.h" />
     <ClInclude Include="..\src\MeshFactory\MeshOrigami.h" />
     <ClInclude Include="..\src\MeshFactory\meshrimface.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshUnfolder.h" />
     <ClInclude Include="..\src\MeshFactory\MeshWeaver.h" />
     <CustomBuild Include="..\src\UI\bridgerpanel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

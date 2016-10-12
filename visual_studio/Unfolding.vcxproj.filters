@@ -276,9 +276,6 @@
     <ClCompile Include="..\src\GeomUtils\reebgraph.cpp">
       <Filter>Source Files\GeomUtils</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\GeomProc\meshunfolder.cpp">
-      <Filter>Source Files\GeomProc</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\GeomProc\MeshConnector.cpp">
       <Filter>Source Files\GeomProc</Filter>
     </ClCompile>
@@ -326,6 +323,9 @@
     </ClCompile>
     <ClCompile Include="..\src\UI\OrigamiPanel.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MeshFactory\MeshUnfolder.cpp">
+      <Filter>Source Files\Factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -467,9 +467,6 @@
     <ClInclude Include="..\src\GeomProc\meshsmoother.h">
       <Filter>Header Files\GeomProc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\GeomProc\meshunfolder.h">
-      <Filter>Header Files\GeomProc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\GeomProc\MeshConnector.h">
       <Filter>Header Files\GeomProc</Filter>
     </ClInclude>
@@ -487,6 +484,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_OrigamiPanel.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MeshFactory\MeshUnfolder.h">
+      <Filter>Header Files\Factory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
