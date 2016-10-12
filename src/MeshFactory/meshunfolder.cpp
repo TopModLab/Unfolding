@@ -1,4 +1,4 @@
-#include "MeshFactory/meshunfolder.h"
+#include "MeshFactory/MeshUnfolder.h"
 #include "HDS/hds_mesh.h"
 
 #include "Utils/utils.h"
@@ -262,6 +262,7 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
 					parentMap.insert(make_pair(adjFid, cur_fid));
 				}
 			}
+			cout << "in proc queue" << endl;
 		}
 		
 		// Qt display progress

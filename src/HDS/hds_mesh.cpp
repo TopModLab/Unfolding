@@ -101,6 +101,7 @@ void HDS_Mesh::updatePieceSet()
 	for (size_t fid = 0; fid < faceSet.size(); fid++)
 	//for (auto f : faceSet)
 	{
+		cout << "still updating piece set\n";
 		//auto &f = faceSet[i];
 		// If f has not been visited yet
 		// Add to selected faces
@@ -974,6 +975,7 @@ vector<hdsid_t> HDS_Mesh::linkedFaces(hdsid_t inFaceId) const
 	vector<bool> visitedFaces(faceSet.size(), false);
 
 	queue<hdsid_t> ProcQueue;
+	vector<hdsid_t> CutFaces;
 	ProcQueue.push(inFaceId);
 	// Input face should be marked as visited
 	visitedFaces[inFaceId] = true;
@@ -984,22 +986,19 @@ vector<hdsid_t> HDS_Mesh::linkedFaces(hdsid_t inFaceId) const
 
 		// If CutFace is not the last face,
 		// move it to the end of the queue
-		// TODO: Potential issue: current piece can have multiple CutFace
-		if (faceSet[cur_fid].isCutFace && !ProcQueue.empty())
+		if (faceSet[cur_fid].isCutFace)
 		{
-			ProcQueue.push(cur_fid);
+			CutFaces.push_back(cur_fid);
 			continue;
 		}
 		// Otherwise, add to result
-		else
-		{
-			retFaceSet.push_back(cur_fid);
-		}
+		retFaceSet.push_back(cur_fid);
 
 		// Loop face and record all unvisited face into queue
 		auto fhe = heFromFace(cur_fid);
 		auto curHE = fhe;
-		do {
+		do
+		{
 			auto adj_fid = curHE->flip()->fid;
 			curHE = curHE->next();
 			if (!visitedFaces[adj_fid])
@@ -1009,6 +1008,8 @@ vector<hdsid_t> HDS_Mesh::linkedFaces(hdsid_t inFaceId) const
 			}
 		} while (curHE != fhe);
 	}
+	// Move cut face to the end of the result
+	retFaceSet.insert(retFaceSet.end(), CutFaces.begin(), CutFaces.end());
 	return retFaceSet;
 }
 
