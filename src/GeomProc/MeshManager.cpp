@@ -177,7 +177,6 @@ HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 	vector<he_t> hes(heCount);
 	// Temporary Half-Edge Pair Recorder
 	using hepair_t = pair<hdsid_t, hdsid_t>;
-	// TODO: replace by unordered_map
 	unordered_map<hepair_t, hdsid_t, Utils::pair_hash> heMap;
 
 	// Assign vertex positions and ids
@@ -679,7 +678,7 @@ bool MeshManager::setQuadEdge(double fsize, int type, double shift)
 	}
 	else
 	{
-		cout<<"Operation not defined yet"<<endl;
+		cout << "Operation not defined yet" << endl;
 		delete outMesh;
 		return false;
 	}

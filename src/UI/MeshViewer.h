@@ -118,6 +118,7 @@ public:
 	}
 
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
+	void saveScreenShot();
 	
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;

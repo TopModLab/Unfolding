@@ -42,6 +42,16 @@ void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh)
 	update();
 }
 
+void MeshViewer::saveScreenShot()
+{
+	QString filename = QFileDialog::getSaveFileName(
+		this, "Save Screenshot file...", "default", tr("PNG(*.png)"));
+	if (!filename.isEmpty())
+	{
+		this->grab().save(filename);
+	}
+}
+
 
 void MeshViewer::setInteractionMode(InteractionState state)
 {
@@ -553,12 +563,7 @@ void MeshViewer::keyPressEvent(QKeyEvent* e)
 	{
 		if (e->modifiers() == Qt::AltModifier)
 		{
-			QString filename = QFileDialog::getSaveFileName(
-				this, "Save Screenshot file...", "default", tr("PNG(*.png)"));
-			if (!filename.isEmpty())
-			{
-				this->grab().save(filename);
-			}
+			saveScreenShot();
 		}
 		break;
 	}
