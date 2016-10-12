@@ -8,6 +8,11 @@
 
 namespace Utils {
 template <typename T>
+inline void clearQueue(queue<T> &Q)
+{
+	while (!Q.empty()) Q.pop();
+}
+template <typename T>
 inline T Lerp(const T &v1, const T &v2, double t)
 {
 	return v1 * (1 - t) + v2 * t;

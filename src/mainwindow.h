@@ -125,7 +125,7 @@ private:
 
 	void updateCurrentMesh();
 private:
-	Ui::MainWindow *ui;
+	QScopedPointer<Ui::MainWindow> ui;
 	QMap<QString, QAction*> actionsMap;
 
 	QScopedPointer<ColormapEditor> color_editor;
@@ -139,11 +139,6 @@ private:
 	QScopedPointer<WeavePanel> wv_panel;
 	QScopedPointer<NeoWeavePanel> neowv_panel;
 	QScopedPointer<OrigamiPanel> origami_panel;
-
-
-private:
-
-
 };
 
 #endif // MAINWINDOW_H

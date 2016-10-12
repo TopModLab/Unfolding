@@ -109,14 +109,11 @@ private:
 	MeshViewer(const MeshViewer &) = delete;
 	MeshViewer& operator = (const MeshViewer &) = delete;
 
-	~MeshViewer();
+	~MeshViewer() {}
 public:
 	static MeshViewer* getInstance()
 	{
-		if (!instance)
-		{
-			instance = new MeshViewer;
-		}
+		if (!instance) instance = new MeshViewer;
 		return instance;
 	}
 
