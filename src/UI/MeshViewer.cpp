@@ -1,6 +1,6 @@
 #include "UI/MeshViewer.h"
+#include "Utils/utils.h"
 #include <QFileDialog>
-#include "MeshFactory/MeshUnfolder.h"
 #include "UI/SelectByRefIdPanel.h"
 
 MeshViewer* MeshViewer::instance = nullptr;
@@ -29,12 +29,9 @@ MeshViewer::MeshViewer(QWidget *parent)
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	this->setFormat(format);
 
-	//
-	fRBO.vbo = heRBO.vbo = vRBO.vbo = make_shared<oglBuffer>(oglBuffer::Type::VertexBuffer);
-}
-
-MeshViewer::~MeshViewer()
-{
+	// create vbo shared by all components
+	fRBO.vbo = heRBO.vbo = vRBO.vbo
+		= make_shared<oglBuffer>(oglBuffer::Type::VertexBuffer);
 }
 
 void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh)
@@ -333,7 +330,6 @@ void MeshViewer::drawMeshToFBO()
 				selVTX.pop();
 			}
 		}
-		vRBO.vbo->unmap();
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
 		break;
@@ -578,8 +574,9 @@ void MeshViewer::mousePressEvent(QMouseEvent* e)
 	mouseState.x = e->x();
 	mouseState.y = e->y();
 
-	if (e->buttons() == Qt::LeftButton && e->modifiers() == Qt::NoModifier
-		&& interactionState != ROAM_CAMERA)
+	if (e->buttons() == Qt::LeftButton &&
+		e->modifiers() == Qt::NoModifier &&
+		interactionState != ROAM_CAMERA)
 	{
 		drawMeshToFBO();
 		update();
@@ -726,24 +723,49 @@ void MeshViewer::selectAll()
 {
 	switch (interactionState) {
 
+	case SEL_VERT:
+	{
+		Utils::clearQueue(selVTX);
+		auto &verts = heMesh->verts();
+		glBindBuffer(GL_TEXTURE_BUFFER, vRBO.flag_tbo);
+		auto dataptr = (uint16_t*)glMapBuffer(GL_TEXTURE_BUFFER, GL_READ_WRITE);
+		for (int i = 0; i < verts.size(); i++)
+		{
+			verts[i].setPicked(true);
+			*(dataptr + i) ^= 2;
+			selVTX.push(i);
+		}
+		glUnmapBuffer(GL_TEXTURE_BUFFER);
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+		break;
+	}
 	case SEL_FACE:
+	{
 		for (auto &f : heMesh->faces())
 			f.setPicked(true);
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
 		fRBO.allocateTBO();
 		break;
+	}
 	case SEL_EDGE:
-		for (auto &e : heMesh->halfedges())
-			e.setPicked(true);
-		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
-		heRBO.allocateTBO();
+	{
+		Utils::clearQueue(selHE);
+		auto &hes = heMesh->halfedges();
+		glBindBuffer(GL_TEXTURE_BUFFER, heRBO.flag_tbo);
+		auto dataptr = (uint16_t*)glMapBuffer(GL_TEXTURE_BUFFER, GL_READ_WRITE);
+		size_t halfsize = hes.size() / 2;
+		for (size_t i = 0; i < halfsize; i++)
+		{
+			hes[i].setPicked(true);
+			hes[i + halfsize].setPicked(true);
+			*(dataptr + i) ^= 2;
+			selHE.push(i);
+			selHE.push(i + halfsize);
+		}
+		glUnmapBuffer(GL_TEXTURE_BUFFER);
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
 		break;
-	case SEL_VERT:
-		for (auto &v : heMesh->verts())
-			v.setPicked(true);
-		heMesh->exportVertVBO(nullptr, &vRBO.flags);
-		vRBO.allocateTBO(1);// Bind only flag tbo
-		break;
+	}
 	default:
 		break;
 	}

@@ -1,4 +1,4 @@
-#include "HDS/hds_mesh.h"
+#include "HDS/HDS_Mesh.h"
 #include "Utils/mathutils.h"
 #include "Utils/utils.h"
 //#include "UI/MeshViewer.h"
@@ -99,14 +99,10 @@ void HDS_Mesh::updatePieceSet()
 
 	// Find all faces
 	for (size_t fid = 0; fid < faceSet.size(); fid++)
-	//for (auto f : faceSet)
 	{
-		cout << "still updating piece set\n";
-		//auto &f = faceSet[i];
 		// If f has not been visited yet
 		// Add to selected faces
 		if (!visitedFaces[fid])
-		//if (visitedFaces.find(f.index) == visitedFaces.end())
 		{
 			visitedFaces[fid] = true;
 			// Find all linked faces except cut face
@@ -283,8 +279,6 @@ void HDS_Mesh::setMesh(
 	HDS_Vertex::resetIndex();
 	HDS_HalfEdge::resetIndex();
 }
-
-
 
 //usage unknown
 #define MAX_CHAR        128

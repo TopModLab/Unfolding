@@ -1,5 +1,5 @@
 #include "MeshFactory/MeshUnfolder.h"
-#include "HDS/hds_mesh.h"
+#include "HDS/HDS_Mesh.h"
 
 #include "Utils/utils.h"
 #include "Utils/mathutils.h"
@@ -244,10 +244,8 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
 		{
 			auto cur_fid = ProcQueue.front();
 			ProcQueue.pop();
-			if (faceSet[cur_fid].isCutFace)
-			{
-				continue;
-			}
+			if (faceSet[cur_fid].isCutFace) continue;
+
 			visitedFaces[cur_fid] = true;
 			
 			expSeq.push_back(cur_fid);
@@ -262,7 +260,6 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
 					parentMap.insert(make_pair(adjFid, cur_fid));
 				}
 			}
-			cout << "in proc queue" << endl;
 		}
 		
 		// Qt display progress

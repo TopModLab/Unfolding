@@ -317,9 +317,9 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
   <ItemGroup>
     <ClCompile Include="..\src\GeomProc\MeshConnector.cpp" />
     <ClCompile Include="..\src\GeomProc\MeshIterator.cpp" />
-    <ClCompile Include="..\src\GeomProc\meshloader.cpp" />
-    <ClCompile Include="..\src\GeomProc\meshmanager.cpp" />
-    <ClCompile Include="..\src\GeomProc\meshsmoother.cpp" />
+    <ClCompile Include="..\src\GeomProc\MeshLoader.cpp" />
+    <ClCompile Include="..\src\GeomProc\MeshManager.cpp" />
+    <ClCompile Include="..\src\GeomProc\MeshSmoother.cpp" />
     <ClCompile Include="..\src\GeomUtils\BBox.cpp" />
     <ClCompile Include="..\src\GeomUtils\discretegeocomputer.cpp" />
     <ClCompile Include="..\src\GeomUtils\GeodesicComputer.cpp" />
@@ -327,21 +327,21 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClCompile Include="..\src\GeomUtils\morsesmalecomplex.cpp" />
     <ClCompile Include="..\src\GeomUtils\OperationStack.cpp" />
     <ClCompile Include="..\src\GeomUtils\reebgraph.cpp" />
-    <ClCompile Include="..\src\HDS\hds_common.cpp" />
-    <ClCompile Include="..\src\HDS\hds_face.cpp" />
-    <ClCompile Include="..\src\HDS\hds_halfedge.cpp" />
-    <ClCompile Include="..\src\HDS\hds_mesh.cpp" />
-    <ClCompile Include="..\src\HDS\hds_vertex.cpp" />
+    <ClCompile Include="..\src\HDS\HDS_Common.cpp" />
+    <ClCompile Include="..\src\HDS\HDS_Face.cpp" />
+    <ClCompile Include="..\src\HDS\HDS_HalfEdge.cpp" />
+    <ClCompile Include="..\src\HDS\HDS_Mesh.cpp" />
+    <ClCompile Include="..\src\HDS\HDS_Vertex.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\mainwindow.cpp" />
-    <ClCompile Include="..\src\MeshFactory\meshcutter.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshCutter.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshDFormer.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshExtender.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshFactory.cpp" />
-    <ClCompile Include="..\src\MeshFactory\meshhollower.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshHollower.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshNeoWeaver.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshOrigami.cpp" />
-    <ClCompile Include="..\src\MeshFactory\meshrimface.cpp" />
+    <ClCompile Include="..\src\MeshFactory\MeshRimFace.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshUnfolder.cpp" />
     <ClCompile Include="..\src\MeshFactory\MeshWeaver.cpp" />
     <ClCompile Include="..\src\UI\bridgerpanel.cpp" />
@@ -479,9 +479,9 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
   <ItemGroup>
     <ClInclude Include="..\src\GeomProc\MeshConnector.h" />
     <ClInclude Include="..\src\GeomProc\MeshIterator.h" />
-    <ClInclude Include="..\src\GeomProc\meshloader.h" />
-    <ClInclude Include="..\src\GeomProc\meshmanager.h" />
-    <ClInclude Include="..\src\GeomProc\meshsmoother.h" />
+    <ClInclude Include="..\src\GeomProc\MeshLoader.h" />
+    <ClInclude Include="..\src\GeomProc\MeshManager.h" />
+    <ClInclude Include="..\src\GeomProc\MeshSmoother.h" />
     <ClInclude Include="..\src\GeomUtils\BBox.h" />
     <ClInclude Include="..\src\GeomUtils\discretegeocomputer.h" />
     <ClInclude Include="..\src\GeomUtils\GeodesicComputer.h" />
@@ -490,11 +490,11 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
     <ClInclude Include="..\src\GeomUtils\morsesmalecomplex.h" />
     <ClInclude Include="..\src\GeomUtils\OperationStack.h" />
     <ClInclude Include="..\src\GeomUtils\reebgraph.h" />
-    <ClInclude Include="..\src\HDS\hds_common.h" />
-    <ClInclude Include="..\src\HDS\hds_face.h" />
-    <ClInclude Include="..\src\HDS\hds_halfedge.h" />
-    <ClInclude Include="..\src\HDS\hds_mesh.h" />
-    <ClInclude Include="..\src\HDS\hds_vertex.h" />
+    <ClInclude Include="..\src\HDS\HDS_Common.h" />
+    <ClInclude Include="..\src\HDS\HDS_Face.h" />
+    <ClInclude Include="..\src\HDS\HDS_HalfEdge.h" />
+    <ClInclude Include="..\src\HDS\HDS_Mesh.h" />
+    <ClInclude Include="..\src\HDS\HDS_Vertex.h" />
     <CustomBuild Include="..\src\mainwindow.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing mainwindow.h...</Message>
@@ -513,16 +513,6 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_CONSOLE -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL -DQT_SVG_LIB -D_UNICODE "-I$(SolutionDir)..\third_party" "-I$(SolutionDir)..\src" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtSvg" "-I.\debug"</Command>
     </CustomBuild>
-    <ClInclude Include="..\src\MeshFactory\meshcutter.h" />
-    <ClInclude Include="..\src\MeshFactory\MeshDFormer.h" />
-    <ClInclude Include="..\src\MeshFactory\MeshExtender.h" />
-    <ClInclude Include="..\src\MeshFactory\MeshFactory.h" />
-    <ClInclude Include="..\src\MeshFactory\meshhollower.h" />
-    <ClInclude Include="..\src\MeshFactory\MeshNeoWeaver.h" />
-    <ClInclude Include="..\src\MeshFactory\MeshOrigami.h" />
-    <ClInclude Include="..\src\MeshFactory\meshrimface.h" />
-    <ClInclude Include="..\src\MeshFactory\MeshUnfolder.h" />
-    <ClInclude Include="..\src\MeshFactory\MeshWeaver.h" />
     <CustomBuild Include="..\src\UI\bridgerpanel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing bridgerpanel.h...</Message>
@@ -559,6 +549,16 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_CONSOLE -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL -DQT_SVG_LIB -D_UNICODE "-I$(SolutionDir)..\third_party" "-I$(SolutionDir)..\src" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtSvg" "-I.\debug"</Command>
     </CustomBuild>
+    <ClInclude Include="..\src\MeshFactory\MeshCutter.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshDFormer.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshExtender.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshFactory.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshHollower.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshNeoWeaver.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshOrigami.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshRimFace.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshUnfolder.h" />
+    <ClInclude Include="..\src\MeshFactory\MeshWeaver.h" />
     <ClInclude Include="..\src\UI\Camera.h" />
     <ClInclude Include="..\src\UI\colormap.h" />
     <CustomBuild Include="..\src\UI\ConnectorPanel.h">

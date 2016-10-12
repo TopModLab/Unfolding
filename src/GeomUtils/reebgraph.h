@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Utils/common.h"
-#include "HDS/hds_vertex.h"
-#include "HDS/hds_halfedge.h"
-#include "HDS/hds_face.h"
-#include "HDS/hds_mesh.h"
+#include "HDS/HDS_Vertex.h"
+#include "HDS/HDS_HalfEdge.h"
+#include "HDS/HDS_Face.h"
+#include "HDS/HDS_Mesh.h"
 
 #ifdef USE_REEB_GRAPH
 

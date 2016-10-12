@@ -1,12 +1,14 @@
 #include "GeomProc/meshmanager.h"
-#include "MeshFactory/meshcutter.h"
+#include "MeshFactory/MeshCutter.h"
 #include "MeshFactory/MeshUnfolder.h"
 #include "meshsmoother.h"
 #include "MeshFactory/MeshExtender.h"
-#include "MeshFactory/meshhollower.h"
+#include "MeshFactory/MeshHollower.h"
 #include "MeshIterator.h"
 #include "GeomProc/MeshConnector.h"
 #include "Utils/utils.h"
+
+#include <QProgressDialog>
 
 #if USE_REEB_GRAPH
 #include <vtkPolyDataToReebGraphFilter.h>
