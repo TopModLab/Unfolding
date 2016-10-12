@@ -1,12 +1,4 @@
 #include "meshsmoother.h"
-#include "HDS/HDS_Mesh.h"
-#include <iostream>
-
-
-using namespace std;
-MeshSmoother::MeshSmoother()
-{
-}
 
 void MeshSmoother::smoothMesh_perVertex(HDS_Mesh *mesh) {
 	auto vertex_comp = [](const HDS_Vertex *a, const HDS_Vertex *b) {

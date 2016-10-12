@@ -559,14 +559,14 @@ void MeshViewer::keyPressEvent(QKeyEvent* e)
 		view_cam.updateModelView();*/
 		break;
 	}
-	case Qt::Key_S:
+	/*case Qt::Key_S:
 	{
 		if (e->modifiers() == Qt::AltModifier)
 		{
 			saveScreenShot();
 		}
 		break;
-	}
+	}*/
 	}
 }
 

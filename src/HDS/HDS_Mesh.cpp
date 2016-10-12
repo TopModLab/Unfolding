@@ -8,8 +8,6 @@
 #else
 #include "UI/glutils.h"
 #endif
-#include<iostream>
-using namespace std;
 
 HDS_Mesh::HDS_Mesh()
 	: processType(HALFEDGE_PROC)

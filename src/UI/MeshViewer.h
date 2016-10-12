@@ -106,11 +106,11 @@ class MeshViewer : public QOpenGLWidget, oglFuncs
 	Q_OBJECT
 private:
 	explicit MeshViewer(QWidget *parent = nullptr);
+public:
 	MeshViewer(const MeshViewer &) = delete;
 	MeshViewer& operator = (const MeshViewer &) = delete;
-
 	~MeshViewer() {}
-public:
+
 	static MeshViewer* getInstance()
 	{
 		if (!instance) instance = new MeshViewer;
@@ -120,17 +120,6 @@ public:
 	void bindHalfEdgeMesh(HDS_Mesh *mesh);
 	void saveScreenShot();
 	
-protected:
-	void initializeGL() Q_DECL_OVERRIDE;
-	void paintGL() Q_DECL_OVERRIDE;
-	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
-
-	void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
-	void keyReleaseEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
-	void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-	void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-	void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-	void wheelEvent(QWheelEvent* e) Q_DECL_OVERRIDE;
 public:// slots functions
 	void disableclp();
 	void disablecpp();
@@ -165,6 +154,18 @@ public:// slots functions
 	void toggleText();
 
 	void unfoldView(const HDS_Mesh* inMesh);
+
+protected:
+	void initializeGL() Q_DECL_OVERRIDE;
+	void paintGL() Q_DECL_OVERRIDE;
+	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
+
+	void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
+	void keyReleaseEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
+	void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+	void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+	void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+	void wheelEvent(QWheelEvent* e) Q_DECL_OVERRIDE;
 private: // paint function
 	void allocateGL();
 
