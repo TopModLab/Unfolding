@@ -14,7 +14,7 @@
 #include <QOpenGLWidget>
 #include "UI/glutils.h"
 #include "Utils/common.h"
-#include "HDS/hds_mesh.h"
+#include "HDS/HDS_Mesh.h"
 #include "UI/Camera.h"
 #include "UI/ViewerGrid.h"
 #include "UI/colormap.h"
@@ -297,7 +297,6 @@ private:
 	HDS_Mesh* heMesh;   // not own
 	bool mesh_changed;
 	GLfloat view_scale;
-	//QMatrix4x4 model_matrix;
 
 	// VBOs and VAOs
 	// Vertices data and vao

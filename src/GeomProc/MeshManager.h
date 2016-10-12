@@ -14,14 +14,14 @@
 #include <QMessageBox>
 #include <QTime>
 
-#include "GeomProc/meshloader.h"
+#include "GeomProc/MeshLoader.h"
 #include "GeomProc/MeshConnector.h"
 #include "GeomUtils/OperationStack.h"
 
-#include "HDS/hds_mesh.h"
-#include "HDS/hds_face.h"
-#include "HDS/hds_halfedge.h"
-#include "HDS/hds_vertex.h"
+#include "HDS/HDS_Mesh.h"
+#include "HDS/HDS_Face.h"
+#include "HDS/HDS_HalfEdge.h"
+#include "HDS/HDS_Vertex.h"
 #include "GeomUtils/hds_bridger.h"
 
 #include "GeomUtils/Graph.h"
@@ -35,7 +35,7 @@
 class MeshManager
 {
 private:
-	MeshManager() : operationStack(new OperationStack), meshloader(new OBJLoader) {}
+	MeshManager() : operationStack(new OperationStack), MeshLoader(new OBJLoader) {}
 	MeshManager(const MeshManager &) = delete;
 	MeshManager& operator=(const MeshManager &) = delete;
 public:
@@ -125,7 +125,7 @@ private:
 
 	static int panelType;
 	QScopedPointer<OperationStack> operationStack;
-	QScopedPointer<OBJLoader> meshloader;
+	QScopedPointer<OBJLoader> MeshLoader;
 	QScopedPointer<HDS_Mesh> smoothed_mesh;
 	QScopedPointer<GeodesicComputer> gcomp;
 	QScopedPointer<DiscreteGeoComputer> dis_gcomp;

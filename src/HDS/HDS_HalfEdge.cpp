@@ -1,6 +1,6 @@
-#include "HDS/hds_vertex.h"
-#include "HDS/hds_halfedge.h"
-#include "HDS/hds_face.h"
+#include "HDS/HDS_Vertex.h"
+#include "HDS/HDS_HalfEdge.h"
+#include "HDS/HDS_Face.h"
 
 #include <QDebug>
 

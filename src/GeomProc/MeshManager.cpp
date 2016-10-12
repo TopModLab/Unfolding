@@ -2,7 +2,7 @@
 #include "MeshFactory/meshcutter.h"
 #include "meshsmoother.h"
 #include "MeshFactory/MeshExtender.h"
-#include "MeshFactory/meshhollower.h"
+#include "MeshFactory/MeshHollower.h"
 #include "MeshFactory/meshrimface.h"
 #include "MeshFactory/MeshWeaver.h"
 #include "MeshFactory/MeshDFormer.h"
@@ -127,13 +127,13 @@ bool MeshManager::loadOBJFile(const string &filename) {
 	loadingProgress.setCancelButton(0);
 	loadingProgress.setMinimumDuration(1000);
 	// Check if file is successfully loaded
-	if(meshloader->load(filename))
+	if(MeshLoader->load(filename))
 	{
 		cout << "file " << filename << " loaded." << endl;
 
 
 		// build a half edge mesh here
-		mesh_t* msh = buildHalfEdgeMesh(meshloader->getVerts(), meshloader->getFaces());
+		mesh_t* msh = buildHalfEdgeMesh(MeshLoader->getVerts(), MeshLoader->getFaces());
 		if (msh == nullptr)
 		{
 			loadingProgress.close();
@@ -391,7 +391,7 @@ bool MeshManager::initSparseGraph()
 	loadingProgress.setValue(30);
 
 	HDS_Mesh* hds_mesh = operationStack->getOriMesh();
-	auto filename = meshloader->getFilename();
+	auto filename = MeshLoader->getFilename();
 
 	// preprocess the mesh with smoothing
 	const int nsmooth = 10;
@@ -437,8 +437,8 @@ bool MeshManager::initSparseGraph()
 	// initialize the sparse graph
 	if (hds_mesh->verts().size()>10)
 	{
-		ui32s_t* triFids = meshloader->getTriangulatedIndices();
-		auto floatVerts = meshloader->getVerts();
+		ui32s_t* triFids = MeshLoader->getTriangulatedIndices();
+		auto floatVerts = MeshLoader->getVerts();
 		doubles_t doubleVerts(floatVerts.size());
 		for (size_t i = 0; i < floatVerts.size(); i++)
 		{

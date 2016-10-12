@@ -9,7 +9,7 @@
 #include <QFileDialog>
 #include <QString>
 #include "ui_ConnectorPanel.h"
-#include "HDS/hds_mesh.h"
+#include "HDS/HDS_Mesh.h"
 #include "GeomProc/MeshConnector.h"
 
 

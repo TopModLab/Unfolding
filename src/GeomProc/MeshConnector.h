@@ -5,17 +5,8 @@
 #include "GeomUtils/DiscreteGeoComputer.h"
 
 #include "Utils/common.h"
-#include <QMutex>
-#include <QScopedPointer>
-#include <QSharedPointer>
-#include <QProgressDialog>
 
-#include "GeomProc/meshloader.h"
-
-#include "HDS/hds_mesh.h"
-#include "HDS/hds_face.h"
-#include "HDS/hds_halfedge.h"
-#include "HDS/hds_vertex.h"
+#include "HDS/HDS_Mesh.h"
 #include "GeomUtils/hds_bridger.h"
 #include "Utils/mathutils.h"
 
@@ -29,7 +20,7 @@ enum class UNIT_TYPE : int
 	POINT
 };
 
-typedef const char cstchar;
+using cstchar = const char;
 cstchar SVG_HEAD[] =
 	"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" \
 	"<svg width=\"%d\" height=\"%d\" "\
@@ -165,10 +156,6 @@ private:
 	static void wrtieEtchLayer(
 		FILE* SVG_File, const vector<QVector2D> &etch,
 		Float str_wd = 0.01, int seg = 0, Float segLen = 0.0005f);
-
-private:
-	/*static Float pinholesize;
-	static Float he_scale;*/
 };
 
 #endif

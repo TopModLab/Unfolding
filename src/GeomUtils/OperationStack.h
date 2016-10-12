@@ -3,7 +3,7 @@
 
 #include <QScopedPointer>
 #include <QSharedPointer>
-#include "HDS/hds_mesh.h"
+#include "HDS/HDS_Mesh.h"
 
 class OperationStack
 {
