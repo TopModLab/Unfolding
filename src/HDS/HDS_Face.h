@@ -1,6 +1,4 @@
-#ifndef HDS_FACE_H
-#define HDS_FACE_H
-
+#pragma once
 #include "HDS/hds_common.h"
 #include "GeomUtils/BBox.h"
 
@@ -19,10 +17,7 @@ public:
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_FACE; }
 
 	HDS_Face();
-	~HDS_Face() {}
-
-	//HDS_Face(const HDS_Face &other);
-	//HDS_Face operator=(const HDS_Face &other);
+	~HDS_Face();
 
 	// Get the connected half-edge id
 	// Explicit pointer access is handled by HDS_Mesh
@@ -35,20 +30,17 @@ public:
 	// Check if 
 	bool isConnected(const HDS_Face *other);
 
-	void setScaleFactor(Float factor);
+	void setScaleFactor(Float factor) { scalingFactor = factor; }
+	Float getScalingFactor() const { return scalingFactor; }
 	QVector3D scaleCorner(HDS_Vertex* v);
 	vector<QVector3D> getScaledCorners();
 	void scaleDown();
-	Float getScalingFactor() { return scalingFactor; }
 
 	uint16_t getFlag() const { return flag; }
-	//bounding box related, should only work on cut face
-	//void update_bbox();
 public:
 	hdsid_t index;
 	hdsid_t refid;
 
-	//HDS_HalfEdge *he;
 	hdsid_t heid;
 
 	// Flags
@@ -60,7 +52,6 @@ public:
 			bool : 1;
 			bool isPicked : 1;
 			bool isCutFace : 1; //invisible face between cut edges
-			//bool isHole : 1;
 			bool isBridger : 1;
 			bool isNonPlanar : 1;
 			bool isJoint : 1; //woven joint face
@@ -73,9 +64,4 @@ private:
 	// TODO: remove from class member
 	Float scalingFactor;
 	vector<QVector3D> scaledCorners;
-
-	// Bounding box for the objcet
-	//BBox3 *bound;
 };
-
-#endif // HDS_FACE_H

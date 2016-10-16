@@ -36,19 +36,13 @@ public:
 		SHOW_EDGE = 1 << 2,
 		SHOW_NORM = 1 << 3
 	};
-	/*enum ElementType
-	{
-		Face = 0,
-		Edge,
-		Vertex
-	};*/
 
 	HDS_Mesh();
 	HDS_Mesh(vector<vert_t> &verts,
 			 vector<he_t>   &hes,
 			 vector<face_t> &faces);
 	HDS_Mesh(const HDS_Mesh &other);
-	~HDS_Mesh() {}
+	~HDS_Mesh();
 
 	// Reset UID in each component
 	// Mask(Bitwise Operation): face|edge|vertex
@@ -86,15 +80,7 @@ public:
 	void colorVertices(const doubles_t &val);
 
 	/************************************************************************/
-	/* Legacy Drawing Functions                                             */
-	/************************************************************************/
-	void draw(ColorMap cmap);
-	void drawVertexIndices();
-	void drawEdgeIndices();
-	void drawFaceIndices();
-
-	/************************************************************************/
-	/* Modern Rendering Functions                                           */
+	/* Modern OpenGL Rendering Functions                                    */
 	/************************************************************************/
 	void exportVertVBO(floats_t* verts,	ui16s_t* vFLAGs = nullptr) const;
 	void exportEdgeVBO(ui32s_t* heIBOs = nullptr,
@@ -138,19 +124,16 @@ public:
 	void addFace(face_t &f);
 
 #ifdef USE_LEGACY_FACTORY
-    vector<face_t*> incidentFaces(vert_t *v);
-    vector<he_t*>   incidentEdges(vert_t *v);
-    vector<face_t*> incidentFaces(face_t *f);
-
-    he_t* incidentEdge(face_t *f1, face_t *f2);
-    he_t* incidentEdge(vert_t *v1, vert_t *v2);
-
 	static he_t* insertEdge(
 		vector<he_t> &edges, vert_t* v1, vert_t* v2,
 		he_t* he1 = nullptr, he_t* he2 = nullptr);
 #endif // LEGACY_FACTORY
 
-	vector<hdsid_t> incidentFaceIDs(hdsid_t fid);
+	vector<hdsid_t> incidentFacesFromFace(hdsid_t fid);
+	vector<hdsid_t> incidentFacesFromVert(hdsid_t vid);
+	vector<hdsid_t> incidentEdgesFromVert(hdsid_t vid);
+	hdsid_t sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2);
+	hdsid_t sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2);
 
 
 	void selectFace(hdsid_t idx);

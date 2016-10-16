@@ -15,24 +15,9 @@ HDS_HalfEdge::HDS_HalfEdge()
 {
 }
 
-/*
-HDS_HalfEdge::HDS_HalfEdge(const HDS_HalfEdge &other)
-	: fid(other.fid), vid(other.vid)
-	, prev_offset(other.prev_offset)
-	, next_offset(other.next_offset)
-	, flip_offset(other.flip_offset)
-	, cutTwin_offset(other.cutTwin_offset)
-	, brt_offset(other.brt_offset)
-	, index(other.index), refid(other.refid)
-	, flag(other.flag)
+HDS_HalfEdge::~HDS_HalfEdge()
 {
 }
-
-HDS_HalfEdge HDS_HalfEdge::operator=(const HDS_HalfEdge &other)
-{
-	throw "Not implemented.";
-}
-*/
 
 void HDS_HalfEdge::computeCurvature()
 {

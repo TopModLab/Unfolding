@@ -1,21 +1,9 @@
 #include "HDS/HDS_Mesh.h"
 #include "Utils/mathutils.h"
 #include "Utils/utils.h"
-//#include "UI/MeshViewer.h"
-#ifdef OPENGL_LEGACY
-#include <GL/glu.h>
-#include "UI/glutilsLegacy.h"
-#else
-#include "UI/glutils.h"
-#endif
 
 HDS_Mesh::HDS_Mesh()
 	: processType(HALFEDGE_PROC)
-#ifdef OPENGL_LEGACY
-	, showComponent(SHOW_FACE | SHOW_EDGE)
-	, showVert(true), showEdge(true)
-	, showFace(true), showNormals(false)
-#endif
 {
 }
 
@@ -27,11 +15,6 @@ HDS_Mesh::HDS_Mesh(
 	, heSet(std::move(hes))
 	, faceSet(std::move(faces))
 	, processType(HALFEDGE_PROC)
-#ifdef OPENGL_LEGACY
-	, showComponent(SHOW_FACE | SHOW_EDGE)
-	, showVert(true), showEdge(true)
-	, showFace(true), showNormals(false)
-#endif
 {
 }
 
@@ -41,10 +24,6 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	, faceSet(other.faceSet)
 	, processType(other.processType)
 	, pieceSet(other.pieceSet)
-#ifdef OPENGL_LEGACY
-	, showFace(other.showFace), showEdge(other.showEdge)
-	, showVert(other.showVert), showNormals(other.showNormals)
-#endif
 {
 	if (other.bound.get()) bound.reset(new BBox3(*other.bound));
 
@@ -58,32 +37,9 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	}
 }
 
-#if 0 // Legacy code
-void HDS_Mesh::updateSortedFaces()
+HDS_Mesh::~HDS_Mesh()
 {
-	// create the sorted face set
-	cout<<"updating sorted faces"<<endl;
-	sortedFaces.assign(faceSet.begin(), faceSet.end());
-	std::sort(sortedFaces.begin(), sortedFaces.end(), [](const face_t *fa, const face_t *fb) {
-		auto ca = fa->corners();
-		auto cb = fb->corners();
-		Float minZa = 1e9, minZb = 1e9;
-		for (auto va : ca) {
-			minZa = std::min(va->pos.z(), minZa);
-		}
-		for (auto vb : cb) {
-			minZb = std::min(vb->pos.z(), minZb);
-		}
-		return minZa < minZb;
-	});
 }
-
-void HDS_Mesh::clearSortedFaces()
-{
-	sortedFaces.clear();
-}
-#endif
-
 
 void HDS_Mesh::updatePieceSet()
 {
@@ -242,10 +198,7 @@ void HDS_Mesh::printMesh(const string &msg)
 	}
 
 	for(auto f : faceSet) {
-		//if (f->isCutFace)
-		{
-			cout << f << endl;
-		}
+		cout << f << endl;
 	}
 
 	for(auto he : heSet) {
@@ -276,268 +229,6 @@ void HDS_Mesh::setMesh(
 	HDS_Face::resetIndex();
 	HDS_Vertex::resetIndex();
 	HDS_HalfEdge::resetIndex();
-}
-
-//usage unknown
-#define MAX_CHAR        128
-
-#ifdef OPENGL_LEGACY
-void drawString(const char* str, int numb)
-{
-	static int isFirstCall = 1;
-	static GLuint lists;
-
-	if (isFirstCall) {
-		isFirstCall = 0;
-
-		lists = glGenLists(MAX_CHAR);
-
-		wglUseFontBitmaps(wglGetCurrentDC(), 0, MAX_CHAR, lists);
-	}
-
-	//for(int i=0; i<numb; i++){
-
-	glCallList(lists + *str);
-	cout << "ok" << *str << endl;
-
-	//}
-}
-void display(int num)
-{
-
-	glColor3f(1.0f, 1.0f, 1.0f);
-	//    glRasterPos2f(0.0f, 0.0f);
-	//     glScalef(100,100,100);
-	char ss[20];
-	itoa(num, ss, 10);
-	drawString(ss, num);
-	num = 0;
-
-}
-#endif
-void HDS_Mesh::draw(ColorMap cmap)
-{
-#ifdef OPENGL_LEGACY
-	if (showFace)
-	{
-		GLfloat face_mat_diffuse[4] = { 0.75, 0.75, 0.75, 1 };
-		GLfloat face_mat_diffuse_selected[4] = { 1, 0, 0.5, 1 };
-		GLfloat face_mat_diffuse_bridger[4] = { 0.75, 0.75, 0.95, 1 };
-
-
-		// traverse the mesh and render every single face
-		for (auto fit = sortedFaces.begin(); fit != sortedFaces.end(); fit++)
-		{
-			face_t* f = (*fit);
-			if (f->isCutFace) continue; //invisible face
-													 // render the faces
-			he_t* he = f->he;
-			he_t* hen = he->next;
-			he_t* hep = he->prev;
-
-
-			he_t* curHe = he;
-
-			if (f->isPicked) {
-				glColor4f(1, 0, 0.5, 1);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_selected);
-
-			}
-			else if (f->isBridger) {
-				glColor4f(0.75, 0.75, 0.95, 1);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse_bridger);
-			}
-
-			else {
-				glColor4f(0.75, 0.75, 0.75, 1);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, face_mat_diffuse);
-			}
-
-			int vcount = 0;
-			glBegin(GL_POLYGON);
-			do
-			{
-				++vcount;
-				vert_t* v = curHe->v;
-
-				// interpolation
-				if (!f->isBridger) {
-					//QColor clr = cmap.getColor_discrete(v->colorVal);
-					//GLUtils::setColor(QColor(0.75,0.75,0.75), 0.3); //commented out face color variation
-				}
-				GLUtils::useNormal(v->normal);
-				GLUtils::useVertex(v->pos);
-				curHe = curHe->next;
-			} while (curHe != he);
-			glEnd();
-
-
-		}
-	}
-
-	if (showEdge)
-	{
-
-		glColor4f(0.25, 0.25, 0.25, 1);
-		GLfloat line_mat_diffuse[4] = { 0.25, 0.25, 0.25, 1 };
-		GLfloat line_mat_diffuse_selected[4] = { 1, 0, 0.5, 1 };
-		GLfloat line_mat_diffuse_cutEdge[4] = { 0, 1, 0, 1 };
-
-
-		glLineWidth(2.0);
-		// render the boundaires
-		for (auto eit = heSet.begin(); eit != heSet.end(); eit++)
-		{
-			he_t* e = (*eit);
-			he_t* en = e->next;
-
-			QColor c = Qt::black;
-			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
-
-			if (e->isPicked) {
-				c.setRgbF(1.0, 0.0, 0.5, 1.0);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse_selected);
-			}
-			else if (e->isCutEdge) {
-				c = Qt::green;
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse_cutEdge);
-
-			}
-
-			GLUtils::drawLine(e->v->pos, en->v->pos, c);
-		}
-	}
-
-	if (showVert || showNormals) {
-		glColor4f(0, 0, 1, 1);
-		GLfloat vert_mat_diffuse[4] = { 1, 1, 0, 1 };
-		GLfloat vert_mat_diffuse_selected[4] = { 1, 0, 0.5, 1 };
-
-
-		// render the boundaires
-		for (auto vit = vertSet.begin(); vit != vertSet.end(); vit++)
-		{
-			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vert_mat_diffuse);
-			vert_t* v = (*vit);
-			glPushMatrix();
-			glTranslatef(v->x(), v->y(), v->z());
-#if 0
-			glutSolidSphere(0.125, 16, 16);
-#else
-			glPointSize(5.0);
-			if (v->isPicked) {
-				glColor4f(1, 0, 0.5, 1);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vert_mat_diffuse_selected);
-
-			}
-			else
-			{
-				double c = .5 - clamp(v->curvature, -Pi / 2, Pi / 2) / Pi; //[0, 1]
-																		   //cout << v->index << ":" << v->curvature << ", " << c << endl;
-																		   //        if( c < 0.5 ) {
-																		   //          glColor4f(0.0, (0.5 - c)*2, c*2.0, 1.0);
-																		   //        }
-																		   //        else {
-																		   //          glColor4f(c, (c-0.5, 0.0, 1.0);
-																		   //        }
-																		   //glColor4f(c, 1-c, 1-c, 1.0); //commented out show colors depanding on curvature
-				glColor4f(0.55, 0.55, 0.55, 0.0);
-			}
-
-			if (showVert)
-			{
-				glBegin(GL_POINTS);
-				glVertex3f(0, 0, 0);
-				glEnd();
-			}
-			if (showNormals)
-			{
-				glBegin(GL_LINES);
-
-				GLUtils::setColor(Qt::green);
-				GLUtils::useVertex(QVector3D(0, 0, 0));
-				GLUtils::useVertex(v->normal);
-
-				glEnd();
-			}
-#endif
-			glPopMatrix();
-		}
-	}
-#endif
-}
-
-void HDS_Mesh::drawVertexIndices()
-{
-#ifdef OPENGL_LEGACY
-	glColor4f(0, 0, 1, 1);
-	GLfloat line_mat_diffuse[4] = { 1, 0, 0, 1 };
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, line_mat_diffuse);
-
-	// render the boundaires
-	for (auto vit = vertSet.begin(); vit != vertSet.end(); vit++)
-	{
-		vert_t* v = (*vit);
-		glPushMatrix();
-		glTranslatef(v->x(), v->y(), v->z());
-#if 0
-		glutSolidSphere(0.125, 16, 16);
-#else
-		glPointSize(15.0);
-
-		Float r, g, b;
-		encodeIndex<Float>(v->index, r, g, b);
-		glColor4f(r, g, b, 1.0);
-
-		glBegin(GL_POINTS);
-		glVertex3f(0, 0, 0);
-		glEnd();
-#endif
-		glPopMatrix();
-	}
-#endif
-}
-
-void HDS_Mesh::drawEdgeIndices()
-{
-#ifdef OPENGL_LEGACY
-	for (auto eit = heSet.begin(); eit != heSet.end(); eit++)
-	{
-		he_t* e = (*eit);
-		he_t* en = e->next;
-
-		// draw only odd index half edges
-		if (e->index & 0x1) continue;
-
-		Float r, g, b;
-		encodeIndex<Float>(e->index, r, g, b);
-		glLineWidth(2.0);
-		GLUtils::drawLine(e->v->pos, en->v->pos, QColor::fromRgbF(r, g, b));
-	}
-#endif
-}
-
-void HDS_Mesh::drawFaceIndices()
-{
-#ifdef OPENGL_LEGACY
-	for (auto &f : faceSet) {
-		Float r, g, b;
-		encodeIndex<Float>(f->index, r, g, b);
-		glColor4f(r, g, b, 1.0);
-
-		he_t* he = f->he;
-		he_t* curHe = he;
-
-		glBegin(GL_POLYGON);
-		do
-		{
-			vert_t* v = curHe->v;
-			GLUtils::useVertex(v->pos);
-			curHe = curHe->next;
-		} while (curHe != he);
-		glEnd();
-	}
-#endif
 }
 
 void HDS_Mesh::exportVertVBO(
@@ -1048,7 +739,7 @@ void HDS_Mesh::addFace(face_t &face)
 	faceSet.push_back(face);
 }
 
-std::vector<hdsid_t> HDS_Mesh::incidentFaceIDs(hdsid_t fid)
+std::vector<hdsid_t> HDS_Mesh::incidentFacesFromFace(hdsid_t fid)
 {
 	vector<hdsid_t> ret;
 	auto he = heFromFace(fid);
@@ -1062,75 +753,70 @@ std::vector<hdsid_t> HDS_Mesh::incidentFaceIDs(hdsid_t fid)
 	return ret;
 }
 
-#ifdef USE_LEGACY_FACTORY
-vector<HDS_Face*> HDS_Mesh::incidentFaces(vert_t *v)
+vector<hdsid_t> HDS_Mesh::incidentFacesFromVert(hdsid_t vid)
 {
-	vector<face_t*> faces;
-
-	he_t *he = &heSet[v->heid];
-	he_t *curHe = he;
-	do {
-		faces.push_back(&faceSet[curHe->fid]);
-		curHe = curHe->rotCW();
-	} while( curHe != he );
-
-	return faces;
-}
-// all outgoing half edges of vertex v
-vector<HDS_HalfEdge*> HDS_Mesh::incidentEdges(vert_t *v)
-{
-	he_t *he = &heSet[v->heid];
-	he_t *curHe = he;
-	vector<he_t*> hes;
-	do {
-		hes.push_back(curHe);
-		curHe = curHe->rotCW();
-	} while( curHe != he );
-	return hes;
-}
-
-vector<HDS_Face*> HDS_Mesh::incidentFaces(face_t *f)
-{
-	he_t *he = &heSet[f->heid];
-	he_t *curHe = he;
-	vector<face_t*> faces;
-	do {
-		faces.push_back(&faceSet[curHe->flip()->fid]);
-		curHe = curHe->next();
-	} while( curHe != he );
-	return faces;
-}
-
-HDS_HalfEdge* HDS_Mesh::incidentEdge(face_t *f1, face_t *f2)
-{
-	if(f1 == f2) return nullptr;
-	he_t *he = &heSet[f1->heid];
-	he_t *curHe = he;
-	do {
-		if(curHe->flip()->fid == f2->index)
-			return curHe;
-		curHe = curHe->next();
-	} while( curHe != he );
-
-	return nullptr;
-}
-
-HDS_HalfEdge* HDS_Mesh::incidentEdge(vert_t *v1, vert_t *v2)
-{
-	if(v1 == v2) return nullptr;
-	if(v1->heid == sInvalidHDS || v2->heid == sInvalidHDS) return nullptr;
-
-	he_t * he = &heSet[v1->heid];
-	he_t * curHE = he;
-	do {
-		if(curHE->flip()->vid == v2->index)
-			return curHE;
+	vector<hdsid_t> ret;
+	auto he = heFromVert(vid);
+	auto curHE = he;
+	do
+	{
+		ret.push_back(curHE->fid);
 		curHE = curHE->rotCW();
 	} while (curHE != he);
 
-	return nullptr;
+	return ret;
+}
+// all outgoing half edges of vertex v
+vector<hdsid_t> HDS_Mesh::incidentEdgesFromVert(hdsid_t vid)
+{
+	vector<hdsid_t> ret;
+	auto he = heFromVert(vid);
+	auto curHE = he;
+	do
+	{
+		ret.push_back(curHE->index);
+		curHE = curHE->rotCW();
+	} while (curHE != he);
+
+	return ret;
 }
 
+hdsid_t HDS_Mesh::sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2)
+{
+	if (fid1 == fid2) return sInvalidHDS;
+
+	auto he = heFromFace(fid1);
+	auto curHE = he;
+	do
+	{
+		if (curHE->flip()->fid == fid2)
+		{
+			return curHE->index;
+		}
+		curHE = curHE->next();
+	} while (curHE != he);
+
+	return sInvalidHDS;
+}
+
+hdsid_t HDS_Mesh::sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2)
+{
+	if (vid1 == vid2) return sInvalidHDS;
+
+	auto he = heFromVert(vid1);
+	auto curHE = he;
+	do {
+		if (curHE->flip()->vid == vid2)
+		{
+			return curHE->index;
+		}
+		curHE = curHE->rotCW();
+	} while (curHE != he);
+
+	return sInvalidHDS;
+}
+
+#ifdef USE_LEGACY_FACTORY
 HDS_HalfEdge* HDS_Mesh::insertEdge(
 	vector<he_t> &edges, vert_t* v1, vert_t* v2, he_t* he1, he_t* he2)
 {

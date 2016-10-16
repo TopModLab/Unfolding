@@ -1,5 +1,4 @@
-#ifndef HDS_EDGE_H
-#define HDS_EDGE_H
+#pragma once
 #include "HDS/hds_common.h"
 
 class HDS_HalfEdge : public HDS_Common
@@ -14,11 +13,8 @@ public:
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_EDGE; }
 
 	HDS_HalfEdge();
-	~HDS_HalfEdge(){}
-
-	//HDS_HalfEdge(const HDS_HalfEdge& other);
-	//HDS_HalfEdge operator=(const HDS_HalfEdge& other);
-
+	~HDS_HalfEdge();
+	
 	// Get the explicit pointer to corresponding edges
 	HDS_HalfEdge* prev() { return this + prev_offset; }
 	HDS_HalfEdge* next() { return this + next_offset; }
@@ -42,8 +38,14 @@ public:
 
 	void setPicked(bool v) { isPicked = v; flip()->isPicked = v; }
 	void setCutEdge(bool v) { isCutEdge = v; flip()->isCutEdge = v; }
-	void setFlip(HDS_HalfEdge* f_e) { flip_offset = f_e - this; f_e->flip_offset = -flip_offset; }
-	void setBridgeTwin(HDS_HalfEdge* bt_e) { brt_offset = bt_e - this; bt_e->brt_offset = -brt_offset; }
+	void setFlip(HDS_HalfEdge* f_e) {
+		flip_offset = f_e - this;
+		f_e->flip_offset = -flip_offset;
+	}
+	void setBridgeTwin(HDS_HalfEdge* bt_e) {
+		brt_offset = bt_e - this;
+		bt_e->brt_offset = -brt_offset;
+	}
 
 	uint16_t getFlag() const { return flag; }
 	// TODO: move to mesh factory
@@ -53,22 +55,15 @@ public:
 	hdsid_t index;
 	hdsid_t refid;
 
-	//HDS_Face *f;
 	hdsid_t fid;
 	hdsid_t vid;
-	//HDS_Vertex *v;
 
 	// Offset to index of previous/nex/flip edge
-	// previous/nex/flip edge doesn't exist
-	// when (previous/nex/flip == 0)
+	// previous/nex/flip edge doesn't exist, when (previous/nex/flip == 0)
 	int32_t prev_offset, next_offset, flip_offset;
-	//HDS_HalfEdge *prev, *next, *flip;
 
-	int32_t cutTwin_offset;
+	int32_t cutTwin_offset;// pointer to its twin halfedge created in a cut event
 	int32_t brt_offset;// Bridge-Tween Edge Offset
-	//HDS_HalfEdge *cutTwin;  // pointer to its twin halfedge created in a cut event
-	//HDS_HalfEdge *bridgeTwin;
-
 
 	union
 	{
@@ -86,5 +81,3 @@ public:
 	
 	Float angle;
 };
-
-#endif // HDS_EDGE_H

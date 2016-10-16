@@ -31,16 +31,8 @@ ui32s_t* MeshLoader::getTriangulatedIndices() const
 	return ret;
 }
 
-void MeshLoader::clear() {
-	/*verts.clear();
-	faces.clear();
-	texcoords.clear();
-	normals.clear();
-
-	verts.reserve(131076);
-	normals.reserve(131076);
-	texcoords.reserve(131076);
-	faces.reserve(131076*2);*/
+void MeshLoader::clear()
+{
 	m_verts.clear();
 	m_uvs.clear();
 	m_norms.clear();
@@ -170,7 +162,7 @@ void MeshLoader::estimateNormals()
 	}
 }
 */
-istream& operator>>(istream& is, QVector3D& v) {
+istream& operator>>(istream& is, QVector3D& v) {;
 	qreal x, y, z;
 	is >> x >> y >> z;
 	v.setX(x); v.setY(y); v.setZ(z);
@@ -219,20 +211,16 @@ OBJLoader::index_t OBJLoader::facetype(const char * str, uint32_t * val)
 	int argv = sscanf(str, "%d/%d/%d", val, val + 1, val + 2);
 	switch (argv)
 	{
-	case 3:// V/T/N
-		return VTN;//111
-	case 2:// V/T
+	case 3:// V/T/N : 111
+		return VTN;
+	case 2:// V/T : 011
 		return VT;//011
 	case 1:
 		argv = sscanf(str, "%d//%d", val, val + 2);
-		if (argv == 2)// V//N
-		{
-			return VN;//101
-		}
-		else// V
-		{
-			return V;//001
-		}
+		// V//N : 101
+		if (argv == 2) return VN;
+		// V : 001
+		else return V;
 	}
 }
 

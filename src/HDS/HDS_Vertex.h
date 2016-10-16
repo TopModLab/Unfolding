@@ -1,6 +1,4 @@
-#ifndef HDS_VERTEX_H
-#define HDS_VERTEX_H
-
+#pragma once
 #include "HDS/hds_common.h"
 
 class HDS_Vertex : public HDS_Common
@@ -24,10 +22,7 @@ public:
 	void setRefId(hdsid_t id) { refid = (id << 2) + HDS_Common::FROM_VERTEX; }
 
 	HDS_Vertex(const QVector3D &p = QVector3D());
-	//HDS_Vertex(const HDS_Vertex &other);
-	~HDS_Vertex() {}
-
-	//HDS_Vertex operator=(const HDS_Vertex &other);
+	~HDS_Vertex();
 
 	// Get the connected half-edge id
 	// Explicit pointer access is handled by HDS_Mesh
@@ -48,7 +43,6 @@ public:
 	hdsid_t index;
 	hdsid_t refid;
 
-	//HDS_HalfEdge *he;
 	hdsid_t heid;
 
 	union
@@ -70,5 +64,3 @@ public:
 	Float morseFunctionVal;
 	int32_t sdegree;  // the degree of saddle point
 };
-
-#endif // HDS_VERTEX_H

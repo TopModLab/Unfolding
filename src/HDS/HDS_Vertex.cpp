@@ -12,24 +12,9 @@ HDS_Vertex::HDS_Vertex(const QVector3D &p)
 {
 }
 
-/*
-HDS_Vertex::HDS_Vertex(const HDS_Vertex &other)
-	: index(other.index), refid(other.refid)
-	, flag(other.flag)
-	, pos(other.pos), normal(other.normal)
-	, curvature(other.curvature), colorVal(other.colorVal)
-	, rtype(other.rtype), morseFunctionVal(other.morseFunctionVal)
-	, heid(other.heid)
+HDS_Vertex::~HDS_Vertex()
 {
 }
-
-HDS_Vertex HDS_Vertex::operator=(const HDS_Vertex &other)
-{
-	throw "Not implemented.";
-}
-HDS_Vertex::~HDS_Vertex(){}
-
-*/
 
 vector<HDS_Vertex*> HDS_Vertex::neighbors() const
 {

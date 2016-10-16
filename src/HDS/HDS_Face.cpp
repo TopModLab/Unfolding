@@ -11,112 +11,10 @@ HDS_Face::HDS_Face()
 	, scalingFactor(1)
 {
 }
-/*
-set<HDS_Face *> HDS_Face::connectedFaces() const
+
+HDS_Face::~HDS_Face()
 {
-	// Find all faces that are directly connected to current face
-	set<HDS_Face*> faces;
-
-#ifdef USE_LEGACY_FACTORY
-	//TODO: force cast
-	faces.insert(const_cast<HDS_Face*>(this));
-	auto curHE = this->he;
-	do {
-		auto f = curHE->flip()->f;
-		if (faces.find(f) == faces.end()) {
-			faces.insert(f);
-		}
-		curHE = curHE->next;
-	} while (curHE != he);
-#endif
-	return faces;
 }
-
-set<HDS_Face *> HDS_Face::linkedFaces()
-{
-	// Find all linked faces
-	set<HDS_Face*> faces;
-
-#ifdef USE_LEGACY_FACTORY
-	set<HDS_Face*> visitedFaces;
-	queue<HDS_Face*> Q;
-	Q.push(this);
-	while (!Q.empty())
-	{
-		auto cur = Q.front();
-		Q.pop();
-		faces.insert(cur);
-		if (visitedFaces.find(cur) == visitedFaces.end())
-		{
-			visitedFaces.insert(cur);
-		}
-
-		auto fhe = cur->he;
-		auto curHE = fhe;
-		do {
-			auto f = curHE->flip()->f;
-			if (faces.find(f) == faces.end() && visitedFaces.find(f)== visitedFaces.end())
-			{
-				faces.insert(f);
-				visitedFaces.insert(f);
-				Q.push(f);
-			}
-			curHE = curHE->next;
-		} while (curHE != fhe);
-	}
-#endif
-	return faces;
-}
-
-QVector3D HDS_Face::center() const
-{
-	auto cs = corners();
-	QVector3D c;
-	for(auto p : cs) {
-		c += p->pos;
-	}
-	c /= (qreal) cs.size();
-	return c;
-}
-
-vector<HDS_Vertex*> HDS_Face::corners() const
-{
-	vector<HDS_Vertex*> corners;
-#ifdef USE_LEGACY_FACTORY
-	HDS_HalfEdge *curHE = he;
-	do {
-		corners.push_back(curHE->v);
-		curHE = curHE->next;
-	} while( curHE != he );
-#endif
-	return corners;
-}
-
-QVector3D HDS_Face::computeNormal() 
-{
-#ifdef USE_LEGACY_FACTORY
-	QVector3D c = center();
-	n = QVector3D::crossProduct(he->v->pos - c, he->next()->v->pos - c);
-	n.normalize();
-#endif
-	return n;
-}
-
-QVector3D HDS_Face::computeNormal() const
-{
-#ifdef USE_LEGACY_FACTORY
-	QVector3D c = center();
-	QVector3D n = QVector3D::crossProduct(he->v->pos - c, he->next()->v->pos - c);
-	n.normalize();
-#endif
-	return n;
-}
-*/
-void HDS_Face::setScaleFactor(Float factor)
-{
-	scalingFactor = factor;
-}
-
 
 QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
 {
@@ -166,8 +64,6 @@ QVector3D HDS_Face::scaleCorner(HDS_Vertex* v)
    return v0_scaled;*/
 
 }
-
-
 
 vector<QVector3D> HDS_Face::getScaledCorners()
 {
