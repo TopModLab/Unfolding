@@ -1,5 +1,5 @@
 #include "MeshOrigami.h"
-
+#include "Utils/utils.h"
 HDS_Mesh* MeshOrigami::create(
 	const mesh_t* ref, const confMap &conf)
 {
@@ -13,7 +13,7 @@ HDS_Mesh* MeshOrigami::createOrigami(
 
 	const float patchScale = conf.at("patchScale");
 	const float foldDepth = conf.at("foldDepth");
-
+	const float foldDepthOffset = 0.5;
 	HDS_Vertex::resetIndex();
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();
@@ -58,15 +58,30 @@ HDS_Mesh* MeshOrigami::createOrigami(
 			QVector3D pn = QVector3D::normal(e, en);
 			QVector3D n1 = (vn1 - (QVector3D::dotProduct(vn1, pn)) * pn).normalized();
 			QVector3D n2 = (vn2 - (QVector3D::dotProduct(vn2, pn)) * pn).normalized();
+			
 			QVector3D v11 = m->verts()[he1.vid].pos;
 			QVector3D v12 = m->verts()[he1.next()->vertID()].pos;
 			QVector3D v21 = m->verts()[he2.next()->vertID()].pos;
 			QVector3D v22 = m->verts()[he2.vid].pos;
-			
+			//extrude along the direction of edge normal
+
+			QVector3D v11_in, v12_in, v21_in, v22_in;
+			Utils::LineLineIntersect(v11 - foldDepth *en, v12 - foldDepth*en, v11, v11 - n1, &v11_in);
+			Utils::LineLineIntersect(v11 - foldDepth *en, v12 - foldDepth*en, v12, v12 - n2, &v12_in);
+			Utils::LineLineIntersect(v21 - foldDepth *en, v22 - foldDepth*en, v21, v21 - n1, &v21_in);
+			Utils::LineLineIntersect(v21 - foldDepth *en, v22 - foldDepth*en, v22, v22 - n2, &v22_in);
+			vector<QVector3D> vpos1({ v11_in, v21_in });
+			vector<QVector3D> vpos2({ v12_in, v22_in });
+
+			//uneven bridge edges
+			/*
 			vector<QVector3D> vpos1({
-				v11 - foldDepth * n1, v21 - foldDepth * n1 });
+				v11 - foldDepth * ((1 - foldDepthOffset) * 2) * n1,
+				v21 - foldDepth * ((1 - foldDepthOffset) * 2) * n1 });
 			vector<QVector3D> vpos2({ 
-				v12 - foldDepth * n2, v22 - foldDepth * n2 });
+				v12 - foldDepth * (foldDepthOffset * 2) * n2,
+				v22 - foldDepth * (foldDepthOffset * 2) * n2 });
+			*/
 
 			size_t heOriSize = m->halfedges().size();
 			// generate bridge
