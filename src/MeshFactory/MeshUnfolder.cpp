@@ -209,6 +209,10 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh * ref_mesh)
 		// Otherwise, return null.
 		if (msgBox.exec() == QMessageBox::Cancel) return nullptr;
 	}
+	for (auto heid : dirtyEdges)
+	{
+		ret_mesh->heSet[heid].isPicked = true;
+	}
 	return ret_mesh;
 }
 
