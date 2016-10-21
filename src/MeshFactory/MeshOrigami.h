@@ -8,4 +8,5 @@ public:
 private:
 	static HDS_Mesh* createOrigami(
 		const mesh_t* ref_mesh, const confMap &conf);
+
 };
