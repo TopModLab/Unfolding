@@ -539,27 +539,28 @@ void HDS_Mesh::exportFaceVBO(
 	}
 }
 
-void HDS_Mesh::exportSelection(ui32q_t* selVTX, ui32q_t* selHE, ui32q_t* selFACE)
+void HDS_Mesh::exportSelection(
+	selSeq_t* selVTX, selSeq_t* selHE, selSeq_t* selFACE)
 {
 	if (selVTX != nullptr)
 	{
 		for (auto v : vertSet)
 		{
-			if (v.isPicked) selVTX->push(v.index);
+			if (v.isPicked) selVTX->insert(v.index);
 		}
 	}
 	if (selHE != nullptr)
 	{
 		for (auto he : heSet)
 		{
-			if (he.isPicked) selHE->push(he.index);
+			if (he.isPicked) selHE->insert(he.index);
 		}
 	}
 	if (selFACE != nullptr)
 	{
 		for (auto f : faceSet)
 		{
-			if (f.isPicked) selFACE->push(f.index);
+			if (f.isPicked) selFACE->insert(f.index);
 		}
 	}
 }
@@ -814,6 +815,36 @@ hdsid_t HDS_Mesh::sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2)
 	} while (curHE != he);
 
 	return sInvalidHDS;
+}
+
+bool HDS_Mesh::checkPlanarFace(hdsid_t fid)
+{
+	auto &f = faceSet[fid];
+	auto fVerts = faceCorners(fid);
+	QVector3D normal = QVector3D::crossProduct(
+		vertSet[fVerts[1]].pos - vertSet[fVerts[0]].pos,
+		vertSet[fVerts[2]].pos - vertSet[fVerts[0]].pos
+	);
+
+	for (int i = 3; i < fVerts.size(); i++)
+	{
+		Float dot = QVector3D::dotProduct(normal,
+			vertSet[fVerts[i]].pos - vertSet[fVerts[0]].pos);
+		if (fabsf(dot) > 0.3)
+		{
+			f.isNonPlanar = true;
+			return false;
+		}
+	}
+	return true;
+}
+
+void HDS_Mesh::updatePlanarFlag()
+{
+	for (hdsid_t i = 0; i < faceSet.size(); i++)
+	{
+		checkPlanarFace(i);
+	}
 }
 
 #ifdef USE_LEGACY_FACTORY

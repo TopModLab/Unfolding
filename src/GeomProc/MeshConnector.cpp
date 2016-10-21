@@ -47,7 +47,6 @@ MeshConnector::MeshConnector()
 void MeshConnector::exportQuadEdgePiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-#ifdef USE_LEGACY_FACTORY
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -86,10 +85,14 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 		static_cast<int>(size_vec.y() * he_scale) + 50);
 
 	int printFaceID(0), printCircleID(0);
+
+	auto &verts = unfolded_mesh->verts();
+	auto &hes = unfolded_mesh->halfedges();
+	vector<bool> visitedHE(hes.size(), false);
 	// Go through each piece
 	for (auto piece : unfolded_mesh->pieceSet)
 	{
-		vector<face_t *> cutfaces;
+		vector<face_t*> cutfaces;
 
 		vector<QVector2D> printBorderEdgePts;//Edges on the boundary
 		vector<QVector2D> printEdgePtsCarves;
@@ -103,22 +106,21 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 		vector<QVector2D> printOrientLabel;
 
 		vector<QVector2D> printEtchEdges;
-		unordered_set<he_t*> visitedEtchEdges;
 
 		// Group current piece
 		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
 			const face_t *curFace = &unfolded_mesh->faceSet[fid];
-			auto he = curFace->he;
+			auto he = unfolded_mesh->heFromFace(fid);
 			auto curHE = he;
 			// Cut layer
 			if (curFace->isCutFace)
 			{
 				do
 				{
-					printBorderEdgePts.push_back(curHE->v->pos.toVector2D() * he_scale);
-					curHE = curHE->next;
+					printBorderEdgePts.push_back(verts[curHE->vid].pos.toVector2D() * he_scale);
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 			// Etch layer
@@ -127,22 +129,20 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 				// Write points of each edge
 				do
 				{
-					if (!curHE->isCutEdge
-						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
+					if (!curHE->isCutEdge && !visitedHE[curHE->index])
 					{
-						printEtchEdges.push_back(curHE->v->pos.toVector2D() * he_scale);
-						printEtchEdges.push_back(curHE->next()->v->pos.toVector2D() * he_scale);
-						visitedEtchEdges.insert(curHE);
-						visitedEtchEdges.insert(curHE->flip);
+						printEtchEdges.push_back(verts[curHE->vid].pos.toVector2D() * he_scale);
+						printEtchEdges.push_back(verts[curHE->next()->vid].pos.toVector2D() * he_scale);
+						visitedHE[curHE->index] = visitedHE[curHE->flip()->index] = true;
 					}
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 			else
 			{
 				// Add pinholes
-				vector<he_t*> cutedges;
-				he_t* refedge;
+				vector<const he_t*> cutedges;
+				const he_t* refedge;
 				// Find ref edge, which is the boundary of shared face
 				// Find cut edge, which refers to conner of the flap
 				do
@@ -155,30 +155,30 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 					{
 						cutedges.push_back(curHE);
 					}
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 				for (auto cut_he : cutedges)
 				{
-					vert_t* targetV;
-					vert_t* targetNextV;
-					he_t* targHE;
-					if (cut_he->next == refedge)
+					const vert_t* targetV;
+					const vert_t* targetNextV;
+					const he_t* targHE;
+					if (cut_he->next() == refedge)
 					{
 						targHE = refedge;
-						targetV = refedge->v;
-						targetNextV = refedge->flip()->v;
+						targetV = &verts[refedge->vid];
+						targetNextV = &verts[refedge->flip()->vid];
 					}
 					else
 					{
-						targHE = refedge->flip;
-						targetV = refedge->flip()->v;
-						targetNextV = refedge->v;
+						targHE = refedge->flip();
+						targetV = &verts[refedge->flip()->vid];
+						targetNextV = &verts[refedge->vid];
 					}
 					QVector2D targetVPos = targetV->pos.toVector2D();
 					Float tpin = MeshHollower::refMapPointer->at(targHE->index);
 					QVector2D targPos = targetVPos * (1 - tpin)
 						+ targetNextV->pos.toVector2D() * tpin;
-					QVector2D startPos = cut_he->v->pos.toVector2D();
+					QVector2D startPos = verts[cut_he->vid].pos.toVector2D();
 					QVector2D dirPin = targPos - startPos;
 
 					// 1 Pinhole
@@ -226,7 +226,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 					}
 					
 					// Add labels for pinholes
-					auto res = printTextRecord.find(cut_he->v->refid);
+					auto res = printTextRecord.find(verts[cut_he->vid].refid);
 					if (res != printTextRecord.end())
 					{
 						QVector2D midPos = (res->second + startPos + dirPin * 0.5) * 0.5;
@@ -238,12 +238,12 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 					}
 					else
 					{
-						printTextRecord.insert(make_pair(cut_he->v->refid, startPos + dirPin * 0.5));
+						printTextRecord.insert(make_pair(verts[cut_he->vid].refid, startPos + dirPin * 0.5));
 					}
 				}
 				// Add labels for face
-				QVector2D faceDir = (refedge->v->pos - refedge->flip()->v->pos).toVector2D();
-				printTextPos.push_back(curFace->center().toVector2D() * he_scale);
+				QVector2D faceDir = (verts[refedge->vid].pos - verts[refedge->flip()->vid].pos).toVector2D();
+				printTextPos.push_back(unfolded_mesh->faceCenter(curFace->index).toVector2D() * he_scale);
 				printTextRot.push_back(RadianToDegree(atan2(faceDir.y(), faceDir.x())));
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
 				
@@ -308,7 +308,6 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
-#endif
 }
 
 void MeshConnector::exportWingedEdgePiece(FILE* fp,
@@ -371,7 +370,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 				do
 				{
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 			// Pinholes
@@ -391,7 +390,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 					
 					flapPos.push_back(curHE->v->pos.toVector2D());
 					
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 
 				// Pinhole on main flap edge
@@ -508,7 +507,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 						visitedEtchEdges.insert(curHE);
 						visitedEtchEdges.insert(curHE->flip);
 					}
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 		}
@@ -618,7 +617,7 @@ void MeshConnector::exportGESPiece(FILE* fp,
 				do
 				{
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D() * he_scale);
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 			else if (!curFace->isBridger)
@@ -628,7 +627,7 @@ void MeshConnector::exportGESPiece(FILE* fp,
 				{
 					printPinholes.push_back(
 						(curHE->v->pos.toVector2D() + centerPt) * 0.5 * he_scale);
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 			// Etch layer
@@ -647,7 +646,7 @@ void MeshConnector::exportGESPiece(FILE* fp,
 						visitedEtchEdges.insert(curHE);
 						visitedEtchEdges.insert(curHE->flip);
 					}
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 		}
@@ -754,7 +753,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 				do
 				{
 					printBorderEdgePts.push_back(curHE->v->pos.toVector2D());
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 			else
@@ -781,7 +780,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 		do
 		{
 			cutedges.insert(curHE);
-			curHE = curHE->next;
+			curHE = curHE->next();
 		} while (curHE != he);
 
 		QVector2D *Pthis = new QVector2D(curHE->v->pos.toVector2D() * he_scale);
@@ -993,7 +992,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 			printEdgePts.push_back(Pnext);
 
 			Pthis = Pnext;
-			curHE = curHE->next;
+			curHE = curHE->next();
 		} while (curHE != he);
 
 		/************************************************************************/
@@ -1043,7 +1042,7 @@ void MeshConnector::exportRegularPiece(FILE* fp,
 			do {
 				fprintf(fp, "%f,%f ",
 					curHE->v->pos.x() * he_scale, curHE->v->pos.y() * he_scale);
-				curHE = curHE->next;
+				curHE = curHE->next();
 			} while (curHE != he);
 			fprintf(fp, "%f,%f\" style=\"fill:none;stroke:yellow;stroke-width:%lf\" />\n",
 				he->v->pos.x() * he_scale, he->v->pos.y() * he_scale, str_wd);
@@ -1211,7 +1210,6 @@ void MeshConnector::exportFBWalkPiece(FILE* fp,
 void MeshConnector::exportWovenPiece(FILE* fp,
 	const mesh_t* unfolded_mesh, const confMap &conf)
 {
-#ifdef USE_LEGACY_FACTORY
 	/************************************************************************/
 	/* Scalors                                                              */
 	/************************************************************************/
@@ -1245,6 +1243,12 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 		break;
 	}
 	int printFaceID(0), printCircleID(0);
+
+	// 
+	auto &verts = unfolded_mesh->verts();
+	auto &hes = unfolded_mesh->halfedges();
+	auto &faces = unfolded_mesh->faces();
+	vector<bool> visitedHE(hes.size(), false);
 	
 	// for pieces
 	for (auto piece : unfolded_mesh->pieceSet)
@@ -1254,7 +1258,6 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 		vector<QVector2D> printPinholes;
 
 		vector<QVector2D> printEtchEdges;
-		unordered_set<he_t*> visitedEtchEdges;
 
 		// Label data
 		vector<QVector2D> printTextPos;
@@ -1266,23 +1269,22 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
 		{
-			face_t* curFace = unfolded_mesh->faceMap.at(fid);
-			auto he = curFace->he;
+			auto curFace = &faces[fid];
+			auto he = &hes[curFace->heid];
 			auto curHE = he;
 			// Cut layer
 			if (curFace->isCutFace)
 			{
 				do
 				{
-					printBorderEdgePts.push_back(curHE->v->pos.toVector2D() * he_scale);
-					curHE = curHE->next;
+					printBorderEdgePts.push_back(verts[curHE->vid].pos.toVector2D() * he_scale);
+					curHE = curHE->next();
 				} while (curHE != he);
 			}
 			// Etch layer
 			else if (curFace->isJoint)
 			{
-				//QVector2D centerPt = curFace->center().toVector2D();
-				printPinholes.push_back(curFace->center().toVector2D() * he_scale);
+				printPinholes.push_back(unfolded_mesh->faceCenter(fid).toVector2D() * he_scale);
 				
 				// Add labels for pinhole
 				printTextPos.push_back(printPinholes.back() * he_scale);
@@ -1294,15 +1296,13 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 				// Write points of each edge
 				do
 				{
-					if (!curHE->isCutEdge
-						&& visitedEtchEdges.find(curHE) == visitedEtchEdges.end())
+					if (!curHE->isCutEdge && !visitedHE[curHE->index])
 					{
-						printEtchEdges.push_back(curHE->v->pos.toVector2D() * he_scale);
-						printEtchEdges.push_back(curHE->next->v->pos.toVector2D() * he_scale);
-						visitedEtchEdges.insert(curHE);
-						visitedEtchEdges.insert(curHE->flip);
+						printEtchEdges.push_back(verts[curHE->vid].pos.toVector2D() * he_scale);
+						printEtchEdges.push_back(verts[curHE->next()->vid].pos.toVector2D() * he_scale);
+						visitedHE[curHE->index] = visitedHE[curHE->flip()->index] = true;
 					}
-					curHE = curHE->next;
+					curHE = curHE->next();
 				} while (curHE != he);
 			}			
 		}
@@ -1356,7 +1356,6 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 	/* End of SVG File End                                                  */
 	/************************************************************************/
 	fprintf(fp, "</svg>");
-#endif
 }
 
 void MeshConnector::writeCutLayer(

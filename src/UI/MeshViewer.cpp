@@ -154,9 +154,10 @@ void MeshViewer::unfoldView(const HDS_Mesh* inMesh)
 void MeshViewer::allocateGL()
 {
 	// Clear Selection
-	while (!selVTX.empty()) selVTX.pop();
+	selVTX.clear(); selHE.clear(); selFACE.clear();
+	/*while (!selVTX.empty()) selVTX.pop();
 	while (!selHE.empty()) selHE.pop();
-	while (!selFACE.empty()) selFACE.pop();
+	while (!selFACE.empty()) selFACE.pop();*/
 	heMesh->exportSelection(&selVTX, &selHE, &selFACE);
 
 	heMesh->exportVertVBO(&vtx_array, &vRBO.flags);
@@ -327,18 +328,26 @@ void MeshViewer::drawMeshToFBO()
 		auto dataptr = (uint16_t*)glMapBuffer(GL_TEXTURE_BUFFER, GL_READ_WRITE);
 		if (selected)
 		{
-			selVTX.push(renderID);
-			heMesh->vertSet[renderID].isPicked = true;
+			if (heMesh->vertSet[renderID].isPicked)
+			{
+				selVTX.erase(renderID);
+				heMesh->vertSet[renderID].isPicked = false;
+			}
+			else
+			{
+				selVTX.insert(renderID);
+				heMesh->vertSet[renderID].isPicked = true;
+			}
 			*(dataptr + renderID) ^= 2;
 		} 
 		else
 		{
-			while (!selVTX.empty())
+			for (auto v : selVTX)
 			{
-				heMesh->vertSet[selVTX.front()].isPicked = false;
-				*(dataptr + selVTX.front()) &= 0xFFFD;
-				selVTX.pop();
+				heMesh->vertSet[v].isPicked = false;
+				*(dataptr + v) &= 0xFFFD;
 			}
+			selVTX.clear();
 		}
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
@@ -348,16 +357,24 @@ void MeshViewer::drawMeshToFBO()
 	{
 		if (selected)
 		{
-			selFACE.push(renderID);
-			heMesh->faceSet[renderID].isPicked = true;
+			if (heMesh->faceSet[renderID].isPicked)
+			{
+				selFACE.erase(renderID);
+				heMesh->faceSet[renderID].isPicked = false;
+			}
+			else
+			{
+				selFACE.insert(renderID);
+				heMesh->faceSet[renderID].isPicked = true;
+			}
 		}
 		else
 		{
-			while (!selFACE.empty())
+			for (auto fid : selFACE)
 			{
-				heMesh->faceSet[selFACE.front()].isPicked = false;
-				selFACE.pop();
+				heMesh->faceSet[fid].isPicked = false;
 			}
+			selFACE.clear();
 		}
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
 		fRBO.allocateTBO();
@@ -369,17 +386,26 @@ void MeshViewer::drawMeshToFBO()
 		{
 			auto he = &heMesh->heSet[renderID];
 			auto hef = he->flip();
-			selHE.push(renderID);
-			selHE.push(hef->index);
-			he->isPicked = hef->isPicked = true;
+			if (he->isPicked)
+			{
+				selHE.erase(renderID);
+				selHE.erase(hef->index);
+				he->isPicked = hef->isPicked = false;
+			}
+			else
+			{
+				selHE.insert(renderID);
+				selHE.insert(hef->index);
+				he->isPicked = hef->isPicked = true;
+			}
 		}
 		else
 		{
-			while (!selHE.empty())
+			for (auto heid : selHE)
 			{
-				heMesh->heSet[selHE.front()].isPicked = false;
-				selHE.pop();
+				heMesh->heSet[heid].isPicked = false;
 			}
+			selHE.clear();
 		}
 		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
 		heRBO.allocateTBO();
@@ -730,7 +756,7 @@ void MeshViewer::selectAll()
 
 	case SEL_VERT:
 	{
-		Utils::clearQueue(selVTX);
+		selVTX.clear();
 		auto &verts = heMesh->verts();
 		glBindBuffer(GL_TEXTURE_BUFFER, vRBO.flag_tbo);
 		auto dataptr = (uint16_t*)glMapBuffer(GL_TEXTURE_BUFFER, GL_READ_WRITE);
@@ -738,7 +764,7 @@ void MeshViewer::selectAll()
 		{
 			verts[i].setPicked(true);
 			*(dataptr + i) ^= 2;
-			selVTX.push(i);
+			selVTX.insert(i);
 		}
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
@@ -746,6 +772,7 @@ void MeshViewer::selectAll()
 	}
 	case SEL_FACE:
 	{
+		selFACE.clear();
 		for (auto &f : heMesh->faces())
 			f.setPicked(true);
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
@@ -754,7 +781,7 @@ void MeshViewer::selectAll()
 	}
 	case SEL_EDGE:
 	{
-		Utils::clearQueue(selHE);
+		selHE.clear();
 		auto &hes = heMesh->halfedges();
 		glBindBuffer(GL_TEXTURE_BUFFER, heRBO.flag_tbo);
 		auto dataptr = (uint16_t*)glMapBuffer(GL_TEXTURE_BUFFER, GL_READ_WRITE);
@@ -764,8 +791,8 @@ void MeshViewer::selectAll()
 			hes[i].setPicked(true);
 			hes[i + halfsize].setPicked(true);
 			*(dataptr + i) ^= 2;
-			selHE.push(i);
-			selHE.push(i + halfsize);
+			selHE.insert(i);
+			selHE.insert(i + halfsize);
 		}
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);

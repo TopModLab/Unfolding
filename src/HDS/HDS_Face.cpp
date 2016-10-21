@@ -93,36 +93,3 @@ void HDS_Face::scaleDown()
 	}
 #endif
 }
-
-void HDS_Face::checkPlanar()
-{
-#ifdef USE_LEGACY_FACTORY
-	auto vertices = corners();
-	QVector3D normal = QVector3D::crossProduct(vertices[1]->pos - vertices[0]->pos, vertices[2]->pos - vertices[0]->pos);
-
-	for(int i = 3; i < vertices.size(); i++) {
-		Float dot = QVector3D::dotProduct(normal, vertices[i]->pos - vertices[0]->pos);
-		if (fabsf(dot) > 0.3){
-			isNonPlanar = true;
-			break;
-		}
-	}
-#endif
-}
-
-bool HDS_Face::isConnected(const HDS_Face *other)
-{	
-#ifdef USE_LEGACY_FACTORY
-	auto curHe = he;
-	do 
-	{
-		if (curHe->flip()->f == other)
-		{
-			return true;
-		}
-		curHe = curHe->next;
-	} while (curHe != he);
-#endif
-
-	return false;
-}

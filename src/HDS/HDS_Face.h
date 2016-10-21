@@ -25,11 +25,6 @@ public:
 
 	void setPicked(bool v) { isPicked = v; }
 
-	void checkPlanar();
-
-	// Check if 
-	bool isConnected(const HDS_Face *other);
-
 	void setScaleFactor(Float factor) { scalingFactor = factor; }
 	Float getScalingFactor() const { return scalingFactor; }
 	QVector3D scaleCorner(HDS_Vertex* v);
