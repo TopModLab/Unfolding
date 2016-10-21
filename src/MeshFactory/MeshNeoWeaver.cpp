@@ -249,6 +249,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	vector<float> heDirLens(refEdgeCount);
 	vector<QVector3D> heNorms(refEdgeCount);
 	vector<QVector3D> heTans(refEdgeCount);
+	vector<bool> isConcaveEdge(refEdgeCount, false);
 	// key: original edge id, value: edge id in new mesh
 	unordered_map<hdsid_t, hdsid_t> heCompMap;
 
@@ -265,7 +266,6 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		auto he = &ref_hes[i];
 		if (he->flip_offset < 0) continue;
 		auto hef = he->flip();
-		// TODO: to be finished
 		// calc dir
 		heMid[it] = (ref_verts[hef->vid].pos
 						+ ref_verts[he->vid].pos) * 0.5f;
@@ -276,10 +276,13 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		heTans[it] = QVector3D::crossProduct(
 						heNorms[it], heDirs[it]).normalized();
 		heNorms[it] = QVector3D::crossProduct(heDirs[it], heTans[it]).normalized();
-		heCompMap[he->index] = heCompMap[hef->index] = it;
-
+		// check if edge is concave
+		isConcaveEdge[it] = !isSameDir(
+			QVector3D::crossProduct(fNorms[he->fid], fNorms[hef->fid]), heDirs[it]);
 		heDirLens[it] = heDirs[it].length();
 		heDirs[it] /= heDirLens[it];
+
+		heCompMap[he->index] = heCompMap[hef->index] = it;
 		it++;
 	}
 	vector<vert_t> verts(refHeCount << 1);
@@ -330,12 +333,27 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 			planeVecs[3] = heTans[compID[0]] + heDirs[compID[0]];
 		}
 
+		float edgeLen = patchUniform ? patchScale : heDirLens[compID[0]] * patchScale;
+
+		Float v0x = QVector3D::dotProduct(planeVecs[0], heDirs[compID[0]]);
+		Float v0y = QVector3D::dotProduct(planeVecs[0], heTans[compID[0]]);
+		Float v1x = QVector3D::dotProduct(planeVecs[1], heDirs[compID[0]]);
+		Float v1y = QVector3D::dotProduct(planeVecs[1], heTans[compID[0]]);
+		Float v2x = QVector3D::dotProduct(planeVecs[2], heDirs[compID[0]]);
+		Float v2y = QVector3D::dotProduct(planeVecs[2], heTans[compID[0]]);
+		Float v3x = QVector3D::dotProduct(planeVecs[3], heDirs[compID[0]]);
+		Float v3y = QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
+		Float ab[4]{
+			-v1y*edgeLen / (v0y * v1x - v0x * v1y), v0y*edgeLen / (v0y * v1x - v0x * v1y),
+			-v3y*edgeLen / (v2y * v3x - v2x * v3y), v2y*edgeLen / (v2y * v3x - v2x * v3y),
+		};
+		cout << "ab: " << ab[0] << ", " << ab[1] << ", " << ab[2] << ", " << ab[3] << endl;
+
 		planeVecs[1] *= -QVector3D::dotProduct(planeVecs[0], heTans[compID[0]])
 			/ QVector3D::dotProduct(planeVecs[1], heTans[compID[0]]);
 		planeVecs[3] *= -QVector3D::dotProduct(planeVecs[2], heTans[compID[0]])
 			/ QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
 
-		float edgeLen = patchUniform ? patchScale : heDirLens[compID[0]] * patchScale;
 
 		float vecLen[2]{
 			(planeVecs[0] + planeVecs[1]).length(),
@@ -349,6 +367,16 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		{
 			cout << "Null Vec: " << planeVecs[0] << ", " << planeVecs[1] << endl;
 		}
+		if (isConcaveEdge[compID[0]])
+		{
+			cout << "he: " << compID[0] << " is concave\n";
+			cout << "v0*dir < 0: " << (QVector3D::dotProduct(planeVecs[0], heDirs[compID[0]]) < 0) << endl;
+			cout << "v1*dir < 1: " << (QVector3D::dotProduct(planeVecs[1], heDirs[compID[0]]) < 0) << endl;
+			cout << "v1*dir < 2: " << (QVector3D::dotProduct(planeVecs[2], heDirs[compID[0]]) > 0) << endl;
+			cout << "v1*dir < 3: " << (QVector3D::dotProduct(planeVecs[3], heDirs[compID[0]]) > 0) << endl;
+			cout << "scale(" <<  scale[0] << ", " << scale[1] << ")\n";
+
+		}
 		//printf("scale: %f, %f; len: %f, %f\n", scale[0], scale[1], vecLen[0], vecLen[1]);
 		planeVecs[0] *= scale[0];
 		planeVecs[1] *= scale[0];
@@ -360,8 +388,8 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		// Update vertex position
 
 		// Edge Length
-		verts[paddingIdx].pos = patchUniform ?
-			heMid[compID[0]] + heDirs[compID[0]] * patchScale * 0.5f
+		verts[paddingIdx].pos = patchUniform
+			? heMid[compID[0]] + heDirs[compID[0]] * patchScale * 0.5f
 			: heMid[compID[0]] + heDirs[compID[0]] * edgeLen * 0.5f;
 
 		verts[paddingIdx + 1].pos = verts[paddingIdx].pos + planeVecs[0];

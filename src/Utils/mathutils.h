@@ -65,6 +65,14 @@ inline bool isParallel(const QVector3D &v1, const QVector3D &v2)
 {
 	return isFuzzyNull(QVector3D::crossProduct(v1, v2));
 }
+// Check if two vectors are in the same direction
+inline bool isSameDir(const QVector3D &v1, const QVector3D &v2)
+{
+	return isParallel(v1, v2)
+		&& !(v1.x() > 0 ^ v2.x() > 0)
+		&& !(v1.y() > 0 ^ v2.y() > 0)
+		&& !(v1.z() > 0 ^ v2.z() > 0);
+}
 inline float dot(const QVector3D& v1, const QVector3D& v2)
 {
 	return v1.x() * v2.x() + v1.y() * v2.y() + v1.z() * v2.z();

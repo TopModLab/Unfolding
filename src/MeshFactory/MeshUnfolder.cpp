@@ -12,7 +12,8 @@
 // Unfold a Face Along a Given Edge
 void MeshUnfolder::unfoldFace(
 	hdsid_t sharedHEid, hdsid_t curFid,
-	HDS_Mesh *unfolded_mesh, const HDS_Mesh *ref_mesh)
+	HDS_Mesh *unfolded_mesh, const HDS_Mesh *ref_mesh,
+	vector<bool> &visitedEdge, vector<hdsid_t> &dirtyEdges)
 {
 	auto &verts = unfolded_mesh->verts();
 	auto &refVerts = ref_mesh->verts();
@@ -33,18 +34,26 @@ void MeshUnfolder::unfoldFace(
 	he_t* curHE = he;
 	do
 	{
-		// compute the new position of the vertex
-		vert_t* v = &verts[curHE->vid];
-		const vert_t* v_ref = &refVerts[curHE->vid];
+		if (visitedEdge[curHE->index])
+		{
+			dirtyEdges.push_back(curHE->index);
+		}
+		else
+		{
+			visitedEdge[curHE->index] = true;
+			// compute the new position of the vertex
+			vert_t* v = &verts[curHE->vid];
+			const vert_t* v_ref = &refVerts[curHE->vid];
 
-		// compute the coordinates of this vertex using the reference mesh
-		QVector3D dvec_ref = v_ref->pos - ori_ref;
-		// Vector length from projection onto local axis
-		qreal xcoord = QVector3D::dotProduct(dvec_ref, xvec);
-		qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec);
+			// compute the coordinates of this vertex using the reference mesh
+			QVector3D dvec_ref = v_ref->pos - ori_ref;
+			// Vector length from projection onto local axis
+			qreal xcoord = QVector3D::dotProduct(dvec_ref, xvec);
+			qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec);
 
-		// Project position onto unfolded 2D plane
-		v->pos = ori_unf + xcoord * udir + ycoord * vdir;
+			// Project position onto unfolded 2D plane
+			v->pos = ori_unf + xcoord * udir + ycoord * vdir;
+		}
 		curHE = curHE->next();
 	} while (curHE != he_share);
 }
@@ -178,8 +187,34 @@ void MeshUnfolder::reset_layout(HDS_Mesh *unfolded_mesh)
 	}
 }
 
+HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh * ref_mesh)
+{
+	vector<hdsid_t> dirtyEdges;
+	HDS_Mesh* ret_mesh = unfold(ref_mesh, dirtyEdges);
+	
+	if (!ret_mesh) return nullptr;
+
+	if (!dirtyEdges.empty())
+	{
+		QMessageBox msgBox(QMessageBox::Warning, QString("Warning"),
+			QString(
+				"Current mesh has at least one bad edge!\n"\
+				"Unfolding will lead to unexpected result.\n\n"\
+				"Do you still want to unfold it?"),
+			QMessageBox::Yes | QMessageBox::Cancel,
+			nullptr,
+			Qt::WindowStaysOnTopHint);
+
+		// If user insists unfolding, do it.
+		// Otherwise, return null.
+		if (msgBox.exec() == QMessageBox::Cancel) return nullptr;
+	}
+	return ret_mesh;
+}
+
 // Unfold an Input Mesh
-HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
+HDS_Mesh* MeshUnfolder::unfold(
+	const HDS_Mesh* ref_mesh, vector<hdsid_t> &dirtyEdges)
 {
 	//progress dialog
 	QProgressDialog unfoldingProgress("Unfolding...", "", 0, 100);
@@ -213,6 +248,8 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
 	int progressIndex = 0;
 	// Hash Table for marking visited face
 	vector<bool> visitedFaces(refFaces.size(), false);
+	// Avoid unfold same edge twice
+	vector<bool> visitedEdges(ref_mesh->halfedges().size(), false);
 	// Connected edge id to its parent face
 	vector<hdsid_t> parentEdgeMap(refFaces.size(), -1);
 
@@ -280,14 +317,22 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
 			QVector3D ori_ref = ref_mesh->verts()[he0_ref->vid].pos;
 			he_t* he_unf = unfolded_mesh->heFromFace(frontFid);
 			he_t* curHE = he_unf;
-			do 
+			do
 			{
-				auto &vpos = unfolded_mesh->vertFromHe(curHE->index)->pos;
-				auto vec = vpos - ori_ref;
-				vpos = QVector3D(
-					QVector3D::dotProduct(vec, uvec),
-					QVector3D::dotProduct(vec, vvec),
-					0);
+				if (visitedEdges[curHE->index])
+				{
+					dirtyEdges.push_back(curHE->index);
+				}
+				else
+				{
+					visitedEdges[curHE->index] = true;
+					auto &vpos = unfolded_mesh->vertFromHe(curHE->index)->pos;
+					auto vec = vpos - ori_ref;
+					vpos = QVector3D(
+						QVector3D::dotProduct(vec, uvec),
+						QVector3D::dotProduct(vec, vvec),
+						0);
+				}
 				curHE = curHE->next();
 			} while (curHE != he_unf);
 
@@ -296,7 +341,11 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh* ref_mesh)
 			// base on the geometry of the reference mesh
 			for (size_t i = 1; i < expSeq.size(); ++i)
 			{
-				unfoldFace(parentEdgeMap[expSeq[i]], expSeq[i], unfolded_mesh, ref_mesh);
+				unfoldFace(
+					parentEdgeMap[expSeq[i]], expSeq[i],
+					unfolded_mesh, ref_mesh,
+					visitedEdges, dirtyEdges
+				);
 			}
 		}
 		// Qt display progress

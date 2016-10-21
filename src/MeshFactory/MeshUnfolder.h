@@ -7,11 +7,13 @@ class MeshUnfolder : public MeshFactory
 {
 public:
 	static HDS_Mesh* unfold(const HDS_Mesh* ref_mesh);
+	static HDS_Mesh* unfold(const HDS_Mesh* ref_mesh, vector<hdsid_t> &dirtyEdges);
 
 private:
 	static bool hasBadVertex(const HDS_Mesh* ref_mesh);
 	static void unfoldFace(
 		hdsid_t sharedHEid, hdsid_t curFid,
-		HDS_Mesh* unfolded_mesh, const HDS_Mesh* ref_mesh);
+		HDS_Mesh* unfolded_mesh, const HDS_Mesh* ref_mesh,
+		vector<bool> &visitedEdge, vector<hdsid_t> &dirtyEdges);
 	static void reset_layout(HDS_Mesh* unfolded_mesh);
 };
