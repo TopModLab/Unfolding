@@ -24,7 +24,8 @@
 class MeshViewer;
 struct RenderBufferObject;
 
-struct MouseState {
+struct MouseState
+{
 	MouseState() : isPressed(false), x(0), y(0){}
 	QVector2D m_Pos;
 	int x, y;
@@ -260,7 +261,8 @@ private://interaction ie selection
 	InteractionState interactionState;
 	stack<InteractionState> interactionStateStack;
 	//SelectionState selectionState;
-	queue<uint32_t> selVTX, selHE, selFACE;
+	//queue<uint32_t> selVTX, selHE, selFACE;
+	unordered_set<uint32_t> selVTX, selHE, selFACE;
 
 	MouseState mouseState;
 

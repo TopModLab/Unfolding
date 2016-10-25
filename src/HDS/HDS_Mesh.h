@@ -87,8 +87,8 @@ public:
 		ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;
 	void exportFaceVBO(ui32s_t* fIBOs = nullptr,
 		ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr) const;
-	using ui32q_t = queue<uint32_t>;
-	void exportSelection(ui32q_t* selVTX, ui32q_t* selHE, ui32q_t* selFACE);
+	using selSeq_t = unordered_set<uint32_t>;
+	void exportSelection(selSeq_t* selVTX, selSeq_t* selHE, selSeq_t* selFACE);
 
 	
 	vector<he_t>& halfedges() { return heSet; }
@@ -135,6 +135,8 @@ public:
 	hdsid_t sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2);
 	hdsid_t sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2);
 
+	bool checkPlanarFace(hdsid_t fid);
+	void updatePlanarFlag();
 
 	void selectFace(hdsid_t idx);
 	void selectEdge(hdsid_t idx);
@@ -176,17 +178,17 @@ private:
 	uint16_t processType;
 };
 
-inline ostream& operator<<(ostream &os, const HDS_Vertex& v) {
+inline ostream& operator<<(ostream &os, const HDS_Vertex &v)
+{
 	os << v.index
-		<< ": (" << v.pos.x() << ", " << v.pos.y() << ", " << v.pos.z() << ")"
-		<< "\t"
+		<< ": (" << v.pos.x() << ", " << v.pos.y() << ", " << v.pos.z() << ")\t"
 		<< "he index: " << v.heid;
 	return os;
 }
 
-inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
+inline ostream& operator<<(ostream &os, const HDS_HalfEdge &e)
+{
 	os << e.index << "::"
-
 		<< " prev: " << e.prev()->index
 		<< " next: " << e.next()->index
 		<< " flip: " << e.flip()->index
@@ -195,7 +197,7 @@ inline ostream& operator<<(ostream &os, const HDS_HalfEdge& e) {
 	return os;
 }
 
-inline ostream& operator<<(ostream &os, const HDS_Face& f)
+inline ostream& operator<<(ostream &os, const HDS_Face &f)
 {
 	os << "face #" << f.index << " cut: " << f.isCutFace
 		<< "\n\tconnected edge: " << f.heID() << endl;
