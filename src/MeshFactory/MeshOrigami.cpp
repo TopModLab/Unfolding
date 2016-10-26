@@ -44,6 +44,7 @@ HDS_Mesh* MeshOrigami::createOrigami(
 		constructHE(&m->verts()[i], &m->halfedges()[i]);
 		
 	}
+
 	vector<QVector3D> vns = ref_mesh->allVertNormal();
 	for (int i = 0; i < heSize; i++) {
 		hdsid_t flipid = ref_hes[i].flip()->index;
@@ -92,6 +93,8 @@ HDS_Mesh* MeshOrigami::createOrigami(
 			size_t heOriSize = m->halfedges().size();
 			// generate bridge
 			generateBridge(i, flipid, m, vpos1, vpos2);
+			hdsid_t flipBridgeHeId = m->halfedges()[heOriSize + 2].flip()->index;
+
 			//if selected edge, unlink bridge edge pairs to make flaps
 			if (m->halfedges()[i].isPicked) {
 				//for (int index = 0; index < vpos1.size(); index++)
@@ -113,44 +116,7 @@ HDS_Mesh* MeshOrigami::createOrigami(
 			exposedHEs.insert(he.index);
 	}
 	fillNullFaces(m->halfedges(), m->faces(), exposedHEs);
-
-	//////////////////////////////////////////////////////////////////////////
-	// Unfold Origami, get 2D position, offset 3D bridge
-	//////////////////////////////////////////////////////////////////////////
-	vector<int32_t> dirtyEdges;
-	HDS_Mesh* m_2D = MeshUnfolder::unfold(m, dirtyEdges);
-	for (auto heid : dirtyEdges) {
-		if (patchScale == 1.0) {
-			cout << "detecting dirty edge" << endl;
-			he_t he = m_2D->halfedges()[heid];
-			he_t* ori = he.next()->next();
-			he_t* oriFlip = he.flip()->next()->next();
-			QVector3D v11 = m_2D->vertFromHe(ori->index)->pos;
-			QVector3D v12 = m_2D->vertFromHe(ori->next()->index)->pos;
-			QVector3D v21 = m_2D->vertFromHe(oriFlip->next()->index)->pos;
-			QVector3D v22 = m_2D->vertFromHe(oriFlip->index)->pos;
-
-			QVector3D pos1 = (v11+v21) / 2.0;
-			QVector3D pos2 = (v12+v22) / 2.0;
-			// offset 3D bridge
-			QVector3D newN_2d = (v11 - v21);
-			float dist1 = (v11 - v21).length() / 2.0;
-			float dist2 = (v12 - v22).length() / 2.0;
-			QVector3D axisx = m_2D->edgeVector(oriFlip->index).normalized();
-			QVector3D axisy = QVector3D(-axisx.y(), axisx.x(), 0);
-
-			QVector3D X = m->edgeVector(ori->index).normalized();
-			QVector3D Y = -(fNorms[ori->flip()->faceID()] 
-							+ fNorms[oriFlip->flip()->faceID()]).normalized();
-			QVector3D newN = (X * (QVector3D::dotProduct(newN_2d, axisx))
-							+ Y * (QVector3D::dotProduct(newN_2d, axisy))).normalized();
-			m->vertFromHe(heid)->pos = 
-				m->vertFromHe(oriFlip->index)->pos + newN* dist2;
-			m->vertFromHe(he.flip()->index)->pos = 
-				m->vertFromHe(oriFlip->next()->index)->pos + newN* dist1;
-
-		}
-	}
+	
 	return m;
 
 }
