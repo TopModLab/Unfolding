@@ -36,10 +36,12 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	}
 
 	//give a random layout scheme for now
-
-
-	//unfold
-
+	for (int i = 0; i < ret->faces().size(); i++) {
+			QVector3D vpos = QVector3D(2 * i, 0, 0);
+			QVector3D ev = QVector3D(0, 1, 0);
+		//unfold
+		MeshUnfolder::unfoldSeparateFace(vpos, ev, i, ret);
+	}
 	//add bridges based on ref_mesh flip twins
 	for (int i = 0; i < heSize; i++) {
 		hdsid_t flipid = ref_hes[i].flip()->index;
