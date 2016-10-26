@@ -10,17 +10,19 @@
 #include <QProgressDialog>
 
 // Unfold a Face Along a Given Edge
+// sharedHE is the edge on current face,
+// whose flip is in parent face
 void MeshUnfolder::unfoldFace(
 	hdsid_t sharedHEid, hdsid_t curFid,
-	HDS_Mesh *unfolded_mesh, const HDS_Mesh *ref_mesh,
-	vector<bool> &visitedEdge, vector<hdsid_t> &dirtyEdges)
+	HDS_Mesh* unfolded_mesh, const HDS_Mesh* ref_mesh,
+	vector<bool> &visitedVerts, vector<hdsid_t> &dirtyEdges)
 {
 	auto &verts = unfolded_mesh->verts();
 	auto &refVerts = ref_mesh->verts();
 
 	he_t* he_share = &unfolded_mesh->halfedges()[sharedHEid];
-	const QVector3D ori_ref = refVerts[he_share->vid].pos;
-	const QVector3D ori_unf = verts[he_share->vid].pos;
+	const QVector3D &ori_ref = refVerts[he_share->vid].pos;
+	const QVector3D &ori_unf = verts[he_share->vid].pos;
 	// Local axis of the original mesh, aka reference mesh
 	const QVector3D xvec = ref_mesh->edgeVector(sharedHEid).normalized();
 	const QVector3D yvec = QVector3D::crossProduct(ref_mesh->faceNormal(curFid), xvec);
@@ -30,17 +32,19 @@ void MeshUnfolder::unfoldFace(
 	const QVector3D vdir = QVector3D(-udir.y(), udir.x(), 0);
 
 	// No need to 
-	he_t* he = he_share->next()->next();
-	he_t* curHE = he;
+	//he_t* he = he_share->next()->next();
+	he_t* curHE = he_share->next()->next();
 	do
 	{
-		if (visitedEdge[curHE->index])
+		if (visitedVerts[curHE->vid])
 		{
 			dirtyEdges.push_back(curHE->index);
+			curHE->isPicked = true;
+			curHE->flip()->isPicked = true;
 		}
 		else
 		{
-			visitedEdge[curHE->index] = true;
+			visitedVerts[curHE->vid] = true;
 			// compute the new position of the vertex
 			vert_t* v = &verts[curHE->vid];
 			const vert_t* v_ref = &refVerts[curHE->vid];
@@ -56,6 +60,44 @@ void MeshUnfolder::unfoldFace(
 		}
 		curHE = curHE->next();
 	} while (curHE != he_share);
+}
+
+void MeshUnfolder::unfoldSeparateFace(
+	const QVector3D &new_pos, const QVector3D &udir,
+	hdsid_t curFid, HDS_Mesh* inMesh)
+{
+	auto &verts = inMesh->verts();
+	//auto &refVerts = ref_mesh->verts();
+
+	he_t* he_share = inMesh->heFromFace(curFid);
+	QVector3D &ori_pos = verts[he_share->vid].pos;
+	// Local axis of the original mesh, aka reference mesh
+	const QVector3D xvec = inMesh->edgeVector(*he_share).normalized();
+	const QVector3D yvec = QVector3D::crossProduct(inMesh->faceNormal(curFid), xvec);
+	// Local axis of unfolded mesh, aka the 2D plane
+	// Normal is always vector(0, 0, 1), aka Z-axes in world space
+	// Assume udir is normalized and on X-Y plane
+	const QVector3D vdir = QVector3D(-udir.y(), udir.x(), 0);
+
+	// No need to 
+	he_t* curHE = he_share->next();
+	do
+	{
+		// compute the new position of the vertex
+		vert_t* v = &verts[curHE->vid];
+
+		// compute the coordinates of this vertex using the reference mesh
+		QVector3D dvec_ref = v->pos - ori_pos;
+		// Vector length from projection onto local axis
+		qreal xcoord = QVector3D::dotProduct(dvec_ref, xvec);
+		qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec);
+
+		// Project position onto unfolded 2D plane
+		v->pos = ori_pos + xcoord * udir + ycoord * vdir;
+		
+		curHE = curHE->next();
+	} while (curHE != he_share);
+	ori_pos = new_pos;
 }
 
 // Check if it's able to unfold any vertex in the mesh
@@ -220,6 +262,7 @@ HDS_Mesh* MeshUnfolder::unfold(const HDS_Mesh * ref_mesh)
 HDS_Mesh* MeshUnfolder::unfold(
 	const HDS_Mesh* ref_mesh, vector<hdsid_t> &dirtyEdges)
 {
+	cout << "started to unfold mesh!\n";
 	//progress dialog
 	QProgressDialog unfoldingProgress("Unfolding...", "", 0, 100);
 	unfoldingProgress.setWindowModality(Qt::WindowModal);
@@ -253,11 +296,15 @@ HDS_Mesh* MeshUnfolder::unfold(
 	// Hash Table for marking visited face
 	vector<bool> visitedFaces(refFaces.size(), false);
 	// Avoid unfold same edge twice
-	vector<bool> visitedEdges(ref_mesh->halfedges().size(), false);
+	vector<bool> visitedVerts(ref_mesh->verts().size(), false);
 	// Connected edge id to its parent face
 	vector<hdsid_t> parentEdgeMap(refFaces.size(), -1);
+	if (unfolded_mesh->pieceSet.empty())
+	{
+		unfolded_mesh->updatePieceSet();
+	}
 
-	for (auto piece : ref_mesh->pieceSet)
+	for (auto piece : unfolded_mesh->pieceSet)
 	{
 		// Find the first non cutface in piece
 		auto it_fid = piece.begin();
@@ -300,7 +347,7 @@ HDS_Mesh* MeshUnfolder::unfold(
 		}
 		
 		// Qt display progress
-		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / ref_mesh->pieceSet.size()));
+		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / unfolded_mesh->pieceSet.size()));
 		
 		if (!expSeq.empty())
 		{
@@ -323,13 +370,13 @@ HDS_Mesh* MeshUnfolder::unfold(
 			he_t* curHE = he_unf;
 			do
 			{
-				if (visitedEdges[curHE->index])
+				if (visitedVerts[curHE->vid])
 				{
 					dirtyEdges.push_back(curHE->index);
 				}
 				else
 				{
-					visitedEdges[curHE->index] = true;
+					visitedVerts[curHE->vid] = true;
 					auto &vpos = unfolded_mesh->vertFromHe(curHE->index)->pos;
 					auto vec = vpos - ori_ref;
 					vpos = QVector3D(
@@ -348,12 +395,12 @@ HDS_Mesh* MeshUnfolder::unfold(
 				unfoldFace(
 					parentEdgeMap[expSeq[i]], expSeq[i],
 					unfolded_mesh, ref_mesh,
-					visitedEdges, dirtyEdges
+					visitedVerts, dirtyEdges
 				);
 			}
 		}
 		// Qt display progress
-		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / ref_mesh->pieceSet.size()));
+		unfoldingProgress.setValue(10 + (++progressIndex * 45.0f / unfolded_mesh->pieceSet.size()));
 	}
 
 	// Layout pieces
