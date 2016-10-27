@@ -616,7 +616,7 @@ QVector3D HDS_Mesh::edgeVector(hdsid_t heid) const
 
 QVector3D HDS_Mesh::edgeVector(const he_t &he) const
 {
-	return vertSet[he.flip()->vid].pos - vertSet[he.vid].pos;
+	return vertSet[he.next()->vid].pos - vertSet[he.vid].pos;
 }
 
 vector<QVector3D> HDS_Mesh::allVertNormal() const

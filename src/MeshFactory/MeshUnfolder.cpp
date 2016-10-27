@@ -67,8 +67,7 @@ void MeshUnfolder::unfoldSeparateFace(
 	hdsid_t curFid, HDS_Mesh* inMesh)
 {
 	auto &verts = inMesh->verts();
-	//auto &refVerts = ref_mesh->verts();
-
+	
 	he_t* he_share = inMesh->heFromFace(curFid);
 	QVector3D &ori_pos = verts[he_share->vid].pos;
 	// Local axis of the original mesh, aka reference mesh
@@ -78,8 +77,7 @@ void MeshUnfolder::unfoldSeparateFace(
 	// Normal is always vector(0, 0, 1), aka Z-axes in world space
 	// Assume udir is normalized and on X-Y plane
 	const QVector3D vdir = QVector3D(-udir.y(), udir.x(), 0);
-
-	// No need to 
+	
 	he_t* curHE = he_share->next();
 	do
 	{
@@ -93,7 +91,7 @@ void MeshUnfolder::unfoldSeparateFace(
 		qreal ycoord = QVector3D::dotProduct(dvec_ref, yvec);
 
 		// Project position onto unfolded 2D plane
-		v->pos = ori_pos + xcoord * udir + ycoord * vdir;
+		v->pos = new_pos + xcoord * udir + ycoord * vdir;
 		
 		curHE = curHE->next();
 	} while (curHE != he_share);

@@ -10,5 +10,8 @@ private:
 		const mesh_t* ref_mesh, const confMap &conf);
 	static HDS_Mesh* createWeaving(
 		const mesh_t* ref_mesh, const confMap &conf);
+	static HDS_Mesh* createClassicalWeaving(
+		const mesh_t* ref_mesh, const confMap &conf
+	);
 };
 

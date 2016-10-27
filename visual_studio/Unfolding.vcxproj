@@ -151,15 +151,8 @@
       <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>xcopy /i /e /s /y /f "$(VCInstallDir)redist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).CRT\msvcp$(PlatformToolSetVersion).dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).CRT\vcruntime$(PlatformToolSetVersion).dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).MFC\mfc$(PlatformToolSetVersion)u.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Core.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Gui.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5OpenGL.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Widgets.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svg.dll" "$(OutDir)\"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -203,15 +196,8 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svg.dll" "$(OutDir)\"
       <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>xcopy /i /e /s /y /f "$(VCInstallDir)redist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).CRT\msvcp$(PlatformToolSetVersion).dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).CRT\vcruntime$(PlatformToolSetVersion).dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).MFC\mfc$(PlatformToolSetVersion)u.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Core.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Gui.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5OpenGL.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Widgets.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svg.dll" "$(OutDir)\"
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -254,14 +240,8 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svg.dll" "$(OutDir)\"
       <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>xcopy /i /e /s /y /f "$(VCInstallDir)redist\debug_nonredist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).DebugCRT\msvcp$(PlatformToolSetVersion)d.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\debug_nonredist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).DebugCRT\vcruntime$(PlatformToolSetVersion)d.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\debug_nonredist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).DebugMFC\mfc$(PlatformToolSetVersion)ud.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Cored.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Guid.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5OpenGLd.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Widgetsd.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -304,14 +284,8 @@ xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
       <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>xcopy /i /e /s /y /f "$(VCInstallDir)redist\debug_nonredist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).DebugCRT\msvcp$(PlatformToolSetVersion)d.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\debug_nonredist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).DebugCRT\vcruntime$(PlatformToolSetVersion)d.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(VCInstallDir)redist\debug_nonredist\$(PlatformTarget)\Microsoft.VC$(PlatformToolSetVersion).DebugMFC\mfc$(PlatformToolSetVersion)ud.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Cored.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Guid.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5OpenGLd.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Widgetsd.dll" "$(OutDir)\"
-xcopy /i /e /s /y /f "$(QTDIR)\bin\Qt5Svgd.dll" "$(OutDir)\"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

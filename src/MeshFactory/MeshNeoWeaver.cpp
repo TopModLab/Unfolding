@@ -312,9 +312,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		// Special Cases: normals are parallel to each other
 		auto isZeroVec = [](const QVector3D &vec) {
 			float threshold = 0.01f;
-			return vec.lengthSquared() < sqr(threshold)/*(vec.x() < threshold && vec.x() > -threshold)
-				&& (vec.y() < threshold && vec.y() > -threshold)
-				&& (vec.z() < threshold && vec.z() > -threshold)*/;
+			return vec.lengthSquared() < sqr(threshold);
 		};
 		if (isZeroVec(planeVecs[0]))
 		{
@@ -344,11 +342,12 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 		Float v3x = QVector3D::dotProduct(planeVecs[3], heDirs[compID[0]]);
 		Float v3y = QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
 		Float ab[4]{
-			-v1y*edgeLen / (v0y * v1x - v0x * v1y), v0y*edgeLen / (v0y * v1x - v0x * v1y),
-			-v3y*edgeLen / (v2y * v3x - v2x * v3y), v2y*edgeLen / (v2y * v3x - v2x * v3y),
+			-v1y*edgeLen / (v0y * v1x - v0x * v1y),
+			 v0y*edgeLen / (v0y * v1x - v0x * v1y),
+			-v3y*edgeLen / (v2y * v3x - v2x * v3y),
+			 v2y*edgeLen / (v2y * v3x - v2x * v3y),
 		};
-		cout << "ab: " << ab[0] << ", " << ab[1] << ", " << ab[2] << ", " << ab[3] << endl;
-
+		
 		planeVecs[1] *= -QVector3D::dotProduct(planeVecs[0], heTans[compID[0]])
 			/ QVector3D::dotProduct(planeVecs[1], heTans[compID[0]]);
 		planeVecs[3] *= -QVector3D::dotProduct(planeVecs[2], heTans[compID[0]])
@@ -363,6 +362,7 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 			edgeLen / (planeVecs[0] + planeVecs[1]).length(),
 			edgeLen / (planeVecs[2] + planeVecs[3]).length()
 		};
+#if 0
 		if (vecLen[0] < 0.01f && vecLen[0] > -0.01f)
 		{
 			cout << "Null Vec: " << planeVecs[0] << ", " << planeVecs[1] << endl;
@@ -375,9 +375,9 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 			cout << "v1*dir < 2: " << (QVector3D::dotProduct(planeVecs[2], heDirs[compID[0]]) > 0) << endl;
 			cout << "v1*dir < 3: " << (QVector3D::dotProduct(planeVecs[3], heDirs[compID[0]]) > 0) << endl;
 			cout << "scale(" <<  scale[0] << ", " << scale[1] << ")\n";
-
 		}
-		//printf("scale: %f, %f; len: %f, %f\n", scale[0], scale[1], vecLen[0], vecLen[1]);
+#endif
+		
 		planeVecs[0] *= scale[0];
 		planeVecs[1] *= scale[0];
 		planeVecs[2] *= scale[1];
@@ -412,19 +412,6 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	}
 	
 	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
-	/*for (int i = 0; i < refHeCount; i++)
-	{
-		auto he = &ref_hes[i];
-		auto he_next = he->next();
-
-		hdsid_t he1id, he2id;
-		he1id = he->flip_offset > 0
-			? heCompMap.at(he->index) * edgeCount
-			: heCompMap.at(he->flip()->index) * edgeCount + 2;
-		he2id = he_next->flip_offset > 0
-			? heCompMap.at(he_next->index) * edgeCount
-			: heCompMap.at(he_next->flip()->index) * edgeCount + 2;
-	}*/
 
 	unordered_set<hdsid_t> exposedHEs;
 	for (auto &he: newMesh->halfedges())
@@ -437,4 +424,40 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	newMesh->updatePieceSet();
 
 	return newMesh;
+}
+
+HDS_Mesh* MeshNeoWeaver::createClassicalWeaving(
+	const mesh_t* ref_mesh, const confMap &conf
+)
+{
+	if (!ref_mesh) return nullptr;
+
+	// scaling 
+	const float patchScale = conf.at("patchScale");
+	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
+
+	auto &ref_verts = ref_mesh->verts();
+	auto &ref_hes = ref_mesh->halfedges();
+	auto &ref_faces = ref_mesh->faces();
+	size_t refHeCount = ref_hes.size();
+	size_t refEdgeCount = refHeCount >> 1;
+	size_t refFaceCount = ref_faces.size();
+
+	mesh_t::resetIndex();
+	vector<QVector3D> fNorms(refFaceCount);
+	vector<QVector3D> heMid(refEdgeCount);
+	vector<QVector3D> heDirs(refEdgeCount);
+	vector<float> heDirLens(refEdgeCount);
+	vector<QVector3D> heNorms(refEdgeCount);
+	vector<QVector3D> heTans(refEdgeCount);
+	vector<bool> isConcaveEdge(refEdgeCount, false);
+	// key: original edge id, value: edge id in new mesh
+	unordered_map<hdsid_t, hdsid_t> heCompMap;
+
+	/************************************************************************/
+	/* Caching face centers                                                 */
+	/************************************************************************/
+	// face center cache array
+	vector<QVector3D> faceCenters;
+
 }

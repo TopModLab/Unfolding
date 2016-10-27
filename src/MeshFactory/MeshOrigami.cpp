@@ -8,7 +8,8 @@ HDS_Mesh* MeshOrigami::create(
 	return createOrigami(ref, conf);
 }
 HDS_Mesh* MeshOrigami::createOrigami(
-	const mesh_t* ref_mesh, const confMap &conf) {
+	const mesh_t* ref_mesh, const confMap &conf)
+{
 	if (!ref_mesh) return nullptr;
 	const float patchScale = conf.at("patchScale");
 	const float foldDepth = conf.at("foldDepth");
@@ -24,28 +25,37 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	vector<face_t> faces(ref_mesh->faces());
 	mesh_t* ret = new HDS_Mesh(verts, hes, faces);
 
-	size_t heSize = ret->halfedges().size();
-	for (int i = 0; i < heSize; i++)
+	hdsid_t nulledge = 0;
+	for (auto &he : ret->halfedges())
 	{
-		//reconstruct verts, unlink faces
-		ret->verts()[i].pos = patchScale * ref_verts[ref_hes[i].vid].pos
-			+ (1 - patchScale) * ref_mesh->faceCenter(ref_hes[i].fid);
-		ret->verts()[i].setRefId(ref_hes[i].vid);
-		constructHE(&ret->verts()[i], &ret->halfedges()[i]);
-
+		if (he.isCutEdge)
+		{
+			nulledge = he.index;
+			break;
+		}
+		he.flip_offset = 0;
+		auto v = &ret->verts()[he.index];
+		v->pos = ref_verts[he.vid].pos;
+		v->heid = he.vid = he.index;
 	}
+	ret->halfedges().resize(nulledge);
+	size_t heSize = nulledge;
 
 	//give a random layout scheme for now
-	for (int i = 0; i < ret->faces().size(); i++) {
-			QVector3D vpos = QVector3D(2 * i, 0, 0);
-			QVector3D ev = QVector3D(0, 1, 0);
+	for (int i = 0; i < ret->faces().size(); i++)
+	{
 		//unfold
-		MeshUnfolder::unfoldSeparateFace(vpos, ev, i, ret);
+		MeshUnfolder::unfoldSeparateFace(
+			QVector3D(2 * i, i, 0), QVector3D(0, 1, 0), i, ret
+		);
 	}
 	//add bridges based on ref_mesh flip twins
-	for (int i = 0; i < heSize; i++) {
+
+	for (int i = 0; i < heSize; i++)
+	{
 		hdsid_t flipid = ref_hes[i].flip()->index;
-		if ( flipid > i) {
+		if (flipid > i)
+		{
 			he_t* he1 = &ret->halfedges()[i];
 			he_t* he2 = &ret->halfedges()[flipid];
 
