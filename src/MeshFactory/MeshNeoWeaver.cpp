@@ -3,7 +3,8 @@
 HDS_Mesh* MeshNeoWeaver::create(
 	const mesh_t* ref, const confMap &conf)
 {
-	return createWeaving(ref, conf);
+	return createClassicalWeaving(ref, conf);
+	//return createWeaving(ref, conf);
 	//return createOctWeaving(ref, conf);
 }
 
@@ -444,13 +445,23 @@ HDS_Mesh* MeshNeoWeaver::createClassicalWeaving(
 	size_t refFaceCount = ref_faces.size();
 
 	mesh_t::resetIndex();
+	vector<vert_t> verts(refHeCount << 2);
+	vector<he_t> hes(refHeCount << 2);
+	vector<face_t> faces(refHeCount);
+
 	vector<QVector3D> fNorms(refFaceCount);
-	vector<QVector3D> heMid(refEdgeCount);
+	vector<QVector3D> fCenters(refFaceCount);
+	// Edge local axis
 	vector<QVector3D> heDirs(refEdgeCount);
-	vector<float> heDirLens(refEdgeCount);
 	vector<QVector3D> heNorms(refEdgeCount);
 	vector<QVector3D> heTans(refEdgeCount);
-	vector<bool> isConcaveEdge(refEdgeCount, false);
+	vector<float> heDirLens(refEdgeCount);
+	// Edge plane
+	vector<QVector3D> hePlane(refEdgeCount * 5);
+	//
+	const float r1 = 1.0f;
+	const float r2 = 0.5f;
+	const float r3 = 0.8f;
 	// key: original edge id, value: edge id in new mesh
 	unordered_map<hdsid_t, hdsid_t> heCompMap;
 
@@ -458,6 +469,89 @@ HDS_Mesh* MeshNeoWeaver::createClassicalWeaving(
 	/* Caching face centers                                                 */
 	/************************************************************************/
 	// face center cache array
-	vector<QVector3D> faceCenters;
+	for (int i = 0; i < refFaceCount; i++)
+	{
+		fNorms[i] = ref_mesh->faceNormal(i);
+		fCenters[i] = ref_mesh->faceCenter(i);
+	}
 
+	for (hdsid_t i = 0, it = 0; i < refHeCount; i++)
+	{
+		auto he = &ref_hes[i];
+		if (he->flip_offset < 0) continue;
+		auto hef = he->flip();
+		// calc dir
+		heDirs[it] = (ref_verts[hef->vid].pos
+			- ref_verts[he->vid].pos);
+		heNorms[it] = (fNorms[he->fid]
+			+ fNorms[hef->fid]).normalized();
+		heTans[it] = QVector3D::crossProduct(
+			heNorms[it], heDirs[it]).normalized();
+		heNorms[it] = QVector3D::crossProduct(heDirs[it], heTans[it]).normalized();
+		// check if edge is concave
+		heDirLens[it] = heDirs[it].length();
+		heDirs[it] /= heDirLens[it];
+
+		heCompMap[he->index] = heCompMap[hef->index] = it++;
+	}
+
+	QVector3D p0, p1, p2, p3, p4, p5, heC;
+	QVector3D v1, v2, v3, v4, v5, v6, v7, v8;
+	for (auto &he : ref_hes)
+	{
+		if (he.flip_offset < 0) continue;
+		hdsid_t edgeIt = heCompMap.at(he.index);
+		auto hef = he.flip();
+		p0 = ref_verts[he.vid].pos;
+		p1 = ref_verts[hef->vid].pos;
+		QVector3D fcV = fCenters[he.fid] - p0;
+		QVector3D fcV_f = fCenters[hef->fid] - p0;
+		float x2 = QVector3D::dotProduct(fcV, heDirs[edgeIt]);
+		float y2 = QVector3D::dotProduct(fcV, heTans[edgeIt]);
+		float x3 = QVector3D::dotProduct(fcV_f, heDirs[edgeIt]);
+		float y3 = QVector3D::dotProduct(fcV_f, heTans[edgeIt]);
+
+		p2 = p0 + x2 * heDirs[edgeIt] + y2 * heTans[edgeIt];
+		p3 = p0 + x3 * heDirs[edgeIt] + y3 * heTans[edgeIt];
+		heC = Utils::Lerp(p2, p3, y2 / (y2 - y3));
+		p4 = Utils::Lerp(heC, p2, r1);
+		p5 = Utils::Lerp(heC, p3, r1);
+
+		v1 = Utils::Lerp(p0, p4, r2);
+		v4 = Utils::Lerp(p0, p4, r3);
+		v5 = Utils::Lerp(p0, p5, r2);
+		v6 = Utils::Lerp(p0, p5, r3);
+		v3 = Utils::Lerp(p1, p5, r2);
+		v2 = Utils::Lerp(p1, p5, r3);
+		v7 = Utils::Lerp(p1, p4, r2);
+		v8 = Utils::Lerp(p1, p4, r3);
+
+		vert_t* curVerts = verts.data() + edgeIt * 8;
+		he_t* curHEs = hes.data() + edgeIt * 8;
+		face_t* curFaces = faces.data() + edgeIt * 2;
+		constructHE(curVerts, curHEs, 8);
+		constructFace(curHEs, 4, curFaces);
+		constructFace(curHEs + 4, 4, curFaces + 1);
+		curVerts->pos = v1;
+		(curVerts + 1)->pos = v2;
+		(curVerts + 2)->pos = v3;
+		(curVerts + 3)->pos = v4;
+		(curVerts + 4)->pos = v5;
+		(curVerts + 5)->pos = v6;
+		(curVerts + 6)->pos = v7;
+		(curVerts + 7)->pos = v8;
+	}
+
+
+	unordered_set<hdsid_t> exposedHEs;
+	for (hdsid_t i = 0; i < hes.size(); i++)
+	{
+		exposedHEs.insert(i);
+	}
+	fillNullFaces(hes, faces, exposedHEs);
+	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
+
+	newMesh->updatePieceSet();
+
+	return newMesh;
 }

@@ -598,6 +598,16 @@ void MeshViewer::keyPressEvent(QKeyEvent* e)
 
 void MeshViewer::keyReleaseEvent(QKeyEvent* e)
 {
+	if (e->key() == Qt::Key_S && e->modifiers() == Qt::AltModifier)
+	{
+		QString filename = QFileDialog::getSaveFileName(
+			this,
+			"Save Screenshot file...",
+			"default",
+			tr("PNG(*.png)")
+		);
+		if (!filename.isEmpty()) this->grab().save(filename);
+	}
 }
 
 void MeshViewer::mousePressEvent(QMouseEvent* e)

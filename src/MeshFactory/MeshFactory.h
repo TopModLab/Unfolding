@@ -1,6 +1,6 @@
 #pragma once
 #include "HDS/HDS_Mesh.h"
-
+#include "Utils/utils.h"
 
 class MeshFactory
 {
@@ -16,6 +16,7 @@ public:
 
 	static void init();
 	static void constructHE(vert_t* v, he_t* he);
+	static void constructHE(vert_t* v, he_t* he, size_t edgeCount);
 
 	static void constructFace(
 		he_t* unlinkedHE, size_t edgeCount,

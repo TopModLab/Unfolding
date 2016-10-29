@@ -18,7 +18,13 @@ void MeshFactory::constructHE(vert_t* v, he_t* he)
 	he->vid = v->index;
 }
 
-
+void MeshFactory::constructHE(vert_t* v, he_t* he, size_t edgeCount)
+{
+	for (int i = 0; i < edgeCount; i++)
+	{
+		constructHE(v + i, he + i);
+	}
+}
 
 // Functionality: 
 //	Link edge loops of a face, 
@@ -29,10 +35,11 @@ void MeshFactory::constructHE(vert_t* v, he_t* he)
 //	start edge's address, num of edges to be assigned,
 //	face index of assigned face
 void MeshFactory::constructFace(
-	he_t* unlinkedHE, size_t edgeCount, 
+	he_t* unlinkedHE, size_t edgeCount,
 	face_t* face)
 {
-	for (int i = 0; i < edgeCount; i++) {
+	for (int i = 0; i < edgeCount; i++)
+	{
 		(unlinkedHE + i)->next_offset = (i < edgeCount - 1) ? 1 : 1 - edgeCount;
 		(unlinkedHE + i)->prev_offset = (i > 0) ? -1 : edgeCount - 1;
 		(unlinkedHE + i)->fid = face->index;
@@ -51,7 +58,8 @@ void MeshFactory::constructFace(
 	face_t* face)
 {
 	int edgeCount = indices.size();
-	for (int i = 0; i < edgeCount; i++) {
+	for (int i = 0; i < edgeCount; i++)
+	{
 		(hes[indices[i]]).next_offset = (i < edgeCount - 1) ? 1 : 1 - edgeCount;
 		(hes[indices[i]]).prev_offset = (i > 0) ? -1 : edgeCount - 1;
 		(hes[indices[i]]).fid = face->index;
@@ -150,12 +158,12 @@ void MeshFactory::fillNullFaces(
 }
 
 // Functionality:
-//	generate a new bridger(all quads) connecting he1 and he2
+//	generate a new bridge(all quads) connecting he1 and he2
 //	newly generated faces->he is in same direction as he1.flip
 ///				--------> he1
 ///				<-------- he1.flip
 ///		vpos1[0] *		* vpos2[0]
-///				 Bridger
+///				 |Bridge|
 ///		vpos1[1] *		* vpos2[1]
 ///				--------> he2.flip 
 ///				<-------- he2
