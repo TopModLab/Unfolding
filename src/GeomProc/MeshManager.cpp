@@ -472,51 +472,6 @@ bool MeshManager::initSparseGraph()
 	return false;
 }
 
-/*
-void MeshManager::mapToExtendedMesh()
-{
-	QScopedPointer<HDS_Mesh> ref_mesh;
-	QScopedPointer<HDS_Mesh> des_mesh;
-	ref_mesh.reset(new HDS_Mesh(*cutted_mesh));
-	des_mesh.reset(new HDS_Mesh(*extended_mesh));
-
-
-
-	//mark out all cut edges
-
-	//get cut edges in cutted mesh
-	set<int> cutEdges;
-	for(auto he : ref_mesh->halfedges()) {
-		if (he->isCutEdge) {
-			if( cutEdges.find(he->index) == cutEdges.end() )
-			{
-				cutEdges.insert(he->index);
-			}
-		}
-	}
-
-	//find original cut edges in extended mesh and mark out its face
-	for(auto f : des_mesh->faces()) {
-		if (f->isHole) {
-			HDS_HalfEdge* edge = f->he;
-			do {
-				//edge->setPicked(true);
-				edge->setCutEdge(true);
-				edge = edge->next;
-			}while(edge != f->he);
-		}
-
-		if (f->isBridger) {
-			if (cutEdges.find(f->he->flip()->index) != cutEdges.end()) {
-				f->he->setPicked(true);
-
-			}
-		}
-	}
-
-	extended_mesh.reset(new HDS_Mesh(*des_mesh));
-
-}*/
 
 bool MeshManager::unfoldMesh()
 {
@@ -721,7 +676,16 @@ bool MeshManager::setNeoWeaveMesh(const confMap &conf)
 bool MeshManager::setOrigamiMesh(const confMap &conf)
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
-	HDS_Mesh* outMesh = MeshOrigami::create(inMesh, conf);
+	HDS_Mesh* oriMesh = MeshOrigami::createOrigami(inMesh, conf);
+	HDS_Mesh* outMesh;
+	for (int anim = 0; anim < 10; anim++) {
+		cout << "processing " << anim << endl;
+		HDS_Mesh* ret = MeshOrigami::processOrigami(inMesh, oriMesh, anim);
+		MeshViewer::getInstance()->bindHalfEdgeMesh(ret);
+		Sleep(uint(100));
+		outMesh = ret;
+	}
+	//HDS_Mesh* outMesh = MeshOrigami::processOrigami(inMesh, oriMesh, 0);
 	if (!outMesh)
 	{
 		return false;

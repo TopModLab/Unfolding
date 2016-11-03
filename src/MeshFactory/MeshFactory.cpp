@@ -229,6 +229,7 @@ void MeshFactory::generateBridge(
 			constructHE(&verts[vid], &hes[heOriSize + 4 * face + heOffset]);
 		}
 		constructFace(&hes[heOriSize + 4 * face], 4, &fs[fOriSize + face]);
+		fs[fOriSize + face].isBridger = true;
 	}
 
 	//set flip
