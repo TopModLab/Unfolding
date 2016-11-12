@@ -13,5 +13,8 @@ private:
 	static HDS_Mesh* createClassicalWeaving(
 		const mesh_t* ref_mesh, const confMap &conf
 	);
+	static HDS_Mesh* createConicalWeaving(
+		const mesh_t* ref_mesh, const confMap &conf
+	);
 };
 

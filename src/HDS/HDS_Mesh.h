@@ -102,6 +102,8 @@ public:
 	vector<QVector3D> allVertNormal() const;
 	QVector3D edgeVector(hdsid_t heid) const;
 	QVector3D edgeVector(const he_t &he) const;
+	QVector3D edgeCenter(hdsid_t heid) const;
+	QVector3D edgeCenter(const he_t &he) const;
 	QVector3D faceCenter(hdsid_t fid) const;
 	QVector3D faceNormal(hdsid_t fid) const;
 	vector<hdsid_t> faceCorners(hdsid_t fid) const;

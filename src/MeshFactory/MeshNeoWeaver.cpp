@@ -555,3 +555,65 @@ HDS_Mesh* MeshNeoWeaver::createClassicalWeaving(
 
 	return newMesh;
 }
+
+HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
+	const mesh_t* ref_mesh, const confMap &conf
+)
+{
+	if (!ref_mesh) return nullptr;
+
+	// scaling 
+	const float patchScale = conf.at("patchScale");
+	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
+	const uint32_t patchScale = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
+
+	auto &ref_verts = ref_mesh->verts();
+	auto &ref_hes = ref_mesh->halfedges();
+	auto &ref_faces = ref_mesh->faces();
+	size_t refHeCount = ref_hes.size();
+	size_t refEdgeCount = refHeCount >> 1;
+	size_t refFaceCount = ref_faces.size();
+
+	mesh_t::resetIndex();
+	vector<vert_t> verts(refHeCount << 2);
+	vector<he_t> hes(refHeCount << 2);
+	vector<face_t> faces(refHeCount);
+
+	//vector<QVector3D> fNorms(refFaceCount);
+	//vector<QVector3D> fCenters(refFaceCount);
+	// Edge local axis
+	// half length of he directions
+	vector<QVector3D> heDirs(refHeCount);
+	vector<QVector3D> heCenters(refHeCount);
+	//vector<QVector3D> heNorms(refEdgeCount);
+	//vector<QVector3D> heTans(refEdgeCount);
+	vector<QVector3D> heCross(refHeCount);
+	vector<float> heDirLens(refHeCount);
+	for (auto &he : ref_hes)
+	{
+		heDirs[he.index] = ref_mesh->edgeVector(he) * 0.5f;
+		heCenters[he.index] = heCenters[he.flip()->index]
+			= ref_mesh->edgeCenter(he);
+
+		heDirs[he.flip()->index] = -heDirs[he.index];
+	}
+	for (auto &he : ref_hes)
+	{
+		heCross[he.index] = heDirs[he.index] - heDirs[he.prev()->index];
+	}
+	for (int i = 0; i < refHeCount; i++)
+	{
+		auto he = &ref_hes[i];
+		auto he_Idx = he->index;
+		auto he_prev_Idx = he->prev()->index;
+		QVector3D p0 = heCenters[he_Idx] - heDirs[he_Idx] * patchScale;
+		QVector3D p1 = heCenters[he_prev_Idx] + heDirs[he_prev_Idx] * patchScale;
+		QVector3D av = heCross[he->index] * 0.25f;
+		QVector3D bv = heCross[he->index] * 0.75f;
+		// v1 = p0+av;
+		// v2 = p0+bv;
+		// v3 = p1+av;
+		// v4 = p1+bv;
+		// connect v1-v2-v4-v3
+	}
+}

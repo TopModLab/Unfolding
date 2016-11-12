@@ -608,6 +608,18 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 	return n.normalized();
 }
 
+QVector3D HDS_Mesh::edgeCenter(hdsid_t heid) const
+{
+	return (vertSet[heSet[heid].flip()->vid].pos
+		+ vertSet[heSet[heid].vid].pos) * 0.5f;
+}
+
+QVector3D HDS_Mesh::edgeCenter(const he_t &he) const
+{
+	return (vertSet[he.next()->vid].pos
+		+ vertSet[he.vid].pos) * 0.5f;
+}
+
 QVector3D HDS_Mesh::edgeVector(hdsid_t heid) const
 {
 	return vertSet[heSet[heid].flip()->vid].pos
