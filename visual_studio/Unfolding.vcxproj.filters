@@ -452,9 +452,6 @@
     <ClInclude Include="..\src\GeomProc\MeshLoader.h">
       <Filter>Header Files\GeomProc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\GeomProc\MeshManager.h">
-      <Filter>Header Files\GeomProc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\GeomProc\MeshSmoother.h">
       <Filter>Header Files\GeomProc</Filter>
     </ClInclude>
@@ -573,6 +570,9 @@
     </CustomBuild>
     <CustomBuild Include="..\forms\OrigamiPanel.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\GeomProc\MeshManager.h">
+      <Filter>Header Files\GeomProc</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

@@ -139,8 +139,12 @@ void MeshViewer::initializeGL()
 	glGenBuffers(2, fRBO.tbo);
 }
 
-void MeshViewer::unfoldView(const HDS_Mesh* inMesh)
+void MeshViewer::unfoldView(HDS_Mesh* inMesh)
 {
+	if (!inMesh->bound.get())
+	{
+		inMesh->bound.reset(new BBox3);
+	}
 	QVector3D boundMid = inMesh->bound->getMidPoint();
 	view_cam.setTarget(boundMid);
 	boundMid.setZ(10);

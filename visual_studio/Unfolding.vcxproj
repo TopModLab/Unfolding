@@ -454,7 +454,7 @@
     <ClInclude Include="..\src\GeomProc\MeshConnector.h" />
     <ClInclude Include="..\src\GeomProc\MeshIterator.h" />
     <ClInclude Include="..\src\GeomProc\MeshLoader.h" />
-    <ClInclude Include="..\src\GeomProc\MeshManager.h" />
+    <CustomBuild Include="..\src\GeomProc\MeshManager.h" />
     <ClInclude Include="..\src\GeomProc\MeshSmoother.h" />
     <ClInclude Include="..\src\GeomUtils\BBox.h" />
     <ClInclude Include="..\src\GeomUtils\discretegeocomputer.h" />

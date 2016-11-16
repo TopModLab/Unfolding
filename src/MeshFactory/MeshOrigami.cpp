@@ -7,6 +7,8 @@ HDS_Mesh* MeshOrigami::create(
 {
 	return createOrigami(ref, conf);
 }
+
+// create faces of origami
 HDS_Mesh* MeshOrigami::createOrigami(
 	const mesh_t* ref_mesh, const confMap &conf)
 {
@@ -43,8 +45,10 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	return ret;
 }
 
+// unfold faces and add bridges
 HDS_Mesh* MeshOrigami::processOrigami(
-	const mesh_t* ref_mesh, const mesh_t* ori_mesh, int anim) {
+	const mesh_t* ref_mesh, const mesh_t* ori_mesh, 
+	vector<QVector3D> pos, vector<QVector3D> rot) {
 	mesh_t* ret = new HDS_Mesh(*ori_mesh);
 	auto &ref_hes = ref_mesh->halfedges();
 	size_t heSize = ref_hes.size();
@@ -55,15 +59,7 @@ HDS_Mesh* MeshOrigami::processOrigami(
 	for (int i = 0; i < faceSize; i++)
 	{
 		//unfold
-		
-		MeshUnfolder::unfoldSeparateFace(
-			QVector3D(3 * (i - faceSize / 2), abs(i - faceSize / 2), 0),
-			QVector3D(
-				sin(2* M_PI * i / anim),
-				1,
-				0).normalized(),
-			i, ret
-		);
+		MeshUnfolder::unfoldSeparateFace(pos[i], rot[i], i, ret);
 	}
 
 	//add bridges based on ref_mesh flip twins
@@ -83,14 +79,15 @@ HDS_Mesh* MeshOrigami::processOrigami(
 				(ret->vertFromHe(flipid)->pos
 				+ ret->vertFromHe(he1->next()->index)->pos) / 2.0 };
 			size_t heOriSize = ret->halfedges().size();
+			
 			// generate bridge
-			generateBridge(i, flipid, ret, vpos1, vpos2);
+			if (!ref_hes[i].isPicked) generateBridge(i, flipid, ret, vpos1, vpos2);
 
 			//if selected edge, unlink bridge edge pairs to make flaps
 			if (ref_hes[i].isPicked) {
 				//for (int index = 0; index < vpos1.size(); index++)
 				//{
-				ret->splitHeFromFlip(heOriSize + 2);
+				//ret->splitHeFromFlip(heOriSize + 2);
 				//}
 
 			}
@@ -105,4 +102,37 @@ HDS_Mesh* MeshOrigami::processOrigami(
 	}
 	fillNullFaces(ret->halfedges(), ret->faces(), exposedHEs);
 	return ret;
+}
+
+// evaluate origami (calculate bridge length, and moving direction of faces)
+void MeshOrigami::evaluateOrigami(
+	const mesh_t* ref_mesh, mesh_t* eval_mesh, 
+	float &dist, vector<QVector3D> &vec)
+{
+	for (int i = 0; i < ref_mesh->faces().size(); i++) {
+		QVector3D dir(QVector3D(0,0,0));
+		he_t* he = eval_mesh->heFromFace(i);
+		do {
+			if (!ref_mesh->halfedges()[he->index].isPicked) {
+				hdsid_t flipid = ref_mesh->halfedges()[he->index].flip()->index;
+				he_t* flip = &eval_mesh->halfedges()[flipid];
+				QVector3D v1 = eval_mesh->vertFromHe(he->index)->pos;
+				QVector3D v2 = eval_mesh->vertFromHe(he->flip()->index)->pos;
+				QVector3D fv2 = eval_mesh->vertFromHe(flip->index)->pos;
+				QVector3D fv1 = eval_mesh->vertFromHe(flip->flip()->index)->pos;
+				float dist1 = (v1 - fv1).length();
+				float dist2 = (v2 - fv2).length();
+				if (dist1 < dist2) {
+					dist += dist1;
+					dir += fv1 - v1;
+				}
+				else {
+					dist += dist2;
+					dir += fv2 - v2;
+				}
+			}
+			he = he->next();
+		} while (he != eval_mesh->heFromFace(i));
+		vec[i] = dir;
+	}
 }

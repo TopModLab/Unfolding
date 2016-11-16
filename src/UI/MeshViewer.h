@@ -154,7 +154,7 @@ public:// slots functions
 	void toggleLightingWireframe();
 	void toggleText();
 
-	void unfoldView(const HDS_Mesh* inMesh);
+	void unfoldView(HDS_Mesh* inMesh);
 
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;

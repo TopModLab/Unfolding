@@ -25,7 +25,7 @@ void main()
 		dot_prod = (dot_prod + 1.0f) / 2.0f;
 		vec3 Id = mix(La, Kd, dot_prod); // final diffuse intensity
 		// final color	
-		frag_color = vec4(Id, 1.0f);
+		frag_color = vec4(mix(Id, vec3(0.3,0.5,0.5), 1-dot_prod), 1.0f);
 	}
 
 }
