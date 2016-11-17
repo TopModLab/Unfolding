@@ -676,58 +676,9 @@ bool MeshManager::setNeoWeaveMesh(const confMap &conf)
 bool MeshManager::setOrigamiMesh(const confMap &conf)
 {
 	HDS_Mesh* inMesh = operationStack->getCurrentMesh();
-	HDS_Mesh* oriMesh = MeshOrigami::createOrigami(inMesh, conf);
-	int faceSize = oriMesh->faces().size();
-	HDS_Mesh* outMesh;
-	//while dist can be further reduced
-	float curDist = INT_MAX;
-	vector<QVector3D> rot(faceSize, QVector3D(0, 1, 0).normalized());
-	vector<QVector3D> pos(faceSize);
-	vector<int> posZ(faceSize, 0);
-	int count = 0;
-	queue<pair<int, int>> Q;
-	Q.push({ 0, 0 });
-	//BFS to assign z position of each piece
-	while (count < faceSize && !Q.empty()) {
-		int curIdx = Q.front().first;
-		int z = Q.front().second;
-		posZ[curIdx] = z;
-		Q.pop();
-		for (auto fid : inMesh->incidentFacesFromFace(curIdx)) {
-			if (inMesh->halfedges()[inMesh->sharedEdgeByFaces(curIdx, fid)].isPicked 
-				|| fid == 0 || posZ[fid] != 0) continue;
-			Q.push({fid, z+1});
-			count++;
-		}
-	}
 
-	for (int i = 0; i < faceSize; i++) {
-		pos[i] = QVector3D(3 * (i - faceSize / 2), 0, 0);
-	}
-	while (1) {
-		vector<QVector3D> thisPos(pos);
-		for (int i = 0; i < thisPos.size(); i++) thisPos[i].setZ(posZ[i]*0.2);
-		outMesh = MeshOrigami::processOrigami(inMesh, oriMesh, thisPos, rot);
-		MeshViewer::getInstance()->unfoldView(outMesh);
-		MeshViewer::getInstance()->bindHalfEdgeMesh(outMesh);
-		MeshViewer::getInstance()->repaint();
-		Sleep(uint(100));
-
-		//calculate next step distance
-		float dist = 0;
-		vector<QVector3D> movingDir(faceSize);
-		MeshOrigami::evaluateOrigami(inMesh, outMesh, dist, movingDir);
-		if (fabsf(curDist - dist) < 0.01) break;
-		else {
-			//move pos in movingDir
-			//step size 0.05
-			for (int i = 0; i < faceSize; i++) {
-				pos[i] += movingDir[i] / 20;
-			}
-			curDist = dist;
-		}
-
-	}
+	HDS_Mesh* outMesh = MeshOrigami::create(inMesh, conf);
+	
 	if (!outMesh)
 	{
 		return false;

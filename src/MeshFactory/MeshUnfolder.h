@@ -12,7 +12,7 @@ public:
 
 	static void unfoldSeparateFace(
 		const QVector3D &pos, const QVector3D &orient,
-		hdsid_t curFid, HDS_Mesh* unfolded_mesh
+		hdsid_t curHEid, HDS_Mesh* unfolded_mesh
 	);
 //private:
 	static bool hasBadVertex(const HDS_Mesh* ref_mesh);
