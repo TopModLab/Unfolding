@@ -5,38 +5,41 @@
 
 vector<QVector3D> MeshOrigami::pos = vector<QVector3D>();
 vector<QVector3D> MeshOrigami::orient = vector<QVector3D>();
-
+vector<hdsid_t> MeshOrigami::heid = vector<hdsid_t>();
 HDS_Mesh* MeshOrigami::create(
 	const mesh_t* ref, const confMap &conf)
 {
-	HDS_Mesh* outMesh = MeshOrigami::createOrigami(ref, conf);
 	int faceSize = ref->faces().size();
+	pos = vector<QVector3D>(faceSize, QVector3D(0, 0, 0));
+	orient = vector<QVector3D>(faceSize, QVector3D(0, 1, 0));
+	heid = vector<hdsid_t>(faceSize);
+	HDS_Mesh* outMesh = MeshOrigami::createOrigami(ref, conf);
 	//while dist can be further reduced
 	float curDist = INT_MAX;
 
-// 	while (1) {
-// 
-// 		//calculate next step distance
-// 		float dist = 0;
-// 		vector<QVector3D> movingDir(faceSize);
-// 		MeshOrigami::evaluateOrigami(ref, outMesh, dist, movingDir);
-// 		if (fabsf(curDist - dist) < 0.01) break;
-// 		else {
-// 			//move pos in movingDir
-// 			//step size 0.05
-// 			for (int i = 0; i < faceSize; i++) {
-// 				pos[i] += movingDir[i] / 20;
-// 			}
-// 			curDist = dist;
-// 		}
-// 
-// 		MeshOrigami::processOrigami(ref, outMesh);
-// 		//MeshViewer::getInstance()->unfoldView(outMesh);
-// 		MeshViewer::getInstance()->bindHalfEdgeMesh(outMesh);
-// 		MeshViewer::getInstance()->repaint();
-// 		Sleep(uint(100));
-// 
-// 	}
+	while (1) {
+
+		//calculate next step distance
+		float dist = 0;
+		vector<QVector3D> movingDir(faceSize);
+		MeshOrigami::evaluateOrigami(ref, outMesh, dist, movingDir);
+		if (curDist < dist || fabsf(curDist - dist) < 0.01) break;
+		else {
+			//move pos in movingDir
+			//step size 0.05
+			for (int i = 0; i < faceSize; i++) {
+				pos[i] += movingDir[i] / 20;
+			}
+			curDist = dist;
+		}
+
+		MeshOrigami::processOrigami(ref, outMesh);
+		//MeshViewer::getInstance()->unfoldView(outMesh);
+		MeshViewer::getInstance()->bindHalfEdgeMesh(outMesh);
+		MeshViewer::getInstance()->repaint();
+		Sleep(uint(100));
+
+	}
 	return outMesh;
 }
 
@@ -58,8 +61,7 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	vector<he_t> hes(ref_hes);
 	vector<face_t> faces(ref_mesh->faces());
 	mesh_t* ret = new HDS_Mesh(verts, hes, faces);
-	pos = vector<QVector3D>(refFaceCount, QVector3D(0, 0, 0));
-	orient = vector<QVector3D>(refFaceCount, QVector3D(0, 1, 0));
+	
 
 	hdsid_t nulledge = ret->halfedges().size();
 	for (auto &he : ret->halfedges())
@@ -90,8 +92,9 @@ void MeshOrigami::bridgeOrigami(
 
 	//BFS to get an initial layout
 	vector<hdsid_t> parentEdgeMap(faceSize, 0);
-	queue<pair<int, int>> Q;
+	queue<pair<hdsid_t, int>> Q;
 	vector<bool> visitedFaces(faceSize, false);
+	deque<pair<hdsid_t, int>> expSeq;
 	Q.push({ 0, 0 });
 		//BFS to assign z position of each piece
 		while (!Q.empty()) {
@@ -100,29 +103,7 @@ void MeshOrigami::bridgeOrigami(
 		int z = Q.front().second;
 		Q.pop();
 		visitedFaces[curIdx] = true;
-
-		if (curIdx == 0) {
-			pos[curIdx] = QVector3D(0, 0, 0);
-			orient[curIdx] = QVector3D(0, 1, 0);
-			curHEID = ret->faces()[curIdx].heID();
-		} else {
-			hdsid_t ref_he = parentEdgeMap[curIdx];
-
-			hdsid_t ref_he_nxt = ret->halfedges()[ref_he].next()->index;
-			QVector3D ref_he_pos = ret->vertFromHe(ref_he)->pos;
-			QVector3D ref_he_nxt_pos = ret->vertFromHe(ref_he_nxt)->pos;
-
-			QVector3D ref_he_orient = (ref_he_pos - ref_he_nxt_pos).normalized();
-			//create gap between faces
-			QVector3D curPos = ref_he_nxt_pos 
-				+ QVector3D::crossProduct(QVector3D(0,0,1), ref_he_orient) * foldDepth;
-			
-			pos[curIdx] = curPos;
-			orient[curIdx] = ref_he_orient;//QVector3D(0,-1,0);
-			curHEID = ref_mesh->halfedges()[ref_he].flip()->index;
-		}
-		pos[curIdx].setZ(z);
-		MeshUnfolder::unfoldSeparateFace(pos[curIdx], orient[curIdx], curHEID, ret);
+		expSeq.push_back({ curIdx, z });
 
 		// Go through neighboring faces,
 		// record shared edge to current face
@@ -141,6 +122,36 @@ void MeshOrigami::bridgeOrigami(
 		
 	}
 
+		//expand faces
+		for (auto cur : expSeq) {
+			hdsid_t curIdx = cur.first;
+			hdsid_t z = cur.second;
+			hdsid_t curHEID;
+			if (curIdx == 0) {
+				pos[curIdx] = QVector3D(0, 0, 0);
+				orient[curIdx] = QVector3D(0, 1, 0);
+				curHEID = ret->faces()[curIdx].heID();
+			}
+			else {
+				hdsid_t ref_he = parentEdgeMap[curIdx];
+
+				hdsid_t ref_he_nxt = ret->halfedges()[ref_he].next()->index;
+				QVector3D ref_he_pos = ret->vertFromHe(ref_he)->pos;
+				QVector3D ref_he_nxt_pos = ret->vertFromHe(ref_he_nxt)->pos;
+
+				QVector3D ref_he_orient = (ref_he_pos - ref_he_nxt_pos).normalized();
+				//create gap between faces
+				QVector3D curPos = ref_he_nxt_pos
+					+ QVector3D::crossProduct(QVector3D(0, 0, 1), ref_he_orient) * foldDepth;
+
+				pos[curIdx] = curPos;
+				orient[curIdx] = ref_he_orient;//QVector3D(0,-1,0);
+				curHEID = ref_mesh->halfedges()[ref_he].flip()->index;
+			}
+			pos[curIdx].setZ(z);
+			MeshUnfolder::unfoldSeparateFace(pos[curIdx], orient[curIdx], curHEID, ret);
+			heid[curIdx] = curHEID;
+		}
 	//add bridges based on ref_mesh flip twins
 
 	for (int i = 0; i < heSize; i++)
@@ -186,7 +197,8 @@ void MeshOrigami::processOrigami(const mesh_t* ref_mesh, mesh_t* ret)
 {
 	//update face pieces
 	for (int i = 0; i < ref_mesh->faces().size(); i++) {
-		MeshUnfolder::unfoldSeparateFace(pos[i], orient[i], i, ret);
+
+		MeshUnfolder::unfoldSeparateFace(pos[i], orient[i], heid[i], ret);
 	}
 	auto &ref_hes = ref_mesh->halfedges();
 
@@ -195,19 +207,19 @@ void MeshOrigami::processOrigami(const mesh_t* ref_mesh, mesh_t* ret)
 		hdsid_t flipid = ref_hes[i].flip()->index;
 		if (flipid > i) {
 
-			he_t* he1 = ret->halfedges()[i].flip();
-			he_t* he2 = ret->halfedges()[flipid].flip();
+			he_t* he1 = &ret->halfedges()[i];
+			he_t* he2 = &ret->halfedges()[flipid];
 
 			vector<QVector3D> vpos1 = {
 				(ret->vertFromHe(i)->pos
-				+ ret->vertFromHe(he2->index)->pos) / 2.0 };
+				+ ret->vertFromHe(he2->next()->index)->pos) / 2.0 };
 			vector<QVector3D> vpos2 = {
 				(ret->vertFromHe(flipid)->pos
-				+ ret->vertFromHe(he1->index)->pos) / 2.0 };
+				+ ret->vertFromHe(he1->next()->index)->pos) / 2.0 };
 			for (int i = 0; i < vpos1.size(); i++) {
-				//ret->verts()[he1->prev()->vertID()].pos = vpos2[i];
-				//ret->verts()[he1->prev()->prev()->vertID()].pos = vpos1[i];
-				he1 = he1->prev()->prev()->flip();
+				//ret->verts()[he1->flip()->prev()->vertID()].pos = vpos2[i];
+				//ret->verts()[he1->flip()->prev()->prev()->vertID()].pos = vpos1[i];
+				//he1 = he1->prev()->prev();
 			}
 		}
 	}

@@ -8,6 +8,7 @@ public:
 private:
 	static vector<QVector3D> pos;
 	static vector<QVector3D> orient;
+	static vector<hdsid_t> heid;
 
 	static HDS_Mesh* createOrigami(
 		const mesh_t* ref_mesh, const confMap &conf);
