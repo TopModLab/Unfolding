@@ -740,7 +740,7 @@ void HDS_Mesh::addFace(face_t &face)
 	faceSet.push_back(face);
 }
 
-std::vector<hdsid_t> HDS_Mesh::incidentFacesFromFace(hdsid_t fid)
+std::vector<hdsid_t> HDS_Mesh::incidentFacesFromFace(hdsid_t fid) const
 {
 	vector<hdsid_t> ret;
 	auto he = heFromFace(fid);
@@ -754,7 +754,7 @@ std::vector<hdsid_t> HDS_Mesh::incidentFacesFromFace(hdsid_t fid)
 	return ret;
 }
 
-vector<hdsid_t> HDS_Mesh::incidentFacesFromVert(hdsid_t vid)
+vector<hdsid_t> HDS_Mesh::incidentFacesFromVert(hdsid_t vid) const
 {
 	vector<hdsid_t> ret;
 	auto he = heFromVert(vid);
@@ -768,7 +768,7 @@ vector<hdsid_t> HDS_Mesh::incidentFacesFromVert(hdsid_t vid)
 	return ret;
 }
 // all outgoing half edges of vertex v
-vector<hdsid_t> HDS_Mesh::incidentEdgesFromVert(hdsid_t vid)
+vector<hdsid_t> HDS_Mesh::incidentEdgesFromVert(hdsid_t vid) const
 {
 	vector<hdsid_t> ret;
 	auto he = heFromVert(vid);
@@ -782,7 +782,7 @@ vector<hdsid_t> HDS_Mesh::incidentEdgesFromVert(hdsid_t vid)
 	return ret;
 }
 
-hdsid_t HDS_Mesh::sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2)
+hdsid_t HDS_Mesh::sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2) const
 {
 	if (fid1 == fid2) return sInvalidHDS;
 
@@ -800,7 +800,7 @@ hdsid_t HDS_Mesh::sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2)
 	return sInvalidHDS;
 }
 
-hdsid_t HDS_Mesh::sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2)
+hdsid_t HDS_Mesh::sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2) const
 {
 	if (vid1 == vid2) return sInvalidHDS;
 
@@ -1156,7 +1156,7 @@ void HDS_Mesh::colorVertices(const doubles_t &val)
 #endif
 }
 
-void HDS_Mesh::save(const string &filename)
+void HDS_Mesh::save(const string &filename) const
 {
 	// the vertices and faces are saved in the same order they are loaded in
 	stringstream ss;
