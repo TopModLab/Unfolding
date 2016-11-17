@@ -131,11 +131,11 @@ public:
 		he_t* he1 = nullptr, he_t* he2 = nullptr);
 #endif // LEGACY_FACTORY
 
-	vector<hdsid_t> incidentFacesFromFace(hdsid_t fid);
-	vector<hdsid_t> incidentFacesFromVert(hdsid_t vid);
-	vector<hdsid_t> incidentEdgesFromVert(hdsid_t vid);
-	hdsid_t sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2);
-	hdsid_t sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2);
+	vector<hdsid_t> incidentFacesFromFace(hdsid_t fid) const;
+	vector<hdsid_t> incidentFacesFromVert(hdsid_t vid) const;
+	vector<hdsid_t> incidentEdgesFromVert(hdsid_t vid) const;
+	hdsid_t sharedEdgeByFaces(hdsid_t fid1, hdsid_t fid2) const;
+	hdsid_t sharedEdgeByVerts(hdsid_t vid1, hdsid_t vid2) const;
 
 	bool checkPlanarFace(hdsid_t fid);
 	void updatePlanarFlag();
@@ -146,7 +146,7 @@ public:
 
 	bool validate();
 
-	void save(const string &filename);
+	void save(const string &filename) const;
 
 	void setProcessType(uint16_t type) { processType = type; }
 
