@@ -13,7 +13,12 @@ HDS_Mesh* MeshOrigami::create(
 	pos = vector<QVector3D>(faceSize, QVector3D(0, 0, 0));
 	orient = vector<QVector3D>(faceSize, QVector3D(0, 1, 0));
 	heid = vector<hdsid_t>(faceSize);
-	HDS_Mesh* outMesh = MeshOrigami::createOrigami(ref, conf);
+	const float patchScale = conf.at("patchScale");
+	const float foldDepth = conf.at("foldDepth");
+
+	HDS_Mesh* outMesh = MeshOrigami::createOrigami(ref);
+	bridgeMap bridges = bridgeOrigami(ref, outMesh, patchScale, foldDepth);
+
 	//while dist can be further reduced
 	float curDist = INT_MAX;
 
@@ -33,7 +38,7 @@ HDS_Mesh* MeshOrigami::create(
 			curDist = dist;
 		}
 
-		MeshOrigami::processOrigami(ref, outMesh);
+		MeshOrigami::processOrigami(ref, outMesh, bridges);
 		//MeshViewer::getInstance()->unfoldView(outMesh);
 		MeshViewer::getInstance()->bindHalfEdgeMesh(outMesh);
 		MeshViewer::getInstance()->repaint();
@@ -45,11 +50,10 @@ HDS_Mesh* MeshOrigami::create(
 
 // create faces of origami and unfold them using BFS
 HDS_Mesh* MeshOrigami::createOrigami(
-	const mesh_t* ref_mesh, const confMap &conf)
+	const mesh_t* ref_mesh)
 {
 	if (!ref_mesh) return nullptr;
-	const float patchScale = conf.at("patchScale");
-	const float foldDepth = conf.at("foldDepth");
+
 
 	HDS_Vertex::resetIndex();
 	auto &ref_verts = ref_mesh->verts();
@@ -61,7 +65,7 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	vector<he_t> hes(ref_hes);
 	vector<face_t> faces(ref_mesh->faces());
 	mesh_t* ret = new HDS_Mesh(verts, hes, faces);
-	
+
 
 	hdsid_t nulledge = ret->halfedges().size();
 	for (auto &he : ret->halfedges())
@@ -77,13 +81,12 @@ HDS_Mesh* MeshOrigami::createOrigami(
 		v->heid = he.vid = he.index;
 	}
 	ret->halfedges().resize(nulledge);
-	bridgeOrigami(ref_mesh, ret, patchScale, foldDepth);
 	return ret;
 }
 
 
 // move faces and bridges positions
-void MeshOrigami::bridgeOrigami(
+MeshOrigami::bridgeMap MeshOrigami::bridgeOrigami(
 	const mesh_t* ref_mesh, mesh_t* ret, float patchScale, float foldDepth) {
 	auto &ref_hes = ref_mesh->halfedges();
 	size_t heSize = ref_hes.size();
@@ -96,8 +99,8 @@ void MeshOrigami::bridgeOrigami(
 	vector<bool> visitedFaces(faceSize, false);
 	deque<pair<hdsid_t, int>> expSeq;
 	Q.push({ 0, 0 });
-		//BFS to assign z position of each piece
-		while (!Q.empty()) {
+	//BFS to assign z position of each piece
+	while (!Q.empty()) {
 		hdsid_t curIdx = Q.front().first;
 		hdsid_t curHEID;
 		int z = Q.front().second;
@@ -119,41 +122,41 @@ void MeshOrigami::bridgeOrigami(
 			}
 			curHE = curHE->next();
 		} while (curHE != he);
-		
+
 	}
 
-		//expand faces
-		for (auto cur : expSeq) {
-			hdsid_t curIdx = cur.first;
-			hdsid_t z = cur.second;
-			hdsid_t curHEID;
-			if (curIdx == 0) {
-				pos[curIdx] = QVector3D(0, 0, 0);
-				orient[curIdx] = QVector3D(0, 1, 0);
-				curHEID = ret->faces()[curIdx].heID();
-			}
-			else {
-				hdsid_t ref_he = parentEdgeMap[curIdx];
-
-				hdsid_t ref_he_nxt = ret->halfedges()[ref_he].next()->index;
-				QVector3D ref_he_pos = ret->vertFromHe(ref_he)->pos;
-				QVector3D ref_he_nxt_pos = ret->vertFromHe(ref_he_nxt)->pos;
-
-				QVector3D ref_he_orient = (ref_he_pos - ref_he_nxt_pos).normalized();
-				//create gap between faces
-				QVector3D curPos = ref_he_nxt_pos
-					+ QVector3D::crossProduct(QVector3D(0, 0, 1), ref_he_orient) * foldDepth;
-
-				pos[curIdx] = curPos;
-				orient[curIdx] = ref_he_orient;//QVector3D(0,-1,0);
-				curHEID = ref_mesh->halfedges()[ref_he].flip()->index;
-			}
-			pos[curIdx].setZ(z);
-			MeshUnfolder::unfoldSeparateFace(pos[curIdx], orient[curIdx], curHEID, ret);
-			heid[curIdx] = curHEID;
+	//expand faces
+	for (auto cur : expSeq) {
+		hdsid_t curIdx = cur.first;
+		hdsid_t z = cur.second;
+		hdsid_t curHEID;
+		if (curIdx == 0) {
+			pos[curIdx] = QVector3D(0, 0, 0);
+			orient[curIdx] = QVector3D(0, 1, 0);
+			curHEID = ret->faces()[curIdx].heID();
 		}
-	//add bridges based on ref_mesh flip twins
+		else {
+			hdsid_t ref_he = parentEdgeMap[curIdx];
 
+			hdsid_t ref_he_nxt = ret->halfedges()[ref_he].next()->index;
+			QVector3D ref_he_pos = ret->vertFromHe(ref_he)->pos;
+			QVector3D ref_he_nxt_pos = ret->vertFromHe(ref_he_nxt)->pos;
+
+			QVector3D ref_he_orient = (ref_he_pos - ref_he_nxt_pos).normalized();
+			//create gap between faces
+			QVector3D curPos = ref_he_nxt_pos
+				+ QVector3D::crossProduct(QVector3D(0, 0, 1), ref_he_orient) * foldDepth;
+
+			pos[curIdx] = curPos;
+			orient[curIdx] = ref_he_orient;//QVector3D(0,-1,0);
+			curHEID = ref_mesh->halfedges()[ref_he].flip()->index;
+		}
+		pos[curIdx].setZ(z);
+		MeshUnfolder::unfoldSeparateFace(pos[curIdx], orient[curIdx], curHEID, ret);
+		heid[curIdx] = curHEID;
+	}
+	//add bridges based on ref_mesh flip twins
+	bridgeMap bridges;
 	for (int i = 0; i < heSize; i++)
 	{
 		hdsid_t flipid = ref_hes[i].flip()->index;
@@ -169,10 +172,12 @@ void MeshOrigami::bridgeOrigami(
 				(ret->vertFromHe(flipid)->pos
 				+ ret->vertFromHe(he1->next()->index)->pos) / 2.0 };
 			size_t heOriSize = ret->halfedges().size();
-			
+			size_t vOriSize = ret->verts().size();
 			// generate bridge
-			if (!ref_hes[i].isPicked) generateBridge(i, flipid, ret, vpos1, vpos2);
-
+			if (!ref_hes[i].isPicked) {
+				generateBridge(i, flipid, ret, vpos1, vpos2);
+				bridges[i] = { vOriSize, vpos1.size()*2};
+			}
 			//if selected edge, unlink bridge edge pairs to make flaps
 			if (ref_hes[i].isPicked) {
 				//for (int index = 0; index < vpos1.size(); index++)
@@ -191,9 +196,10 @@ void MeshOrigami::bridgeOrigami(
 			exposedHEs.insert(he.index);
 	}
 	fillNullFaces(ret->halfedges(), ret->faces(), exposedHEs);
+	return bridges;
 }
 
-void MeshOrigami::processOrigami(const mesh_t* ref_mesh, mesh_t* ret)
+void MeshOrigami::processOrigami(const mesh_t* ref_mesh, mesh_t* ret, bridgeMap bridges)
 {
 	//update face pieces
 	for (int i = 0; i < ref_mesh->faces().size(); i++) {
@@ -203,35 +209,34 @@ void MeshOrigami::processOrigami(const mesh_t* ref_mesh, mesh_t* ret)
 	auto &ref_hes = ref_mesh->halfedges();
 
 	//update bridges
-	for (int i = 0; i < ref_hes.size(); i++) {
-		hdsid_t flipid = ref_hes[i].flip()->index;
-		if (flipid > i) {
+	for (auto it : bridges) {
+		hdsid_t heid = it.first;
+		hdsid_t vid = it.second.first;
+		size_t vsize = it.second.second;
+		hdsid_t flipid = ref_hes[heid].flip()->index;
+		he_t* he1 = &ret->halfedges()[heid];
+		he_t* he2 = &ret->halfedges()[flipid];
 
-			he_t* he1 = &ret->halfedges()[i];
-			he_t* he2 = &ret->halfedges()[flipid];
-
-			vector<QVector3D> vpos1 = {
-				(ret->vertFromHe(i)->pos
-				+ ret->vertFromHe(he2->next()->index)->pos) / 2.0 };
-			vector<QVector3D> vpos2 = {
-				(ret->vertFromHe(flipid)->pos
-				+ ret->vertFromHe(he1->next()->index)->pos) / 2.0 };
-			for (int i = 0; i < vpos1.size(); i++) {
-				//ret->verts()[he1->flip()->prev()->vertID()].pos = vpos2[i];
-				//ret->verts()[he1->flip()->prev()->prev()->vertID()].pos = vpos1[i];
-				//he1 = he1->prev()->prev();
-			}
+		vector<QVector3D> vpos1 = {
+			(ret->vertFromHe(heid)->pos
+			+ ret->vertFromHe(he2->next()->index)->pos) / 2.0 };
+		vector<QVector3D> vpos2 = {
+			(ret->vertFromHe(flipid)->pos
+			+ ret->vertFromHe(he1->next()->index)->pos) / 2.0 };
+		for (int i = 0; i < vsize; i+=2) {
+			ret->verts()[vid + i].pos = vpos1[i / 2];
+			ret->verts()[vid + i+1].pos = vpos2[i / 2];
 		}
 	}
 }
 
 // evaluate origami (calculate bridge length, and moving direction of faces)
 void MeshOrigami::evaluateOrigami(
-	const mesh_t* ref_mesh, mesh_t* eval_mesh, 
+	const mesh_t* ref_mesh, mesh_t* eval_mesh,
 	float &dist, vector<QVector3D> &movingDir)
 {
 	for (int i = 0; i < ref_mesh->faces().size(); i++) {
-		QVector3D dir(QVector3D(0,0,0));
+		QVector3D dir(QVector3D(0, 0, 0));
 		he_t* he = eval_mesh->heFromFace(i);
 		do {
 			if (!ref_mesh->halfedges()[he->index].isPicked) {
