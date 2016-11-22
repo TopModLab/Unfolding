@@ -32,6 +32,6 @@ public:
 		mesh_t* mesh,
 		vector<QVector3D> &vpos1 = vector<QVector3D>(),
 		vector<QVector3D> &vpos2 = vector<QVector3D>()
-		);
+	);
 };
 

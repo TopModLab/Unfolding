@@ -3,7 +3,8 @@
 HDS_Mesh* MeshNeoWeaver::create(
 	const mesh_t* ref, const confMap &conf)
 {
-	return createClassicalWeaving(ref, conf);
+	return createConicalWeaving(ref, conf);
+	//return createClassicalWeaving(ref, conf);
 	//return createWeaving(ref, conf);
 	//return createOctWeaving(ref, conf);
 }
@@ -565,7 +566,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	// scaling 
 	const float patchScale = conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
-	const uint32_t patchScale = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
+	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
 
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();
@@ -603,17 +604,57 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	}
 	for (int i = 0; i < refHeCount; i++)
 	{
+		hdsid_t id_offset = i << 2;
 		auto he = &ref_hes[i];
 		auto he_Idx = he->index;
 		auto he_prev_Idx = he->prev()->index;
 		QVector3D p0 = heCenters[he_Idx] - heDirs[he_Idx] * patchScale;
 		QVector3D p1 = heCenters[he_prev_Idx] + heDirs[he_prev_Idx] * patchScale;
-		QVector3D av = heCross[he->index] * 0.25f;
-		QVector3D bv = heCross[he->index] * 0.75f;
+		QVector3D av = heCross[he->index] * 0.25f * patchScale;
+		QVector3D bv = heCross[he->index] * 0.75f * patchScale;
+		verts[id_offset].pos = p0 + av;
+		verts[id_offset + 1].pos = p0 + bv;
+		verts[id_offset + 2].pos = p1 + bv;
+		verts[id_offset + 3].pos = p1 + av;
+		/*cout << "Verts pos at " << i << ":"
+			<< "\n\t" << verts[id_offset].pos.x() << verts[id_offset].pos.y() << verts[id_offset].pos.z()
+			<< "\n\t" << verts[id_offset + 1].pos.x() << verts[id_offset + 1].pos.y() << verts[id_offset + 1].pos.z()
+			<< "\n\t" << verts[id_offset + 2].pos.x() << verts[id_offset + 2].pos.y() << verts[id_offset + 2].pos.z()
+			<< "\n\t" << verts[id_offset + 3].pos.x() << verts[id_offset + 3].pos.y() << verts[id_offset + 3].pos.z()
+			<< endl;*/
+		constructHE(&verts[id_offset], &hes[id_offset], 4);
+		constructFace(&hes[id_offset], 4, &faces[i]);
+		faces[i].isBridge = true;
 		// v1 = p0+av;
 		// v2 = p0+bv;
-		// v3 = p1+av;
 		// v4 = p1+bv;
+		// v3 = p1+av;
 		// connect v1-v2-v4-v3
 	}
+	hes.reserve(hes.size() + refHeCount * 4);
+	faces.reserve(faces.size() + refHeCount);
+	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
+	for (auto &he : ref_mesh->halfedges())
+	{
+		if (he.flip_offset > 0)
+		{
+			QVector3D v1 = heCenters[he.index] - heDirs[he.index] * 0.25;
+			QVector3D v2 = heCenters[he.index] + heDirs[he.index] * 0.25;
+			generateBridge(he.index * 4, he.flip()->index * 4, newMesh,
+				vector<QVector3D>{v1}, vector<QVector3D>{v2});
+			generateBridge(he.next()->index * 4 + 2,
+				he.rotCW()->index * 4 + 2, newMesh,
+				vector<QVector3D>{v1}, vector<QVector3D>{v2});
+		}
+	}
+	unordered_set<hdsid_t> exposedHEs;
+	for (auto &he : newMesh->halfedges())
+	{
+		if (he.flip_offset == 0) exposedHEs.insert(he.index);
+	}
+	fillNullFaces(newMesh->halfedges(), newMesh->faces(), exposedHEs);
+
+	newMesh->updatePieceSet();
+
+	return newMesh;
 }

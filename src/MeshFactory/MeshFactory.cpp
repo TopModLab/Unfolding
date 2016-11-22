@@ -225,11 +225,10 @@ void MeshFactory::generateBridge(
 				if (face == size) vid = vid22;
 				else vid = vOriSize + 2 * face + 1;
 			}
-
 			constructHE(&verts[vid], &hes[heOriSize + 4 * face + heOffset]);
 		}
 		constructFace(&hes[heOriSize + 4 * face], 4, &fs[fOriSize + face]);
-		fs[fOriSize + face].isBridger = true;
+		//fs[fOriSize + face].isBridge = true;
 	}
 
 	//set flip
@@ -237,6 +236,7 @@ void MeshFactory::generateBridge(
 	hes[he2].setFlip(&hes[hes.size() - 2]);
 	for (int i = 0; i < size ; i++)
 	{
+		//cout << "in set flip loop\n";
 		hes[heOriSize + 4 * ( i + 1 ) - 2].setFlip(
 			&hes[heOriSize + 4 * (i + 1)]);
 	}

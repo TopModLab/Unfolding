@@ -428,7 +428,7 @@ void HDS_Mesh::exportFaceVBO(
 			}*/
 			case 6:
 			{
-				if (!face.isBridger)
+				if (!face.isBridge)
 				{
 					/*********************/
 					/* Non-Bridger Faces */
@@ -460,7 +460,7 @@ void HDS_Mesh::exportFaceVBO(
 			}
 			case 8:
 			{
-				if (!face.isBridger)
+				if (!face.isBridge)
 				{
 					/*********************/
 					/* Non-Bridger Faces */

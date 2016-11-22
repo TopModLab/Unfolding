@@ -26,7 +26,7 @@ void main()
 	normal = normalize(cross(v1.xyz, v2.xyz));
 	
 	flag = texelFetch(flag_tex, gl_PrimitiveIDIn).r;
-	if (bool(flag & 16u) && bool(hl_comp & 4u))// Bridger Face
+	if (bool(flag & 8u) && bool(hl_comp & 4u))// Bridger Face
 	{
 		Kd = vec3(0.0f, 0.8f, 1.f);
 	}
