@@ -21,27 +21,35 @@ HDS_Mesh* MeshOrigami::create(
 
 	//while dist can be further reduced
 	float curDist = INT_MAX;
-
+	vector<QVector3D> nxtPos = pos;
 	while (1) {
 
 		//calculate next step distance
 		float dist = 0;
 		vector<QVector3D> movingDir(faceSize);
-		MeshOrigami::evaluateOrigami(ref, outMesh, dist, movingDir);
-		if (curDist < dist || fabsf(curDist - dist) < 0.01) break;
+		vector<QVector3D> rotateDir(faceSize);
+
+		MeshOrigami::evaluateOrigami(ref, outMesh, dist, movingDir, rotateDir);
+
+		if (curDist < dist || fabsf(curDist - dist) < 0.001) break;
 		else {
 			//move pos in movingDir
 			//step size 0.05
 			for (int i = 0; i < faceSize; i++) {
-				pos[i] += movingDir[i] / 20;
+				nxtPos[i] = pos[i] + movingDir[i] / 20;
+				//orient[i] += rotateDir[i] / 40;
+				//orient[i].normalize();
 			}
 			curDist = dist;
+			cout << "cur distance:::" << curDist << endl;
 		}
 
 		MeshOrigami::processOrigami(ref, outMesh, bridges);
 		//MeshViewer::getInstance()->unfoldView(outMesh);
 		MeshViewer::getInstance()->bindHalfEdgeMesh(outMesh);
 		MeshViewer::getInstance()->repaint();
+
+		pos = nxtPos;
 		Sleep(uint(100));
 
 	}
@@ -233,34 +241,54 @@ void MeshOrigami::processOrigami(const mesh_t* ref_mesh, mesh_t* ret, bridgeMap 
 // evaluate origami (calculate bridge length, and moving direction of faces)
 void MeshOrigami::evaluateOrigami(
 	const mesh_t* ref_mesh, mesh_t* eval_mesh,
-	float &dist, vector<QVector3D> &movingDir)
+	float &dist, vector<QVector3D> &movingDir, vector<QVector3D> &rotateDir)
 {
+	vector<QVector3D> faceCenters(ref_mesh->faces().size());
+	for (int i = 0; i < ref_mesh->faces().size(); i++) {
+		faceCenters[i] = eval_mesh->faceCenter(i);
+	}
+
 	for (int i = 0; i < ref_mesh->faces().size(); i++) {
 		QVector3D dir(QVector3D(0, 0, 0));
+		QVector3D rot(QVector3D(0, 0, 0));
+		int cutCount = 0;
 		he_t* he = eval_mesh->heFromFace(i);
 		do {
 			if (!ref_mesh->halfedges()[he->index].isPicked) {
-				hdsid_t flipid = ref_mesh->halfedges()[he->index].flip()->index;
-				he_t* flip = &eval_mesh->halfedges()[flipid];
-				QVector3D v1 = eval_mesh->vertFromHe(he->index)->pos;
-				QVector3D v2 = eval_mesh->vertFromHe(he->flip()->index)->pos;
-				QVector3D fv2 = eval_mesh->vertFromHe(flip->index)->pos;
-				QVector3D fv1 = eval_mesh->vertFromHe(flip->flip()->index)->pos;
-				v1.setZ(0); v2.setZ(0); fv2.setZ(0); fv1.setZ(0);
-				float dist1 = (v1 - fv1).length();
-				float dist2 = (v2 - fv2).length();
-				if (dist1 < dist2) {
-					dist += dist1;
-					dir += fv1 - v1;
-				}
-				else {
-					dist += dist2;
-					dir += fv2 - v2;
-				}
+				hdsid_t flipheid = ref_mesh->halfedges()[he->index].flip()->index;
+				//find vector between two face centers
+				hdsid_t f1 = i;
+				hdsid_t f2 = eval_mesh->faceFromHe(flipheid)->index;
+				QVector3D fc1 = faceCenters[f1];
+				QVector3D fc2 = faceCenters[f2];
+				fc1.setZ(0); fc2.setZ(0);
+				QVector3D curDir = fc2 - fc1;
+				QVector3D orient1 = eval_mesh->edgeVector(he->index).normalized();
+				QVector3D orient2 = -eval_mesh->edgeVector(flipheid).normalized();
+
+				QVector3D optimalDir;
+				if (QVector3D::dotProduct(orient1, orient2) < 0)
+					optimalDir = (orient2 - orient1).normalized();
+				else
+					optimalDir = QVector3D::crossProduct((orient1 + orient2).normalized(), 
+															QVector3D(0, 0, 1));
+
+				dir += fc2 - (optimalDir*curDir.length() + fc1);
+				dist += 1 - QVector3D::dotProduct(optimalDir, curDir.normalized());
+				cout << 1 - QVector3D::dotProduct(optimalDir, curDir.normalized()) << " of " << i << endl;
+				
+			}
+			else {
+				cutCount++;
 			}
 			he = he->next();
 		} while (he != eval_mesh->heFromFace(i));
-		movingDir[i] = dir;
+		//if (i > 0)
+		//{
+			movingDir[i] = dir;
+			cout << "::::" << dir.length() << endl;
+			rotateDir[i] = rot;
+		//}
 	}
 
 }

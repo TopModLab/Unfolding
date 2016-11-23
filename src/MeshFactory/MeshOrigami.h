@@ -19,6 +19,6 @@ private:
 		const mesh_t* ref_mesh, mesh_t* ori_mesh, bridgeMap bridges);
 	static void evaluateOrigami(
 		const mesh_t* ref_mesh, mesh_t* eval_mesh,
-		float &dist, vector<QVector3D>& movingDir);
+		float &dist, vector<QVector3D>& movingDir, vector<QVector3D>& rotateDir);
 
 };
