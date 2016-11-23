@@ -453,7 +453,7 @@
           <x>10</x>
           <y>1</y>
           <width>51</width>
-          <height>31</height>
+          <height>32</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0">
@@ -472,8 +472,6 @@
          </item>
         </layout>
        </widget>
-       <zorder>horizontalLayoutWidget</zorder>
-       <zorder>origamiBtn</zorder>
       </widget>
      </widget>
     </item>
@@ -700,7 +698,6 @@
     </property>
     <addaction name="actionSelAll"/>
     <addaction name="actionSelInv"/>
-    <addaction name="actionSelMulti"/>
     <addaction name="actionSelConnComp"/>
     <addaction name="separator"/>
     <addaction name="actionSelTwinP"/>
@@ -978,9 +975,9 @@
     <string>Ctrl+I</string>
    </property>
   </action>
-  <action name="actionSelMulti">
+  <action name="actUnselect">
    <property name="text">
-    <string>Select Multiple</string>
+    <string>Unselect Component</string>
    </property>
    <property name="shortcut">
     <string>Shift+M</string>
@@ -1115,7 +1112,7 @@
     <string>Select Faces</string>
    </property>
    <property name="toolTip">
-    <string>Select faces</string>
+    <string>Select faces. Hold 'Z' to unselect.</string>
    </property>
   </action>
   <action name="actionSelEdge">
@@ -1130,7 +1127,7 @@
     <string>Select Edges</string>
    </property>
    <property name="toolTip">
-    <string>Select edges</string>
+    <string>Select edges. Hold 'Z' to unselect.</string>
    </property>
   </action>
   <action name="actionSelVertex">
@@ -1145,7 +1142,7 @@
     <string>Select Vertices</string>
    </property>
    <property name="toolTip">
-    <string>Select vertices</string>
+    <string>Select vertices. Hold 'Z' to unselect.</string>
    </property>
   </action>
   <action name="actionSmooth">
