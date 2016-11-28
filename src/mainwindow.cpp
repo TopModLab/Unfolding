@@ -187,7 +187,6 @@ void MainWindow::createActions()
 		//selection menu
 		connect(ui->actionSelAll, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectAll);
 		connect(ui->actionSelInv, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectInverse);
-		connect(ui->actionSelMulti, &QAction::triggered, this, &MainWindow::selectMultiple);
 		connect(ui->actSelRefID, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectByRefID);
 		// TODO: Support all section options
 		/*connect(ui->actionSelTwinP, &QAction::triggered, viewer, &viewer_t::selectTwinPair()));
@@ -844,14 +843,6 @@ void MainWindow::slot_reset()
 
 //========================================//
 
-void MainWindow::selectMultiple()
-{
-	// TODO: Remove redunant function, by default is multple
-	//MeshViewer::getInstance()->setSelectionMode(viewer_t::MultiSelect);
-}
-
-
-
 void MainWindow::slot_toggleEdges()
 {
 	// TODO: Check if toggleVertices/Edges/Faces/Normals work
@@ -897,22 +888,22 @@ void MainWindow::slot_toggleNormals()
 
 void MainWindow::slot_toggleCameraOperation()
 {
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::ROAM_CAMERA);
+	MeshViewer::getInstance()->interactionState.state = 0;
 }
 
 void MainWindow::slot_toggleFaceSelection()
 {
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_FACE);
+	MeshViewer::getInstance()->interactionState.sel_face = true;
 }
 
 void MainWindow::slot_toggleEdgeSelection()
 {
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_EDGE);
+	MeshViewer::getInstance()->interactionState.sel_edge = true;
 }
 
 void MainWindow::slot_toggleVertexSelection()
 {
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_VERT);
+	MeshViewer::getInstance()->interactionState.sel_vert = true;
 }
 
 

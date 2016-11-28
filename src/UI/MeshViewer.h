@@ -180,19 +180,17 @@ public:
 		SHADE_WF_FLAT = SHADE_FLAT | SHADE_WF,
 		SHADE_VERT = 1 << 2
 	};
-	/*enum SelectionState
+	union InteractionState
 	{
-	SingleSelect = 0,
-	MultiSelect
-	};*/
-	enum InteractionState : uint8_t
-	{
-		ROAM_CAMERA = 0,
-		SEL_MULTI = 1 << 1,
-		SEL_VERT = 1 << 2,
-		SEL_FACE = 1 << 3,
-		SEL_EDGE = 1 << 4
-	};
+		uint8_t state = 0;
+		struct
+		{
+			bool unselect : 1;
+			bool sel_vert : 1;
+			bool sel_face : 1;
+			bool sel_edge : 1;
+		};
+	} interactionState;
 	enum DataTypeMark : uint8_t
 	{
 		NULL_MARK = 0,
@@ -243,7 +241,7 @@ public:
 	void setCurvatureColormap(ColorMap cmap);
 	void setCutLocusMethod(int midx);
 
-	void setInteractionMode(InteractionState state);
+	void setInteractionMode(uint8_t newState);
 	//void setSelectionMode(SelectionState mode);
 
 	void showCriticalPoints();
@@ -258,8 +256,8 @@ private://interaction ie selection
 	void initializeFBO();
 	void drawMeshToFBO();
 	
-	InteractionState interactionState;
-	stack<InteractionState> interactionStateStack;
+	//uint8_t interactionState;
+	//stack<InteractionState> interactionStateStack;
 	//SelectionState selectionState;
 	//queue<uint32_t> selVTX, selHE, selFACE;
 	unordered_set<uint32_t> selVTX, selHE, selFACE;

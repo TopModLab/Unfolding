@@ -54,8 +54,6 @@ private:
 	void triggerExportSVG();
 	void exportSVG();
 
-	void selectMultiple();
-
 	void slot_toggleEdges();
 	void slot_toggleFaces();
 	void slot_toggleVertices();
