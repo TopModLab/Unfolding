@@ -580,16 +580,30 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	vector<he_t> hes(refHeCount << 2);
 	vector<face_t> faces(refHeCount);
 
-	//vector<QVector3D> fNorms(refFaceCount);
+	vector<QVector3D> fNorms(refFaceCount);
 	//vector<QVector3D> fCenters(refFaceCount);
 	// Edge local axis
 	// half length of he directions
 	vector<QVector3D> heDirs(refHeCount);
 	vector<QVector3D> heCenters(refHeCount);
-	//vector<QVector3D> heNorms(refEdgeCount);
+	vector<QVector3D> heNorms(refEdgeCount);
 	//vector<QVector3D> heTans(refEdgeCount);
 	vector<QVector3D> heCross(refHeCount);
 	vector<float> heDirLens(refHeCount);
+    // Cache out face normals for Edge Normals(thickness)
+    for (int i = 0; i < refFaceCount; i++)
+    {
+        fNorms[i] = ref_mesh->faceNormal(i);
+    }
+    for (hdsid_t i = 0, it = 0; i < refHeCount; i++)
+    {
+        auto he = &ref_hes[i];
+        if (he->flip_offset < 0) continue;
+        auto hef = he->flip();
+        heNorms[it] = (fNorms[he->fid]
+            + fNorms[hef->fid]).normalized();
+    }
+    // Cache out Edge Directions and Edge Centers
 	for (auto &he : ref_hes)
 	{
 		heDirs[he.index] = ref_mesh->edgeVector(he) * 0.5f;
@@ -598,10 +612,12 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 
 		heDirs[he.flip()->index] = -heDirs[he.index];
 	}
+    // Cache out Edge Cross Vectors for generating patches on edge.
 	for (auto &he : ref_hes)
 	{
 		heCross[he.index] = heDirs[he.index] - heDirs[he.prev()->index];
 	}
+    // cache out four points for each edge
 	for (int i = 0; i < refHeCount; i++)
 	{
 		hdsid_t id_offset = i << 2;
@@ -631,6 +647,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 		// v3 = p1+av;
 		// connect v1-v2-v4-v3
 	}
+    // Construct bridge patch 
+    // start from one edge and move to next woven edge to update bridge up/down, set position
 	hes.reserve(hes.size() + refHeCount * 4);
 	faces.reserve(faces.size() + refHeCount);
 	mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
@@ -647,6 +665,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 				vector<QVector3D>{v1}, vector<QVector3D>{v2});
 		}
 	}
+
+    // Finalize Mesh
 	unordered_set<hdsid_t> exposedHEs;
 	for (auto &he : newMesh->halfedges())
 	{
