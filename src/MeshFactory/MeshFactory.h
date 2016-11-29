@@ -15,14 +15,14 @@ public:
 	}
 
 	static void init();
-	static void constructHE(vert_t* v, he_t* he);
-	static void constructHE(vert_t* v, he_t* he, size_t edgeCount);
+	static void constructHEPair(vert_t* v, he_t* he);
+	static void constructHERing(vert_t* v, he_t* he, size_t edgeCount);
 
 	static void constructFace(
 		he_t* unlinkedHE, size_t edgeCount,
 		face_t* fid);
 	static void constructFace(
-		vector<he_t> hes, const vector<int> indices, 
+		vector<he_t> &hes, const vector<hdsid_t> &indices, 
 		face_t* fid);
 	static void fillNullFaces(
 		vector<he_t> &hes, vector<face_t> &faces,

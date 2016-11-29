@@ -12,17 +12,17 @@ void MeshFactory::init()
 ///	v		he
 // Input:
 //	vertex pointer, half edge pointer
-void MeshFactory::constructHE(vert_t* v, he_t* he)
+void MeshFactory::constructHEPair(vert_t* v, he_t* he)
 {
 	if(v->heid == sInvalidHDS) v->heid = he->index;
 	he->vid = v->index;
 }
 
-void MeshFactory::constructHE(vert_t* v, he_t* he, size_t edgeCount)
+void MeshFactory::constructHERing(vert_t* v, he_t* he, size_t edgeCount)
 {
 	for (int i = 0; i < edgeCount; i++)
 	{
-		constructHE(v + i, he + i);
+		constructHEPair(v + i, he + i);
 	}
 }
 
@@ -54,7 +54,7 @@ void MeshFactory::constructFace(
 //	half-edges buffer, vector of indices of half edges to be assigned,
 //	face index of assigned face
 void MeshFactory::constructFace(
-	vector<he_t> hes, const vector<int> indices, 
+	vector<he_t> &hes, const vector<hdsid_t> &indices, 
 	face_t* face)
 {
 	int edgeCount = indices.size();
@@ -225,7 +225,7 @@ void MeshFactory::generateBridge(
 				if (face == size) vid = vid22;
 				else vid = vOriSize + 2 * face + 1;
 			}
-			constructHE(&verts[vid], &hes[heOriSize + 4 * face + heOffset]);
+			constructHEPair(&verts[vid], &hes[heOriSize + 4 * face + heOffset]);
 		}
 		constructFace(&hes[heOriSize + 4 * face], 4, &fs[fOriSize + face]);
 		//fs[fOriSize + face].isBridge = true;
