@@ -428,6 +428,205 @@ HDS_Mesh* MeshNeoWeaver::createWeaving(
 	return newMesh;
 }
 
+HDS_Mesh * MeshNeoWeaver::createCrossWeaving(
+    const mesh_t* ref_mesh, const confMap &conf)
+{
+    if (!ref_mesh) return nullptr;
+#if 0
+    // scaling 
+    const float patchScale = conf.at("patchScale");
+    const bool patchUniform = (conf.at("patchUniform") == 1.0f);
+    auto &ref_verts = ref_mesh->verts();
+    auto &ref_hes = ref_mesh->halfedges();
+    auto &ref_faces = ref_mesh->faces();
+    size_t refHeCount = ref_hes.size();
+    size_t refEdgeCount = refHeCount >> 1;
+    size_t refFaceCount = ref_faces.size();
+
+    mesh_t::resetIndex();
+    vector<QVector3D> fNorms(refFaceCount);
+    vector<QVector3D> heMid(refHeCount);
+    vector<QVector3D> heDirs(refHeCount);
+    vector<float> heDirLens(refHeCount);
+    vector<QVector3D> heNorms(refHeCount);
+    vector<QVector3D> heTans(refHeCount);
+    vector<bool> isConcaveEdge(refHeCount, false);
+
+    // Number of edges in each new patch
+    int edgeCount = 4;
+
+    for (int i = 0; i < refFaceCount; i++)
+    {
+        fNorms[i] = ref_mesh->faceNormal(i);
+    }
+
+    vector<bool> visitedHE(refHeCount, false);
+    for (hdsid_t i = 0; i < refHeCount; i++)
+    {
+        auto he = &ref_hes[i];
+        if (visitedHE[i]) continue;
+        //if (he->flip_offset < 0) continue;
+        auto hef = he->flip();
+        hdsid_t hefIdx = hef->index;
+        // calc dir
+        heMid[i] = heMid[hefIdx] = (ref_verts[hef->vid].pos
+            + ref_verts[he->vid].pos) * 0.5f;
+        heDirs[i] = (ref_verts[hef->vid].pos
+            - ref_verts[he->vid].pos);
+        heDirs[hefIdx] = -heDirs[i];
+        if (QVector3D::dotProduct(QVector3D::crossProduct(
+            fNorms[he->fid], fNorms[hef->fid]), heDirs[i]) > 0)
+        {
+            heNorms[i] = heNorms[hefIdx]
+                = (fNorms[he->fid] + fNorms[hef->fid]).normalized();
+            heTans[i] = QVector3D::crossProduct(
+                heNorms[i], heDirs[i]).normalized();
+            heTans[hefIdx] = -heTans[i];
+        }
+        else
+        {
+            heNorms[i]
+                = (fNorms[he->fid] - fNorms[hef->fid]).normalized();
+            heNorms[hefIdx] = -heNorms[i];
+
+            heTans[i] = heTans[hefIdx] = QVector3D::crossProduct(
+                heNorms[i], heDirs[i]).normalized();
+        }
+
+        heDirLens[i] = heDirLens[hefIdx] = heDirs[i].length();
+        heDirs[i] /= heDirLens[i];
+        heDirs[hefIdx] /= heDirLens[i];
+
+        visitedHE[i] = visitedHE[hefIdx] = true;
+    }
+    vector<vert_t> verts(refHeCount << 1);
+    vector<he_t> hes(refHeCount << 1);
+    vector<face_t> faces(refEdgeCount);
+
+    hdsid_t outputOffset = 0;
+    for (auto &he : ref_hes)
+    {
+        if (he.flip_offset < 0) continue;
+
+        auto hef = he.flip();
+        /*hdsid_t compID[5]{
+            heCompMap.at(he.index),
+            heCompMap.at(he.next()->index),
+            heCompMap.at(he.prev()->index),
+            heCompMap.at(hef->next()->index),
+            heCompMap.at(hef->prev()->index)
+        };*/
+        QVector3D planeVecs[4]{
+            QVector3D::crossProduct(heNorms[compID[0]], heNorms[compID[1]]),
+            QVector3D::crossProduct(heNorms[compID[0]], heNorms[compID[2]]),
+            QVector3D::crossProduct(heNorms[compID[0]], heNorms[compID[3]]),
+            QVector3D::crossProduct(heNorms[compID[0]], heNorms[compID[4]]),
+        };
+
+        // Special Cases: normals are parallel to each other
+        auto isZeroVec = [](const QVector3D &vec) {
+            float threshold = 0.01f;
+            return vec.lengthSquared() < sqr(threshold);
+        };
+        if (isZeroVec(planeVecs[0]))
+        {
+            planeVecs[0] = heTans[compID[0]] - heDirs[compID[0]];
+        }
+        if (isZeroVec(planeVecs[1]))
+        {
+            planeVecs[1] = -heTans[compID[0]] - heDirs[compID[0]];
+        }
+        if (isZeroVec(planeVecs[2]))
+        {
+            planeVecs[2] = -heTans[compID[0]] + heDirs[compID[0]];
+        }
+        if (isZeroVec(planeVecs[3]))
+        {
+            planeVecs[3] = heTans[compID[0]] + heDirs[compID[0]];
+        }
+
+        float edgeLen = patchUniform ? patchScale : heDirLens[compID[0]] * patchScale;
+
+        Float v0x = QVector3D::dotProduct(planeVecs[0], heDirs[compID[0]]);
+        Float v0y = QVector3D::dotProduct(planeVecs[0], heTans[compID[0]]);
+        Float v1x = QVector3D::dotProduct(planeVecs[1], heDirs[compID[0]]);
+        Float v1y = QVector3D::dotProduct(planeVecs[1], heTans[compID[0]]);
+        Float v2x = QVector3D::dotProduct(planeVecs[2], heDirs[compID[0]]);
+        Float v2y = QVector3D::dotProduct(planeVecs[2], heTans[compID[0]]);
+        Float v3x = QVector3D::dotProduct(planeVecs[3], heDirs[compID[0]]);
+        Float v3y = QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
+        Float ab[4]{
+            -v1y*edgeLen / (v0y * v1x - v0x * v1y),
+            v0y*edgeLen / (v0y * v1x - v0x * v1y),
+            -v3y*edgeLen / (v2y * v3x - v2x * v3y),
+            v2y*edgeLen / (v2y * v3x - v2x * v3y),
+        };
+
+        planeVecs[1] *= -QVector3D::dotProduct(planeVecs[0], heTans[compID[0]])
+            / QVector3D::dotProduct(planeVecs[1], heTans[compID[0]]);
+        planeVecs[3] *= -QVector3D::dotProduct(planeVecs[2], heTans[compID[0]])
+            / QVector3D::dotProduct(planeVecs[3], heTans[compID[0]]);
+
+
+        float vecLen[2]{
+            (planeVecs[0] + planeVecs[1]).length(),
+            (planeVecs[2] + planeVecs[3]).length()
+        };
+        float scale[2]{
+            edgeLen / (planeVecs[0] + planeVecs[1]).length(),
+            edgeLen / (planeVecs[2] + planeVecs[3]).length()
+        };
+
+        planeVecs[0] *= scale[0];
+        planeVecs[1] *= scale[0];
+        planeVecs[2] *= scale[1];
+        //planeVecs[3] *= scale[1];
+
+        // padded index for verts and HEs
+        auto paddingIdx = outputOffset * edgeCount;
+        // Update vertex position
+
+        // Edge Length
+        verts[paddingIdx].pos = patchUniform
+            ? heMid[compID[0]] + heDirs[compID[0]] * patchScale * 0.5f
+            : heMid[compID[0]] + heDirs[compID[0]] * edgeLen * 0.5f;
+
+        verts[paddingIdx + 1].pos = verts[paddingIdx].pos + planeVecs[0];
+        verts[paddingIdx + 2].pos = verts[paddingIdx + 1].pos + planeVecs[1];
+        verts[paddingIdx + 3].pos = verts[paddingIdx + 2].pos + planeVecs[2];
+
+        // Construct edges
+        for (int i = 0; i < edgeCount; i++)
+        {
+            constructHEPair(&verts[paddingIdx + i], &hes[paddingIdx + i]);
+        }
+
+        //construct edge loop
+        constructFace(&hes[paddingIdx], edgeCount, &faces[outputOffset]);
+
+        //for testing bridger
+
+        outputOffset++;
+        //normID[0] = heNorms[compID];
+    }
+
+    mesh_t* newMesh = new HDS_Mesh(verts, hes, faces);
+
+    unordered_set<hdsid_t> exposedHEs;
+    for (auto &he : newMesh->halfedges())
+    {
+        if (!he.flip_offset)
+            exposedHEs.insert(he.index);
+    }
+    fillNullFaces(newMesh->halfedges(), newMesh->faces(), exposedHEs);
+
+    newMesh->updatePieceSet();
+
+    return newMesh;
+
+#endif
+}
+
 HDS_Mesh* MeshNeoWeaver::createClassicalWeaving(
 	const mesh_t* ref_mesh, const confMap &conf
 )
@@ -628,6 +827,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	}
     // cache out four points for each edge
     vector<QVector3D> heToPatchPos(refHeCount * 4);
+    Float vecScale[] = { (0.5f - patchScale * 0.5f)*patchScale,
+        (0.5f + patchScale * 0.5f)*patchScale };
 	for (int i = 0; i < refHeCount; i++)
 	{
 		hdsid_t id_offset = i << 2;
@@ -636,8 +837,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 		auto he_prev_Idx = he->prev()->index;
 		QVector3D p0 = heCenters[he_Idx] - heDirs[he_Idx] * patchScale;
 		QVector3D p1 = heCenters[he_prev_Idx] + heDirs[he_prev_Idx] * patchScale;
-		QVector3D av = heCross[he->index] * 0.25f * patchScale;
-		QVector3D bv = heCross[he->index] * 0.75f * patchScale;
+		QVector3D av = heCross[he->index] * vecScale[0];
+		QVector3D bv = heCross[he->index] * vecScale[1];
 		heToPatchPos[he_Idx * 4 + 2] = p0 + av;
         heToPatchPos[he_Idx * 4 + 3] = p0 + bv;
         heToPatchPos[he_prev_Idx * 4 + 1] = p1 + bv;
