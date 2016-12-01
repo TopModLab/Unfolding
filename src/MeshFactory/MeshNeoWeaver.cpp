@@ -566,8 +566,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	// scaling 
 	const float patchScale = conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
-    const Float sLayerOffset = 0.1f;//conf.at("LayerOffset")
-    const Float sPatchStripLenScale = 0.2f;//conf.at("PatchStripLenScale")
+    const Float sLayerOffset = conf.at("LayerOffset");// 0.1 by default
+    const Float sPatchStripLenScale = conf.at("PatchStripLenScale"); // 0.2 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
 
 	auto &ref_verts = ref_mesh->verts();
@@ -617,6 +617,13 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
     // Cache out Edge Cross Vectors for generating patches on edge.
 	for (auto &he : ref_hes)
 	{
+        if (true)
+        {
+            heCross[he.index] = QVector3D::crossProduct(
+                heNorms[he.prev()->index],
+                heNorms[he.index]);
+        }
+        else
 		heCross[he.index] = heDirs[he.index] - heDirs[he.prev()->index];
 	}
     // cache out four points for each edge

@@ -37,4 +37,6 @@ void NeoWeavePanel::setConfig()
 	config["patchScale"] = ui->patchSizeSlider->value()
 		/ static_cast<Float>(ui->patchSizeSlider->maximum());
 	config["patchUniform"] = static_cast<Float>(ui->uniformSizeBtn->isChecked());
+    config["LayerOffset"] = static_cast<Float>(ui->layerOffsetSpinBox->value());
+    config["PatchStripLenScale"] = static_cast<Float>(ui->stripScaleSpinBox->value());
 }
