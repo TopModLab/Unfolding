@@ -37,6 +37,37 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	}
 }
 
+HDS_Mesh::HDS_Mesh(const string &binaryFileName)
+{
+    FILE* fp = fopen(binaryFileName.c_str(), "rb");
+    HDSBinHeader header;
+    std::fread(&header, sizeof(HDSBinHeader), 1, fp);
+
+    vertSet.resize(header.vertCount);
+    heSet.resize(header.heCount);
+    faceSet.resize(header.faceCount);
+    std::fread(vertSet.data(), sizeof(vert_t), header.vertCount, fp);
+    std::fread(heSet.data(), sizeof(he_t), header.heCount, fp);
+    std::fread(faceSet.data(), sizeof(face_t), header.faceCount, fp);
+
+    pieceSet.resize(header.pieceCount);
+    uint32_t curPieces;
+    for (int i = 0; i < header.pieceCount; i++)
+    {
+        std::fread(&curPieces, sizeof(uint32_t), 1, fp);
+        pieceSet[i].resize(curPieces);
+        std::fread(pieceSet[i].data(), sizeof(hdsid_t), curPieces, fp);
+    }
+    if (header.bound_exist)
+    {
+        BBox3* bbox = new BBox3;
+        std::fread(bbox, sizeof(BBox3), 1, fp);
+        bound.reset(bbox);
+    }
+
+    fclose(fp);
+}
+
 HDS_Mesh::~HDS_Mesh()
 {
 }
@@ -1181,4 +1212,23 @@ void HDS_Mesh::save(const string &filename) const
 	ofstream fout(filename);
 	fout << ss.str();
 	fout.close();
+}
+
+void HDS_Mesh::saveBinary(const string &filename) const
+{
+    FILE* fp = fopen(filename.c_str(), "wb");
+    HDSBinHeader header(vertSet.size(), heSet.size(), faceSet.size(),
+                        pieceSet.size(), processType, bound.get() != nullptr);
+    std::fwrite(&header, sizeof(HDSBinHeader), 1, fp);
+    std::fwrite(vertSet.data(), sizeof(vert_t), header.vertCount, fp);
+    std::fwrite(heSet.data(), sizeof(he_t), header.heCount, fp);
+    std::fwrite(faceSet.data(), sizeof(face_t), header.faceCount, fp);
+    for (int i = 0; i < header.pieceCount; i++)
+    {
+        uint32_t pieces = pieceSet[i].size();
+        std::fwrite(&pieces, sizeof(uint32_t), 1, fp);
+        std::fwrite(pieceSet[i].data(), sizeof(hdsid_t), pieces, fp);
+    }
+    if (header.bound_exist) std::fwrite(bound.get(), sizeof(BBox3), 1, fp);
+    fclose(fp);
 }

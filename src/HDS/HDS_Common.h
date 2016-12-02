@@ -49,7 +49,18 @@ inline QString HDS_Common::ref_ID2String(hdsid_t refid)
 
 	return QString::number(refid >> 2);
 }
-
+struct HDSBinHeader
+{
+    uint32_t vertCount, heCount, faceCount;
+    uint32_t pieceCount;
+    uint16_t process_type;
+    bool     bound_exist;
+    HDSBinHeader() {}
+    HDSBinHeader(uint32_t vc, uint32_t hc, uint32_t fc,
+                 uint32_t pc, uint16_t pt, bool be)
+                : vertCount(vc), heCount(hc), faceCount(fc)
+                , pieceCount(pc), process_type(pt), bound_exist(be) {}
+};
 class HDS_Vertex;
 class HDS_HalfEdge;
 class HDS_Face;
