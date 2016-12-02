@@ -469,13 +469,15 @@ void MainWindow::createStatusBar()
 
 void MainWindow::newFile()
 {
+    QString filename = QFileDialog::getOpenFileName(this, "Select a Geometry File",
 #ifdef _DEBUG
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)"));
+                                                    "meshes/",
 #else // Release
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "", tr("OBJ files(*.obj)"));
+                                                    "",
 #endif
-	
-	if (filename != NULL) {
+                                                    tr("Geometry Files(*.obj *.hds)"));
+	if (!filename.isEmpty())
+    {
 #ifdef _DEBUG
 		QTime clock;
 		clock.start();
@@ -487,8 +489,22 @@ void MainWindow::newFile()
 		qDebug("Clear ObjectStack Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
-			return;
+		
+
+        if (filename.endsWith("obj"))
+        {
+            if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
+                return;
+        }
+        else if (filename.endsWith("hds"))
+        {
+            cout << "Open HDS file\n";
+            MeshManager::getInstance()->loadHDSFile(string(filename.toUtf8().constData()));
+        }
+        else
+        {
+            return;
+        }
 		
 #ifdef _DEBUG
 		qDebug("Loading Object Takes %d ms In Total.", clock.elapsed());

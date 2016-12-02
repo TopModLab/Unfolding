@@ -42,6 +42,7 @@ public:
 			 vector<he_t>   &hes,
 			 vector<face_t> &faces);
 	HDS_Mesh(const HDS_Mesh &other);
+    HDS_Mesh(const string &binaryFileName);
 	~HDS_Mesh();
 
 	// Reset UID in each component
@@ -147,6 +148,8 @@ public:
 	bool validate();
 
 	void save(const string &filename) const;
+
+    void saveBinary(const string &filename) const;
 
 	void setProcessType(uint16_t type) { processType = type; }
 

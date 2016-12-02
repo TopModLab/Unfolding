@@ -139,6 +139,8 @@ bool MeshManager::loadOBJFile(const string &filename) {
 			loadingProgress.close();
 			return false;
 		}
+        // save HDS binary file for later use
+        //msh->saveBinary(filename.substr(0, filename.size() - 3) + "hds");
 		//operationStack->reset();
 		operationStack->push(msh);
 #ifdef _DEBUG
@@ -156,6 +158,32 @@ bool MeshManager::loadOBJFile(const string &filename) {
 		return false;
 	}
 }
+
+bool MeshManager::loadHDSFile(const string &filename)
+{
+#ifdef _DEBUG
+    QTime clock;
+    clock.start();
+#endif
+
+    QProgressDialog loadingProgress("Loading the object...", "", 0, 100);
+    loadingProgress.setWindowModality(Qt::WindowModal);
+    loadingProgress.setValue(0);
+    loadingProgress.setAutoClose(true);
+    loadingProgress.setCancelButton(0);
+    loadingProgress.setMinimumDuration(1000);
+
+    mesh_t* msh = new mesh_t(filename);
+    operationStack->push(msh);
+#ifdef _DEBUG
+    qDebug("Clear Operation Takes %d ms In Total.", clock.elapsed());
+    clock.restart();
+#endif
+    loadingProgress.setValue(100);
+
+    return true;
+}
+
 HDS_Mesh* MeshManager::buildHalfEdgeMesh(
 	const floats_t &inVerts, const vector<PolyIndex> &inFaces)
 {
