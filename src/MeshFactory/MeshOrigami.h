@@ -12,13 +12,13 @@ private:
 	static vector<hdsid_t> heid;
 
 	static HDS_Mesh* createOrigami(
-		const mesh_t* ref_mesh);
+		const mesh_t* ref_mesh, float scale, float depth);
 	static bridgeMap bridgeOrigami(
-		const mesh_t* ref_mesh, mesh_t* ori_mesh, float scale, float depth);
+		const mesh_t* ref_mesh, mesh_t* ori_mesh);
 	static void processOrigami(
 		const mesh_t* ref_mesh, mesh_t* ori_mesh, bridgeMap bridges);
 	static void evaluateOrigami(
 		const mesh_t* ref_mesh, mesh_t* eval_mesh,
-		float &dist, vector<QVector3D>& movingDir, vector<QVector3D>& rotateDir);
+		vector<float> &dist, vector<QVector3D>& movingDir, vector<QVector3D>& rotateDir);
 
 };
