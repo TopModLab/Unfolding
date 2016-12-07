@@ -788,8 +788,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	vector<QVector3D> heDirs(refHeCount);
 	vector<QVector3D> heCenters(refHeCount);
 	vector<QVector3D> heNorms(refHeCount);
-	//vector<QVector3D> heTans(refEdgeCount);
-	vector<QVector3D> heCross(refHeCount);
+	vector<QVector3D> heTans(refHeCount);
+	vector<QVector3D> heCross(refHeCount * 2);
 	vector<float> heDirLens(refHeCount);
     // Cache out face normals for Edge Normals(thickness)
     for (int i = 0; i < refFaceCount; i++)
@@ -807,24 +807,50 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
     // Cache out Edge Directions and Edge Centers
 	for (auto &he : ref_hes)
 	{
-		heDirs[he.index] = ref_mesh->edgeVector(he) * 0.5f;
-		heCenters[he.index] = heCenters[he.flip()->index]
-			= ref_mesh->edgeCenter(he);
-
+		heDirs[he.index] = ref_mesh->edgeVector(he) * 0.5f;// half length of he
+        heDirLens[he.index] = heDirLens[he.flip()->index] = heDirs[he.index].length();
+		heCenters[he.index] = heCenters[he.flip()->index] = ref_mesh->edgeCenter(he);
+        heTans[he.index] = QVector3D::crossProduct(heNorms[he.index],
+                                                   heDirs[he.index]).normalized();
 		heDirs[he.flip()->index] = -heDirs[he.index];
+        heTans[he.flip()->index] = -heTans[he.index];
 	}
     // Cache out Edge Cross Vectors for generating patches on edge.
 	for (auto &he : ref_hes)
 	{
         if (true)
         {
-            heCross[he.index] = QVector3D::crossProduct(
-                heNorms[he.prev()->index],
-                heNorms[he.index]);
+            heCross[he.index << 1] = heCross[(he.prev()->index << 1) + 1]
+                                   = QVector3D::crossProduct(heNorms[he.prev()->index],
+                                                             heNorms[he.index]);
         }
         else
 		heCross[he.index] = heDirs[he.index] - heDirs[he.prev()->index];
 	}
+    for (int i = 0; i < refHeCount; i++)
+    {
+        hdsid_t nextHeID = ref_hes[i].next()->index;
+        QVector3D &v1 = heCross[i << 1];
+        QVector3D &v2 = heCross[(i << 1) + 1];
+        float v1x = QVector3D::dotProduct(v1, heTans[i]);
+        float v2x = QVector3D::dotProduct(v2, heTans[i]);
+        v2 *= v1x / v2x;
+        QVector3D vy = v1 - v2;
+        const QVector3D &dir = heDirs[i];
+        int maxExtAxis = maxExtent(dir);
+        float scalor = dir[maxExtAxis] / vy[maxExtAxis] * 2;
+        v1 *= scalor;
+        v2 *= scalor;
+    }
+    for (int i = 0; i < refHeCount; i++)
+    {
+        QVector3D &v1 = heCross[i << 1];
+        QVector3D &v2 = heCross[(ref_hes[i].prev()->index << 1) + 1];
+
+        int maxExtAxis = maxExtent(v1);
+        if (abs(v1[maxExtAxis]) < abs(v2[maxExtAxis])) v2 = v1;
+        else                                           v1 = v2;
+    }
     // cache out four points for each edge
     vector<QVector3D> heToPatchPos(refHeCount * 4);
     Float vecScale[] = { (0.5f - patchScale * 0.5f)*patchScale,
@@ -837,8 +863,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 		auto he_prev_Idx = he->prev()->index;
 		QVector3D p0 = heCenters[he_Idx] - heDirs[he_Idx] * patchScale;
 		QVector3D p1 = heCenters[he_prev_Idx] + heDirs[he_prev_Idx] * patchScale;
-		QVector3D av = heCross[he->index] * vecScale[0];
-		QVector3D bv = heCross[he->index] * vecScale[1];
+		QVector3D av = heCross[he->index << 1] * vecScale[0];
+		QVector3D bv = heCross[he->index << 1] * vecScale[1];
 		heToPatchPos[he_Idx * 4 + 2] = p0 + av;
         heToPatchPos[he_Idx * 4 + 3] = p0 + bv;
         heToPatchPos[he_prev_Idx * 4 + 1] = p1 + bv;
@@ -925,6 +951,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
             patchPos[43] = heToPatchPos[neiEdgeIDs[5] * 4] - heNorms[neiEdgeIDs[4]] * sLayerOffset;
 
             //////////////////////////////////////////////////////////////////////////
+#define LERP_BRIDGE
 #ifdef LERP_BRIDGE
             patchPos[2] = Utils::Lerp(patchPos[0], patchPos[10], 0.2f);
             patchPos[3] = Utils::Lerp(patchPos[1], patchPos[11], 0.2f);

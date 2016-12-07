@@ -53,8 +53,9 @@ inline QColor operator+(QColor c1, QColor c2) {
 }
 inline int maxExtent(const QVector3D &vec)
 {
-	int ret = vec[0] > vec[1] ? 0 : 1;
-	return vec[ret] > vec[2] ? ret : 2;
+    float absVal[3] = { abs(vec[0]), abs(vec[1]), abs(vec[2]) };
+	int ret = absVal[0] > absVal[1] ? 0 : 1;
+	return absVal[ret] > absVal[2] ? ret : 2;
 }
 inline bool isFuzzyNull(const QVector3D &v)
 {
