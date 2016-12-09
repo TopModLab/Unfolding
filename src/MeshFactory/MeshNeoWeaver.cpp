@@ -951,27 +951,58 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
             patchPos[43] = heToPatchPos[neiEdgeIDs[5] * 4] - heNorms[neiEdgeIDs[4]] * sLayerOffset;
 
             //////////////////////////////////////////////////////////////////////////
-#define LERP_BRIDGE
+//#define LERP_BRIDGE
+            auto lerpPatchPos = [](QVector3D* ptr, int srcBegin, int srcEnd, int seg) {
+                Float increment = 1.0f / seg;
+                Float wgt = increment;
+                for (int targ = srcBegin + 2; targ < srcEnd; targ+=2, wgt += increment)
+                {
+                    ptr[targ] = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], wgt);
+                }
+            };
+            auto edgePatchEval = [](QVector3D* ptr, int srcBegin, int srcEnd) {
+                QVector3D vec1 = ptr[srcBegin+1] - ptr[srcBegin];
+                QVector3D vec2 = ptr[srcEnd+1] - ptr[srcEnd];
+                float len1 = vec1.length();
+                float len2 = vec2.length();
+                float lenAvg = (len1 + len2) * 0.5f;
+                vec1 *= lenAvg / len1;
+                vec2 *= lenAvg / len2;
+                int seg = (srcEnd - srcBegin - 2) >> 1;
+                Float increment = 2.0 / seg;
+                Float wgt = increment;
+                if (QVector3D::dotProduct(vec2 - vec1, ptr[srcEnd] - ptr[srcBegin]) > 0)
+                {
+                    ptr[srcBegin + seg] = ptr[srcEnd - seg]
+                                        = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], 0.5f);
+
+                    ptr[srcBegin + seg + 1] = ptr[srcBegin + seg] + vec1;
+                    ptr[srcEnd - seg + 1] = ptr[srcEnd - seg] + vec2;
+                }
+                else
+                {
+                    ptr[srcBegin + seg + 1] = ptr[srcEnd - seg + 1]
+                                            = Utils::Lerp(ptr[srcBegin + 1],
+                                                          ptr[srcEnd + 1],
+                                                          0.5f);
+
+                    ptr[srcBegin + seg] = ptr[srcBegin + seg + 1] - vec1;
+                    ptr[srcEnd - seg] = ptr[srcEnd - seg + 1] - vec2;
+                }
+                for (int i = 2; i < seg; i += 2, wgt += increment)
+                {
+                    ptr[srcBegin + i] = Utils::Lerp(ptr[srcBegin], ptr[srcBegin + seg], wgt);
+                    ptr[srcEnd - i] = Utils::Lerp(ptr[srcEnd], ptr[srcEnd - seg], wgt);
+                    ptr[srcBegin + i + 1] = Utils::Lerp(ptr[srcBegin + 1], ptr[srcBegin + seg + 1], wgt);
+                    ptr[srcEnd - i + 1] = Utils::Lerp(ptr[srcEnd + 1], ptr[srcEnd - seg + 1], wgt);
+                }
+               
+            };
 #ifdef LERP_BRIDGE
-            patchPos[2] = Utils::Lerp(patchPos[0], patchPos[10], 0.2f);
-            patchPos[3] = Utils::Lerp(patchPos[1], patchPos[11], 0.2f);
-            patchPos[4] = Utils::Lerp(patchPos[0], patchPos[10], 0.4f);
-            patchPos[5] = Utils::Lerp(patchPos[1], patchPos[11], 0.4f);
-            patchPos[6] = Utils::Lerp(patchPos[0], patchPos[10], 0.6f);
-            patchPos[7] = Utils::Lerp(patchPos[1], patchPos[11], 0.6f);
-            patchPos[8] = Utils::Lerp(patchPos[0], patchPos[10], 0.8f);
-            patchPos[9] = Utils::Lerp(patchPos[1], patchPos[11], 0.8f);
+            lerpPatchPos(patchPos, 0, 10, 10);
+            lerpPatchPos(patchPos, 1, 11, 10);
 #else
-            QVector3D vec1 = patchPos[1] - patchPos[0];
-            QVector3D vec2 = patchPos[11] - patchPos[10];
-            QVector3D vec3 = vec2 - vec1;
-            patchPos[4] = patchPos[6] = Utils::Lerp(patchPos[0], patchPos[10], 0.5f);
-            patchPos[2] = Utils::Lerp(patchPos[0], patchPos[10], 0.25f);
-            patchPos[8] = Utils::Lerp(patchPos[0], patchPos[10], 0.75f);
-            patchPos[3] = patchPos[2] + vec1;
-            patchPos[5] = patchPos[4] + vec1;
-            patchPos[7] = patchPos[6] + vec2;
-            patchPos[9] = patchPos[8] + vec2;
+            edgePatchEval(patchPos, 0, 10);
 #endif // LERP_BRIDGE
 
             patchPos[12] = Utils::Lerp(patchPos[10], patchPos[16], sPatchStripLenScale);
@@ -980,25 +1011,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
             patchPos[15] = Utils::Lerp(patchPos[17], patchPos[11], sPatchStripLenScale);
 
 #ifdef LERP_BRIDGE
-            patchPos[18] = Utils::Lerp(patchPos[16], patchPos[26], 0.2f);
-            patchPos[19] = Utils::Lerp(patchPos[17], patchPos[27], 0.2f);
-            patchPos[20] = Utils::Lerp(patchPos[16], patchPos[26], 0.4f);
-            patchPos[21] = Utils::Lerp(patchPos[17], patchPos[27], 0.4f);
-            patchPos[22] = Utils::Lerp(patchPos[16], patchPos[26], 0.6f);
-            patchPos[23] = Utils::Lerp(patchPos[17], patchPos[27], 0.6f);
-            patchPos[24] = Utils::Lerp(patchPos[16], patchPos[26], 0.8f);
-            patchPos[25] = Utils::Lerp(patchPos[17], patchPos[27], 0.8f);
+            lerpPatchPos(patchPos, 16, 26, 10);
+            lerpPatchPos(patchPos, 17, 27, 10);
 #else
-            vec1 = patchPos[17] - patchPos[16];
-            vec2 = patchPos[27] - patchPos[26];
-            vec3 = vec2 - vec1;
-            patchPos[20] = patchPos[22] = Utils::Lerp(patchPos[16], patchPos[26], 0.5f);
-            patchPos[18] = Utils::Lerp(patchPos[16], patchPos[26], 0.25f);
-            patchPos[24] = Utils::Lerp(patchPos[16], patchPos[26], 0.75f);
-            patchPos[19] = patchPos[18] + vec1;
-            patchPos[21] = patchPos[20] + vec1;
-            patchPos[23] = patchPos[22] + vec2;
-            patchPos[25] = patchPos[24] + vec2;
+            edgePatchEval(patchPos, 16, 26);
 #endif // LERP_BRIDGE
 
             patchPos[28] = Utils::Lerp(patchPos[26], patchPos[32], sPatchStripLenScale);
@@ -1007,25 +1023,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
             patchPos[31] = Utils::Lerp(patchPos[33], patchPos[27], sPatchStripLenScale);
 
 #ifdef LERP_BRIDGE
-            patchPos[34] = Utils::Lerp(patchPos[32], patchPos[42], 0.2f);
-            patchPos[35] = Utils::Lerp(patchPos[33], patchPos[43], 0.2f);
-            patchPos[36] = Utils::Lerp(patchPos[32], patchPos[42], 0.4f);
-            patchPos[37] = Utils::Lerp(patchPos[33], patchPos[43], 0.4f);
-            patchPos[38] = Utils::Lerp(patchPos[32], patchPos[42], 0.6f);
-            patchPos[39] = Utils::Lerp(patchPos[33], patchPos[43], 0.6f);
-            patchPos[40] = Utils::Lerp(patchPos[32], patchPos[42], 0.8f);
-            patchPos[41] = Utils::Lerp(patchPos[33], patchPos[43], 0.8f);
+            lerpPatchPos(patchPos, 32, 42, 10);
+            lerpPatchPos(patchPos, 33, 43, 10);
 #else
-            vec1 = patchPos[33] - patchPos[32];
-            vec2 = patchPos[43] - patchPos[42];
-            vec3 = vec2 - vec1;
-            patchPos[36] = patchPos[38] = Utils::Lerp(patchPos[32], patchPos[42], 0.5f);
-            patchPos[34] = Utils::Lerp(patchPos[32], patchPos[42], 0.25f);
-            patchPos[40] = Utils::Lerp(patchPos[32], patchPos[42], 0.75f);
-            patchPos[35] = patchPos[34] + vec1;
-            patchPos[37] = patchPos[36] + vec1;
-            patchPos[39] = patchPos[38] + vec2;
-            patchPos[41] = patchPos[40] + vec2;
+            edgePatchEval(patchPos, 32, 42);
 #endif // LERP_BRIDGE
 
             for (int j = 0; j < sPatchVertCount; j++)

@@ -241,3 +241,51 @@ void MeshFactory::generateBridge(
 			&hes[heOriSize + 4 * (i + 1)]);
 	}
 }
+
+bool MeshFactory::createBridgeFromNull(mesh_t* mesh,
+                                       size_t bridgeCount,
+                                       vector<QVector3D> &vpos1,
+                                       size_t ofs1, size_t stride1,
+                                       vector<QVector3D> &vpos2,
+                                       size_t ofs2, size_t stride2)
+{
+    if (!nullptr) return false;
+    if (bridgeCount < 1) return false;
+
+    auto &verts = mesh->verts();
+    auto &hes = mesh->halfedges();
+    auto &faces = mesh->faces();
+
+    size_t vOfs = verts.size();
+    verts.resize(vOfs + bridgeCount * 2 + 2);
+    size_t heOfs = hes.size();
+    hes.resize(heOfs + bridgeCount * 4);
+    size_t fOfs = faces.size();
+    faces.resize(fOfs + bridgeCount);
+
+    auto curHE = hes.data() + heOfs;
+    auto curVert = verts.data() + vOfs;
+    auto curFace = faces.data() + fOfs;
+    for (int i = 0; i < bridgeCount; i++)
+    {
+        constructFace(curHE, 4, curFace);
+        if (i != bridgeCount - 1)
+        {
+            (curHE + 2)->flip_offset = 2;
+            (curHE + 4)->flip_offset = -2;
+        }
+        constructHEPair(curVert, curHE++);
+        constructHEPair(curVert + 1, curHE++);
+        constructHEPair(curVert + 3, curHE++);
+        constructHEPair(curVert + 2, curHE++);
+        curFace++;
+        curVert += 2;
+    }
+    for (int i = 0; i < bridgeCount + 1; i++)
+    {
+        verts[vOfs + i * 2] = vpos1[ofs1 + stride1 * i];
+        verts[vOfs + i * 2 + 1] = vpos2[ofs2 + stride2 * i];
+    }
+
+    return true;
+}
