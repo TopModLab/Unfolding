@@ -610,7 +610,7 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 
 QVector3D HDS_Mesh::edgeVector(hdsid_t heid) const
 {
-	return vertSet[heSet[heid].flip()->vid].pos
+	return vertSet[heSet[heid].next()->vid].pos
 		- vertSet[heSet[heid].vid].pos;
 }
 

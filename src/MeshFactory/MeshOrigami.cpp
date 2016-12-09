@@ -6,6 +6,8 @@
 vector<QVector3D> MeshOrigami::pos = vector<QVector3D>();
 vector<QVector3D> MeshOrigami::orient = vector<QVector3D>();
 vector<hdsid_t> MeshOrigami::heid = vector<hdsid_t>();
+vector<hdsid_t> MeshOrigami::nCons = vector<hdsid_t>();
+
 HDS_Mesh* MeshOrigami::create(
 	const mesh_t* ref, const confMap &conf)
 {
@@ -13,10 +15,12 @@ HDS_Mesh* MeshOrigami::create(
 	pos = vector<QVector3D>(faceSize, QVector3D(0, 0, 0));
 	orient = vector<QVector3D>(faceSize, QVector3D(0, 1, 0));
 	heid = vector<hdsid_t>(faceSize);
+	nCons = vector<hdsid_t>(faceSize);
 	const float patchScale = conf.at("patchScale");
 	const float foldDepth = conf.at("foldDepth");
 
-	HDS_Mesh* outMesh = MeshOrigami::createOrigami(ref, patchScale, foldDepth);
+	HDS_Mesh* outMesh = createOrigami(ref, patchScale, foldDepth);
+	evalOrigamiRot(ref, outMesh);
 	bridgeMap bridges = bridgeOrigami(ref, outMesh);
 
 	//while dist can be further reduced
@@ -34,9 +38,8 @@ HDS_Mesh* MeshOrigami::create(
 		//calculate next step distance
 		vector<float> dist(faceSize, 0);
 		vector<QVector3D> movingDir(faceSize);
-		vector<QVector3D> rotateDir(faceSize);
 
-		MeshOrigami::evaluateOrigami(ref, outMesh, dist, movingDir, rotateDir);
+		MeshOrigami::evalOrigamiPos(ref, outMesh, dist, movingDir);
 
 		bool stopSim = true;
 		//move pos in movingDir
@@ -46,7 +49,7 @@ HDS_Mesh* MeshOrigami::create(
 			if (curDist[i] >= dist[i] && curDist[i] - dist[i] > 0.0001) {
 				stopSim = false;
 				nxtPos[i] = pos[i] + movingDir[i] / 50;
-				nxtOrient[i] = (orient[i] + rotateDir[i] / 50).normalized();
+				//nxtOrient[i] = (orient[i] + rotateDir[i] / 50).normalized();
 				curDist[i] = dist[i];
 			}
 
@@ -93,21 +96,36 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	}
 	ret->halfedges().resize(nulledge);
 	ret->matchIndexToSize();
-	int faceSize = ret->faces().size();
+	size_t faceSize = ret->faces().size();
+	size_t startFace = 0;
+	int maxCon = 0;
+	for (size_t i = 0; i < faceSize; i++) {
+		int con = 0;
+		he_t* he = ret->heFromFace(i);
+		do {
+			if (!he->isPicked) con++;
+			he = he->next();
+		} while (he != ret->heFromFace(i));
+		nCons[i] = con;
+		if (con > maxCon) {
+			startFace = i;
+			maxCon = con;
+		}
+	}
+
 
 	//BFS to get an initial layout
 	vector<hdsid_t> parentEdgeMap(faceSize, 0);
 	queue<pair<hdsid_t, int>> Q;
 	vector<bool> visitedFaces(faceSize, false);
-	deque<pair<hdsid_t, int>> expSeq;
-	Q.push({ 0, 0 });
+	vector<pair<hdsid_t, int>> expSeq;
+	Q.push({ startFace, 0 });
+	visitedFaces[startFace] = true;
 	//BFS to assign z position of each piece
 	while (!Q.empty()) {
 		hdsid_t curIdx = Q.front().first;
-		hdsid_t curHEID;
 		int z = Q.front().second;
 		Q.pop();
-		visitedFaces[curIdx] = true;
 		expSeq.push_back({ curIdx, z });
 
 		// Go through neighboring faces,
@@ -120,6 +138,7 @@ HDS_Mesh* MeshOrigami::createOrigami(
 			if (!visitedFaces[adjFid] && !curHE->isPicked)
 			{
 				Q.push({ adjFid, z + 1 });
+				visitedFaces[adjFid] = true;
 				parentEdgeMap[adjFid] = curHE->index;
 			}
 			curHE = curHE->next();
@@ -128,18 +147,20 @@ HDS_Mesh* MeshOrigami::createOrigami(
 	}
 
 	//expand faces
-	for (auto cur : expSeq) {
+	for (int i = 0; i < expSeq.size(); i++) {
+		pair<hdsid_t, int> cur = expSeq[i];
 		hdsid_t curIdx = cur.first;
-		hdsid_t z = cur.second;
+		int z = cur.second;
 		hdsid_t curHEID;
-		if (curIdx == 0) {
+		if (i == 0) {
+			//initial piece
 			pos[curIdx] = QVector3D(0, 0, 0);
 			orient[curIdx] = QVector3D(0, 1, 0);
 			curHEID = ret->faces()[curIdx].heID();
 		}
 		else {
+			//get pos
 			hdsid_t ref_he = parentEdgeMap[curIdx];
-
 			hdsid_t ref_he_nxt = ret->halfedges()[ref_he].next()->index;
 			QVector3D ref_he_pos = ret->vertFromHe(ref_he)->pos;
 			QVector3D ref_he_nxt_pos = ret->vertFromHe(ref_he_nxt)->pos;
@@ -150,15 +171,16 @@ HDS_Mesh* MeshOrigami::createOrigami(
 				+ QVector3D::crossProduct(QVector3D(0, 0, 1), ref_he_orient) * foldDepth;
 
 			pos[curIdx] = curPos;
-			orient[curIdx] = ref_he_orient;//QVector3D(0,-1,0);
+
+			orient[curIdx] = ref_he_orient;
 			curHEID = ref_mesh->halfedges()[ref_he].flip()->index;
 		}
 		pos[curIdx].setZ(z);
-		if (curIdx == 5) {
-			pos[curIdx] += QVector3D(1, 1, 0);
-			orient[5] += QVector3D::crossProduct(orient[5], QVector3D(0, 0, 1)).normalized() / 9;
+		/*if (curIdx == 5) {
+			//pos[curIdx] += QVector3D(1, 1, 0);
+			orient[5] += QVector3D::crossProduct(QVector3D(0, 0, 1), orient[5]).normalized() / 9;
 			orient[5].normalize();
-		}
+		}*/
 		MeshUnfolder::unfoldSeparateFace(pos[curIdx], orient[curIdx], curHEID, ret);
 		heid[curIdx] = curHEID;
 	}
@@ -249,21 +271,11 @@ void MeshOrigami::processOrigami(const mesh_t* ref_mesh, mesh_t* ret, bridgeMap 
 }
 
 // evaluate origami (calculate bridge length, and moving direction of faces)
-void MeshOrigami::evaluateOrigami(
+void MeshOrigami::evalOrigamiPos(
 	const mesh_t* ref_mesh, mesh_t* eval_mesh,
-	vector<float> &dist, vector<QVector3D> &movingDir, vector<QVector3D> &rotateDir)
+	vector<float> &dist, vector<QVector3D> &movingDir)
 {
 	vector<QVector3D> faceCenters(ref_mesh->faces().size());
-	vector<int> cutCounts(ref_mesh->faces().size(), 0);
-
-	for (int i = 0; i < ref_mesh->faces().size(); i++) {
-		faceCenters[i] = eval_mesh->faceCenter(i);
-		he_t* he = eval_mesh->heFromFace(i);
-		do {
-			if (ref_mesh->halfedges()[he->index].isPicked) cutCounts[i]++;
-			he = he->next();
-		} while (he != eval_mesh->heFromFace(i));
-	}
 
 	for (int i = 0; i < ref_mesh->faces().size(); i++) {
 
@@ -280,15 +292,18 @@ void MeshOrigami::evaluateOrigami(
 				fc1.setZ(0); fc2.setZ(0);
 				QVector3D curDir = fc2 - fc1;
 				QVector3D orient1 = eval_mesh->edgeVector(he->index).normalized();
-				QVector3D orient2 = -eval_mesh->edgeVector(flipheid).normalized();
+				QVector3D orient2 = eval_mesh->edgeVector(flipheid).normalized();
 
 				QVector3D optimalDir;
-				if (QVector3D::dotProduct(orient1, orient2) < 0)
-					optimalDir = (orient2 - orient1).normalized();
-				else
-					optimalDir = QVector3D::crossProduct((orient1 + orient2).normalized(),
+				if (QVector3D::dotProduct(orient1, orient2) > 0) {
+					optimalDir = (-orient2 - orient1).normalized();
+				}
+				else {
+					optimalDir = QVector3D::crossProduct((orient1 - orient2).normalized(),
 						QVector3D(0, 0, 1));
-				if (cutCounts[f1] >= cutCounts[f2]) {
+				}
+					
+				if (nCons[f1] <= nCons[f2]) {
 					movingDir[i] += fc2 - (optimalDir*curDir.length() + fc1);
 					dist[i] += 1 - QVector3D::dotProduct(optimalDir, curDir.normalized());
 					cout << 1 - QVector3D::dotProduct(optimalDir, curDir.normalized()) << " of " << i << endl;
@@ -305,4 +320,37 @@ void MeshOrigami::evaluateOrigami(
 		//}
 	}
 
+}
+
+void MeshOrigami::evalOrigamiRot(const mesh_t* ref_mesh, mesh_t* eval_mesh)
+{
+	for (int i = 0; i < ref_mesh->faces().size(); i++) {
+
+		he_t* he = eval_mesh->heFromFace(i);
+		do {
+			if (!ref_mesh->halfedges()[he->index].isPicked) {
+				hdsid_t flipheid = ref_mesh->halfedges()[he->index].flip()->index;
+				QVector3D orient1 = eval_mesh->edgeVector(he->index).normalized();
+				QVector3D orient2 = eval_mesh->edgeVector(flipheid).normalized();
+				hdsid_t f1 = i;
+				hdsid_t f2 = eval_mesh->faceFromHe(flipheid)->index;
+				if (nCons[f1] <= nCons[f2]) {
+					if (QVector3D::dotProduct(orient1, orient2) > 0) {
+						bool rotCW = QVector3D::crossProduct(orient1, orient2).z() > 0;
+						//rotate piece until dotProduct is 0
+						while (QVector3D::dotProduct(orient1, orient2) > 0) {
+							//compute the rotation vector
+							QVector3D rot = QVector3D::crossProduct(QVector3D(0, 0, 1), orient1).normalized() / 10;
+							orient1 = orient1 + (rotCW ? rot : (-rot));
+							orient[f1] = orient[f1] + (rotCW ? rot : (-rot));
+							
+
+						}
+						orient[f1].normalize();
+					}
+				}
+			}
+			he = he->next();
+		} while (he != eval_mesh->heFromFace(i));
+	}
 }
