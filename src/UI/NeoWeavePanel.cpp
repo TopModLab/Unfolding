@@ -15,15 +15,25 @@ NeoWeavePanel::NeoWeavePanel(QWidget *parent) :
 		ui->patchSizeSpinBox->setValue(
 			value / static_cast<double>(ui->patchSizeSlider->maximum()));
 	});
-
 	connect(ui->patchSizeSpinBox,
 		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[&](double value) { 
-		ui->patchSizeSlider->setValue(
-			value * (ui->patchSizeSlider->maximum()));
+		ui->patchSizeSlider->setValue( value * (ui->patchSizeSlider->maximum()));
 	});
 
+    // Layer Offset Value
+    connect(ui->layerOffsetSlider, &QSlider::valueChanged,
+        [&](int value) { ui->layerOffsetSpinBox->setValue(value * 0.01f); });
+    connect(ui->layerOffsetSpinBox,
+        static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+        [&](double value) { ui->layerOffsetSlider->setValue(value * 100.0f); });
 
+    // Strip Scaling Value
+    connect(ui->stripScaleSlider, &QSlider::valueChanged,
+        [&](int value) { ui->stripScaleSpinBox->setValue( value * 0.01f); });
+    connect(ui->stripScaleSpinBox,
+        static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+        [&](double value) { ui->stripScaleSlider->setValue(value * 100.0f); });
 }
 
 NeoWeavePanel::~NeoWeavePanel()
@@ -34,9 +44,9 @@ NeoWeavePanel::~NeoWeavePanel()
 
 void NeoWeavePanel::setConfig()
 {
-	config["patchScale"] = ui->patchSizeSlider->value()
-		/ static_cast<Float>(ui->patchSizeSlider->maximum());
-	config["patchUniform"] = static_cast<Float>(ui->uniformSizeBtn->isChecked());
-    config["LayerOffset"] = static_cast<Float>(ui->layerOffsetSpinBox->value());
-    config["PatchStripLenScale"] = static_cast<Float>(ui->stripScaleSpinBox->value());
+	config["patchScale"]      = ui->patchSizeSlider->value()
+		                      / static_cast<Float>(ui->patchSizeSlider->maximum());
+	config["patchUniform"]    = static_cast<Float>(ui->uniformSizeBtn->isChecked());
+    config["layerOffset"]     = static_cast<Float>(ui->layerOffsetSpinBox->value());
+    config["patchStripScale"] = static_cast<Float>(ui->stripScaleSpinBox->value());
 }

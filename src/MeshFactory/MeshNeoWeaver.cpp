@@ -765,9 +765,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	// scaling 
 	const float patchScale = conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
-    const Float sLayerOffset = conf.at("LayerOffset");// 0.1 by default
-    const Float sPatchStripLenScale = conf.at("PatchStripLenScale"); // 0.2 by default
+    const Float layerOffset = conf.at("layerOffset");// 0.1 by default
+    const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
+    const uint32_t patchCurvedSample = 3;
 
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();
@@ -790,7 +791,9 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	vector<QVector3D> heNorms(refHeCount);
 	vector<QVector3D> heTans(refHeCount);
 	vector<QVector3D> heCross(refHeCount * 2);
-	vector<float> heDirLens(refHeCount);
+	vector<float>     heDirLens(refHeCount);
+    vector<uint8_t>   heCurvatureType(refHeCount, 0);// 1 for convex, 0: planar, -1: concave
+    vector<bool>      heCornerConsistent(refHeCount, false);//edge at corner has same type
     // Cache out face normals for Edge Normals(thickness)
     for (int i = 0; i < refFaceCount; i++)
     {
@@ -875,7 +878,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 		// v3 = p1+av;
 		// connect v1-v2-v4-v3
 	}
-    // Construct bridge patch 
+    // Construct bridge patch
+    const int sPatchMaxVertices = 256;
     const int sPatchFaceCount = 21;
     const int sPatchHeCount = sPatchFaceCount * 4;
     const int sPatchVertCount = sPatchFaceCount * 2 + 2;
@@ -914,6 +918,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
     vector<bool> heOnTopFlag(refHeCount, false);
     vector<hdsid_t> heToPatch(refHeCount);
     hdsid_t curPatchID = 0;
+    QVector3D patchPos[sPatchVertCount];// [sPatchMaxVertices];
     for (int i = 0; i < refHeCount; i++)
     {
         if (visitedHE[i]) continue;
@@ -934,35 +939,34 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
             };
             // Update position
             auto patchVerts = &verts[curPatchID * sPatchVertCount];
-            QVector3D patchPos[sPatchVertCount];
             patchPos[0] = heToPatchPos[neiEdgeIDs[0] * 4];
             patchPos[1] = heToPatchPos[neiEdgeIDs[0] * 4 + 1];
             patchPos[10] = heToPatchPos[neiEdgeIDs[1] * 4 + 1];
             patchPos[11] = heToPatchPos[neiEdgeIDs[1] * 4];
 
-            patchPos[16] = heToPatchPos[neiEdgeIDs[2] * 4 + 3] + heNorms[neiEdgeIDs[2]] * sLayerOffset;
-            patchPos[17] = heToPatchPos[neiEdgeIDs[2] * 4 + 2] + heNorms[neiEdgeIDs[2]] * sLayerOffset;
-            patchPos[26] = heToPatchPos[neiEdgeIDs[3] * 4 + 2] + heNorms[neiEdgeIDs[2]] * sLayerOffset;
-            patchPos[27] = heToPatchPos[neiEdgeIDs[3] * 4 + 3] + heNorms[neiEdgeIDs[2]] * sLayerOffset;
+            patchPos[16] = heToPatchPos[neiEdgeIDs[2] * 4 + 3] + heNorms[neiEdgeIDs[2]] * layerOffset;
+            patchPos[17] = heToPatchPos[neiEdgeIDs[2] * 4 + 2] + heNorms[neiEdgeIDs[2]] * layerOffset;
+            patchPos[26] = heToPatchPos[neiEdgeIDs[3] * 4 + 2] + heNorms[neiEdgeIDs[2]] * layerOffset;
+            patchPos[27] = heToPatchPos[neiEdgeIDs[3] * 4 + 3] + heNorms[neiEdgeIDs[2]] * layerOffset;
 
-            patchPos[32] = heToPatchPos[neiEdgeIDs[4] * 4] - heNorms[neiEdgeIDs[4]] * sLayerOffset;
-            patchPos[33] = heToPatchPos[neiEdgeIDs[4] * 4 + 1] - heNorms[neiEdgeIDs[4]] * sLayerOffset;
-            patchPos[42] = heToPatchPos[neiEdgeIDs[5] * 4 + 1] - heNorms[neiEdgeIDs[4]] * sLayerOffset;
-            patchPos[43] = heToPatchPos[neiEdgeIDs[5] * 4] - heNorms[neiEdgeIDs[4]] * sLayerOffset;
+            patchPos[32] = heToPatchPos[neiEdgeIDs[4] * 4] - heNorms[neiEdgeIDs[4]] * layerOffset;
+            patchPos[33] = heToPatchPos[neiEdgeIDs[4] * 4 + 1] - heNorms[neiEdgeIDs[4]] * layerOffset;
+            patchPos[42] = heToPatchPos[neiEdgeIDs[5] * 4 + 1] - heNorms[neiEdgeIDs[4]] * layerOffset;
+            patchPos[43] = heToPatchPos[neiEdgeIDs[5] * 4] - heNorms[neiEdgeIDs[4]] * layerOffset;
 
             //////////////////////////////////////////////////////////////////////////
 //#define LERP_BRIDGE
             auto lerpPatchPos = [](QVector3D* ptr, int srcBegin, int srcEnd, int seg) {
                 Float increment = 1.0f / seg;
                 Float wgt = increment;
-                for (int targ = srcBegin + 2; targ < srcEnd; targ+=2, wgt += increment)
+                for (int targ = srcBegin + 2; targ < srcEnd; targ += 2, wgt += increment)
                 {
                     ptr[targ] = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], wgt);
                 }
             };
             auto edgePatchEval = [](QVector3D* ptr, int srcBegin, int srcEnd) {
-                QVector3D vec1 = ptr[srcBegin+1] - ptr[srcBegin];
-                QVector3D vec2 = ptr[srcEnd+1] - ptr[srcEnd];
+                QVector3D vec1 = ptr[srcBegin + 1] - ptr[srcBegin];
+                QVector3D vec2 = ptr[srcEnd + 1] - ptr[srcEnd];
                 float len1 = vec1.length();
                 float len2 = vec2.length();
                 float lenAvg = (len1 + len2) * 0.5f;
@@ -974,7 +978,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
                 if (QVector3D::dotProduct(vec2 - vec1, ptr[srcEnd] - ptr[srcBegin]) > 0)
                 {
                     ptr[srcBegin + seg] = ptr[srcEnd - seg]
-                                        = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], 0.5f);
+                        = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], 0.5f);
 
                     ptr[srcBegin + seg + 1] = ptr[srcBegin + seg] + vec1;
                     ptr[srcEnd - seg + 1] = ptr[srcEnd - seg] + vec2;
@@ -982,9 +986,9 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
                 else
                 {
                     ptr[srcBegin + seg + 1] = ptr[srcEnd - seg + 1]
-                                            = Utils::Lerp(ptr[srcBegin + 1],
-                                                          ptr[srcEnd + 1],
-                                                          0.5f);
+                        = Utils::Lerp(ptr[srcBegin + 1],
+                            ptr[srcEnd + 1],
+                            0.5f);
 
                     ptr[srcBegin + seg] = ptr[srcBegin + seg + 1] - vec1;
                     ptr[srcEnd - seg] = ptr[srcEnd - seg + 1] - vec2;
@@ -996,7 +1000,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
                     ptr[srcBegin + i + 1] = Utils::Lerp(ptr[srcBegin + 1], ptr[srcBegin + seg + 1], wgt);
                     ptr[srcEnd - i + 1] = Utils::Lerp(ptr[srcEnd + 1], ptr[srcEnd - seg + 1], wgt);
                 }
-               
+
             };
 #ifdef LERP_BRIDGE
             lerpPatchPos(patchPos, 0, 10, 10);
@@ -1005,10 +1009,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
             edgePatchEval(patchPos, 0, 10);
 #endif // LERP_BRIDGE
 
-            patchPos[12] = Utils::Lerp(patchPos[10], patchPos[16], sPatchStripLenScale);
-            patchPos[13] = Utils::Lerp(patchPos[11], patchPos[17], sPatchStripLenScale);
-            patchPos[14] = Utils::Lerp(patchPos[16], patchPos[10], sPatchStripLenScale);
-            patchPos[15] = Utils::Lerp(patchPos[17], patchPos[11], sPatchStripLenScale);
+            patchPos[12] = Utils::Lerp(patchPos[10], patchPos[16], patchStripScale);
+            patchPos[13] = Utils::Lerp(patchPos[11], patchPos[17], patchStripScale);
+            patchPos[14] = Utils::Lerp(patchPos[16], patchPos[10], patchStripScale);
+            patchPos[15] = Utils::Lerp(patchPos[17], patchPos[11], patchStripScale);
 
 #ifdef LERP_BRIDGE
             lerpPatchPos(patchPos, 16, 26, 10);
@@ -1017,10 +1021,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
             edgePatchEval(patchPos, 16, 26);
 #endif // LERP_BRIDGE
 
-            patchPos[28] = Utils::Lerp(patchPos[26], patchPos[32], sPatchStripLenScale);
-            patchPos[29] = Utils::Lerp(patchPos[27], patchPos[33], sPatchStripLenScale);
-            patchPos[30] = Utils::Lerp(patchPos[32], patchPos[26], sPatchStripLenScale);
-            patchPos[31] = Utils::Lerp(patchPos[33], patchPos[27], sPatchStripLenScale);
+            patchPos[28] = Utils::Lerp(patchPos[26], patchPos[32], patchStripScale);
+            patchPos[29] = Utils::Lerp(patchPos[27], patchPos[33], patchStripScale);
+            patchPos[30] = Utils::Lerp(patchPos[32], patchPos[26], patchStripScale);
+            patchPos[31] = Utils::Lerp(patchPos[33], patchPos[27], patchStripScale);
 
 #ifdef LERP_BRIDGE
             lerpPatchPos(patchPos, 32, 42, 10);
@@ -1028,6 +1032,17 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 #else
             edgePatchEval(patchPos, 32, 42);
 #endif // LERP_BRIDGE
+            auto bezierPos = [](QVector3D* ptr) {
+                *ptr = *(ptr - 2) * 0.25f + *ptr * 0.5f + *(ptr + 2) * 0.25f;
+            };
+            bezierPos(&patchPos[10]);
+            bezierPos(&patchPos[11]);
+            bezierPos(&patchPos[16]);
+            bezierPos(&patchPos[17]);
+            bezierPos(&patchPos[26]);
+            bezierPos(&patchPos[27]);
+            bezierPos(&patchPos[32]);
+            bezierPos(&patchPos[33]);
 
             for (int j = 0; j < sPatchVertCount; j++)
             {

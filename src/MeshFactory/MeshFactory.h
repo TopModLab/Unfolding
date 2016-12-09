@@ -35,10 +35,8 @@ public:
 	);
     static bool createBridgeFromNull(
         mesh_t* mesh, size_t bridgeCount,
-        vector<QVector3D> &vpos1,
-        size_t ofs1, size_t stride1,
-        vector<QVector3D> &vpos2,
-        size_t ofs2, size_t stride2
+        QVector3D* vp1, size_t ofs1, size_t stride1,
+        QVector3D* vp2, size_t ofs2, size_t stride2
     );
 };
 

@@ -244,9 +244,9 @@ void MeshFactory::generateBridge(
 
 bool MeshFactory::createBridgeFromNull(mesh_t* mesh,
                                        size_t bridgeCount,
-                                       vector<QVector3D> &vpos1,
+                                       QVector3D* vp1,
                                        size_t ofs1, size_t stride1,
-                                       vector<QVector3D> &vpos2,
+                                       QVector3D* vp2,
                                        size_t ofs2, size_t stride2)
 {
     if (!nullptr) return false;
@@ -268,7 +268,7 @@ bool MeshFactory::createBridgeFromNull(mesh_t* mesh,
     auto curFace = faces.data() + fOfs;
     for (int i = 0; i < bridgeCount; i++)
     {
-        constructFace(curHE, 4, curFace);
+        constructFace(curHE, 4, curFace + i);
         if (i != bridgeCount - 1)
         {
             (curHE + 2)->flip_offset = 2;
@@ -278,13 +278,14 @@ bool MeshFactory::createBridgeFromNull(mesh_t* mesh,
         constructHEPair(curVert + 1, curHE++);
         constructHEPair(curVert + 3, curHE++);
         constructHEPair(curVert + 2, curHE++);
-        curFace++;
+
         curVert += 2;
     }
     for (int i = 0; i < bridgeCount + 1; i++)
     {
-        verts[vOfs + i * 2] = vpos1[ofs1 + stride1 * i];
-        verts[vOfs + i * 2 + 1] = vpos2[ofs2 + stride2 * i];
+        int idx = vOfs + i * 2;
+        verts[idx].pos = vp1[ofs1 + stride1 * i];
+        verts[idx + 1].pos = vp2[ofs2 + stride2 * i];
     }
 
     return true;
