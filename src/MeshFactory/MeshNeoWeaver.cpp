@@ -792,43 +792,54 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(
 	vector<QVector3D> heTans(refHeCount);
 	vector<QVector3D> heCross(refHeCount * 2);
 	vector<float>     heDirLens(refHeCount);
-    vector<uint8_t>   heCurvatureType(refHeCount, 0);// 1 for convex, 0: planar, -1: concave
+    vector<uint8_t>   heCurvatureType(refHeCount, 0);// 1 for convex, 0: planar, 2: concave
     vector<bool>      heCornerConsistent(refHeCount, false);//edge at corner has same type
     // Cache out face normals for Edge Normals(thickness)
-    for (int i = 0; i < refFaceCount; i++)
-    {
-        fNorms[i] = ref_mesh->faceNormal(i);
-    }
+    for (int i = 0; i < refFaceCount; i++) fNorms[i] = ref_mesh->faceNormal(i);
+    
+    // Cache out Edge Directions and Edge Centers
     for (hdsid_t i = 0; i < refHeCount; i++)
     {
-        auto he = &ref_hes[i];
+        const he_t* he = &ref_hes[i];
         if (he->flip_offset < 0) continue;
-        auto hef = he->flip();
-        heNorms[i] = heNorms[hef->index]
-            =  (fNorms[he->fid] + fNorms[hef->fid]).normalized();
+        const he_t* hef = he->flip();
+        hdsid_t hefId = hef->index;
+        heNorms[i] = heNorms[hefId]
+                   = (fNorms[he->fid] + fNorms[hef->fid]).normalized();
+        heDirs[i] = ref_mesh->edgeVector(i) * 0.5f;// half length of he
+        heDirLens[i] = heDirLens[hefId] = heDirs[i].length();
+        heCenters[i] = heCenters[hefId] = ref_mesh->edgeCenter(i);
+        heTans[i] = QVector3D::crossProduct(heNorms[i], heDirs[i]).normalized();
+        heDirs[hefId] = -heDirs[i];
+        heTans[hefId] = -heTans[i];
+
+        // 0 (planar):  cross product of face normals is zero
+        // 1 (convex):  cross product of face normals is in the same dir with edge dir
+        // 2 (concave): cross product of face normals is opposite to edge dir
+        QVector3D crossVec = QVector3D::crossProduct(fNorms[he->fid], fNorms[hef->fid]);
+        heCurvatureType[i] = heCurvatureType[hefId]
+                           = crossVec.isNull() ? 0
+                           : QVector3D::dotProduct(crossVec, heDirs[i]) > 0 ? 1 : 2;
     }
-    // Cache out Edge Directions and Edge Centers
+    // update corner flag
+    // true:  both edge are convex or concave
+    // false: edges has different flag, or one of them is planar
 	for (auto &he : ref_hes)
 	{
-		heDirs[he.index] = ref_mesh->edgeVector(he) * 0.5f;// half length of he
-        heDirLens[he.index] = heDirLens[he.flip()->index] = heDirs[he.index].length();
-		heCenters[he.index] = heCenters[he.flip()->index] = ref_mesh->edgeCenter(he);
-        heTans[he.index] = QVector3D::crossProduct(heNorms[he.index],
-                                                   heDirs[he.index]).normalized();
-		heDirs[he.flip()->index] = -heDirs[he.index];
-        heTans[he.flip()->index] = -heTans[he.index];
+        heCornerConsistent[he.index] = heCurvatureType[he.index]
+                                     & heCurvatureType[he.prev()->index];
 	}
     // Cache out Edge Cross Vectors for generating patches on edge.
+    // If corner has same flag on each edge, aka flag consistent,
+    // use cross product of edge normals to get corner vectors;
+    // Otherwise, use average of edge vectors
 	for (auto &he : ref_hes)
 	{
-        if (true)
-        {
-            heCross[he.index << 1] = heCross[(he.prev()->index << 1) + 1]
-                                   = QVector3D::crossProduct(heNorms[he.prev()->index],
-                                                             heNorms[he.index]);
-        }
-        else
-		heCross[he.index] = heDirs[he.index] - heDirs[he.prev()->index];
+        heCross[he.index << 1] = heCross[(he.prev()->index << 1) + 1]
+                               = heCornerConsistent[he.index]
+                               ? QVector3D::crossProduct(heNorms[he.prev()->index],
+                                                         heNorms[he.index])
+                               : heDirs[he.index] - heDirs[he.prev()->index];
 	}
     for (int i = 0; i < refHeCount; i++)
     {
