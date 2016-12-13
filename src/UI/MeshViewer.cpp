@@ -99,7 +99,9 @@ void MeshViewer::initializeGL()
 	vRBO.vbo->create();
 	vRBO.vbo->setUsagePattern(oglBuffer::StreamDraw);
 	vRBO.vbo->bind();
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          vert_trait.stride,
+                          (void*)vert_trait.offset);
 	glEnableVertexAttribArray(0);
 
 	vRBO.releaseAll();
@@ -112,7 +114,10 @@ void MeshViewer::initializeGL()
 		RBO.vao.bind();
 
 		RBO.vbo->bind();
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                              vert_trait.stride,
+                              (void*)vert_trait.offset);
+
 		glEnableVertexAttribArray(0);
 
 		RBO.ibo.create();
@@ -154,20 +159,19 @@ void MeshViewer::allocateGL()
 	while (!selFACE.empty()) selFACE.pop();*/
 	heMesh->exportSelection(&selVTX, &selHE, &selFACE);
 
-	heMesh->exportVertVBO(&vtx_array, &vRBO.flags);
+	heMesh->exportVertVBO(&vert_trait, &vRBO.flags);
 	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
 	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
-	vtx_array.shrink_to_fit();
 	vRBO.shrink_to_fit();
 	heRBO.shrink_to_fit();
 	fRBO.shrink_to_fit();
 
 	// Bind Vertices Buffer
 	vRBO.vbo->bind();
-	if (!vtx_array.empty())
-	{
-		vRBO.vbo->allocate(&vtx_array[0], sizeof(GLfloat) * vtx_array.size());
-	}
+    if (vert_trait.count > 0)
+    {
+        vRBO.vbo->allocate(vert_trait.data, vert_trait.size);
+    }
 	vRBO.vbo->release();
 	vRBO.allocateTBO(1);// Bind only flag tbo
 	
@@ -247,7 +251,7 @@ void MeshViewer::drawMeshToFBO()
 		vRBO.vao.bind();
 		glPointSize(15.0);
 		uid_shader.setUniformValue("mode", 1);
-		glDrawArrays(GL_POINTS, 0, vtx_array.size() / 3);
+		glDrawArrays(GL_POINTS, 0, vert_trait.count);
 		vRBO.vao.release();//vtx_vbo.release();
 		//draw vertices
 	}
@@ -438,7 +442,7 @@ void MeshViewer::paintGL()
 			glBindTexture(GL_TEXTURE_BUFFER, vRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, vRBO.flag_tbo);
 			vtx_solid_shader.setUniformValue("flag_tex", 0);
-			glDrawArrays(GL_POINTS, 0, vtx_array.size() / 3);
+			glDrawArrays(GL_POINTS, 0, vert_trait.count);
 
 			vRBO.vao.release();//vtx_vbo.release();
 			vtx_solid_shader.release();

@@ -44,12 +44,12 @@ public:
 		uint16_t flag;
 		struct
 		{
-			bool : 1;
-			bool isPicked : 1;
-			bool isCutFace : 1; //invisible face between cut edges
-			bool isBridge : 1;
+			bool             : 1;
+			bool isPicked    : 1;
+			bool isCutFace   : 1; //invisible face between cut edges
+			bool isBridge    : 1;
 			bool isNonPlanar : 1;
-			bool isJoint : 1; //woven joint face
+			bool isJoint     : 1; //woven joint face
 		};
 	};
 
