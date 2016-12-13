@@ -74,7 +74,7 @@ HDS_Mesh::~HDS_Mesh()
 
 void HDS_Mesh::updatePieceSet()
 {
-	for (auto piece : pieceSet)
+	for (auto &piece : pieceSet)
 	{
 		piece.clear();
 	}
@@ -262,39 +262,25 @@ void HDS_Mesh::setMesh(
 	HDS_HalfEdge::resetIndex();
 }
 
-void HDS_Mesh::exportVertVBO(
-	floats_t* verts, ui16s_t* vFLAGs) const
+void HDS_Mesh::exportVertVBO(VertexBufferTrait* vertTrait,
+                             ui16s_t* vFLAGs) const
 {
 	// vertex object buffer
 	// If verts exist, copy vertex buffer and vertex flags
-	if (verts != nullptr)
+	if (vertTrait != nullptr)
 	{
-		verts->clear();
-		verts->reserve(vertSet.size());
-		vFLAGs->clear();
-		vFLAGs->reserve(vertSet.size());
-		for (auto v : vertSet)
-		{
-			auto& pos = v.pos;
-			verts->push_back(pos.x());
-			verts->push_back(pos.y());
-			verts->push_back(pos.z());
-			vFLAGs->push_back(v.getFlag());
-		}
-	}
+        vertTrait->data = (void*)vertSet.data();
+        vertTrait->count = vertSet.size();
+        vertTrait->size = sizeof(vert_t) * vertTrait->count;
+    }
 	// if verts is null, copy only vertex flags
-	else
+	if (vFLAGs != nullptr)
 	{
 		vFLAGs->clear();
 		vFLAGs->reserve(vertSet.size());
-		for (auto v : vertSet)
-		{
-			if (v.isPicked)
-			{
-				cout << "already picked!" << endl;
-			}
-			vFLAGs->push_back(v.getFlag());
-		}
+		vFLAGs->clear();
+		vFLAGs->reserve(vertSet.size());
+		for (auto &v : vertSet) vFLAGs->push_back(v.getFlag());
 	}
 }
 
@@ -459,7 +445,7 @@ void HDS_Mesh::exportFaceVBO(
 			}*/
 			case 6:
 			{
-				if (!face.isBridger)
+				if (!face.isBridge)
 				{
 					/*********************/
 					/* Non-Bridger Faces */
@@ -491,7 +477,7 @@ void HDS_Mesh::exportFaceVBO(
 			}
 			case 8:
 			{
-				if (!face.isBridger)
+				if (!face.isBridge)
 				{
 					/*********************/
 					/* Non-Bridger Faces */
@@ -550,7 +536,7 @@ void HDS_Mesh::exportFaceVBO(
 		// re-export face flag
 		fFLAGs->clear();
 		fFLAGs->reserve(fSetSize * 2);
-		for (auto face : faceSet)
+		for (auto &face : faceSet)
 		{
 			if (face.isCutFace)
 			{
@@ -575,21 +561,21 @@ void HDS_Mesh::exportSelection(
 {
 	if (selVTX != nullptr)
 	{
-		for (auto v : vertSet)
+		for (auto &v : vertSet)
 		{
 			if (v.isPicked) selVTX->insert(v.index);
 		}
 	}
 	if (selHE != nullptr)
 	{
-		for (auto he : heSet)
+		for (auto &he : heSet)
 		{
 			if (he.isPicked) selHE->insert(he.index);
 		}
 	}
 	if (selFACE != nullptr)
 	{
-		for (auto f : faceSet)
+		for (auto &f : faceSet)
 		{
 			if (f.isPicked) selFACE->insert(f.index);
 		}
@@ -615,9 +601,8 @@ QVector3D HDS_Mesh::faceCenter(hdsid_t fid) const
 {
 	auto corners = faceCorners(fid);
 	QVector3D c;
-	for (auto vid : corners) {
-		c += vertSet[vid].pos;
-	}
+	for (auto vid : corners) c += vertSet[vid].pos;
+
 	c /= (qreal)corners.size();
 
 	return c;
@@ -627,16 +612,26 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 {
 	auto corners = faceCorners(fid);
 	QVector3D c;
-	for (auto vid : corners) {
-		c += vertSet[vid].pos;
-	}
+	for (auto vid : corners) c += vertSet[vid].pos;
+	
 	c /= (qreal)corners.size();
 
-	QVector3D n = QVector3D::crossProduct(
-		vertSet[corners[0]].pos - c,
-		vertSet[corners[1]].pos - c);
+	QVector3D n = QVector3D::crossProduct(vertSet[corners[0]].pos - c,
+                                          vertSet[corners[1]].pos - c);
 
 	return n.normalized();
+}
+
+QVector3D HDS_Mesh::edgeCenter(hdsid_t heid) const
+{
+	return (vertSet[heSet[heid].flip()->vid].pos
+            + vertSet[heSet[heid].vid].pos) * 0.5f;
+}
+
+QVector3D HDS_Mesh::edgeCenter(const he_t &he) const
+{
+	return (vertSet[he.next()->vid].pos
+		+ vertSet[he.vid].pos) * 0.5f;
 }
 
 QVector3D HDS_Mesh::edgeVector(hdsid_t heid) const
@@ -673,7 +668,7 @@ vector<QVector3D> HDS_Mesh::allVertNormal() const
 			ret[vid] += n;
 		}
 	}
-	for (auto n : ret) n.normalize();
+	for (auto &n : ret) n.normalize();
 
 	return ret;
 }

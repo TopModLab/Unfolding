@@ -907,22 +907,20 @@ void MainWindow::slot_toggleCameraOperation()
 	MeshViewer::getInstance()->interactionState.state = 0;
 }
 
-void MainWindow::slot_toggleFaceSelection()
+void MainWindow::slot_toggleVertexSelection()
 {
-	MeshViewer::getInstance()->interactionState.sel_face = true;
+    MeshViewer::getInstance()->interactionState.state = 2;
 }
 
 void MainWindow::slot_toggleEdgeSelection()
 {
-	MeshViewer::getInstance()->interactionState.sel_edge = true;
+    MeshViewer::getInstance()->interactionState.state = 4;
 }
 
-void MainWindow::slot_toggleVertexSelection()
+void MainWindow::slot_toggleFaceSelection()
 {
-	MeshViewer::getInstance()->interactionState.sel_vert = true;
+    MeshViewer::getInstance()->interactionState.state = 8;
 }
-
-
 
 void MainWindow::slot_triggerColormap() {
 	color_editor->show();

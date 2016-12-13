@@ -186,9 +186,9 @@ public:
 		struct
 		{
 			bool unselect : 1;
-			bool sel_vert : 1;
+            bool sel_vert : 1;
+            bool sel_edge : 1;
 			bool sel_face : 1;
-			bool sel_edge : 1;
 		};
 	} interactionState;
 	enum DataTypeMark : uint8_t
@@ -302,7 +302,7 @@ private:
 
 	// VBOs and VAOs
 	// Vertices data and vao
-	floats_t vtx_array;
+    VertexBufferTrait vert_trait;
 
 	RenderBufferObject vRBO;
 	RenderBufferObject fRBO;

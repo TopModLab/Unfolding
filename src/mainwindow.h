@@ -64,9 +64,9 @@ private:
 	void slot_reset();
 
 	void slot_toggleCameraOperation();
-	void slot_toggleFaceSelection();
-	void slot_toggleEdgeSelection();
-	void slot_toggleVertexSelection();
+    void slot_toggleVertexSelection();
+    void slot_toggleEdgeSelection();
+    void slot_toggleFaceSelection();
 
 	void slot_performMeshCut();
 	void slot_unfoldMesh();
