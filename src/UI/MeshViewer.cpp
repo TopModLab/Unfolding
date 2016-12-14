@@ -15,7 +15,7 @@ MeshViewer::MeshViewer(QWidget *parent)
 	, hlComp(HighlightComp::HIGHLIGHT_CUTEDGE)
 	, grid(4, 6.0f, this)
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0, 0, 0),
-		QVector3D(0, 1, 0), 54.3, 1.67, 0.1, 100)
+               QVector3D(0, 1, 0), 54.3, 1.67, 0.1, 100)
 	, mesh_changed(false), view_scale(1.0)
 	, vRBO(this), fRBO(this), heRBO(this)
 {
@@ -409,7 +409,7 @@ void MeshViewer::paintGL()
 	glClearColor(0.6f, 0.6f, 0.6f, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	auto checkDispMode = [](uint32_t disp, DispComp mode)->bool{
+	auto checkDispMode = [](uint32_t disp, DispComp mode)->bool {
 		return disp & static_cast<uint32_t>(mode);
 	};
 
@@ -626,7 +626,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent* e)
 
 	if (e->buttons() == Qt::LeftButton && e->modifiers() == Qt::AltModifier)
 	{
-		view_cam.rotate(dy * 0.25, dx * 0.25, 0.0);
+		view_cam.rotate(dy * 0.25f, -dx * 0.25f, 0.0);
 		update();
 	}
 	else if (e->buttons() == Qt::RightButton && e->modifiers() == Qt::AltModifier)
