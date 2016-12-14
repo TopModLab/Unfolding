@@ -47,5 +47,5 @@ void perspCamera::rotate(Float x_rot, Float y_rot, Float z_rot)
 
 void perspCamera::resizeViewport(Float aspr)
 {
-	CameraToScreen(0, 0) = -CameraToScreen(1, 1) / aspr;
+	CameraToScreen(0, 0) = CameraToScreen(1, 1) / aspr;
 }
