@@ -324,29 +324,49 @@ void MeshOrigami::evalOrigamiPos(
 
 void MeshOrigami::evalOrigamiRot(const mesh_t* ref_mesh, mesh_t* eval_mesh)
 {
-	for (int i = 0; i < ref_mesh->faces().size(); i++) {
+	int faceSize = ref_mesh->faces().size();
+	for (int i = 0; i < faceSize; i++) {
 
 		he_t* he = eval_mesh->heFromFace(i);
 		do {
 			if (!ref_mesh->halfedges()[he->index].isPicked) {
 				hdsid_t flipheid = ref_mesh->halfedges()[he->index].flip()->index;
+				he_t* fliphe = &eval_mesh->halfedges()[flipheid];
 				QVector3D orient1 = eval_mesh->edgeVector(he->index).normalized();
 				QVector3D orient2 = eval_mesh->edgeVector(flipheid).normalized();
+
 				hdsid_t f1 = i;
 				hdsid_t f2 = eval_mesh->faceFromHe(flipheid)->index;
+				cout << "f1 " << f1 << " f2 " << f2 << endl;
+// 				cout << "orient1:: " << orient1.x() << "  " << orient1.y() << "  " << orient1.z() << endl;
+// 				cout << "orient2:: " << orient2.x() << "  " << orient2.y() << "  " << orient2.z() << endl;
+
 				if (nCons[f1] <= nCons[f2]) {
+					QVector3D v11 = eval_mesh->vertFromHe(he->index)->pos;
+					QVector3D v12 = eval_mesh->vertFromHe(he->next()->index)->pos;
+					QVector3D v21 = eval_mesh->vertFromHe(flipheid)->pos;
+					QVector3D v22 = eval_mesh->vertFromHe(fliphe->next()->index)->pos;
 					if (QVector3D::dotProduct(orient1, orient2) > 0) {
 						bool rotCW = QVector3D::crossProduct(orient1, orient2).z() > 0;
 						//rotate piece until dotProduct is 0
+						cout << "rot CW? " << rotCW << endl;
 						while (QVector3D::dotProduct(orient1, orient2) > 0) {
 							//compute the rotation vector
-							QVector3D rot = QVector3D::crossProduct(QVector3D(0, 0, 1), orient1).normalized() / 10;
-							orient1 = orient1 + (rotCW ? rot : (-rot));
-							orient[f1] = orient[f1] + (rotCW ? rot : (-rot));
-							
+							QVector3D rot1 = QVector3D::crossProduct(QVector3D(0, 0, 1), orient1).normalized() / 10;
+							QVector3D rotf1 = QVector3D::crossProduct(QVector3D(0, 0, 1), orient[f1]).normalized() / 10;
 
+							orient1 = (orient1 + (rotCW ? (-rot1) : (rot1))).normalized();
+							orient[f1] = (orient[f1] + (rotCW ? (-rotf1) : (rotf1))).normalized();
+
+							cout << "dot:: "<<QVector3D::dotProduct(orient1, orient2) << endl;
+							cout << "orient1:: " << orient1.x() <<"  "<< orient1.y() <<"  "<< orient1.z() << endl;
+							cout << "orient[f1]:: " << orient[f1].x() << "  " << orient[f1].y() << "  " << orient[f1].z() << endl;
+
+							//cout << "====" << orient1 << endl;
+							//cout << orient[f1] << endl;
 						}
-						orient[f1].normalize();
+						//update face pieces
+						MeshUnfolder::unfoldSeparateFace(pos[f1], orient[f1], heid[f1], eval_mesh);
 					}
 				}
 			}
