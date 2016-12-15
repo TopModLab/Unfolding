@@ -187,7 +187,6 @@ void MainWindow::createActions()
 		//selection menu
 		connect(ui->actionSelAll, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectAll);
 		connect(ui->actionSelInv, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectInverse);
-		connect(ui->actionSelMulti, &QAction::triggered, this, &MainWindow::selectMultiple);
 		connect(ui->actSelRefID, &QAction::triggered, MeshViewer::getInstance(), &viewer_t::selectByRefID);
 		// TODO: Support all section options
 		/*connect(ui->actionSelTwinP, &QAction::triggered, viewer, &viewer_t::selectTwinPair()));
@@ -470,13 +469,15 @@ void MainWindow::createStatusBar()
 
 void MainWindow::newFile()
 {
+    QString filename = QFileDialog::getOpenFileName(this, "Select a Geometry File",
 #ifdef _DEBUG
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "meshes/", tr("OBJ files(*.obj)"));
+                                                    "meshes/",
 #else // Release
-	QString filename = QFileDialog::getOpenFileName(this, "Select an OBJ file",  "", tr("OBJ files(*.obj)"));
+                                                    "",
 #endif
-	
-	if (filename != NULL) {
+                                                    tr("Geometry Files(*.obj *.hds)"));
+	if (!filename.isEmpty())
+    {
 #ifdef _DEBUG
 		QTime clock;
 		clock.start();
@@ -488,8 +489,22 @@ void MainWindow::newFile()
 		qDebug("Clear ObjectStack Takes %d ms In Total.", clock.elapsed());
 		clock.restart();
 #endif
-		if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
-			return;
+		
+
+        if (filename.endsWith("obj"))
+        {
+            if (!MeshManager::getInstance()->loadOBJFile(string(filename.toUtf8().constData())))
+                return;
+        }
+        else if (filename.endsWith("hds"))
+        {
+            cout << "Open HDS file\n";
+            MeshManager::getInstance()->loadHDSFile(string(filename.toUtf8().constData()));
+        }
+        else
+        {
+            return;
+        }
 		
 #ifdef _DEBUG
 		qDebug("Loading Object Takes %d ms In Total.", clock.elapsed());
@@ -844,14 +859,6 @@ void MainWindow::slot_reset()
 
 //========================================//
 
-void MainWindow::selectMultiple()
-{
-	// TODO: Remove redunant function, by default is multple
-	//MeshViewer::getInstance()->setSelectionMode(viewer_t::MultiSelect);
-}
-
-
-
 void MainWindow::slot_toggleEdges()
 {
 	// TODO: Check if toggleVertices/Edges/Faces/Normals work
@@ -897,25 +904,23 @@ void MainWindow::slot_toggleNormals()
 
 void MainWindow::slot_toggleCameraOperation()
 {
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::ROAM_CAMERA);
-}
-
-void MainWindow::slot_toggleFaceSelection()
-{
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_FACE);
-}
-
-void MainWindow::slot_toggleEdgeSelection()
-{
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_EDGE);
+	MeshViewer::getInstance()->interactionState.state = 0;
 }
 
 void MainWindow::slot_toggleVertexSelection()
 {
-	MeshViewer::getInstance()->setInteractionMode(viewer_t::SEL_VERT);
+    MeshViewer::getInstance()->interactionState.state = 2;
 }
 
+void MainWindow::slot_toggleEdgeSelection()
+{
+    MeshViewer::getInstance()->interactionState.state = 4;
+}
 
+void MainWindow::slot_toggleFaceSelection()
+{
+    MeshViewer::getInstance()->interactionState.state = 8;
+}
 
 void MainWindow::slot_triggerColormap() {
 	color_editor->show();

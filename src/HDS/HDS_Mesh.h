@@ -9,6 +9,15 @@
 
 #include "GeomUtils/BBox.h"
 
+struct VertexBufferTrait
+{
+    const void* data   = nullptr;
+    uint32_t    count  = 0;
+    uint32_t    size   = 0;
+    uint32_t    offset = offsetof(HDS_Vertex, pos);
+    uint32_t    stride = sizeof(HDS_Vertex);
+};
+
 class HDS_Mesh
 {
 public:
@@ -42,6 +51,7 @@ public:
 			 vector<he_t>   &hes,
 			 vector<face_t> &faces);
 	HDS_Mesh(const HDS_Mesh &other);
+    HDS_Mesh(const string &binaryFileName);
 	~HDS_Mesh();
 
 	// Reset UID in each component
@@ -57,7 +67,6 @@ public:
 		vert_t::matchIndexToSize(vertSet.size());
 		he_t::matchIndexToSize(heSet.size());
 		face_t::matchIndexToSize(faceSet.size());
-
 	}
 	void updatePieceSet();	/* Find linked faces and store in pieceSet */
 	
@@ -82,26 +91,31 @@ public:
 	/************************************************************************/
 	/* Modern OpenGL Rendering Functions                                    */
 	/************************************************************************/
-	void exportVertVBO(floats_t* verts,	ui16s_t* vFLAGs = nullptr) const;
-	void exportEdgeVBO(ui32s_t* heIBOs = nullptr,
-		ui32s_t* heIDs = nullptr, ui16s_t* heFLAGs = nullptr) const;
-	void exportFaceVBO(ui32s_t* fIBOs = nullptr,
-		ui32s_t* fIDs = nullptr, ui16s_t* fFLAGs = nullptr) const;
+	void exportVertVBO(VertexBufferTrait* vertTrait,
+                       ui16s_t* vFLAGs  = nullptr) const;
+	void exportEdgeVBO(ui32s_t* heIBOs  = nullptr,
+                       ui32s_t* heIDs   = nullptr,
+                       ui16s_t* heFLAGs = nullptr) const;
+	void exportFaceVBO(ui32s_t* fIBOs   = nullptr,
+                       ui32s_t* fIDs    = nullptr,
+                       ui16s_t* fFLAGs  = nullptr) const;
 	using selSeq_t = unordered_set<uint32_t>;
 	void exportSelection(selSeq_t* selVTX, selSeq_t* selHE, selSeq_t* selFACE);
 
 	
-	vector<he_t>& halfedges() { return heSet; }
-	vector<face_t>& faces() { return faceSet; }
-	vector<vert_t>& verts() { return vertSet; }
-	const vector<he_t>& halfedges() const { return heSet; }
-	const vector<face_t>& faces() const { return faceSet; }
-	const vector<vert_t>& verts() const { return vertSet; }
+	vector<he_t>   &halfedges() { return heSet; }
+	vector<face_t> &faces() { return faceSet; }
+	vector<vert_t> &verts() { return vertSet; }
+	const vector<he_t>   &halfedges() const { return heSet; }
+	const vector<face_t> &faces() const { return faceSet; }
+	const vector<vert_t> &verts() const { return vertSet; }
 	//////////////////////////////////////////////////////////////////////////
 	// Compute mesh properties
 	vector<QVector3D> allVertNormal() const;
 	QVector3D edgeVector(hdsid_t heid) const;
 	QVector3D edgeVector(const he_t &he) const;
+    QVector3D edgeCenter(hdsid_t heid) const;
+    QVector3D edgeCenter(const he_t &he) const;
 	QVector3D faceCenter(hdsid_t fid) const;
 	QVector3D faceNormal(hdsid_t fid) const;
 	vector<hdsid_t> faceCorners(hdsid_t fid) const;
@@ -145,6 +159,8 @@ public:
 	bool validate();
 
 	void save(const string &filename) const;
+
+    void saveBinary(const string &filename) const;
 
 	void setProcessType(uint16_t type) { processType = type; }
 

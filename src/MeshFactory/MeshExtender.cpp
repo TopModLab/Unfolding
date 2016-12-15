@@ -83,7 +83,7 @@ void MeshExtender::scaleFaces()
 			face_t* newFace = createFace(vertices);
 			newFace->refid = f.refid;
 			newFace->isCutFace = false;
-			newFace->isBridger = false;
+			newFace->isBridge = false;
 			faces_new.push_back(*newFace);
 
 			//assign half edge's refid
@@ -343,7 +343,7 @@ bool MeshExtender::updateNewMesh()
 	for (auto f : faces_new) {
 		f.index = HDS_Face::assignIndex();
 		cur_mesh->addFace(f);
-		if (f.isBridger) bridgerCount++;
+		if (f.isBridge) bridgerCount++;
 	}
 	//add new vertices and edges
 	for (auto v : verts_new) {

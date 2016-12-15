@@ -7,7 +7,7 @@ MeshViewer* MeshViewer::instance = nullptr;
 
 MeshViewer::MeshViewer(QWidget *parent)
 	: QOpenGLWidget(parent)
-	, interactionState(ROAM_CAMERA)
+	//, interactionState(ROAM_CAMERA)
 	, heMesh(nullptr)
 	, renderFlag(0)
 	, shadingSate(SHADE_WF_FLAT)
@@ -15,7 +15,7 @@ MeshViewer::MeshViewer(QWidget *parent)
 	, hlComp(HighlightComp::HIGHLIGHT_CUTEDGE)
 	, grid(4, 6.0f, this)
 	, view_cam(QVector3D(4, 2, 4), QVector3D(0, 0, 0),
-		QVector3D(0, 1, 0), 54.3, 1.67, 0.1, 100)
+               QVector3D(0, 1, 0), 54.3, 1.67, 0.1, 100)
 	, mesh_changed(false), view_scale(1.0)
 	, vRBO(this), fRBO(this), heRBO(this)
 {
@@ -50,12 +50,6 @@ void MeshViewer::saveScreenShot()
 	{
 		this->grab().save(filename);
 	}
-}
-
-
-void MeshViewer::setInteractionMode(InteractionState state)
-{
-	interactionState = state;
 }
 
 void MeshViewer::showShading(ShadingState shading)
@@ -105,7 +99,9 @@ void MeshViewer::initializeGL()
 	vRBO.vbo->create();
 	vRBO.vbo->setUsagePattern(oglBuffer::StreamDraw);
 	vRBO.vbo->bind();
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          vert_trait.stride,
+                          (void*)vert_trait.offset);
 	glEnableVertexAttribArray(0);
 
 	vRBO.releaseAll();
@@ -118,7 +114,10 @@ void MeshViewer::initializeGL()
 		RBO.vao.bind();
 
 		RBO.vbo->bind();
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                              vert_trait.stride,
+                              (void*)vert_trait.offset);
+
 		glEnableVertexAttribArray(0);
 
 		RBO.ibo.create();
@@ -164,20 +163,19 @@ void MeshViewer::allocateGL()
 	while (!selFACE.empty()) selFACE.pop();*/
 	heMesh->exportSelection(&selVTX, &selHE, &selFACE);
 
-	heMesh->exportVertVBO(&vtx_array, &vRBO.flags);
+	heMesh->exportVertVBO(&vert_trait, &vRBO.flags);
 	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
 	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
-	vtx_array.shrink_to_fit();
 	vRBO.shrink_to_fit();
 	heRBO.shrink_to_fit();
 	fRBO.shrink_to_fit();
 
 	// Bind Vertices Buffer
 	vRBO.vbo->bind();
-	if (!vtx_array.empty())
-	{
-		vRBO.vbo->allocate(&vtx_array[0], sizeof(GLfloat) * vtx_array.size());
-	}
+    if (vert_trait.count > 0)
+    {
+        vRBO.vbo->allocate(vert_trait.data, vert_trait.size);
+    }
 	vRBO.vbo->release();
 	vRBO.allocateTBO(1);// Bind only flag tbo
 	
@@ -243,9 +241,7 @@ void MeshViewer::drawMeshToFBO()
 	uid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 	uid_shader.setUniformValue("scale", static_cast<Float>(view_scale));
 
-	switch (interactionState)
-	{
-	case InteractionState::SEL_VERT:
+	if (interactionState.sel_vert)
 	{
 		if (shadingSate & ShadingState::SHADE_FLAT)
 		{
@@ -259,12 +255,11 @@ void MeshViewer::drawMeshToFBO()
 		vRBO.vao.bind();
 		glPointSize(15.0);
 		uid_shader.setUniformValue("mode", 1);
-		glDrawArrays(GL_POINTS, 0, vtx_array.size() / 3);
+		glDrawArrays(GL_POINTS, 0, vert_trait.count);
 		vRBO.vao.release();//vtx_vbo.release();
 		//draw vertices
-		break;
 	}
-	case InteractionState::SEL_FACE:
+	else if (interactionState.sel_face)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -281,9 +276,8 @@ void MeshViewer::drawMeshToFBO()
 		fRBO.vao.release();
 		glBindTexture(GL_TEXTURE_BUFFER, 0);
 		//draw faces
-		break;
 	}
-	case InteractionState::SEL_EDGE:
+	else if (interactionState.sel_edge)
 	{
 		if (shadingSate & ShadingState::SHADE_FLAT)
 		{
@@ -297,7 +291,6 @@ void MeshViewer::drawMeshToFBO()
 		glLineWidth(10);
 		heRBO.vao.bind();
 
-
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_BUFFER, heRBO.id_tex);
 		glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, heRBO.id_tbo);
@@ -310,9 +303,6 @@ void MeshViewer::drawMeshToFBO()
 		heRBO.vao.release();
 		glBindTexture(GL_TEXTURE_BUFFER, 0);
 		//draw edges
-		break;
-	}
-	default: break;
 	}
 
 	fbo->release();
@@ -324,9 +314,7 @@ void MeshViewer::drawMeshToFBO()
 	bool selected = pixel >> 24;
 	uint32_t renderID = pixel & 0xFFFFFF;
 	
-	switch (interactionState)
-	{
-	case InteractionState::SEL_VERT:
+	if (interactionState.sel_vert)
 	{
 		glBindBuffer(GL_TEXTURE_BUFFER, vRBO.flag_tbo);
 		auto dataptr = (uint16_t*)glMapBuffer(GL_TEXTURE_BUFFER, GL_READ_WRITE);
@@ -344,7 +332,7 @@ void MeshViewer::drawMeshToFBO()
 			}
 			*(dataptr + renderID) ^= 2;
 		} 
-		else
+		else if (interactionState.unselect)
 		{
 			for (auto v : selVTX)
 			{
@@ -355,13 +343,13 @@ void MeshViewer::drawMeshToFBO()
 		}
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
-		break;
 	}
-	case InteractionState::SEL_FACE:
+	else if (interactionState.sel_face)
 	{
 		if (selected)
 		{
-			if (heMesh->faceSet[renderID].isPicked)
+			if (heMesh->faceSet[renderID].isPicked
+				&& interactionState.unselect)
 			{
 				selFACE.erase(renderID);
 				heMesh->faceSet[renderID].isPicked = false;
@@ -372,7 +360,7 @@ void MeshViewer::drawMeshToFBO()
 				heMesh->faceSet[renderID].isPicked = true;
 			}
 		}
-		else
+		else if (interactionState.unselect)
 		{
 			for (auto fid : selFACE)
 			{
@@ -382,15 +370,14 @@ void MeshViewer::drawMeshToFBO()
 		}
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
 		fRBO.allocateTBO();
-		break;
 	}
-	case InteractionState::SEL_EDGE:
+	else if (interactionState.sel_edge)
 	{
 		if (selected)
 		{
 			auto he = &heMesh->heSet[renderID];
 			auto hef = he->flip();
-			if (he->isPicked)
+			if (he->isPicked && interactionState.unselect)
 			{
 				selHE.erase(renderID);
 				selHE.erase(hef->index);
@@ -403,7 +390,7 @@ void MeshViewer::drawMeshToFBO()
 				he->isPicked = hef->isPicked = true;
 			}
 		}
-		else
+		else if (interactionState.unselect)
 		{
 			for (auto heid : selHE)
 			{
@@ -413,8 +400,6 @@ void MeshViewer::drawMeshToFBO()
 		}
 		heMesh->exportEdgeVBO(nullptr, nullptr, &heRBO.flags);
 		heRBO.allocateTBO();
-		break;
-	}
 	}
 #ifdef _DEBUG
 	cout << "draw primitive id:" << renderID << endl;
@@ -428,7 +413,7 @@ void MeshViewer::paintGL()
 	glClearColor(0.6f, 0.6f, 0.6f, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	auto checkDispMode = [](uint32_t disp, DispComp mode)->bool{
+	auto checkDispMode = [](uint32_t disp, DispComp mode)->bool {
 		return disp & static_cast<uint32_t>(mode);
 	};
 
@@ -448,7 +433,7 @@ void MeshViewer::paintGL()
 			allocateGL();
 		}
 		// Draw Vertices
-		if (shadingSate & SHADE_VERT || interactionState == SEL_VERT)
+		if (shadingSate & SHADE_VERT || interactionState.sel_vert)
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 			glPointSize(10);
@@ -461,7 +446,7 @@ void MeshViewer::paintGL()
 			glBindTexture(GL_TEXTURE_BUFFER, vRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, vRBO.flag_tbo);
 			vtx_solid_shader.setUniformValue("flag_tex", 0);
-			glDrawArrays(GL_POINTS, 0, vtx_array.size() / 3);
+			glDrawArrays(GL_POINTS, 0, vert_trait.count);
 
 			vRBO.vao.release();//vtx_vbo.release();
 			vtx_solid_shader.release();
@@ -469,7 +454,7 @@ void MeshViewer::paintGL()
 
 
 		// Draw Faces
-		if (shadingSate & SHADE_FLAT || interactionState & SEL_FACE)
+		if (shadingSate & SHADE_FLAT || interactionState.sel_face)
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			//glEnable(GL_CULL_FACE);
@@ -493,7 +478,7 @@ void MeshViewer::paintGL()
 		}
 
 		// Draw Edges
-		if (shadingSate & SHADE_WF || interactionState == SEL_EDGE)
+		if (shadingSate & SHADE_WF || interactionState.sel_edge)
 		{
 			// Draw edge
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -597,6 +582,11 @@ void MeshViewer::keyPressEvent(QKeyEvent* e)
 		}
 		break;
 	}*/
+	case Qt::Key_Z:
+	{
+		interactionState.unselect = true;
+		break;
+	}
 	}
 }
 
@@ -612,6 +602,10 @@ void MeshViewer::keyReleaseEvent(QKeyEvent* e)
 		);
 		if (!filename.isEmpty()) this->grab().save(filename);
 	}
+	if (e->key() == Qt::Key_Z)
+	{
+		interactionState.unselect = false;
+	}
 }
 
 void MeshViewer::mousePressEvent(QMouseEvent* e)
@@ -621,7 +615,7 @@ void MeshViewer::mousePressEvent(QMouseEvent* e)
 
 	if (e->buttons() == Qt::LeftButton &&
 		e->modifiers() == Qt::NoModifier &&
-		interactionState != ROAM_CAMERA)
+		interactionState.state > 1)
 	{
 		drawMeshToFBO();
 		update();
@@ -636,7 +630,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent* e)
 
 	if (e->buttons() == Qt::LeftButton && e->modifiers() == Qt::AltModifier)
 	{
-		view_cam.rotate(dy * 0.25, dx * 0.25, 0.0);
+		view_cam.rotate(dy * 0.25f, -dx * 0.25f, 0.0);
 		update();
 	}
 	else if (e->buttons() == Qt::RightButton && e->modifiers() == Qt::AltModifier)
@@ -766,9 +760,7 @@ void MeshViewer::wheelEvent(QWheelEvent* e)
 
 void MeshViewer::selectAll()
 {
-	switch (interactionState) {
-
-	case SEL_VERT:
+	if (interactionState.sel_vert)
 	{
 		selVTX.clear();
 		auto &verts = heMesh->verts();
@@ -782,18 +774,16 @@ void MeshViewer::selectAll()
 		}
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
-		break;
 	}
-	case SEL_FACE:
+	else if (interactionState.sel_face)
 	{
 		selFACE.clear();
 		for (auto &f : heMesh->faces())
 			f.setPicked(true);
 		heMesh->exportFaceVBO(nullptr, nullptr, &fRBO.flags);
 		fRBO.allocateTBO();
-		break;
 	}
-	case SEL_EDGE:
+	else if (interactionState.sel_edge)
 	{
 		selHE.clear();
 		auto &hes = heMesh->halfedges();
@@ -810,10 +800,6 @@ void MeshViewer::selectAll()
 		}
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
-		break;
-	}
-	default:
-		break;
 	}
 	update();
 }
@@ -821,34 +807,26 @@ void MeshViewer::selectAll()
 void MeshViewer::selectInverse()
 {
 	//TODO: buggy
-	switch (interactionState)
-	{
-	case SEL_FACE:
+	if (interactionState.sel_face)
 	{
 		for (auto &f : heMesh->faces())
 		{
 			heMesh->selectFace(f.index);
 		}
-		break;
 	}
-	case SEL_EDGE:
+	else if (interactionState.sel_edge)
 	{
 		for (auto &e : heMesh->halfedges())
 		{
 			e.setPicked(!e.isPicked);
 		}
-		break;
 	}
-	case SEL_VERT:
+	else if (interactionState.sel_vert)
 	{
 		for (auto &v : heMesh->verts())
 		{
 			heMesh->selectVertex(v.index);
 		}
-		break;
-	}
-	default:
-		break;
 	}
 	update();
 }

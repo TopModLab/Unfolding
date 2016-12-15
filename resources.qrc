@@ -10,6 +10,8 @@
     <file>icons/disp/highlightNonPlanar.png</file>
     <file>icons/disp/wireframe.png</file>
     <file>icons/disp/wireframeOnShaded.png</file>
+    <file>meshes/cube.obj</file>
+    <file>meshes/cube.hds</file>
     <file>meshes/torus.obj</file>
     <file>meshes/tetrahedron.obj</file>
     <file>icons/polygon/polycube.png</file>
@@ -49,7 +51,6 @@
     <file>shaders/face_vs.glsl</file>
     <file>shaders/uid_fs.glsl</file>
     <file>shaders/uid_vs.glsl</file>
-    <file>meshes/cube.obj</file>
     <file>shaders/edge_gs.glsl</file>
     <file>shaders/vtx_fs.glsl</file>
     <file>shaders/vtx_vs.glsl</file>

@@ -124,7 +124,7 @@ void MeshConnector::exportQuadEdgePiece(FILE* fp,
 				} while (curHE != he);
 			}
 			// Etch layer
-			else if (curFace->isBridger)
+			else if (curFace->isBridge)
 			{
 				// Write points of each edge
 				do
@@ -374,7 +374,7 @@ void MeshConnector::exportWingedEdgePiece(FILE* fp,
 				} while (curHE != he);
 			}
 			// Pinholes
-			else if (!curFace->isBridger)
+			else if (!curFace->isBridge)
 			{
 				// Add pinholes
 				vector<he_t*> cutedges;
@@ -620,7 +620,7 @@ void MeshConnector::exportGESPiece(FILE* fp,
 					curHE = curHE->next();
 				} while (curHE != he);
 			}
-			else if (!curFace->isBridger)
+			else if (!curFace->isBridge)
 			{
 				QVector2D centerPt = curFace->center().toVector2D();
 				do

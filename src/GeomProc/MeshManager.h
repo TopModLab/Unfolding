@@ -78,7 +78,8 @@ public:
 	void colorMeshByGeoDistance(int vidx);
 	void colorMeshByGeoDistance(int vidx, int lev0, int lev1, double ratio);
 
-	bool loadOBJFile(const string& filename);
+	bool loadOBJFile(const string &filename);
+    bool loadHDSFile(const string &filename);
 	HDS_Mesh* buildHalfEdgeMesh(const floats_t &inVerts, const vector<PolyIndex> &inFaces);
 	void cutMeshWithSelectedEdges();
 	bool initSparseGraph();

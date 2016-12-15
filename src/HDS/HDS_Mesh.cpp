@@ -37,13 +37,44 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	}
 }
 
+HDS_Mesh::HDS_Mesh(const string &binaryFileName)
+{
+    FILE* fp = fopen(binaryFileName.c_str(), "rb");
+    HDSBinHeader header;
+    std::fread(&header, sizeof(HDSBinHeader), 1, fp);
+
+    vertSet.resize(header.vertCount);
+    heSet.resize(header.heCount);
+    faceSet.resize(header.faceCount);
+    std::fread(vertSet.data(), sizeof(vert_t), header.vertCount, fp);
+    std::fread(heSet.data(), sizeof(he_t), header.heCount, fp);
+    std::fread(faceSet.data(), sizeof(face_t), header.faceCount, fp);
+
+    pieceSet.resize(header.pieceCount);
+    uint32_t curPieces;
+    for (int i = 0; i < header.pieceCount; i++)
+    {
+        std::fread(&curPieces, sizeof(uint32_t), 1, fp);
+        pieceSet[i].resize(curPieces);
+        std::fread(pieceSet[i].data(), sizeof(hdsid_t), curPieces, fp);
+    }
+    if (header.bound_exist)
+    {
+        BBox3* bbox = new BBox3;
+        std::fread(bbox, sizeof(BBox3), 1, fp);
+        bound.reset(bbox);
+    }
+
+    fclose(fp);
+}
+
 HDS_Mesh::~HDS_Mesh()
 {
 }
 
 void HDS_Mesh::updatePieceSet()
 {
-	for (auto piece : pieceSet)
+	for (auto &piece : pieceSet)
 	{
 		piece.clear();
 	}
@@ -231,39 +262,25 @@ void HDS_Mesh::setMesh(
 	HDS_HalfEdge::resetIndex();
 }
 
-void HDS_Mesh::exportVertVBO(
-	floats_t* verts, ui16s_t* vFLAGs) const
+void HDS_Mesh::exportVertVBO(VertexBufferTrait* vertTrait,
+                             ui16s_t* vFLAGs) const
 {
 	// vertex object buffer
 	// If verts exist, copy vertex buffer and vertex flags
-	if (verts != nullptr)
+	if (vertTrait != nullptr)
 	{
-		verts->clear();
-		verts->reserve(vertSet.size());
-		vFLAGs->clear();
-		vFLAGs->reserve(vertSet.size());
-		for (auto v : vertSet)
-		{
-			auto& pos = v.pos;
-			verts->push_back(pos.x());
-			verts->push_back(pos.y());
-			verts->push_back(pos.z());
-			vFLAGs->push_back(v.getFlag());
-		}
-	}
+        vertTrait->data = (void*)vertSet.data();
+        vertTrait->count = vertSet.size();
+        vertTrait->size = sizeof(vert_t) * vertTrait->count;
+    }
 	// if verts is null, copy only vertex flags
-	else
+	if (vFLAGs != nullptr)
 	{
 		vFLAGs->clear();
 		vFLAGs->reserve(vertSet.size());
-		for (auto v : vertSet)
-		{
-			if (v.isPicked)
-			{
-				cout << "already picked!" << endl;
-			}
-			vFLAGs->push_back(v.getFlag());
-		}
+		vFLAGs->clear();
+		vFLAGs->reserve(vertSet.size());
+		for (auto &v : vertSet) vFLAGs->push_back(v.getFlag());
 	}
 }
 
@@ -428,7 +445,7 @@ void HDS_Mesh::exportFaceVBO(
 			}*/
 			case 6:
 			{
-				if (!face.isBridger)
+				if (!face.isBridge)
 				{
 					/*********************/
 					/* Non-Bridger Faces */
@@ -460,7 +477,7 @@ void HDS_Mesh::exportFaceVBO(
 			}
 			case 8:
 			{
-				if (!face.isBridger)
+				if (!face.isBridge)
 				{
 					/*********************/
 					/* Non-Bridger Faces */
@@ -519,7 +536,7 @@ void HDS_Mesh::exportFaceVBO(
 		// re-export face flag
 		fFLAGs->clear();
 		fFLAGs->reserve(fSetSize * 2);
-		for (auto face : faceSet)
+		for (auto &face : faceSet)
 		{
 			if (face.isCutFace)
 			{
@@ -544,21 +561,21 @@ void HDS_Mesh::exportSelection(
 {
 	if (selVTX != nullptr)
 	{
-		for (auto v : vertSet)
+		for (auto &v : vertSet)
 		{
 			if (v.isPicked) selVTX->insert(v.index);
 		}
 	}
 	if (selHE != nullptr)
 	{
-		for (auto he : heSet)
+		for (auto &he : heSet)
 		{
 			if (he.isPicked) selHE->insert(he.index);
 		}
 	}
 	if (selFACE != nullptr)
 	{
-		for (auto f : faceSet)
+		for (auto &f : faceSet)
 		{
 			if (f.isPicked) selFACE->insert(f.index);
 		}
@@ -584,9 +601,8 @@ QVector3D HDS_Mesh::faceCenter(hdsid_t fid) const
 {
 	auto corners = faceCorners(fid);
 	QVector3D c;
-	for (auto vid : corners) {
-		c += vertSet[vid].pos;
-	}
+	for (auto vid : corners) c += vertSet[vid].pos;
+
 	c /= (qreal)corners.size();
 
 	return c;
@@ -596,16 +612,26 @@ QVector3D HDS_Mesh::faceNormal(hdsid_t fid) const
 {
 	auto corners = faceCorners(fid);
 	QVector3D c;
-	for (auto vid : corners) {
-		c += vertSet[vid].pos;
-	}
+	for (auto vid : corners) c += vertSet[vid].pos;
+	
 	c /= (qreal)corners.size();
 
-	QVector3D n = QVector3D::crossProduct(
-		vertSet[corners[0]].pos - c,
-		vertSet[corners[1]].pos - c);
+	QVector3D n = QVector3D::crossProduct(vertSet[corners[0]].pos - c,
+                                          vertSet[corners[1]].pos - c);
 
 	return n.normalized();
+}
+
+QVector3D HDS_Mesh::edgeCenter(hdsid_t heid) const
+{
+	return (vertSet[heSet[heid].flip()->vid].pos
+            + vertSet[heSet[heid].vid].pos) * 0.5f;
+}
+
+QVector3D HDS_Mesh::edgeCenter(const he_t &he) const
+{
+	return (vertSet[he.next()->vid].pos
+		+ vertSet[he.vid].pos) * 0.5f;
 }
 
 QVector3D HDS_Mesh::edgeVector(hdsid_t heid) const
@@ -642,7 +668,7 @@ vector<QVector3D> HDS_Mesh::allVertNormal() const
 			ret[vid] += n;
 		}
 	}
-	for (auto n : ret) n.normalize();
+	for (auto &n : ret) n.normalize();
 
 	return ret;
 }
@@ -1181,4 +1207,23 @@ void HDS_Mesh::save(const string &filename) const
 	ofstream fout(filename);
 	fout << ss.str();
 	fout.close();
+}
+
+void HDS_Mesh::saveBinary(const string &filename) const
+{
+    FILE* fp = fopen(filename.c_str(), "wb");
+    HDSBinHeader header(vertSet.size(), heSet.size(), faceSet.size(),
+                        pieceSet.size(), processType, bound.get() != nullptr);
+    std::fwrite(&header, sizeof(HDSBinHeader), 1, fp);
+    std::fwrite(vertSet.data(), sizeof(vert_t), header.vertCount, fp);
+    std::fwrite(heSet.data(), sizeof(he_t), header.heCount, fp);
+    std::fwrite(faceSet.data(), sizeof(face_t), header.faceCount, fp);
+    for (int i = 0; i < header.pieceCount; i++)
+    {
+        uint32_t pieces = pieceSet[i].size();
+        std::fwrite(&pieces, sizeof(uint32_t), 1, fp);
+        std::fwrite(pieceSet[i].data(), sizeof(hdsid_t), pieces, fp);
+    }
+    if (header.bound_exist) std::fwrite(bound.get(), sizeof(BBox3), 1, fp);
+    fclose(fp);
 }

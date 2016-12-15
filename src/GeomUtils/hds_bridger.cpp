@@ -99,7 +99,7 @@ void HDS_Bridger::createBridge()
 				//fix face
 				//bridgeFace->index = HDS_Face::assignIndex();
 				bridgeFace->isCutFace = false;
-				bridgeFace->isBridger = true;
+				bridgeFace->isBridge = true;
 				//add face to mesh
 				faces.push_back(*bridgeFace);
 		}
