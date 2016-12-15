@@ -641,7 +641,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent* e)
 	{
 		if (dx != e->x() && dy != e->y())
 		{
-			view_cam.zoom(dx * 0.01, dy * 0.01, 0.0);
+			view_cam.zoom(-dx * 0.01, dy * 0.01, 0.0);
 			update();
 		}
 	}
