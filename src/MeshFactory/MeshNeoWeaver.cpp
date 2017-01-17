@@ -621,6 +621,7 @@ HDS_Mesh * MeshNeoWeaver::createCrossWeaving(const mesh_t* ref_mesh,
     return newMesh;
 
 #endif
+	return nullptr;
 }
 
 HDS_Mesh* MeshNeoWeaver::createClassicalWeaving(const mesh_t* ref_mesh,
@@ -855,7 +856,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
         else                                           v1 = v2;
     }
     // cache out four points for each edge
-    vector<QVector3D> heToPatchPos(refHeCount * 4);
+    //vector<QVector3D> heToPatchPos(refHeCount * 4);
     vector<QVector3D> heToPatchPos(refHeCount * 4);
     Float vecScaleShort = (0.5f - patchScale * 0.5f) * patchScale;
     Float vecScaleLong = (0.5f + patchScale * 0.5f) * patchScale;
