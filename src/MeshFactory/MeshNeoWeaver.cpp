@@ -753,17 +753,17 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
                                               const confMap &conf)
 {
 
-	BBox3* bb = new BBox3();
+	BBox3 bb;
 	for (auto v : ref_mesh->verts())
 	{
-		bb->Union(v.pos);
+		bb.Union(v.pos);
 	}
-	float bound = bb->getDiagnal().length();
+	float bound = bb.getDiagnal().length();
 
 	// scaling 
-	const float patchScale = conf.at("patchScale");
+	const Float patchScale = conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
-    const Float layerOffset = bound/2.0 * conf.at("layerOffset");// 0.1 by default
+    const Float layerOffset = conf.at("layerOffset") * bound * 0.5f;// 0.1 by default
     const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
     const uint32_t patchCurvedSample = 3;
@@ -840,6 +840,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
                                : heDirs[he.index] - heDirs[he.prev()->index];
 	}
 
+    // Solve linear equation to scale he cross vectors
+    // to make the sum of current and next cross vectors match edge length
     for (int i = 0; i < refHeCount; i++)
     {
         hdsid_t nextHeID = ref_hes[i].next()->index;
@@ -855,6 +857,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
         v1 *= scalor;
         v2 *= scalor;
     }
+    // Check cross vector length at the same corner
+    // Use the shorter vector to avoid intersection at face center
     for (int i = 0; i < refHeCount; i++)
     {
         QVector3D &v1 = heCross[i << 1];
@@ -864,8 +868,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
         if (abs(v1[maxExtAxis]) < abs(v2[maxExtAxis])) v2 = v1;
         else                                           v1 = v2;
     }
-    // cache out four points for each edge
-    //vector<QVector3D> heToPatchPos(refHeCount * 4);
+    // Cache out four points for each edge
+    // vector<QVector3D> heToPatchPos(refHeCount * 4);
     vector<QVector3D> heToPatchPos(refHeCount * 4);
     Float vecScaleShort = (0.5f - patchScale * 0.5f) * patchScale;
     Float vecScaleLong = (0.5f + patchScale * 0.5f) * patchScale;
@@ -966,6 +970,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 
             //////////////////////////////////////////////////////////////////////////
 //#define LERP_BRIDGE
+            // Linear interpolate positions for patch boundary
             auto lerpPatchPos = [](QVector3D* ptr, int srcBegin, int srcEnd, int seg) {
                 Float increment = 1.0f / seg;
                 Float wgt = increment;
@@ -974,6 +979,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
                     ptr[targ] = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], wgt);
                 }
             };
+            // Calculate difference vectors from diffrent sides on an edge
+            // Generate triangle region in the center of the patch
+            // Linear interpolate between triangle and cross vectors on each side
+            //     (the lerp operation is handled outside the fuction below)
             auto edgePatchEval = [](QVector3D* ptr, int srcBegin, int srcEnd) {
                 QVector3D vec1 = ptr[srcBegin + 1] - ptr[srcBegin];
                 QVector3D vec2 = ptr[srcEnd + 1] - ptr[srcEnd];
@@ -997,8 +1006,8 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
                 {
                     ptr[srcBegin + seg + 1] = ptr[srcEnd - seg + 1]
                         = Utils::Lerp(ptr[srcBegin + 1],
-                            ptr[srcEnd + 1],
-                            0.5f);
+                                      ptr[srcEnd + 1],
+                                      0.5f);
 
                     ptr[srcBegin + seg] = ptr[srcBegin + seg + 1] - vec1;
                     ptr[srcEnd - seg] = ptr[srcEnd - seg + 1] - vec2;
@@ -1054,16 +1063,18 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
             bezierPos(&patchPos[32]);
             bezierPos(&patchPos[33]);
 
+            // Assign evaluated positions to patch
             for (int j = 0; j < sPatchVertCount; j++)
             {
                 (patchVerts + j)->pos = patchPos[j];
             }
-
+            // Update he-to-patch lookup table
             heToPatch[neiEdgeIDs[3]] = -curPatchID;
             heToPatch[neiEdgeIDs[2]] = curPatchID++;
             visitedHE[neiEdgeIDs[2]] = visitedHE[neiEdgeIDs[3]] = true;
 
             heOnTopFlag[neiEdgeIDs[1]] = true;
+            // Move to he corresponding to next connected trip
             curHE = curHE->rotCCW()->next()->flip();
         } while (curHE != he);
     }
