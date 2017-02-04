@@ -871,6 +871,47 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
     // Cache out four points for each edge
     // vector<QVector3D> heToPatchPos(refHeCount * 4);
     vector<QVector3D> heToPatchPos(refHeCount * 4);
+
+	for (int i = 0; i < refHeCount; i++)
+	{
+		const he_t* he = &ref_hes[i];
+		hdsid_t he_flip_idx = he->flip()->index;
+		hdsid_t he_prev_Idx = he->prev()->index;
+		hdsid_t he_next_Idx = he->next()->index;
+		hdsid_t he_fnext_Idx = he->flip()->next()->index;
+		hdsid_t he_fprev_Idx = he->flip()->prev()->index;
+
+		//get centerVec
+		QVector3D cVec = heCenters[he_prev_Idx] - heCenters[he_fprev_Idx];
+		QVector3D cVec_next = heCenters[he_next_Idx] - heCenters[he_fnext_Idx];
+		//project to edge plane
+		QVector3D cVec_he = 
+			heDirs[i] * QVector3D::dotProduct(heDirs[i], cVec)
+			+ heTans[i] * QVector3D::dotProduct(heTans[i], cVec);
+		QVector3D cVec_he_next = 
+			heDirs[i] * QVector3D::dotProduct(heDirs[i], cVec_next)
+			+ heTans[i] * QVector3D::dotProduct(heTans[i], cVec_next);
+		//get centerLine which passes the edge center
+		//find intersection with heCrosses
+		QVector3D pc, pc_next;
+		QVector3D vs = ref_mesh->vertFromHe(i)->pos;
+		QVector3D ve = ref_mesh->vertFromHe(he_next_Idx)->pos;
+		Utils::LineLineIntersect(
+			heCenters[i], heCenters[i] + cVec_he, 
+			vs, vs + heCross[i<<1], &pc);
+		Utils::LineLineIntersect(
+			heCenters[i], heCenters[i] + cVec_he_next,
+			ve, ve + heCross[he_next_Idx<<1], 
+			&pc_next);
+		//scale the strip based on centerLine
+		heToPatchPos[i * 4 + 2] = Utils::Lerp(pc, vs, patchScale);
+		heToPatchPos[i * 4 + 3] = Utils::Lerp(pc, vs + heCross[i << 1], patchScale);
+		heToPatchPos[i * 4 + 0] = Utils::Lerp(pc_next, ve, patchScale);
+		heToPatchPos[i * 4 + 1] = Utils::Lerp(pc_next, ve + heCross[he_next_Idx << 1], patchScale);
+
+	}
+	
+/*
     Float vecScaleShort = (0.5f - patchScale * 0.5f) * patchScale;
     Float vecScaleLong = (0.5f + patchScale * 0.5f) * patchScale;
     for (int i = 0; i < refHeCount; i++)
@@ -892,6 +933,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
         // v3 = p1+av;
         // connect v1-v2-v4-v3
     }
+*/
     // Construct bridge patch
     const int sPatchMaxVertices = 256;
     const int sPatchFaceCount = 21;
