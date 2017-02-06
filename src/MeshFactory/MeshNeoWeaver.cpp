@@ -767,7 +767,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
     const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
     const uint32_t patchCurvedSample = 3;
-
+	const Float patchLength = 0.5;
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();
 	auto &ref_faces = ref_mesh->faces();
@@ -911,6 +911,44 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 
 	}
 	
+	for (int i = 0; i < refHeCount; i++)
+	{
+		const he_t* he = &ref_hes[i];
+		hdsid_t he_flip_idx = he->flip()->index;
+		if (he->flip_offset > 0) continue;
+		QVector3D v0, v0h, v1, v1h, v2, v2h, v3, v3h;
+		v0 = heToPatchPos[i * 4 + 0]; v0h = heToPatchPos[he_flip_idx * 4 + 0];
+		v1 = heToPatchPos[i * 4 + 1]; v1h = heToPatchPos[he_flip_idx * 4 + 1];
+		v2 = heToPatchPos[i * 4 + 2]; v2h = heToPatchPos[he_flip_idx * 4 + 2];
+		v3 = heToPatchPos[i * 4 + 3]; v3h = heToPatchPos[he_flip_idx * 4 + 3];
+		if ((v2-v3h).length() > (v3 - v2h).length())
+		{
+			heToPatchPos[i * 4 + 3] = Utils::Lerp((v3 + v2h) / 2, v3, patchLength);
+			heToPatchPos[he_flip_idx * 4 + 2] = Utils::Lerp((v3 + v2h) / 2, v2h, patchLength);
+			heToPatchPos[i * 4 + 2] = v2 - (v3 - heToPatchPos[i * 4 + 3]);
+			heToPatchPos[he_flip_idx * 4 + 3] = v3h - (v2h - heToPatchPos[he_flip_idx * 4 + 2]);
+		}
+		else {
+			heToPatchPos[i * 4 + 2] = Utils::Lerp((v2 + v3h) / 2, v2, patchLength);
+			heToPatchPos[he_flip_idx * 4 + 3] = Utils::Lerp((v2 + v3h) / 2, v3h, patchLength);
+			heToPatchPos[i * 4 + 3] = v3 - (v2 - heToPatchPos[i * 4 + 2]);
+			heToPatchPos[he_flip_idx * 4 + 2] = v2h - (v3h - heToPatchPos[he_flip_idx * 4 + 3]);
+		}
+
+		if ((v0 - v1h).length() > (v1 - v0h).length())
+		{
+			heToPatchPos[i * 4 + 1] = Utils::Lerp((v1 + v0h) / 2, v1, patchLength);
+			heToPatchPos[he_flip_idx * 4 + 0] = Utils::Lerp((v1 + v0h) / 2, v0h, patchLength);
+			heToPatchPos[i * 4 + 0] = v0 - (v1 - heToPatchPos[i * 4 + 1]);
+			heToPatchPos[he_flip_idx * 4 + 1] = v1h - (v0h - heToPatchPos[he_flip_idx * 4 + 0]);
+		}
+		else {
+			heToPatchPos[i * 4 + 0] = Utils::Lerp((v0 + v1h) / 2, v0, patchLength);
+			heToPatchPos[he_flip_idx * 4 + 1] = Utils::Lerp((v0 + v1h) / 2, v1h, patchLength);
+			heToPatchPos[i * 4 + 1] = v1 - (v0 - heToPatchPos[i * 4 + 0]);
+			heToPatchPos[he_flip_idx * 4 + 0] = v0h - (v1h - heToPatchPos[he_flip_idx * 4 + 1]);
+		}
+	}
 /*
     Float vecScaleShort = (0.5f - patchScale * 0.5f) * patchScale;
     Float vecScaleLong = (0.5f + patchScale * 0.5f) * patchScale;
@@ -1025,44 +1063,45 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
             // Generate triangle region in the center of the patch
             // Linear interpolate between triangle and cross vectors on each side
             //     (the lerp operation is handled outside the fuction below)
-            auto edgePatchEval = [](QVector3D* ptr, int srcBegin, int srcEnd) {
-                QVector3D vec1 = ptr[srcBegin + 1] - ptr[srcBegin];
-                QVector3D vec2 = ptr[srcEnd + 1] - ptr[srcEnd];
-                float len1 = vec1.length();
-                float len2 = vec2.length();
-                float lenAvg = (len1 + len2) * 0.5f;
-                vec1 *= lenAvg / len1;
-                vec2 *= lenAvg / len2;
-                int seg = (srcEnd - srcBegin - 2) >> 1;
-                Float increment = 2.0 / seg;
-                Float wgt = increment;
-                if (QVector3D::dotProduct(vec2 - vec1, ptr[srcEnd] - ptr[srcBegin]) > 0)
-                {
-                    ptr[srcBegin + seg] = ptr[srcEnd - seg]
-                        = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], 0.5f);
+			
+			auto edgePatchEval = [](QVector3D* ptr, int srcBegin, int srcEnd) {
+				QVector3D vec1 = ptr[srcBegin + 1] - ptr[srcBegin];
+				QVector3D vec2 = ptr[srcEnd + 1] - ptr[srcEnd];
+				float len1 = vec1.length();
+				float len2 = vec2.length();
+				float lenAvg = (len1 + len2) * 0.5f;
+				vec1 *= lenAvg / len1;
+				vec2 *= lenAvg / len2;
+				int seg = (srcEnd - srcBegin - 2) >> 1;
+				Float increment = 2.0 / seg;
+				Float wgt = increment;
+				if (QVector3D::dotProduct(vec2 - vec1, ptr[srcEnd] - ptr[srcBegin]) > 0)
+				{
+					ptr[srcBegin + seg] = ptr[srcEnd - seg]
+						= Utils::Lerp(ptr[srcBegin], ptr[srcEnd], 0.5f);
 
-                    ptr[srcBegin + seg + 1] = ptr[srcBegin + seg] + vec1;
-                    ptr[srcEnd - seg + 1] = ptr[srcEnd - seg] + vec2;
-                }
-                else
-                {
-                    ptr[srcBegin + seg + 1] = ptr[srcEnd - seg + 1]
-                        = Utils::Lerp(ptr[srcBegin + 1],
-                                      ptr[srcEnd + 1],
-                                      0.5f);
+					ptr[srcBegin + seg + 1] = ptr[srcBegin + seg] + vec1;
+					ptr[srcEnd - seg + 1] = ptr[srcEnd - seg] + vec2;
+				}
+				else
+				{
+					ptr[srcBegin + seg + 1] = ptr[srcEnd - seg + 1]
+						= Utils::Lerp(ptr[srcBegin + 1],
+							ptr[srcEnd + 1],
+							0.5f);
 
-                    ptr[srcBegin + seg] = ptr[srcBegin + seg + 1] - vec1;
-                    ptr[srcEnd - seg] = ptr[srcEnd - seg + 1] - vec2;
-                }
-                for (int i = 2; i < seg; i += 2, wgt += increment)
-                {
-                    ptr[srcBegin + i] = Utils::Lerp(ptr[srcBegin], ptr[srcBegin + seg], wgt);
-                    ptr[srcEnd - i] = Utils::Lerp(ptr[srcEnd], ptr[srcEnd - seg], wgt);
-                    ptr[srcBegin + i + 1] = Utils::Lerp(ptr[srcBegin + 1], ptr[srcBegin + seg + 1], wgt);
-                    ptr[srcEnd - i + 1] = Utils::Lerp(ptr[srcEnd + 1], ptr[srcEnd - seg + 1], wgt);
-                }
+					ptr[srcBegin + seg] = ptr[srcBegin + seg + 1] - vec1;
+					ptr[srcEnd - seg] = ptr[srcEnd - seg + 1] - vec2;
+				}
+				for (int i = 2; i < seg; i += 2, wgt += increment)
+				{
+					ptr[srcBegin + i] = Utils::Lerp(ptr[srcBegin], ptr[srcBegin + seg], wgt);
+					ptr[srcEnd - i] = Utils::Lerp(ptr[srcEnd], ptr[srcEnd - seg], wgt);
+					ptr[srcBegin + i + 1] = Utils::Lerp(ptr[srcBegin + 1], ptr[srcBegin + seg + 1], wgt);
+					ptr[srcEnd - i + 1] = Utils::Lerp(ptr[srcEnd + 1], ptr[srcEnd - seg + 1], wgt);
+				}
 
-            };
+			};
 #ifdef LERP_BRIDGE
             lerpPatchPos(patchPos, 0, 10, 10);
             lerpPatchPos(patchPos, 1, 11, 10);
