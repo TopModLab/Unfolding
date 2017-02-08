@@ -1,5 +1,5 @@
 #include "MeshNeoWeaver.h"
-
+#define LERP_BRIDGE 1
 HDS_Mesh* MeshNeoWeaver::create(const mesh_t* ref,
                                 const confMap &conf)
 {
@@ -767,7 +767,6 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
     const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
     const uint32_t patchCurvedSample = 3;
-	const Float patchLength = 0.5;
 	auto &ref_verts = ref_mesh->verts();
 	auto &ref_hes = ref_mesh->halfedges();
 	auto &ref_faces = ref_mesh->faces();
@@ -871,7 +870,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
     // Cache out four points for each edge
     // vector<QVector3D> heToPatchPos(refHeCount * 4);
     vector<QVector3D> heToPatchPos(refHeCount * 4);
-
+	vector<QVector3D> heToPatchVec(refHeCount * 2);
 	for (int i = 0; i < refHeCount; i++)
 	{
 		const he_t* he = &ref_hes[i];
@@ -880,6 +879,19 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 		hdsid_t he_next_Idx = he->next()->index;
 		hdsid_t he_fnext_Idx = he->flip()->next()->index;
 		hdsid_t he_fprev_Idx = he->flip()->prev()->index;
+
+		//			EDGE PATCH:						||  EDGE:
+		//			   v2	pc  v3					||	
+		//		vs ------------------ vs+heCross	||	vs
+		//		   |	|		|	|				||	 \
+		//	   v0h ------------------ v1			||	   \
+		//		   |	|		|	|				||	    \
+		//		   ------------------ pc_next		||		  \
+		//		   |	|		|	|				||		   \
+		//	   v1h ------------------ v0			||	         \
+		//		   |	|		|	|				||		      \
+		//ve+heCro ------------------ ve			||			    ve
+		//				v3h		v2h					||
 
 		//get centerVec
 		QVector3D cVec = heCenters[he_prev_Idx] - heCenters[he_fprev_Idx];
@@ -908,9 +920,13 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 		heToPatchPos[i * 4 + 3] = Utils::Lerp(pc, vs + heCross[i << 1], patchScale);
 		heToPatchPos[i * 4 + 0] = Utils::Lerp(pc_next, ve, patchScale);
 		heToPatchPos[i * 4 + 1] = Utils::Lerp(pc_next, ve + heCross[he_next_Idx << 1], patchScale);
-
+		//record the centerLines
+		heToPatchVec[i * 2 + 0] = cVec_he_next;
+		heToPatchVec[i * 2 + 1] = cVec_he;
 	}
-	
+	//scale the strip inwards while keeping the vectors parallel
+
+
 	for (int i = 0; i < refHeCount; i++)
 	{
 		const he_t* he = &ref_hes[i];
@@ -921,32 +937,89 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 		v1 = heToPatchPos[i * 4 + 1]; v1h = heToPatchPos[he_flip_idx * 4 + 1];
 		v2 = heToPatchPos[i * 4 + 2]; v2h = heToPatchPos[he_flip_idx * 4 + 2];
 		v3 = heToPatchPos[i * 4 + 3]; v3h = heToPatchPos[he_flip_idx * 4 + 3];
-		if ((v2-v3h).length() > (v3 - v2h).length())
+		//scale with edge center as pivot
+
+		//find intersection of two crossing pieces
+		//scale the other ends accordingly
+		QVector3D v2_v3h, v3_v2h, v1_v0h, v0_v1h;
+		Utils::LineLineIntersect(
+			heCenters[i], heCenters[i] + heToPatchVec[i * 2 + 0],
+			v2, v3h, &v2_v3h);
+		Utils::LineLineIntersect(
+			heCenters[i], heCenters[i] + heToPatchVec[i * 2 + 0],
+			v3, v2h, &v3_v2h);
+		Utils::LineLineIntersect(
+			heCenters[i], heCenters[i] + heToPatchVec[i * 2 + 1],
+			v1, v0h, &v1_v0h);
+		Utils::LineLineIntersect(
+			heCenters[i], heCenters[i] + heToPatchVec[i * 2 + 1],
+			v0, v1h, &v0_v1h);
+
+		if ((v2-v2_v3h).length() > (v3 - v3_v2h).length())
 		{
+#ifdef PATCH_LENGTH
 			heToPatchPos[i * 4 + 3] = Utils::Lerp((v3 + v2h) / 2, v3, patchLength);
 			heToPatchPos[he_flip_idx * 4 + 2] = Utils::Lerp((v3 + v2h) / 2, v2h, patchLength);
-			heToPatchPos[i * 4 + 2] = v2 - (v3 - heToPatchPos[i * 4 + 3]);
-			heToPatchPos[he_flip_idx * 4 + 3] = v3h - (v2h - heToPatchPos[he_flip_idx * 4 + 2]);
+#else
+			Utils::LineLineIntersect(v1, v0h, v3, v2h, &heToPatchPos[i * 4 + 3]);
+			Utils::LineLineIntersect(v0, v1h, v2, v3h, &heToPatchPos[he_flip_idx * 4 + 3]);
+
+#endif
+			Utils::LineLineIntersect(
+				heToPatchPos[i * 4 + 3], heToPatchPos[i * 4 + 3] + (v2 - v3),
+				v2, v3h, &heToPatchPos[i * 4 + 2]);
+			Utils::LineLineIntersect(
+				heToPatchPos[he_flip_idx * 4 + 3], heToPatchPos[he_flip_idx * 4 + 3] + (v2h - v3h),
+				v3, v2h, &heToPatchPos[he_flip_idx * 4 + 2]);
 		}
 		else {
+#ifdef PATCH_LENGTH
 			heToPatchPos[i * 4 + 2] = Utils::Lerp((v2 + v3h) / 2, v2, patchLength);
 			heToPatchPos[he_flip_idx * 4 + 3] = Utils::Lerp((v2 + v3h) / 2, v3h, patchLength);
-			heToPatchPos[i * 4 + 3] = v3 - (v2 - heToPatchPos[i * 4 + 2]);
-			heToPatchPos[he_flip_idx * 4 + 2] = v2h - (v3h - heToPatchPos[he_flip_idx * 4 + 3]);
+#else
+			Utils::LineLineIntersect(v1, v0h, v2, v3h, &heToPatchPos[i * 4 + 2]);
+			Utils::LineLineIntersect(v0, v1h, v3, v2h, &heToPatchPos[he_flip_idx * 4 + 2]);
+#endif
+			Utils::LineLineIntersect(
+				heToPatchPos[i * 4 + 2], heToPatchPos[i * 4 + 2] + (v3 - v2),
+				v3, v2h, &heToPatchPos[i * 4 + 3]);
+			Utils::LineLineIntersect(
+				heToPatchPos[he_flip_idx * 4 + 2], heToPatchPos[he_flip_idx * 4 + 2] + (v3h - v2h),
+				v2, v3h, &heToPatchPos[he_flip_idx * 4 + 3]);
 		}
 
-		if ((v0 - v1h).length() > (v1 - v0h).length())
+		if ((v0 - v0_v1h).length() > (v1 - v1_v0h).length())
 		{
+#ifdef PATCH_LENGTH
 			heToPatchPos[i * 4 + 1] = Utils::Lerp((v1 + v0h) / 2, v1, patchLength);
 			heToPatchPos[he_flip_idx * 4 + 0] = Utils::Lerp((v1 + v0h) / 2, v0h, patchLength);
-			heToPatchPos[i * 4 + 0] = v0 - (v1 - heToPatchPos[i * 4 + 1]);
-			heToPatchPos[he_flip_idx * 4 + 1] = v1h - (v0h - heToPatchPos[he_flip_idx * 4 + 0]);
+#else
+			Utils::LineLineIntersect(v3, v2h, v1, v0h, &heToPatchPos[i * 4 + 1]);
+			Utils::LineLineIntersect(v2, v3h, v0, v1h, &heToPatchPos[he_flip_idx * 4 + 1]);
+#endif
+			Utils::LineLineIntersect(
+				heToPatchPos[i * 4 + 1], heToPatchPos[i * 4 + 1] + (v0 - v1),
+				v0, v1h, &heToPatchPos[i * 4 + 0]);
+			Utils::LineLineIntersect(
+				heToPatchPos[he_flip_idx * 4 + 1], heToPatchPos[he_flip_idx * 4 + 1] + (v0h - v1h),
+				v1, v0h, &heToPatchPos[he_flip_idx * 4 + 0]);
+			
 		}
 		else {
+#ifdef PATCH_LENGTH
 			heToPatchPos[i * 4 + 0] = Utils::Lerp((v0 + v1h) / 2, v0, patchLength);
 			heToPatchPos[he_flip_idx * 4 + 1] = Utils::Lerp((v0 + v1h) / 2, v1h, patchLength);
-			heToPatchPos[i * 4 + 1] = v1 - (v0 - heToPatchPos[i * 4 + 0]);
-			heToPatchPos[he_flip_idx * 4 + 0] = v0h - (v1h - heToPatchPos[he_flip_idx * 4 + 1]);
+#else
+			Utils::LineLineIntersect(v3, v2h, v0, v1h, &heToPatchPos[i * 4 + 0]);
+			Utils::LineLineIntersect(v2, v3h, v1, v0h, &heToPatchPos[he_flip_idx * 4 + 0]);
+#endif
+			Utils::LineLineIntersect(
+				heToPatchPos[i * 4 + 0], heToPatchPos[i * 4 + 0] + (v1 - v0),
+				v1, v0h, &heToPatchPos[i * 4 + 1]);
+			Utils::LineLineIntersect(
+				heToPatchPos[he_flip_idx * 4 + 0], heToPatchPos[he_flip_idx * 4 + 0] + (v1h - v0h),
+				v0, v1h, &heToPatchPos[he_flip_idx * 4 + 1]);
+			
 		}
 	}
 /*
@@ -1052,7 +1125,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 //#define LERP_BRIDGE
             // Linear interpolate positions for patch boundary
             auto lerpPatchPos = [](QVector3D* ptr, int srcBegin, int srcEnd, int seg) {
-                Float increment = 1.0f / seg;
+                Float increment = 2.0f / seg;
                 Float wgt = increment;
                 for (int targ = srcBegin + 2; targ < srcEnd; targ += 2, wgt += increment)
                 {

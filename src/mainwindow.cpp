@@ -35,9 +35,9 @@ void MainWindow::initialization()
 {
 	isExtended = false;
 #ifdef _DEBUG
-	initMesh("meshes/cube.obj");
+	initMesh("meshes/2-cube.obj");
 #else
-	initMesh(":meshes/cube.obj");
+	initMesh(":meshes/2-cube.obj");
 #endif // _DEBUG
 }
 
@@ -174,11 +174,13 @@ void MainWindow::createActions()
 		/* Create Menu                                                          */
 		/************************************************************************/
 		connect(ui->actGenCube, &QAction::triggered,
-			[&] { this->initMesh(":meshes/cube.obj"); });
+			[&] { this->initMesh(":meshes/2-cube.obj"); });
+/*
 		connect(ui->actGenTorus, &QAction::triggered,
 			[&] { this->initMesh(":meshes/torus.obj"); });
+*/
 		connect(ui->actGenTetra, &QAction::triggered,
-			[&] { this->initMesh(":meshes/tetrahedron.obj"); });
+			[&] { this->initMesh(":meshes/1-tetrahedron.obj"); });
 		//////////////////////////////////////////////////////////////////////////
 		connect(ui->actionReset, &QAction::triggered, this, &MainWindow::slot_reset);
 		connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::slot_undo);

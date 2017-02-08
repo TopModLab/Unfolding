@@ -10,9 +10,6 @@
         <file>icons/disp/highlightNonPlanar.png</file>
         <file>icons/disp/wireframe.png</file>
         <file>icons/disp/wireframeOnShaded.png</file>
-        <file>meshes/cube.obj</file>
-        <file>meshes/torus.obj</file>
-        <file>meshes/tetrahedron.obj</file>
         <file>icons/polygon/polycube.png</file>
         <file>icons/polygon/polytetra.png</file>
         <file>icons/polygon/polytorus.png</file>
@@ -55,5 +52,7 @@
         <file>shaders/vtx_vs.glsl</file>
         <file>icons/unfolding.png</file>
         <file>icons/unfolding_large.png</file>
+        <file>meshes/2-cube.obj</file>
+        <file>meshes/1-tetrahedron.obj</file>
     </qresource>
 </RCC>
