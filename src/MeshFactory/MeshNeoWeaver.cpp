@@ -763,7 +763,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 	// scaling 
 	const Float patchScale = conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
-    const Float layerOffset = conf.at("layerOffset") * bound * 0.5f;// 0.1 by default
+    const Float layerOffset = conf.at("layerOffset") / bound * 0.5f;// 0.1 by default
     const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
     const uint32_t patchCurvedSample = 3;
@@ -1175,17 +1175,42 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 				}
 
 			};
+			auto bridgeEval = [](QVector3D* ptr, int srcBegin, int srcEnd, float patchStripScale) {
+				//WARNING: intersection might not exist
+				QVector3D mid0, mid1;
+				Utils::LineLineIntersect(ptr[srcBegin], ptr[srcBegin - 2], ptr[srcEnd], ptr[srcEnd + 2], &mid0);
+				Utils::LineLineIntersect(ptr[srcBegin+1], ptr[srcBegin - 1], ptr[srcEnd+1], ptr[srcEnd + 3], &mid1);
+				//if the intersection is within any edge patches
+				if (QVector3D::dotProduct((mid0 - ptr[srcBegin]), (ptr[srcBegin] - ptr[srcBegin - 10])) < 0
+					|| QVector3D::dotProduct((mid0 - ptr[srcEnd]), (ptr[srcEnd] - ptr[srcEnd + 10])) < 0)
+				{
+					ptr[srcBegin + 2] = Utils::Lerp(ptr[srcBegin], ptr[srcEnd], patchStripScale/2);
+					ptr[srcBegin + 3] = Utils::Lerp(ptr[srcBegin+1], ptr[srcEnd+1], patchStripScale/2);
+					ptr[srcBegin + 4] = Utils::Lerp(ptr[srcEnd], ptr[srcBegin], patchStripScale/2);
+					ptr[srcBegin + 5] = Utils::Lerp(ptr[srcEnd+1], ptr[srcBegin+1], patchStripScale/2);
+				}
+				else {
+					ptr[srcBegin + 2] = Utils::Lerp(mid0, ptr[srcBegin], patchStripScale);
+					ptr[srcBegin + 3] = Utils::Lerp(mid1, ptr[srcBegin + 1], patchStripScale);
+					ptr[srcBegin + 4] = Utils::Lerp(mid0, ptr[srcEnd], patchStripScale);
+					ptr[srcBegin + 5] = Utils::Lerp(mid1, ptr[srcEnd + 1], patchStripScale);
+				}
+
+			};
+
+			//eval edge patch
 #ifdef LERP_BRIDGE
             lerpPatchPos(patchPos, 0, 10, 10);
             lerpPatchPos(patchPos, 1, 11, 10);
 #else
             edgePatchEval(patchPos, 0, 10);
 #endif // LERP_BRIDGE
+/*
 
             patchPos[12] = Utils::Lerp(patchPos[10], patchPos[16], patchStripScale);
             patchPos[13] = Utils::Lerp(patchPos[11], patchPos[17], patchStripScale);
             patchPos[14] = Utils::Lerp(patchPos[16], patchPos[10], patchStripScale);
-            patchPos[15] = Utils::Lerp(patchPos[17], patchPos[11], patchStripScale);
+            patchPos[15] = Utils::Lerp(patchPos[17], patchPos[11], patchStripScale);*/
 
 #ifdef LERP_BRIDGE
             lerpPatchPos(patchPos, 16, 26, 10);
@@ -1193,11 +1218,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 #else
             edgePatchEval(patchPos, 16, 26);
 #endif // LERP_BRIDGE
-
-            patchPos[28] = Utils::Lerp(patchPos[26], patchPos[32], patchStripScale);
+           /* patchPos[28] = Utils::Lerp(patchPos[26], patchPos[32], patchStripScale);
             patchPos[29] = Utils::Lerp(patchPos[27], patchPos[33], patchStripScale);
             patchPos[30] = Utils::Lerp(patchPos[32], patchPos[26], patchStripScale);
-            patchPos[31] = Utils::Lerp(patchPos[33], patchPos[27], patchStripScale);
+            patchPos[31] = Utils::Lerp(patchPos[33], patchPos[27], patchStripScale);*/
 
 #ifdef LERP_BRIDGE
             lerpPatchPos(patchPos, 32, 42, 10);
@@ -1205,6 +1229,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 #else
             edgePatchEval(patchPos, 32, 42);
 #endif // LERP_BRIDGE
+
+			//eval bridges
+			bridgeEval(patchPos, 10, 16, patchStripScale);
+			bridgeEval(patchPos, 26, 32, patchStripScale);
             auto bezierPos = [](QVector3D* ptr) {
                 *ptr = *(ptr - 2) * 0.25f + *ptr * 0.5f + *(ptr + 2) * 0.25f;
             };

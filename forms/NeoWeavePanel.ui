@@ -138,7 +138,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Strip Scale</string>
+        <string>Smoothness</string>
        </property>
       </widget>
      </item>
@@ -158,7 +158,7 @@
      <item row="2" column="1">
       <widget class="QSlider" name="stripScaleSlider">
        <property name="maximum">
-        <number>50</number>
+        <number>100</number>
        </property>
        <property name="singleStep">
         <number>1</number>
@@ -189,7 +189,7 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
        <property name="maximum">
-        <double>0.500000000000000</double>
+        <double>1.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.050000000000000</double>
