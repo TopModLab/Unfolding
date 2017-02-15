@@ -1104,18 +1104,29 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
                 curHE->flip()->prev()->index,
                 curHE->flip()->prev()->flip()->index
             };
-            // Update position
+			//get Edge id from HE id
+			hdsid_t preEdge = neiEdgeIDs[0] < neiEdgeIDs[1] ? neiEdgeIDs[0] : neiEdgeIDs[1];
+			hdsid_t curEdge = neiEdgeIDs[2] < neiEdgeIDs[3] ? neiEdgeIDs[2] : neiEdgeIDs[3];
+			hdsid_t nxtEdge = neiEdgeIDs[4] < neiEdgeIDs[5] ? neiEdgeIDs[4] : neiEdgeIDs[5];
+
+            // Update position and set refid
             auto patchVerts = &verts[curPatchID * sPatchVertCount];
+			(patchVerts + 0)->setRefId(preEdge);
+			(patchVerts + 11)->setRefId(preEdge);
             patchPos[0] = heToPatchPos[neiEdgeIDs[0] * 4];
             patchPos[1] = heToPatchPos[neiEdgeIDs[0] * 4 + 1];
             patchPos[10] = heToPatchPos[neiEdgeIDs[1] * 4 + 1];
             patchPos[11] = heToPatchPos[neiEdgeIDs[1] * 4];
 
+			(patchVerts + 17)->setRefId(curEdge);
+			(patchVerts + 26)->setRefId(curEdge);
             patchPos[16] = heToPatchPos[neiEdgeIDs[2] * 4 + 3] + heNorms[neiEdgeIDs[2]] * layerOffset;
             patchPos[17] = heToPatchPos[neiEdgeIDs[2] * 4 + 2] + heNorms[neiEdgeIDs[2]] * layerOffset;
             patchPos[26] = heToPatchPos[neiEdgeIDs[3] * 4 + 2] + heNorms[neiEdgeIDs[2]] * layerOffset;
             patchPos[27] = heToPatchPos[neiEdgeIDs[3] * 4 + 3] + heNorms[neiEdgeIDs[2]] * layerOffset;
 
+			(patchVerts + 32)->setRefId(nxtEdge);
+			(patchVerts + 43)->setRefId(nxtEdge);
             patchPos[32] = heToPatchPos[neiEdgeIDs[4] * 4] - heNorms[neiEdgeIDs[4]] * layerOffset;
             patchPos[33] = heToPatchPos[neiEdgeIDs[4] * 4 + 1] - heNorms[neiEdgeIDs[4]] * layerOffset;
             patchPos[42] = heToPatchPos[neiEdgeIDs[5] * 4 + 1] - heNorms[neiEdgeIDs[4]] * layerOffset;
