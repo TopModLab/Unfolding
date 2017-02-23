@@ -674,6 +674,15 @@ void MainWindow::slot_triggerNeoWeaveMesh()
 
 	if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
+		BBox3 bb;
+		for (auto v : MeshManager::getInstance()->getMeshStack()->getOriMesh()->verts())
+		{
+			bb.Union(v.pos);
+		}
+
+		//size corresponding to inch
+		float bound = bb.getDiagnal().length();
+		neowv_panel->setSize(bound);
 		neowv_panel->show();
 		neowv_panel->activateWindow();
 	}

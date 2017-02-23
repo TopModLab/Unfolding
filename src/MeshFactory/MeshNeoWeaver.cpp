@@ -753,17 +753,10 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
                                               const confMap &conf)
 {
 
-	BBox3 bb;
-	for (auto v : ref_mesh->verts())
-	{
-		bb.Union(v.pos);
-	}
-	float bound = bb.getDiagnal().length();
-
 	// scaling 
 	const Float patchScale = conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
-    const Float layerOffset = conf.at("layerOffset") / bound;// 0.1 by default
+    const Float layerOffset = conf.at("layerOffset");
     const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
     const uint32_t patchCurvedSample = 3;

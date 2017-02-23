@@ -5,6 +5,7 @@ NeoWeavePanel::NeoWeavePanel(QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::NeoWeavePanel)
 {
+	size = 2;//default object as 2 inch
 	ui->setupUi(this);
 	setWindowTitle(tr("Weave Panel"));
 	connect(ui->okButton, &QPushButton::clicked, this, &QWidget::close);
@@ -23,10 +24,10 @@ NeoWeavePanel::NeoWeavePanel(QWidget *parent) :
 
     // Layer Offset Value
     connect(ui->layerOffsetSlider, &QSlider::valueChanged,
-        [&](int value) { ui->layerOffsetSpinBox->setValue(value * 0.01f); });
+        [&](int value) { ui->layerOffsetSpinBox->setValue(value * 0.01f * size); });
     connect(ui->layerOffsetSpinBox,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        [&](double value) { ui->layerOffsetSlider->setValue(value * 100.0f); });
+        [&](double value) { ui->layerOffsetSlider->setValue(value * 100.0f /size); });
 
     // Strip Scaling Value
     connect(ui->stripScaleSlider, &QSlider::valueChanged,
