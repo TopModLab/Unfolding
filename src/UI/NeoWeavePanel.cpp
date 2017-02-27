@@ -13,13 +13,12 @@ NeoWeavePanel::NeoWeavePanel(QWidget *parent) :
 	connect(ui->okButton, &QPushButton::clicked, this, &NeoWeavePanel::sig_saved);
 
 	connect(ui->patchSizeSlider, &QSlider::valueChanged, [&](int value) {
-		ui->patchSizeSpinBox->setValue(
-			value / static_cast<double>(ui->patchSizeSlider->maximum()));
+		ui->patchSizeSpinBox->setValue(value);
 	});
 	connect(ui->patchSizeSpinBox,
 		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[&](double value) { 
-		ui->patchSizeSlider->setValue( value * (ui->patchSizeSlider->maximum()));
+		ui->patchSizeSlider->setValue( value);
 	});
 
     // Layer Offset Value
