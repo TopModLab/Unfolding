@@ -773,8 +773,9 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 	vector<he_t> hes;
 	vector<face_t> faces;
 
+#ifdef DOO_SABIN
 	//evaluate doo-sabin subd
-	vector<QVector3D> heCorners(refHeCount);
+	vector<QVector3D> heCorners(refHeCount*2);
 	for (int i = 0; i < refFaceCount; i++) {
 		//loop each face and evaluate new positions
 		QVector3D fc = ref_mesh->faceCenter(i);
@@ -783,12 +784,13 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 		do 
 		{
 			QVector3D curEc = ref_mesh->edgeCenter(curHE->index);
-			heCorners[curHE->index] 
+			heCorners[curHE->index<<1] = heCorners[(curHE->prev()->index<<1)+1]
 				= (fc + prevEc + curEc + ref_mesh->vertFromHe(curHE->index)->pos) / 4;
 			prevEc = curEc;
 			curHE = curHE->next();
 		} while (curHE != ref_mesh->heFromFace(i));
 	}
+#endif
 	//calculate new edge normal and center
 	
 	vector<QVector3D> fNorms(refFaceCount);
@@ -817,32 +819,98 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 #ifdef DOO_SABIN
 		//get center point, 
 		heCenters[i] = heCenters[hefId]
-			= (heCorners[i] + heCorners[he->next()->index]
-				+ heCorners[hefId] + heCorners[hef->next()->index]) / 4;
+			= (heCorners[i<<1] + heCorners[(i<<1)+1]
+				+ heCorners[hefId<<1] + heCorners[(hefId<<1)+1]) / 4;
 		//calculate normal of v1, v2, cp and normal of v3, v4, cp, 
-		QVector3D n1 = QVector3D::normal(heCenters[i], heCorners[he->next()->index], heCorners[i]);
-		QVector3D n2 = QVector3D::normal(heCenters[i], heCorners[hef->next()->index], heCorners[hefId]);
+		QVector3D n1 = QVector3D::normal(heCenters[i], heCorners[(i<<1)+1], heCorners[i<<1]);
+		QVector3D n2 = QVector3D::normal(heCenters[i], heCorners[(hefId<<1)+1], heCorners[hefId<<1]);
 
 		//and get the average normal
 		heNorms[i] = heNorms[hefId] = (n1 + n2).normalized();
-
+		
 #else
 		heNorms[i] = heNorms[hefId]
 			= (fNorms[he->fid] + fNorms[hef->fid]).normalized();
 		heCenters[i] = heCenters[hefId] = ref_mesh->edgeCenter(i);
+		heDirs[i] = ref_mesh->edgeVector(i) * 0.5f;// half length of he
+		heDirs[hefId] = -heDirs[i];
 #endif
 	}
+
+#ifdef DOO_SABIN
+	//project heCorners to this plane
+	for (hdsid_t i = 0; i < refHeCount*2; i++)
+	{
+		heCorners[i] = Utils::LinePlaneIntersect(
+			heCorners[i], heCorners[i] + heNorms[i >> 1],
+			heCenters[i >> 1], heNorms[i >> 1]);
+	}
+#endif
+
+#ifdef DOO_SABIN
+
+	//////////////////////
+	//get approximate heCross
+	for (hdsid_t i = 0; i < refHeCount; i++)
+	{
+		const he_t* he = &ref_hes[i];
+		const he_t* hef = he->flip();
+		hdsid_t hefId = hef->index;
+		heDirs[i] = (heCorners[(i << 1) + 1] - heCorners[i << 1])*0.5f;
+
+		// 0 (planar):  cross product of face normals is zero
+		// 1 (convex):  cross product of face normals is in the same dir with edge dir
+		// 2 (concave): cross product of face normals is opposite to edge dir
+		QVector3D crossVec = QVector3D::crossProduct(fNorms[he->fid], fNorms[hef->fid]);
+		heCurvatureType[i] = crossVec.isNull() ? 0
+			: QVector3D::dotProduct(crossVec, heDirs[i]) > 0 ? 1 : 2;
+	}
+	// update corner flag
+	// true:  both edge are convex or concave
+	// false: edges has different flag, or one of them is planar
+	for (auto &he : ref_hes)
+	{
+		heCornerConsistent[he.index] = heCurvatureType[he.index]
+			& heCurvatureType[he.prev()->index];
+	}
+	// Cache out Edge Cross Vectors for generating patches on edge.
+	// If corner has same flag on each edge, aka flag consistent,
+	// use cross product of edge normals to get corner vectors;
+	// Otherwise, use average of edge vectors
+	for (auto &he : ref_hes)
+	{
+		heCross[he.index << 1] = heCross[(he.prev()->index << 1) + 1]
+			= heCornerConsistent[he.index]
+			? QVector3D::crossProduct(heNorms[he.prev()->index],
+				heNorms[he.index])
+			: heDirs[he.index] - heDirs[he.prev()->index];
+	}
+
+	//find new edge endpoint
+	for (hdsid_t i = 0; i < refHeCount; i++)
+	{
+		const he_t* he = &ref_hes[i];
+		const he_t* hef = he->flip();
+		hdsid_t hefId = hef->index;
+		//get intersecting point of two heCross
+		QVector3D vs;
+		Utils::LineLineIntersect(
+			heCorners[i<<1],heCorners[i<<1]+heCross[i<<1],
+			heCorners[(hefId<<1)+1], heCorners[(hefId << 1) + 1]+heCross[(hefId<<1)+1], 
+			&vs);
+		heCorners[i << 1] = heCorners[(hefId << 1) + 1] = vs;
+	}
+	for (hdsid_t i = 0; i < refHeCount; i++)
+	{
+		heDirs[i] = (heCorners[(i << 1) + 1] - heCorners[i << 1])*0.5f;
+	}
+#endif // DOO_SABIN
 
 	for (hdsid_t i = 0; i < refHeCount; i++)
 	{
 		const he_t* he = &ref_hes[i];
 		const he_t* hef = he->flip();
 		hdsid_t hefId = hef->index;
-#ifdef DOO_SABIN
-		heDirs[i] = (heCorners[he->next()->index] - heCorners[i]) * 0.5f;
-#else
-		heDirs[i] = ref_mesh->edgeVector(i) * 0.5f;// half length of he
-#endif // DOO_SABIN
 
 		heDirLens[i] = heDirs[i].length();
 		heTans[i] = QVector3D::crossProduct(heNorms[i], heDirs[i]).normalized();
@@ -874,6 +942,7 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
                                                          heNorms[he.index])
                                : heDirs[he.index] - heDirs[he.prev()->index];
 	}
+
 
     // Solve linear equation to scale he cross vectors
     // to make the sum of current and next cross vectors match edge length
@@ -934,17 +1003,17 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 		QVector3D cVec_next = heCenters[he_next_Idx] - heCenters[he_fnext_Idx];
 		//project to edge plane
 		QVector3D cVec_he = 
-			heDirs[i] * QVector3D::dotProduct(heDirs[i], cVec)
+			heDirs[i].normalized() * QVector3D::dotProduct(heDirs[i].normalized(), cVec)
 			+ heTans[i] * QVector3D::dotProduct(heTans[i], cVec);
 		QVector3D cVec_he_next = 
-			heDirs[i] * QVector3D::dotProduct(heDirs[i], cVec_next)
+			heDirs[i].normalized() * QVector3D::dotProduct(heDirs[i].normalized(), cVec_next)
 			+ heTans[i] * QVector3D::dotProduct(heTans[i], cVec_next);
 		//get centerLine which passes the edge center
 		//find intersection with heCrosses
 		QVector3D pc, pc_next;
 #ifdef DOO_SABIN
-		QVector3D vs = heCorners[i];
-		QVector3D ve = heCorners[he_next_Idx];
+		QVector3D vs = heCorners[i<<1];
+		QVector3D ve = heCorners[(i<<1)+1];
 #else
 		QVector3D vs = ref_mesh->vertFromHe(i)->pos;
 		QVector3D ve = ref_mesh->vertFromHe(he_next_Idx)->pos;

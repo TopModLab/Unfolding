@@ -18,7 +18,7 @@ NeoWeavePanel::NeoWeavePanel(QWidget *parent) :
 	connect(ui->patchSizeSpinBox,
 		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[&](double value) { 
-		ui->patchSizeSlider->setValue( value);
+		ui->patchSizeSlider->setValue(value);
 	});
 
     // Layer Offset Value
