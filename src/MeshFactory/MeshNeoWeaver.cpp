@@ -1,15 +1,16 @@
 #include "MeshNeoWeaver.h"
-#define LERP_BRIDGE 1
+//#define LERP_BRIDGE 1
 #define DOO_SABIN 1
 HDS_Mesh* MeshNeoWeaver::create(const mesh_t* ref,
                                 const confMap &conf)
 {
     if (!ref) return nullptr;
 
-	return createConicalWeaving(ref, conf);
+	//return createConicalWeaving(ref, conf);
 	//return createClassicalWeaving(ref, conf);
 	//return createWeaving(ref, conf);
 	//return createOctWeaving(ref, conf);
+	return createTriangleWeaving(ref, conf);
 }
 
 HDS_Mesh* MeshNeoWeaver::createOctWeaving(const mesh_t* ref_mesh,
@@ -1420,6 +1421,190 @@ HDS_Mesh* MeshNeoWeaver::createConicalWeaving(const mesh_t* ref_mesh,
 	return ret;
 }
 
+HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
+											   const confMap &conf) {
+	// scaling 
+	const Float patchScale = conf.at("patchScale");
+	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
+	const Float layerOffset = conf.at("layerOffset");
+	const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
+	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
+	const uint32_t patchCurvedSample = 3;
+	auto &ref_verts = ref_mesh->verts();
+	auto &ref_hes = ref_mesh->halfedges();
+	auto &ref_faces = ref_mesh->faces();
+	size_t refHeCount = ref_hes.size();
+	size_t refEdgeCount = refHeCount >> 1;
+	size_t refFaceCount = ref_faces.size();
+
+	mesh_t::resetIndex();
+	vector<vert_t> verts;
+	vector<he_t> hes;
+	vector<face_t> faces;
+	// cache edge centers
+	vector<QVector3D> heCenters(refHeCount);
+	for (auto &he: ref_hes)
+	{
+		heCenters[he.index] = ref_mesh->edgeCenter(he);
+	}
+	// cache edge patch pos
+	vector<QVector3D> cornerPatchPos(refHeCount * 3);
+	for (auto &he: ref_hes)
+	{
+		QVector3D c = (heCenters[he.index] + heCenters[he.next()->index])/2;
+		cornerPatchPos[he.index*3 + 0] = 
+			Utils::Lerp(c, ref_mesh->vertFromHe(he.index)->pos, patchScale);
+		cornerPatchPos[he.index*3 + 1] =
+			Utils::Lerp(c, ref_mesh->vertFromHe(he.next()->index)->pos, patchScale);
+		cornerPatchPos[he.index*3 + 2] =
+			Utils::Lerp(c, ref_mesh->vertFromHe(he.next()->next()->index)->pos, patchScale);
+	}
+	// cache edge patch norm
+	vector<QVector3D> heNorm(refHeCount);
+	for (auto &he : ref_hes)
+	{
+		if (he.flip_offset>0) continue;
+		heNorm[he.index] = heNorm[he.flip()->index] =
+			QVector3D::normal(cornerPatchPos[he.flip()->index * 3 + 1],
+				cornerPatchPos[he.index * 3 + 1],
+				 cornerPatchPos[he.index * 3]);
+	}
+	// Construct bridge patch
+	const int nESamples = 1;
+	const int nFSamples = 1;
+	const int sPatchFaceCount = nESamples * 3 + (nFSamples + 2) * 2;
+
+	const int sPatchHeCount = sPatchFaceCount * 4;
+	const int sPatchVertCount = sPatchFaceCount * 2 + 2;
+	const int sPatchCount = refEdgeCount;
+	faces.resize(sPatchCount * sPatchFaceCount);
+	hes.resize(sPatchCount * sPatchHeCount);
+	verts.resize(sPatchCount * sPatchVertCount);
+
+	for (hdsid_t i = 0; i < refEdgeCount; i++)
+	{
+		int patchFaceOffset = i * sPatchFaceCount;
+		int patchHEOffset = i * sPatchHeCount;
+		int patchVertOffset = i * sPatchVertCount;
+		auto curHE = hes.data() + patchHEOffset;
+		auto curVert = verts.data() + patchVertOffset;
+		auto curFace = faces.data() + patchFaceOffset;
+		
+		for (int j = 0; j < sPatchFaceCount; j++)
+		{
+			constructFace(curHE, 4, curFace);
+			if (j != sPatchFaceCount - 1)
+			{
+				(curHE + 2)->flip_offset = 2;
+				(curHE + 4)->flip_offset = -2;
+			}
+			constructHEPair(curVert, curHE++);
+			constructHEPair(curVert + 1, curHE++);
+			constructHEPair(curVert + 3, curHE++);
+			constructHEPair(curVert + 2, curHE++);
+			curFace++;
+			curVert += 2;
+		}
+	}
+
+	// start from one edge and move to next woven edge 
+	vector<bool> visitedHE(refHeCount, false);
+	vector<bool> heOnTopFlag(refHeCount, false);
+	vector<hdsid_t> heToPatch(refHeCount);
+	hdsid_t curPatchID = 0;
+	QVector3D patchPos[sPatchVertCount];// [sPatchMaxVertices];
+	for (int i = 0; i < refHeCount; i++)
+	{
+		if (visitedHE[i]) continue;
+
+		auto he = &ref_hes[i];
+		auto curHE = he;
+
+		do
+		{
+			// neighboring edge ids
+			hdsid_t neiEdgeIDs[]{
+				curHE->prev()->flip()->index,
+				curHE->prev()->index,
+				curHE->index,
+				curHE->flip()->index,
+				curHE->flip()->prev()->index,
+				curHE->flip()->prev()->flip()->index
+			};
+			//get bezier control points
+			// Quad--Tri--Quad--Tri(face band)--Quad(Edge band)
+			auto patchVerts = &verts[curPatchID * sPatchVertCount];
+			int segSamples[]{ 0, nESamples * 2, 2, nFSamples * 2,2,
+								nESamples * 2, 2, nFSamples * 2,2,
+								nESamples * 2 };
+			int segIndex[10];
+			for (int i = 0; i < 10; i++)
+			{
+				segIndex[i] = segSamples[i] + (i > 0 ? segIndex[i - 1] : 0);
+			}
+
+			patchPos[segIndex[0]+1] = cornerPatchPos[neiEdgeIDs[0] * 3];
+			patchPos[segIndex[0]] = cornerPatchPos[neiEdgeIDs[0] * 3 + 1];
+			//face patch
+			patchPos[segIndex[1]+1] = patchPos[segIndex[2]+1] =
+				patchPos[segIndex[3]+1] = patchPos[segIndex[4]+1] = 
+				cornerPatchPos[neiEdgeIDs[1] * 3 + 1];
+			patchPos[segIndex[1]] = cornerPatchPos[neiEdgeIDs[1] * 3];
+			patchPos[segIndex[2]] = patchPos[segIndex[3]] =
+				(cornerPatchPos[neiEdgeIDs[1] * 3]+ cornerPatchPos[neiEdgeIDs[1] * 3+2]) / 2;
+			patchPos[segIndex[4]] = cornerPatchPos[neiEdgeIDs[1] * 3 + 2];
+			//second face patch
+			patchPos[segIndex[5]] = patchPos[segIndex[6]] =
+				patchPos[segIndex[7]] = patchPos[segIndex[8]] =
+				cornerPatchPos[neiEdgeIDs[4] * 3 + 1];
+			patchPos[segIndex[5] + 1] = cornerPatchPos[neiEdgeIDs[4] * 3+2];
+			patchPos[segIndex[6] + 1] = patchPos[segIndex[7] + 1] =
+				(cornerPatchPos[neiEdgeIDs[4] * 3] + cornerPatchPos[neiEdgeIDs[4] * 3 + 2]) / 2;
+			patchPos[segIndex[8] + 1] = cornerPatchPos[neiEdgeIDs[4] * 3];
+			//edge patch
+			patchPos[segIndex[9] + 1] = cornerPatchPos[neiEdgeIDs[5] * 3 + 1];
+			patchPos[segIndex[9]] = cornerPatchPos[neiEdgeIDs[5] * 3];
+
+			// update bridge up/down
+			for (int i = 3; i < 7; i++)
+			{
+				patchPos[segIndex[i]] += heNorm[neiEdgeIDs[2]] * layerOffset;
+				patchPos[segIndex[i]+1] += heNorm[neiEdgeIDs[2]] * layerOffset;
+			}
+			for (int i = 7; i < 10; i++)
+			{
+				patchPos[segIndex[i]] -= heNorm[neiEdgeIDs[4]] * layerOffset;
+				patchPos[segIndex[i] + 1] -= heNorm[neiEdgeIDs[4]] * layerOffset;
+			}
+
+			// Assign evaluated positions to patch
+			for (int j = 0; j < sPatchVertCount; j++)
+			{
+				(patchVerts + j)->pos = patchPos[j];
+			}
+			// Update he-to-patch lookup table
+			heToPatch[neiEdgeIDs[3]] = -curPatchID;
+			heToPatch[neiEdgeIDs[2]] = curPatchID++;
+			visitedHE[neiEdgeIDs[2]] = visitedHE[neiEdgeIDs[3]] = true;
+
+			heOnTopFlag[neiEdgeIDs[1]] = true;
+			// Move to he corresponding to next connected trip
+			curHE = curHE->rotCCW()->next()->flip();
+		} while (curHE != he);
+	}
+
+	// Finalize Mesh
+	unordered_set<hdsid_t> exposedHEs;
+	for (auto &he : hes)
+	{
+		if (he.flip_offset == 0) exposedHEs.insert(he.index);
+	}
+	fillNullFaces(hes, faces, exposedHEs);
+	HDS_Mesh* ret = new HDS_Mesh(verts, hes, faces);
+	//ret->updatePieceSet();
+
+	return ret;
+}
 HDS_Mesh* MeshNeoWeaver::createBiTriWeaving(const mesh_t* ref_mesh,
                                             const confMap &conf)
 {

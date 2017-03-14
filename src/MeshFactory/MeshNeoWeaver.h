@@ -16,6 +16,8 @@ private:
                                             const confMap &conf);
 	static HDS_Mesh* createConicalWeaving(const mesh_t* ref_mesh,
                                           const confMap &conf);
+	static HDS_Mesh* createTriangleWeaving(const mesh_t* ref_mesh,
+										  const confMap &conf);
     static HDS_Mesh* createBiTriWeaving(const mesh_t* ref_mesh,
                                         const confMap &conf);
     static void createStripTopo(vector<vert_t> &verts,
