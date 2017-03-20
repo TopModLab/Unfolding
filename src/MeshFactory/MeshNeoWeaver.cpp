@@ -1427,7 +1427,8 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 	const Float patchScale = conf.at("patchScale");
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
 	const Float layerOffset = conf.at("layerOffset");
-	const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
+	const Float stripWidth = conf.at("patchStripWidth");
+	//const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
 	const uint32_t patchCurvedSample = 3;
 	auto &ref_verts = ref_mesh->verts();
@@ -1565,6 +1566,13 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 			patchPos[segIndex[9] + 1] = cornerPatchPos[neiEdgeIDs[5] * 3 + 1];
 			patchPos[segIndex[9]] = cornerPatchPos[neiEdgeIDs[5] * 3];
 
+			// scale inwards control points
+			for (int i = 0; i < 10; i++)
+			{
+				QVector3D mid = (patchPos[segIndex[i]] + patchPos[segIndex[i] + 1]) / 2;
+				patchPos[segIndex[i]] = Utils::Lerp(mid, patchPos[segIndex[i]], stripWidth);
+				patchPos[segIndex[i]+1] = Utils::Lerp(mid, patchPos[segIndex[i]+1], stripWidth);
+			}
 			// update bridge up/down
 			for (int i = 3; i < 7; i++)
 			{
