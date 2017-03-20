@@ -1225,6 +1225,7 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 	int etchSegCount = static_cast<int>(conf.at("etchSeg"));
 	double etchSegWidth = conf.at("etchSegWidth");
 	int cn_t = static_cast<int>(conf.at("connector"));
+	int pinholecount_type = static_cast<int>(conf.at("pinCount"));
 
 	Float circle_offset = 3;
 	QVector2D size_vec = unfolded_mesh->bound->getDiagnal().toVector2D();
@@ -1235,13 +1236,13 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 		static_cast<int>(size_vec.x() * he_scale),
 		static_cast<int>(size_vec.y() * he_scale));
 
-	switch (cn_t)
+	/*switch (cn_t)
 	{
 	case WOVEN_HOLE_CONNECTOR:
 		break;
 	default:
 		break;
-	}
+	}*/
 	int printFaceID(0), printCircleID(0);
 
 	// 
@@ -1264,7 +1265,8 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 		floats_t printTextRot;
 		vector<QString> printTextIfo;
 		//unordered_map<int32_t, QVector2D> printTextRecord;
-		
+
+		unordered_map< hdsid_t, pair<QVector3D, QVector3D> > vertsHash;
 		// Group current piece
 		fprintf(fp, "<g>\n");
 		for (auto fid : piece)
@@ -1282,20 +1284,30 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 				} while (curHE != he);
 			}
 			// Etch layer
-			else if (curFace->isJoint)
+			/*else if (curFace->isJoint)
 			{
 				printPinholes.push_back(unfolded_mesh->faceCenter(fid).toVector2D() * he_scale);
-				
 				// Add labels for pinhole
-				printTextPos.push_back(printPinholes.back() * he_scale);
+
+				printTextPos.push_back(printPinholes.back() + QVector2D(0, 2*pin_radius));
 				printTextRot.push_back(0);
 				printTextIfo.push_back(HDS_Common::ref_ID2String(curFace->refid));
-			}
+			}*/
 			else // Etch
 			{
 				// Write points of each edge
 				do
 				{
+					auto curV = unfolded_mesh->vertFromHe(curHE->index);
+					if (curV->refid != -1)
+					{
+						if (vertsHash.find(curV->refid) == vertsHash.end()) {
+							vertsHash[curV->refid].first = curV->pos;
+						}
+						else {
+							vertsHash[curV->refid].second = curV->pos;
+						}
+					}
 					if (!curHE->isCutEdge && !visitedHE[curHE->index])
 					{
 						printEtchEdges.push_back(verts[curHE->vid].pos.toVector2D() * he_scale);
@@ -1306,6 +1318,22 @@ void MeshConnector::exportWovenPiece(FILE* fp,
 				} while (curHE != he);
 			}			
 		}
+
+		//Add pinhole and label position
+		for (auto& x : vertsHash) {
+			QVector2D p1 = Utils::Lerp(x.second.first, x.second.second, 0.33).toVector2D();
+			QVector2D p2 = Utils::Lerp(x.second.first, x.second.second, 0.66).toVector2D();
+			QVector2D label = Utils::Lerp(x.second.first, x.second.second, 0.5).toVector2D();
+
+			printPinholes.push_back(p1 * he_scale);
+			printPinholes.push_back(p2 * he_scale);
+
+			// Add labels for pinhole
+			printTextPos.push_back(label * he_scale);
+			printTextRot.push_back(0);
+			printTextIfo.push_back(HDS_Common::ref_ID2String(x.first));
+		}
+
 		/************************************************************************/
 		/* Print Text                                                           */
 		/************************************************************************/

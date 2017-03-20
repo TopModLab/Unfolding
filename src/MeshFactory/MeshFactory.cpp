@@ -12,17 +12,17 @@ void MeshFactory::init()
 ///	v		he
 // Input:
 //	vertex pointer, half edge pointer
-void MeshFactory::constructHE(vert_t* v, he_t* he)
+void MeshFactory::constructHEPair(vert_t* v, he_t* he)
 {
 	if(v->heid == sInvalidHDS) v->heid = he->index;
 	he->vid = v->index;
 }
 
-void MeshFactory::constructHE(vert_t* v, he_t* he, size_t edgeCount)
+void MeshFactory::constructHERing(vert_t* v, he_t* he, size_t edgeCount)
 {
 	for (int i = 0; i < edgeCount; i++)
 	{
-		constructHE(v + i, he + i);
+		constructHEPair(v + i, he + i);
 	}
 }
 
@@ -54,7 +54,7 @@ void MeshFactory::constructFace(
 //	half-edges buffer, vector of indices of half edges to be assigned,
 //	face index of assigned face
 void MeshFactory::constructFace(
-	vector<he_t> hes, const vector<int> indices, 
+	vector<he_t> &hes, const vector<hdsid_t> &indices, 
 	face_t* face)
 {
 	int edgeCount = indices.size();
@@ -225,8 +225,7 @@ void MeshFactory::generateBridge(
 				if (face == size) vid = vid22;
 				else vid = vOriSize + 2 * face + 1;
 			}
-
-			constructHE(&verts[vid], &hes[heOriSize + 4 * face + heOffset]);
+			constructHEPair(&verts[vid], &hes[heOriSize + 4 * face + heOffset]);
 		}
 		constructFace(&hes[heOriSize + 4 * face], 4, &fs[fOriSize + face]);
 		fs[fOriSize + face].isBridge = true;
@@ -237,7 +236,57 @@ void MeshFactory::generateBridge(
 	hes[he2].setFlip(&hes[hes.size() - 2]);
 	for (int i = 0; i < size ; i++)
 	{
+		//cout << "in set flip loop\n";
 		hes[heOriSize + 4 * ( i + 1 ) - 2].setFlip(
 			&hes[heOriSize + 4 * (i + 1)]);
 	}
+}
+
+bool MeshFactory::createBridgeFromNull(mesh_t* mesh,
+                                       size_t bridgeCount,
+                                       QVector3D* vp1,
+                                       size_t ofs1, size_t stride1,
+                                       QVector3D* vp2,
+                                       size_t ofs2, size_t stride2)
+{
+    if (!nullptr) return false;
+    if (bridgeCount < 1) return false;
+
+    auto &verts = mesh->verts();
+    auto &hes = mesh->halfedges();
+    auto &faces = mesh->faces();
+
+    size_t vOfs = verts.size();
+    verts.resize(vOfs + bridgeCount * 2 + 2);
+    size_t heOfs = hes.size();
+    hes.resize(heOfs + bridgeCount * 4);
+    size_t fOfs = faces.size();
+    faces.resize(fOfs + bridgeCount);
+
+    auto curHE = hes.data() + heOfs;
+    auto curVert = verts.data() + vOfs;
+    auto curFace = faces.data() + fOfs;
+    for (int i = 0; i < bridgeCount; i++)
+    {
+        constructFace(curHE, 4, curFace + i);
+        if (i != bridgeCount - 1)
+        {
+            (curHE + 2)->flip_offset = 2;
+            (curHE + 4)->flip_offset = -2;
+        }
+        constructHEPair(curVert, curHE++);
+        constructHEPair(curVert + 1, curHE++);
+        constructHEPair(curVert + 3, curHE++);
+        constructHEPair(curVert + 2, curHE++);
+
+        curVert += 2;
+    }
+    for (int i = 0; i < bridgeCount + 1; i++)
+    {
+        int idx = vOfs + i * 2;
+        verts[idx].pos = vp1[ofs1 + stride1 * i];
+        verts[idx + 1].pos = vp2[ofs2 + stride2 * i];
+    }
+
+    return true;
 }

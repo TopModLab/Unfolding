@@ -15,23 +15,28 @@ public:
 	}
 
 	static void init();
-	static void constructHE(vert_t* v, he_t* he);
-	static void constructHE(vert_t* v, he_t* he, size_t edgeCount);
+	static void constructHEPair(vert_t* v, he_t* he);
+	static void constructHERing(vert_t* v, he_t* he, size_t edgeCount);
 
 	static void constructFace(
 		he_t* unlinkedHE, size_t edgeCount,
 		face_t* fid);
 	static void constructFace(
-		vector<he_t> hes, const vector<int> indices, 
+		vector<he_t> &hes, const vector<hdsid_t> &indices, 
 		face_t* fid);
-	static void fillNullFaces(
-		vector<he_t> &hes, vector<face_t> &faces,
+    static void fillNullFaces(
+        vector<he_t> &hes, vector<face_t> &faces,
 		unordered_set<hdsid_t> &nullHEs);
 	static void generateBridge(
 		hdsid_t he1, hdsid_t he2, 
 		mesh_t* mesh,
 		vector<QVector3D> &vpos1 = vector<QVector3D>(),
 		vector<QVector3D> &vpos2 = vector<QVector3D>()
-		);
+	);
+    static bool createBridgeFromNull(
+        mesh_t* mesh, size_t bridgeCount,
+        QVector3D* vp1, size_t ofs1, size_t stride1,
+        QVector3D* vp2, size_t ofs2, size_t stride2
+    );
 };
 

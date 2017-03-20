@@ -168,6 +168,18 @@ inline void LineLineIntersect(
 	//*pb = p3 + mub * p43;
 }
 
+//from http://math.stackexchange.com/questions/83990/line-and-plane-intersection-in-3d
+inline QVector3D LinePlaneIntersect(
+	QVector3D la, QVector3D lb,
+	QVector3D p, QVector3D n) 
+{
+	QVector3D ba = lb - la;
+	float nDotA = QVector3D::dotProduct(n, la);
+	float nDotBA = QVector3D::dotProduct(n, ba);
+
+	return la + (((p.length() - nDotA) / nDotBA) * ba);
+}
+
 }
 
 #endif // UTILS_HPP

@@ -21,11 +21,16 @@ signals:
 
 public:
 	void setConfig();
-
+	void setSize(float s);
 private:
 	Ui::NeoWeavePanel *ui;
 	confMap config;
+	float size;
 
 };
 
+inline
+void NeoWeavePanel::setSize(float s) {
+	size = s;
+}
 #endif // NEOWEAVEPANEL_H
