@@ -1472,8 +1472,8 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 	}
 	// Construct bridge patch
 	const int nESamples = 1;
-	const int nFSamples = 1;
-	const int sPatchFaceCount = nESamples * 3 + (nFSamples + 2) * 2;
+	const int nFSamples = 4;
+	const int sPatchFaceCount = nESamples * 3 + (nFSamples + 4) * 2;
 
 	const int sPatchHeCount = sPatchFaceCount * 4;
 	const int sPatchVertCount = sPatchFaceCount * 2 + 2;
@@ -1507,6 +1507,7 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 			curVert += 2;
 		}
 	}
+ 
 
 	// start from one edge and move to next woven edge 
 	vector<bool> visitedHE(refHeCount, false);
@@ -1535,11 +1536,11 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 			//get bezier control points
 			// Quad--Tri--Quad--Tri(face band)--Quad(Edge band)
 			auto patchVerts = &verts[curPatchID * sPatchVertCount];
-			int segSamples[]{ 0, nESamples * 2, 2, nFSamples * 2,2,
-								nESamples * 2, 2, nFSamples * 2,2,
+			int segSamples[]{ 0, nESamples * 2, 2, 2, nFSamples * 2,2,2,
+								nESamples * 2, 2, 2, nFSamples * 2,2,2,
 								nESamples * 2 };
 			int segIndex[10];
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 14; i++)
 			{
 				segIndex[i] = segSamples[i] + (i > 0 ? segIndex[i - 1] : 0);
 			}
@@ -1547,44 +1548,97 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 			patchPos[segIndex[0]+1] = cornerPatchPos[neiEdgeIDs[0] * 3];
 			patchPos[segIndex[0]] = cornerPatchPos[neiEdgeIDs[0] * 3 + 1];
 			//face patch
-			patchPos[segIndex[1]+1] = patchPos[segIndex[2]+1] =
-				patchPos[segIndex[3]+1] = patchPos[segIndex[4]+1] = 
-				cornerPatchPos[neiEdgeIDs[1] * 3 + 1];
-			patchPos[segIndex[1]] = cornerPatchPos[neiEdgeIDs[1] * 3];
-			patchPos[segIndex[2]] = patchPos[segIndex[3]] =
+			for (int i = 1; i < 7; i++) {
+				patchPos[segIndex[i] + 1] = cornerPatchPos[neiEdgeIDs[1] * 3 + 1];
+			}
+			patchPos[segIndex[1]] = patchPos[segIndex[2]] = cornerPatchPos[neiEdgeIDs[1] * 3];
+			patchPos[segIndex[3]] = patchPos[segIndex[4]] =
 				(cornerPatchPos[neiEdgeIDs[1] * 3]+ cornerPatchPos[neiEdgeIDs[1] * 3+2]) / 2;
-			patchPos[segIndex[4]] = cornerPatchPos[neiEdgeIDs[1] * 3 + 2];
+			patchPos[segIndex[5]] = patchPos[segIndex[6]] = cornerPatchPos[neiEdgeIDs[1] * 3 + 2];
 			//second face patch
-			patchPos[segIndex[5]] = patchPos[segIndex[6]] =
-				patchPos[segIndex[7]] = patchPos[segIndex[8]] =
-				cornerPatchPos[neiEdgeIDs[4] * 3 + 1];
-			patchPos[segIndex[5] + 1] = cornerPatchPos[neiEdgeIDs[4] * 3+2];
-			patchPos[segIndex[6] + 1] = patchPos[segIndex[7] + 1] =
+			for (int i = 7; i < 13; i++) {
+				patchPos[segIndex[i]] = cornerPatchPos[neiEdgeIDs[4] * 3 + 1];
+			}
+			patchPos[segIndex[7] + 1] = patchPos[segIndex[8] + 1] = cornerPatchPos[neiEdgeIDs[4] * 3+2];
+			patchPos[segIndex[9] + 1] = patchPos[segIndex[10] + 1] =
 				(cornerPatchPos[neiEdgeIDs[4] * 3] + cornerPatchPos[neiEdgeIDs[4] * 3 + 2]) / 2;
-			patchPos[segIndex[8] + 1] = cornerPatchPos[neiEdgeIDs[4] * 3];
+			patchPos[segIndex[11] + 1] = patchPos[segIndex[12] + 1] = cornerPatchPos[neiEdgeIDs[4] * 3];
 			//edge patch
-			patchPos[segIndex[9] + 1] = cornerPatchPos[neiEdgeIDs[5] * 3 + 1];
-			patchPos[segIndex[9]] = cornerPatchPos[neiEdgeIDs[5] * 3];
+			patchPos[segIndex[13] + 1] = cornerPatchPos[neiEdgeIDs[5] * 3 + 1];
+			patchPos[segIndex[13]] = cornerPatchPos[neiEdgeIDs[5] * 3];
 
 			// scale inwards control points
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 14; i++)
 			{
 				QVector3D mid = (patchPos[segIndex[i]] + patchPos[segIndex[i] + 1]) / 2;
 				patchPos[segIndex[i]] = Utils::Lerp(mid, patchPos[segIndex[i]], stripWidth);
 				patchPos[segIndex[i]+1] = Utils::Lerp(mid, patchPos[segIndex[i]+1], stripWidth);
 			}
+			// reconstruct face patch
+			//first patch
+			QVector3D center = patchPos[segIndex[3] + 1];
+			QVector3D mid = (patchPos[segIndex[2] + 1] + patchPos[segIndex[3] + 1]) / 2;
+			patchPos[segIndex[2] + 1] = patchPos[segIndex[3] + 1] = mid;
+			patchPos[segIndex[2]] -= patchPos[segIndex[1] + 1] - mid;
+			patchPos[segIndex[3]] += mid - center;
+			mid = (patchPos[segIndex[4] + 1] + patchPos[segIndex[5] + 1]) / 2;
+			patchPos[segIndex[4] + 1] = patchPos[segIndex[5] + 1] = mid;
+			patchPos[segIndex[4]] += mid - center;
+			patchPos[segIndex[5]] -= patchPos[segIndex[6] + 1] - mid;
+			//second patch
+			center = patchPos[segIndex[9]];
+			mid = (patchPos[segIndex[8]] + patchPos[segIndex[9]]) / 2;
+			patchPos[segIndex[8]] = patchPos[segIndex[9]] = mid;
+			patchPos[segIndex[8]+1] -= patchPos[segIndex[7]] - mid;
+			patchPos[segIndex[9]+1] += mid - center;
+			mid = (patchPos[segIndex[10]] + patchPos[segIndex[11]]) / 2;
+			patchPos[segIndex[10]] = patchPos[segIndex[11]] = mid;
+			patchPos[segIndex[10]+1] += mid - center;
+			patchPos[segIndex[11]+1] -= patchPos[segIndex[12]] - mid;
+
+			// intepolate face samples
+			QVector3D cp3 = Utils::Lerp(patchPos[segIndex[3]], patchPos[segIndex[4]], 0.25);
+			QVector3D cp3_1 = Utils::Lerp(patchPos[segIndex[3]+1], patchPos[segIndex[4]+1], 0.25);
+			QVector3D cp4 = Utils::Lerp(patchPos[segIndex[3]], patchPos[segIndex[4]], 0.75);
+			QVector3D cp4_1 = Utils::Lerp(patchPos[segIndex[3] + 1], patchPos[segIndex[4] + 1], 0.75);
+			//second patch
+			QVector3D cp9 = Utils::Lerp(patchPos[segIndex[9]], patchPos[segIndex[10]], 0.25);
+			QVector3D cp9_1 = Utils::Lerp(patchPos[segIndex[9] + 1], patchPos[segIndex[10] + 1], 0.25);
+			QVector3D cp10 = Utils::Lerp(patchPos[segIndex[9]], patchPos[segIndex[10]], 0.75);
+			QVector3D cp10_1 = Utils::Lerp(patchPos[segIndex[9] + 1], patchPos[segIndex[10] + 1], 0.75);
+
+			auto cubicBezierPos = [](QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3, QVector3D* ptr, int samples) {
+				for (int i = 0; i < samples; i++) {
+					float t = 1.0f / samples * (float)i;
+					*(ptr + i*2) = powf(1 - t, 3)*p0 + 3 * powf(1 - t, 2)*t*p1 + 3 * powf(t, 2)*(1 - t)*p2 + powf(t, 3)*p3;
+				}
+			};
+
 			// update bridge up/down
-			for (int i = 3; i < 7; i++)
+			for (int i = 4; i < 10; i++)
 			{
 				patchPos[segIndex[i]] += heNorm[neiEdgeIDs[2]] * layerOffset;
 				patchPos[segIndex[i]+1] += heNorm[neiEdgeIDs[2]] * layerOffset;
 			}
-			for (int i = 7; i < 10; i++)
+			cubicBezierPos(
+				patchPos[segIndex[3]], cp3, cp4+ heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4]],
+				&patchPos[segIndex[3]], nFSamples);
+			cubicBezierPos(
+				patchPos[segIndex[3]+1], cp3_1, cp4_1 + heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4]+1],
+				&patchPos[segIndex[3]+1], nFSamples);
+			for (int i = 10; i < 14; i++)
 			{
 				patchPos[segIndex[i]] -= heNorm[neiEdgeIDs[4]] * layerOffset;
 				patchPos[segIndex[i] + 1] -= heNorm[neiEdgeIDs[4]] * layerOffset;
 			}
-
+			cubicBezierPos(
+				patchPos[segIndex[9]], cp9 + heNorm[neiEdgeIDs[2]] * layerOffset, 
+				cp10 - heNorm[neiEdgeIDs[4]] * layerOffset, patchPos[segIndex[10]],
+				&patchPos[segIndex[9]], nFSamples);
+			cubicBezierPos(
+				patchPos[segIndex[9]+1], cp9_1 + heNorm[neiEdgeIDs[2]] * layerOffset,
+				cp10_1 - heNorm[neiEdgeIDs[4]] * layerOffset, patchPos[segIndex[10]+1],
+				&patchPos[segIndex[9]+1], nFSamples);
 			// Assign evaluated positions to patch
 			for (int j = 0; j < sPatchVertCount; j++)
 			{
