@@ -1428,7 +1428,7 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
 	const Float layerOffset = conf.at("layerOffset");
 	const Float stripWidth = conf.at("patchStripWidth");
-	//const Float patchStripScale = conf.at("patchStripScale"); // 0.25 by default
+	const Float smoothness = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
 	const uint32_t patchCurvedSample = 3;
 	auto &ref_verts = ref_mesh->verts();
@@ -1471,9 +1471,9 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 				 cornerPatchPos[he.index * 3]);
 	}
 	// Construct bridge patch
-	const int nESamples = 1;
-	const int nFSamples = 4;
-	const int sPatchFaceCount = nESamples * 3 + (nFSamples + 4) * 2;
+	const int nESamples = 4;
+	const int nFSamples = 8;
+	const int sPatchFaceCount = (nESamples * 4 + 3) + (nFSamples + 2) * 2;
 
 	const int sPatchHeCount = sPatchFaceCount * 4;
 	const int sPatchVertCount = sPatchFaceCount * 2 + 2;
@@ -1536,10 +1536,12 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 			//get bezier control points
 			// Quad--Tri--Quad--Tri(face band)--Quad(Edge band)
 			auto patchVerts = &verts[curPatchID * sPatchVertCount];
-			int segSamples[]{ 0, nESamples * 2, 2, 2, nFSamples * 2,2,2,
-								nESamples * 2, 2, 2, nFSamples * 2,2,2,
-								nESamples * 2 };
-			int segIndex[10];
+			int segSamples[]{ 0, 2, nESamples * 2, 
+								2, nFSamples * 2, 2,
+								nESamples * 2, 2, nESamples * 2, 
+								2, nFSamples * 2,2,
+								nESamples * 2, 2 };
+			int segIndex[14];
 			for (int i = 0; i < 14; i++)
 			{
 				segIndex[i] = segSamples[i] + (i > 0 ? segIndex[i - 1] : 0);
@@ -1596,7 +1598,17 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 			patchPos[segIndex[10]+1] += mid - center;
 			patchPos[segIndex[11]+1] -= patchPos[segIndex[12]] - mid;
 
-			// intepolate face samples
+			auto cubicBezierPos = [](
+				QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3,
+				QVector3D* ptr, int samples) {
+				vector<QVector3D> p({ p0, p1, p2, p3 });
+				for (int i = 0; i < samples + 1; i++) {
+					float t = 1.0f / samples * (float)i;
+					*(ptr + i * 2) = powf(1 - t, 3)*p[0] + 3 * powf(1 - t, 2)*t*p[1] + 3 * powf(t, 2)*(1 - t)*p[2] + powf(t, 3)*p[3];
+				}
+				p.clear();
+			};
+			// calculate face control points
 			QVector3D cp3 = Utils::Lerp(patchPos[segIndex[3]], patchPos[segIndex[4]], 0.25);
 			QVector3D cp3_1 = Utils::Lerp(patchPos[segIndex[3]+1], patchPos[segIndex[4]+1], 0.25);
 			QVector3D cp4 = Utils::Lerp(patchPos[segIndex[3]], patchPos[segIndex[4]], 0.75);
@@ -1607,30 +1619,25 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 			QVector3D cp10 = Utils::Lerp(patchPos[segIndex[9]], patchPos[segIndex[10]], 0.75);
 			QVector3D cp10_1 = Utils::Lerp(patchPos[segIndex[9] + 1], patchPos[segIndex[10] + 1], 0.75);
 
-			auto cubicBezierPos = [](QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3, QVector3D* ptr, int samples) {
-				for (int i = 0; i < samples; i++) {
-					float t = 1.0f / samples * (float)i;
-					*(ptr + i*2) = powf(1 - t, 3)*p0 + 3 * powf(1 - t, 2)*t*p1 + 3 * powf(t, 2)*(1 - t)*p2 + powf(t, 3)*p3;
-				}
-			};
-
 			// update bridge up/down
 			for (int i = 4; i < 10; i++)
 			{
 				patchPos[segIndex[i]] += heNorm[neiEdgeIDs[2]] * layerOffset;
 				patchPos[segIndex[i]+1] += heNorm[neiEdgeIDs[2]] * layerOffset;
 			}
-			cubicBezierPos(
-				patchPos[segIndex[3]], cp3, cp4+ heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4]],
-				&patchPos[segIndex[3]], nFSamples);
-			cubicBezierPos(
-				patchPos[segIndex[3]+1], cp3_1, cp4_1 + heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4]+1],
-				&patchPos[segIndex[3]+1], nFSamples);
 			for (int i = 10; i < 14; i++)
 			{
 				patchPos[segIndex[i]] -= heNorm[neiEdgeIDs[4]] * layerOffset;
 				patchPos[segIndex[i] + 1] -= heNorm[neiEdgeIDs[4]] * layerOffset;
 			}
+
+			//intepolate face samples
+			cubicBezierPos(
+				patchPos[segIndex[3]], cp3, cp4 + heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4]],
+				&patchPos[segIndex[3]], nFSamples);
+			cubicBezierPos(
+				patchPos[segIndex[3] + 1], cp3_1, cp4_1 + heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4] + 1],
+				&patchPos[segIndex[3] + 1], nFSamples);
 			cubicBezierPos(
 				patchPos[segIndex[9]], cp9 + heNorm[neiEdgeIDs[2]] * layerOffset, 
 				cp10 - heNorm[neiEdgeIDs[4]] * layerOffset, patchPos[segIndex[10]],
@@ -1639,6 +1646,48 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 				patchPos[segIndex[9]+1], cp9_1 + heNorm[neiEdgeIDs[2]] * layerOffset,
 				cp10_1 - heNorm[neiEdgeIDs[4]] * layerOffset, patchPos[segIndex[10]+1],
 				&patchPos[segIndex[9]+1], nFSamples);
+
+			//intepolate edge samples
+			QVector3D cp;
+			cp = Utils::Lerp(patchPos[segIndex[1]], (patchPos[segIndex[0]] + patchPos[segIndex[1]]) / 2, smoothness);
+			cubicBezierPos(cp, Utils::Lerp(cp, patchPos[segIndex[1]], 0.5),
+				patchPos[segIndex[1]], patchPos[segIndex[2]],
+				&patchPos[segIndex[1]], nESamples);
+			cp = Utils::Lerp(patchPos[segIndex[1] + 1], (patchPos[segIndex[0] + 1] + patchPos[segIndex[1] + 1]) / 2, smoothness);
+			cubicBezierPos(cp, Utils::Lerp(cp, patchPos[segIndex[1] + 1], 0.5),
+				patchPos[segIndex[1] + 1], patchPos[segIndex[2] + 1],
+				&patchPos[segIndex[1] + 1], nESamples);
+
+			QVector3D cp6 = patchPos[segIndex[6]];
+			QVector3D cp6_1 = patchPos[segIndex[6] + 1];
+			QVector3D cp7 = patchPos[segIndex[7]];
+			QVector3D cp7_1 = patchPos[segIndex[7] + 1];
+			cp = Utils::Lerp(patchPos[segIndex[6]], (patchPos[segIndex[7]] + patchPos[segIndex[6]]) / 2, smoothness);
+			cubicBezierPos(patchPos[segIndex[5]], patchPos[segIndex[6]],
+				Utils::Lerp(cp, patchPos[segIndex[6]], 0.5), cp,
+				&patchPos[segIndex[5]], nESamples);
+			cp = Utils::Lerp(patchPos[segIndex[6] + 1], (patchPos[segIndex[7] + 1] + patchPos[segIndex[6] + 1]) / 2, smoothness);
+			cubicBezierPos(patchPos[segIndex[5] + 1], patchPos[segIndex[6] + 1],
+				Utils::Lerp(cp, patchPos[segIndex[6] + 1], 0.5), cp,
+				&patchPos[segIndex[5] + 1], nESamples);
+
+			cp = Utils::Lerp(cp7, (cp6 + cp7) / 2, smoothness);
+			cubicBezierPos(cp, Utils::Lerp(cp, cp7, 0.5),
+				cp7, patchPos[segIndex[8]],
+				&patchPos[segIndex[7]], nESamples);
+			cp = Utils::Lerp(cp7_1, (cp6_1 + cp7_1) / 2, smoothness);
+			cubicBezierPos(cp, Utils::Lerp(cp, cp7_1, 0.5),
+				cp7_1, patchPos[segIndex[8] + 1],
+				&patchPos[segIndex[7] + 1], nESamples);
+
+			cp = Utils::Lerp(patchPos[segIndex[12]], (patchPos[segIndex[12]] + patchPos[segIndex[13]]) / 2, smoothness);
+			cubicBezierPos(patchPos[segIndex[11]], patchPos[segIndex[12]],
+				Utils::Lerp(cp, patchPos[segIndex[12]], 0.5), cp,
+				&patchPos[segIndex[11]], nESamples);
+			cp = Utils::Lerp(patchPos[segIndex[12] + 1], (patchPos[segIndex[12] + 1] + patchPos[segIndex[13] + 1]) / 2, smoothness);
+			cubicBezierPos(patchPos[segIndex[11] + 1], patchPos[segIndex[12] + 1],
+				Utils::Lerp(cp, patchPos[segIndex[12] + 1], 0.5), cp,
+				&patchPos[segIndex[11] + 1], nESamples);
 			// Assign evaluated positions to patch
 			for (int j = 0; j < sPatchVertCount; j++)
 			{
