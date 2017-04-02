@@ -11,11 +11,11 @@
 
 struct VertexBufferTrait
 {
-    const void* data   = nullptr;
-    uint32_t    count  = 0;
-    uint32_t    size   = 0;
-    uint32_t    offset = offsetof(HDS_Vertex, pos);
-    uint32_t    stride = sizeof(HDS_Vertex);
+	const void* data   = nullptr;
+	uint32_t    count  = 0;
+	uint32_t    size   = 0;
+	uint32_t    offset = 0;
+	uint32_t    stride = 0;
 };
 
 class HDS_Mesh
@@ -92,6 +92,7 @@ public:
 	/* Modern OpenGL Rendering Functions                                    */
 	/************************************************************************/
 	void exportVertVBO(VertexBufferTrait* vertTrait,
+                       VertexBufferTrait* vertNormTrait = nullptr,
                        ui16s_t* vFLAGs  = nullptr) const;
 	void exportEdgeVBO(ui32s_t* heIBOs  = nullptr,
                        ui32s_t* heIDs   = nullptr,
@@ -109,9 +110,17 @@ public:
 	const vector<he_t>   &halfedges() const { return heSet; }
 	const vector<face_t> &faces() const { return faceSet; }
 	const vector<vert_t> &verts() const { return vertSet; }
+
+	vector<QVector3D> &vertnorms();
+	const vector<QVector3D> &vertnorms() const;
+	void updateVertNormal();
+
+	// Geometry thickness display
+	void setThickness(Float val) { thickness = val; }
+	Float getThickness() const { return thickness; }
+
 	//////////////////////////////////////////////////////////////////////////
 	// Compute mesh properties
-	vector<QVector3D> allVertNormal() const;
 	QVector3D edgeVector(hdsid_t heid) const;
 	QVector3D edgeVector(const he_t &he) const;
     QVector3D edgeCenter(hdsid_t heid) const;
@@ -169,6 +178,7 @@ private:
 	bool validateFace(hdsid_t fid);
 	bool validateEdge(hdsid_t heid);
 
+
 protected:
 	friend class ReebGraph;
 	friend class MainWindow;
@@ -187,11 +197,15 @@ private:
 	vector<he_t>   heSet;
 	vector<face_t> faceSet;
 
+	// Vertex normals for rendering thickness
+	vector<QVector3D> vertNormSet;
+
 	// pieces information
 	vector<vector<hdsid_t>> pieceSet;
 	unique_ptr<BBox3> bound;
 
 	uint16_t processType;
+	Float thickness;
 };
 
 inline ostream& operator<<(ostream &os, const HDS_Vertex &v)

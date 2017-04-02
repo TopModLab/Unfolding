@@ -15,6 +15,7 @@ HDS_Mesh::HDS_Mesh(
 	, heSet(std::move(hes))
 	, faceSet(std::move(faces))
 	, processType(HALFEDGE_PROC)
+	, thickness(0.0f)
 {
 }
 
@@ -23,7 +24,7 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 	, heSet(other.heSet)
 	, faceSet(other.faceSet)
 	, processType(other.processType)
-	, pieceSet(other.pieceSet)
+	, thickness(other.thickness)
 {
 	if (other.bound.get()) bound.reset(new BBox3(*other.bound));
 
@@ -39,33 +40,34 @@ HDS_Mesh::HDS_Mesh(const HDS_Mesh &other)
 
 HDS_Mesh::HDS_Mesh(const string &binaryFileName)
 {
-    FILE* fp = fopen(binaryFileName.c_str(), "rb");
-    HDSBinHeader header;
-    std::fread(&header, sizeof(HDSBinHeader), 1, fp);
+	FILE* fp = fopen(binaryFileName.c_str(), "rb");
+	HDSBinHeader header;
+	std::fread(&header, sizeof(HDSBinHeader), 1, fp);
 
-    vertSet.resize(header.vertCount);
-    heSet.resize(header.heCount);
-    faceSet.resize(header.faceCount);
-    std::fread(vertSet.data(), sizeof(vert_t), header.vertCount, fp);
-    std::fread(heSet.data(), sizeof(he_t), header.heCount, fp);
-    std::fread(faceSet.data(), sizeof(face_t), header.faceCount, fp);
+	vertSet.resize(header.vertCount);
+	heSet.resize(header.heCount);
+	faceSet.resize(header.faceCount);
+	std::fread(vertSet.data(), sizeof(vert_t), header.vertCount, fp);
+	std::fread(heSet.data(), sizeof(he_t), header.heCount, fp);
+	std::fread(faceSet.data(), sizeof(face_t), header.faceCount, fp);
 
-    pieceSet.resize(header.pieceCount);
-    uint32_t curPieces;
-    for (int i = 0; i < header.pieceCount; i++)
-    {
-        std::fread(&curPieces, sizeof(uint32_t), 1, fp);
-        pieceSet[i].resize(curPieces);
-        std::fread(pieceSet[i].data(), sizeof(hdsid_t), curPieces, fp);
-    }
-    if (header.bound_exist)
-    {
-        BBox3* bbox = new BBox3;
-        std::fread(bbox, sizeof(BBox3), 1, fp);
-        bound.reset(bbox);
-    }
+	pieceSet.resize(header.pieceCount);
+	uint32_t curPieces;
+	for (int i = 0; i < header.pieceCount; i++)
+	{
+		std::fread(&curPieces, sizeof(uint32_t), 1, fp);
+		pieceSet[i].resize(curPieces);
+		std::fread(pieceSet[i].data(), sizeof(hdsid_t), curPieces, fp);
+	}
 
-    fclose(fp);
+	if (header.bound_exist)
+	{
+		BBox3* bbox = new BBox3;
+		std::fread(bbox, sizeof(BBox3), 1, fp);
+		bound.reset(bbox);
+	}
+
+	fclose(fp);
 }
 
 HDS_Mesh::~HDS_Mesh()
@@ -263,16 +265,27 @@ void HDS_Mesh::setMesh(
 }
 
 void HDS_Mesh::exportVertVBO(VertexBufferTrait* vertTrait,
+                             VertexBufferTrait* vertNormTrait,
                              ui16s_t* vFLAGs) const
 {
 	// vertex object buffer
 	// If verts exist, copy vertex buffer and vertex flags
 	if (vertTrait != nullptr)
 	{
-        vertTrait->data = (void*)vertSet.data();
-        vertTrait->count = vertSet.size();
-        vertTrait->size = sizeof(vert_t) * vertTrait->count;
-    }
+		vertTrait->data = (void*)vertSet.data();
+		vertTrait->count = vertSet.size();
+		vertTrait->size = sizeof(vert_t) * vertTrait->count;
+	}
+
+	// vertex object buffer
+	// If verts exist, copy vertex buffer and vertex flags
+	if (vertNormTrait != nullptr && !vertNormSet.empty())
+	{
+		vertNormTrait->data = (void*)vertNormSet.data();
+		vertNormTrait->count = vertNormSet.size();
+		vertNormTrait->size = sizeof(QVector3D) * vertTrait->count;
+	}
+
 	// if verts is null, copy only vertex flags
 	if (vFLAGs != nullptr)
 	{
@@ -645,12 +658,30 @@ QVector3D HDS_Mesh::edgeVector(const he_t &he) const
 	return vertSet[he.next()->vid].pos - vertSet[he.vid].pos;
 }
 
-vector<QVector3D> HDS_Mesh::allVertNormal() const
+vector<QVector3D> &HDS_Mesh::vertnorms()
 {
-	vector<QVector3D> ret(vertSet.size(), QVector3D());
+	if (vertNormSet.empty())
+	{
+		updateVertNormal();
+	}
+	return vertNormSet;
+}
+
+const vector<QVector3D>& HDS_Mesh::vertnorms() const
+{
+	return vertNormSet;
+}
+
+void HDS_Mesh::updateVertNormal()
+{
+	vertNormSet.resize(vertSet.size());
 
 	for ( hdsid_t fid = 0; fid < faceSet.size(); fid++)
 	{
+		if (faceSet[fid].isCutFace)
+		{
+			continue;
+		}
 		auto corners = faceCorners(fid);
 		QVector3D c;
 		for (auto vid : corners) {
@@ -665,12 +696,13 @@ vector<QVector3D> HDS_Mesh::allVertNormal() const
 
 		for (auto vid : corners)
 		{
-			ret[vid] += n;
+			vertNormSet[vid] += n;
 		}
 	}
-	for (auto &n : ret) n.normalize();
-
-	return ret;
+	for (auto &n : vertNormSet)
+	{
+		n.normalize();
+	}
 }
 
 

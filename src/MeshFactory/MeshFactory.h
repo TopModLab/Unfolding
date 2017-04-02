@@ -10,7 +10,7 @@ public:
 	using face_t = HDS_Face;
 	using mesh_t = HDS_Mesh;
 
-	static HDS_Mesh* create(const mesh_t* ref, const confMap &conf) {
+	static HDS_Mesh* create(const mesh_t* /*ref*/, const confMap &/*conf*/) {
 		return nullptr;
 	}
 

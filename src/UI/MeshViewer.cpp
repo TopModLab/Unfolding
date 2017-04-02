@@ -30,8 +30,16 @@ MeshViewer::MeshViewer(QWidget *parent)
 	this->setFormat(format);
 
 	// create vbo shared by all components
-	fRBO.vbo = heRBO.vbo = vRBO.vbo
-		= make_shared<oglBuffer>(oglBuffer::Type::VertexBuffer);
+	for (size_t i = 0; i < RenderBufferObject::VBO_TYPE_COUNT; i++)
+	{
+		fRBO.vbo[i] = heRBO.vbo[i] = vRBO.vbo[i]
+			= make_shared<oglBuffer>(oglBuffer::Type::VertexBuffer);
+	}
+
+	vertTrait[RenderBufferObject::POSITION].offset = offsetof(HDS_Vertex, pos);
+	vertTrait[RenderBufferObject::POSITION].stride = sizeof(HDS_Vertex);
+	vertTrait[RenderBufferObject::NORMAL].offset = 0;
+	vertTrait[RenderBufferObject::NORMAL].stride = sizeof(QVector3D);
 }
 
 void MeshViewer::bindHalfEdgeMesh(HDS_Mesh *mesh)
@@ -96,13 +104,16 @@ void MeshViewer::initializeGL()
 	vRBO.vao.create();
 	vRBO.vao.bind();
 
-	vRBO.vbo->create();
-	vRBO.vbo->setUsagePattern(oglBuffer::StreamDraw);
-	vRBO.vbo->bind();
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                          vert_trait.stride,
-                          (void*)vert_trait.offset);
-	glEnableVertexAttribArray(0);
+	for (size_t i = 0; i < RenderBufferObject::VBO_TYPE_COUNT; i++)
+	{
+		vRBO.vbo[i]->create();
+		vRBO.vbo[i]->setUsagePattern(oglBuffer::StreamDraw);
+		vRBO.vbo[i]->bind();
+		glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE,
+                              vertTrait[i].stride,
+                              (void*)vertTrait[i].offset);
+		glEnableVertexAttribArray(i);
+	}
 
 	vRBO.releaseAll();
 
@@ -113,12 +124,14 @@ void MeshViewer::initializeGL()
 		RBO.vao.create();
 		RBO.vao.bind();
 
-		RBO.vbo->bind();
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                              vert_trait.stride,
-                              (void*)vert_trait.offset);
-
-		glEnableVertexAttribArray(0);
+		for (size_t i = 0; i < RenderBufferObject::VBO_TYPE_COUNT; i++)
+		{
+			RBO.vbo[i]->bind();
+			glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE,
+                                  vertTrait[i].stride,
+                                  (void*)vertTrait[i].offset);
+			glEnableVertexAttribArray(i);
+		}
 
 		RBO.ibo.create();
 		RBO.ibo.setUsagePattern(oglBuffer::StaticDraw);
@@ -159,7 +172,7 @@ void MeshViewer::allocateGL()
 	while (!selFACE.empty()) selFACE.pop();*/
 	heMesh->exportSelection(&selVTX, &selHE, &selFACE);
 
-	heMesh->exportVertVBO(&vert_trait, &vRBO.flags);
+	heMesh->exportVertVBO(vertTrait, vertTrait + 1, &vRBO.flags);
 	heMesh->exportEdgeVBO(&heRBO.ibos, &heRBO.ids, &heRBO.flags);
 	heMesh->exportFaceVBO(&fRBO.ibos, &fRBO.ids, &fRBO.flags);
 	vRBO.shrink_to_fit();
@@ -167,12 +180,17 @@ void MeshViewer::allocateGL()
 	fRBO.shrink_to_fit();
 
 	// Bind Vertices Buffer
-	vRBO.vbo->bind();
-    if (vert_trait.count > 0)
-    {
-        vRBO.vbo->allocate(vert_trait.data, vert_trait.size);
-    }
-	vRBO.vbo->release();
+	for (size_t i = 0; i < RenderBufferObject::VBO_TYPE_COUNT; i++)
+	{
+		vRBO.vbo[i]->bind();
+		if (vertTrait[i].count > 0 && vertTrait[i].data)
+		{
+			vRBO.vbo[i]->allocate(vertTrait[i].data, vertTrait[i].size);
+		}
+
+		vRBO.vbo[i]->release();
+	}
+	
 	vRBO.allocateTBO(1);// Bind only flag tbo
 	
 	// Bind Face Buffers
@@ -251,7 +269,7 @@ void MeshViewer::drawMeshToFBO()
 		vRBO.vao.bind();
 		glPointSize(15.0);
 		uid_shader.setUniformValue("mode", 1);
-		glDrawArrays(GL_POINTS, 0, vert_trait.count);
+		glDrawArrays(GL_POINTS, 0, vertTrait[0].count);
 		vRBO.vao.release();//vtx_vbo.release();
 		//draw vertices
 	}
@@ -442,7 +460,7 @@ void MeshViewer::paintGL()
 			glBindTexture(GL_TEXTURE_BUFFER, vRBO.flag_tex);
 			glTexBuffer(GL_TEXTURE_BUFFER, GL_R16UI, vRBO.flag_tbo);
 			vtx_solid_shader.setUniformValue("flag_tex", 0);
-			glDrawArrays(GL_POINTS, 0, vert_trait.count);
+			glDrawArrays(GL_POINTS, 0, vertTrait[0].count);
 
 			vRBO.vao.release();//vtx_vbo.release();
 			vtx_solid_shader.release();
@@ -462,6 +480,7 @@ void MeshViewer::paintGL()
 			face_solid_shader.setUniformValue("view_matrix", view_cam.WorldToCamera);
 			glUniform1ui(oglUniLoc(face_solid_shader, "hl_comp"), hlComp);
 			face_solid_shader.setUniformValue("scale", view_scale);
+			face_solid_shader.setUniformValue("thickness", heMesh->getThickness());
 			// Bind Texture Buffer
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_BUFFER, fRBO.flag_tex);
@@ -654,7 +673,7 @@ void MeshViewer::mouseMoveEvent(QMouseEvent* e)
 	mouseState.y += dy;
 }
 
-void MeshViewer::mouseReleaseEvent(QMouseEvent* e)
+void MeshViewer::mouseReleaseEvent(QMouseEvent* /*e*/)
 {
 	/*
 	switch (interactionState)
@@ -836,7 +855,7 @@ void MeshViewer::selectByRefID()
 
 		for_each(heMesh->vertSet.begin(), heMesh->vertSet.end(),
 			[&](HDS_Vertex &v) { v.setPicked(v.refid == refid); });
-		heMesh->exportVertVBO(nullptr, &vRBO.flags);
+		heMesh->exportVertVBO(nullptr, nullptr, &vRBO.flags);
 		vRBO.allocateTBO(1);
 
 		for_each(heMesh->heSet.begin(), heMesh->heSet.end(),

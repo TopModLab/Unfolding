@@ -3,16 +3,61 @@
 * Face Geometry Shader
 */
 layout(triangles) in;
-layout(triangle_strip, max_vertices = 3) out;
+layout(triangle_strip, max_vertices = 18) out;
 
 uniform mat4 proj_matrix;
 uniform uint hl_comp;// Highlight Components
 uniform usamplerBuffer flag_tex;
+uniform float thickness = 0.0f;
+
+in vec4 vNorm[];
 
 flat out vec3 Kd;
 out vec3 normal;
 out vec3 pos;
 flat out uint flag;
+
+void EmitSide(vec4 p0, vec4 p1, vec4 n0, vec4 n1)
+{
+	vec4 p2 = p0 - n0 * thickness;
+	vec4 p3 = p1 - n1 * thickness;
+	normal = normalize(cross((p3 - p0).xyz, (p1 - p2).xyz));
+
+	pos = p0.xyz;
+	gl_Position = proj_matrix * p0;
+	EmitVertex();
+
+	pos = p2.xyz;
+	gl_Position = proj_matrix * p2;
+	EmitVertex();
+
+	pos = p1.xyz;
+	gl_Position = proj_matrix * p1;
+	EmitVertex();
+	
+	pos = p3.xyz;
+	gl_Position = proj_matrix * p3;
+	EmitVertex();
+
+	EndPrimitive();
+}
+
+void EmitBottom(vec4 p0, vec4 p1, vec4 p2)
+{
+	pos = p0.xyz - vNorm[0].xyz * thickness;
+	gl_Position = proj_matrix * vec4(pos, 1.0f);
+	EmitVertex();
+
+	pos = p1.xyz - vNorm[1].xyz * thickness;
+	gl_Position = proj_matrix * vec4(pos, 1.0f);
+	EmitVertex();
+
+	pos = p2.xyz - vNorm[2].xyz * thickness;
+	gl_Position = proj_matrix * vec4(pos, 1.0f);
+	EmitVertex();
+
+	EndPrimitive();
+}
 
 void main()
 {
@@ -51,6 +96,17 @@ void main()
 	gl_Position = proj_matrix * p2;
 	pos = p2.xyz;
 	EmitVertex();
+	EndPrimitive();
+	
+	// Create thickness
+	if (thickness > 0.0f)
+	{
+		EmitBottom(p0, p1, p2);
+
+		EmitSide(p0, p1, vNorm[0], vNorm[1]);
+		EmitSide(p1, p2, vNorm[1], vNorm[2]);
+		EmitSide(p2, p0, vNorm[2], vNorm[0]);
+	}
 }
 
 
