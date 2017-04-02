@@ -33,6 +33,14 @@ struct MouseState
 };
 struct RenderBufferObject// : protected oglFuncs
 {
+	enum VertexBufferType
+	{
+		POSITION = 0,
+		NORMAL,
+		//COLOR,
+		VBO_TYPE_COUNT
+	};
+
 	RenderBufferObject(oglFuncs* f)
 		: funcs(f)
 		, vao(nullptr)
@@ -57,7 +65,14 @@ struct RenderBufferObject// : protected oglFuncs
 	{
 		vao.release();
 		ibo.release();
-		vbo->release();
+		releaseVBO();
+	}
+	void releaseVBO()
+	{
+		for (size_t i = 0; i < VBO_TYPE_COUNT; i++)
+		{
+			vbo[i]->release();
+		}
 	}
 	void allocateIBO()
 	{
@@ -84,7 +99,7 @@ struct RenderBufferObject// : protected oglFuncs
 	}
 
 	oglFuncs* funcs;
-	shared_ptr<oglBuffer> vbo;
+	shared_ptr<oglBuffer> vbo[VBO_TYPE_COUNT];
 	oglVAO vao;
 	oglBuffer ibo;
 	union
@@ -102,6 +117,7 @@ struct RenderBufferObject// : protected oglFuncs
 	ui32s_t ids;// he id, for querying
 	ui16s_t flags;// he flag data
 };
+
 class MeshViewer : public QOpenGLWidget, oglFuncs
 {
 	Q_OBJECT
@@ -302,7 +318,7 @@ private:
 
 	// VBOs and VAOs
 	// Vertices data and vao
-    VertexBufferTrait vert_trait;
+	VertexBufferTrait vertTrait[RenderBufferObject::VBO_TYPE_COUNT];
 
 	RenderBufferObject vRBO;
 	RenderBufferObject fRBO;
