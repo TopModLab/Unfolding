@@ -1713,7 +1713,7 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 	fillNullFaces(hes, faces, exposedHEs);
 	HDS_Mesh* ret = new HDS_Mesh(verts, hes, faces);
 	//ret->updatePieceSet();
-
+	ret->setThickness(layerOffset);
 	return ret;
 }
 HDS_Mesh* MeshNeoWeaver::createBiTriWeaving(const mesh_t* ref_mesh,
