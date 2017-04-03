@@ -640,6 +640,7 @@ HDS_Mesh* MeshNeoWeaver::createClassicalWeaving(const mesh_t* ref_mesh,
 	size_t refEdgeCount = refHeCount >> 1;
 	size_t refFaceCount = ref_faces.size();
 
+
 	mesh_t::resetIndex();
 	vector<vert_t> verts(refHeCount << 2);
 	vector<he_t> hes(refHeCount << 2);

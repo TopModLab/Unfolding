@@ -44,6 +44,8 @@ void EmitSide(vec4 p0, vec4 p1, vec4 n0, vec4 n1)
 
 void EmitBottom(vec4 p0, vec4 p1, vec4 p2)
 {
+	// If prefer backside as normal color, remove the comment here.
+	//normal = -normal;
 	pos = p0.xyz - vNorm[0].xyz * thickness;
 	gl_Position = proj_matrix * vec4(pos, 1.0f);
 	EmitVertex();
