@@ -45,6 +45,7 @@ void OperationStack::redo()
 /*call push in meshManger*/
 void OperationStack::push(HDS_Mesh* curMesh)
 {
+	curMesh->updateVertNormal();
 	opStack.push(QSharedPointer<Operation>(new Operation(curMesh, curFlag)));
 	setCurrentFlag(curFlag);
 	if (curFlag == Original)
