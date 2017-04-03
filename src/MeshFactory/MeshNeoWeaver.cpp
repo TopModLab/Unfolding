@@ -1471,7 +1471,7 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 				 cornerPatchPos[he.index * 3]);
 	}
 	// Construct bridge patch
-	const int nESamples = 4;
+	const int nESamples = 16;
 	const int nFSamples = 8;
 	const int sPatchFaceCount = (nESamples * 4 + 3) + (nFSamples + 2) * 2;
 

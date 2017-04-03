@@ -674,15 +674,16 @@ void MainWindow::slot_triggerNeoWeaveMesh()
 
 	if (MeshManager::getInstance()->getMeshStack()->canRim)
 	{
-		BBox3 bb;
-		for (auto v : MeshManager::getInstance()->getMeshStack()->getOriMesh()->verts())
+		Float shortestEdge = (Float)INT_MAX;
+		HDS_Mesh* ori_mesh = MeshManager::getInstance()->getMeshStack()->getOriMesh();
+		for (auto &he : ori_mesh->halfedges())
 		{
-			bb.Union(v.pos);
+			if (he.flip_offset>0) continue;
+			shortestEdge = min(shortestEdge, ori_mesh->edgeVector(he).length());
 		}
 
 		//size corresponding to inch
-		float bound = bb.getDiagnal().length();
-		neowv_panel->setSize(bound);
+		neowv_panel->setSize(shortestEdge/10.0f);
 		neowv_panel->show();
 		neowv_panel->activateWindow();
 	}
