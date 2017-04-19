@@ -168,16 +168,24 @@ inline void LineLineIntersect(
 	//*pb = p3 + mub * p43;
 }
 
-//from http://math.stackexchange.com/questions/83990/line-and-plane-intersection-in-3d
-inline QVector3D LinePlaneIntersect(
+//from http://stackoverflow.com/questions/7168484/3d-line-segment-and-plane-intersection
+inline bool LinePlaneIntersect(
 	QVector3D la, QVector3D lb,
-	QVector3D p, QVector3D n) 
+	QVector3D p, QVector3D n, QVector3D* contact) 
 {
-	QVector3D ba = lb - la;
-	float nDotA = QVector3D::dotProduct(n, la);
-	float nDotBA = QVector3D::dotProduct(n, ba);
+	// get d value
+	float d = QVector3D::dotProduct(n, p);
 
-	return la + (((p.length() - nDotA) / nDotBA) * ba);
+	if (QVector3D::dotProduct(n, lb-la) == 0) {
+		return false; // No intersection, the line is parallel to the plane
+	}
+
+	// Compute the X value for the directed line ray intersecting the plane
+	float x = (d - QVector3D::dotProduct(n, la)) / QVector3D::dotProduct(n, lb-la);
+
+	// output contact point
+	*contact = la + (lb-la).normalized()*x; //Make sure your ray vector is normalized
+	return true;
 }
 
 }

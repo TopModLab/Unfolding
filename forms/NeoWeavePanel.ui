@@ -95,7 +95,7 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
        <property name="maximum">
-        <double>1.000000000000000</double>
+        <double>0.990000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.050000000000000</double>
@@ -115,7 +115,7 @@
      <item row="3" column="1">
       <widget class="QSlider" name="stripScaleSlider">
        <property name="maximum">
-        <number>100</number>
+        <number>99</number>
        </property>
        <property name="singleStep">
         <number>1</number>
