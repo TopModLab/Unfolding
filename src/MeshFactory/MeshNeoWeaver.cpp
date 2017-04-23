@@ -1426,9 +1426,9 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 											   const confMap &conf) {
 	// scaling 
 	const Float patchScale = conf.at("patchScale");
-	const bool patchUniform = (conf.at("patchUniform") == 1.0f);
+	//const bool patchUniform = (conf.at("patchUniform") == 1.0f);
 	const Float layerOffset = conf.at("layerOffset");
-	const Float stripWidth = conf.at("patchStripWidth");
+	//const Float stripWidth = conf.at("patchStripWidth");
 	const Float smoothness = conf.at("patchStripScale"); // 0.25 by default
 	const uint32_t patchSeg = 2;// static_cast<uint32_t>(conf.at("patchSeg"));
 	//const uint32_t patchCurvedSample = 3;
@@ -1449,26 +1449,24 @@ HDS_Mesh* MeshNeoWeaver::createTriangleWeaving(const mesh_t* ref_mesh,
 	{
 		heCenters[he.index] = ref_mesh->edgeCenter(he);
 	}
-	// cache edge patch pos
-	vector<QVector3D> cornerPatchPos(refHeCount * 4);
+	// cache face patch pos
+	vector<QVector3D> cornerPatchPos(refHeCount * 6);
 	for (auto &he: ref_hes)
 	{
-		QVector3D c = (heCenters[he.index] + heCenters[he.next()->index])/2;
-		cornerPatchPos[he.index * 4 + 0] = 
-			Utils::Lerp(c, ref_mesh->vertFromHe(he.index)->pos, patchScale);
-		cornerPatchPos[he.index * 4 + 1] = 
-		cornerPatchPos[he.index * 4 + 2] =
-			Utils::Lerp(c, ref_mesh->vertFromHe(he.next()->index)->pos, patchScale);
-		cornerPatchPos[he.index * 4 + 3] = 
-			Utils::Lerp(c, ref_mesh->vertFromHe(he.next()->next()->index)->pos, patchScale);
+		QVector3D v0 = ref_mesh->vertFromHe(he.index)->pos;
+		QVector3D v1 = ref_mesh->vertFromHe(he.next()->index)->pos;
+		QVector3D v2 = ref_mesh->vertFromHe(he.next()->next()->index)->pos;
+		QVector3D vm = (v0 + v2) / 2.0;
+		QVector3D vc0 = Utils::Lerp((v0 + v1) / 2.0, (v1 + v2) / 2.0, 1 / 3.0);
+		QVector3D vc1 = Utils::Lerp((v0 + v1) / 2.0, (v1 + v2) / 2.0, 2 / 3.0);
 
-		//scale inwards
-		QVector3D mid01 = (cornerPatchPos[he.index * 4 + 0] + cornerPatchPos[he.index * 4 + 1]) / 2;
-		cornerPatchPos[he.index * 4 + 0] = Utils::Lerp(mid01, cornerPatchPos[he.index * 4 + 0], stripWidth);
-		cornerPatchPos[he.index * 4 + 1] = Utils::Lerp(mid01, cornerPatchPos[he.index * 4 + 1], stripWidth);
-		QVector3D mid23 = (cornerPatchPos[he.index * 4 + 2] + cornerPatchPos[he.index * 4 + 3]) / 2;
-		cornerPatchPos[he.index * 4 + 2] = Utils::Lerp(mid23, cornerPatchPos[he.index * 4 + 2], stripWidth);
-		cornerPatchPos[he.index * 4 + 3] = Utils::Lerp(mid23, cornerPatchPos[he.index * 4 + 3], stripWidth);
+		cornerPatchPos[he.index * 6 + 0] = Utils::Lerp(vc0, v0, patchScale);
+		cornerPatchPos[he.index * 6 + 1] = Utils::Lerp(vc0, v1, patchScale);
+		cornerPatchPos[he.index * 6 + 2] = Utils::Lerp(vc0, vm, patchScale);
+		cornerPatchPos[he.index * 6 + 3] = Utils::Lerp(vc1, vm, patchScale);
+		cornerPatchPos[he.index * 6 + 4] = Utils::Lerp(vc1, v1, patchScale);
+		cornerPatchPos[he.index * 6 + 5] = Utils::Lerp(vc1, v2, patchScale);
+
 	}
 	// cache edge patch overlapping region
 	#if 0
@@ -1496,10 +1494,14 @@ vector<QVector3D> heOverlap(refHeCount*4);
 	vector<QVector3D> heNorm(refHeCount);
 	for (auto &he : ref_hes)
 	{
-		if (he.flip_offset>0) continue;
-		heNorm[he.index] = heNorm[he.flip()->index] =
-			QVector3D::normal(cornerPatchPos[he.flip()->index * 4 + 1],
-				cornerPatchPos[he.index * 4 + 1], cornerPatchPos[he.index * 4]);
+		if (he.flip_offset < 0) continue;
+		heNorm[he.index] = 
+			QVector3D::normal(cornerPatchPos[he.flip()->index * 6 + 1],
+				cornerPatchPos[he.index * 6 + 1], cornerPatchPos[he.index * 6]);
+		heNorm[he.flip()->index] =
+			QVector3D::normal(cornerPatchPos[he.flip()->prev()->index * 6 + 5],
+				cornerPatchPos[he.prev()->index * 6 + 5], cornerPatchPos[he.prev()->index * 6 + 4]);
+
 	}
 	// Construct bridge patch
 	const int nESamples = 8;
@@ -1581,51 +1583,44 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			// Quad--Tri--Quad--Tri(face band)--Quad(Edge band)
 			auto patchVerts = &verts[(curPatchID-1) * sPatchVertCount];
 
-			patchPos[segIndex[0] + 1] = cornerPatchPos[neiEdgeIDs[0] * 4];
-			patchPos[segIndex[0]] = cornerPatchPos[neiEdgeIDs[0] * 4 + 1];
+			patchPos[segIndex[0] + 1] = cornerPatchPos[neiEdgeIDs[0] * 6];
+			patchPos[segIndex[0]] = cornerPatchPos[neiEdgeIDs[0] * 6 + 1];
 			
 			//face patch
-			patchPos[segIndex[1] + 1] = patchPos[segIndex[2] + 1] = cornerPatchPos[neiEdgeIDs[1] * 4 + 1];
-			patchPos[segIndex[1]] = patchPos[segIndex[2]] = cornerPatchPos[neiEdgeIDs[1] * 4];
-			patchPos[segIndex[3] + 1] = patchPos[segIndex[4] + 1] =
-				(cornerPatchPos[neiEdgeIDs[1] * 4 + 1] + cornerPatchPos[neiEdgeIDs[1] * 4 + 2]) / 2;
-			patchPos[segIndex[3]] = patchPos[segIndex[4]] =
-				(cornerPatchPos[neiEdgeIDs[1] * 4] + cornerPatchPos[neiEdgeIDs[1] * 4 + 3]) / 2;
-			patchPos[segIndex[5] + 1] = patchPos[segIndex[6] + 1] = cornerPatchPos[neiEdgeIDs[1] * 4 + 2];
-			patchPos[segIndex[5]] = patchPos[segIndex[6]] = cornerPatchPos[neiEdgeIDs[1] * 4 + 3];
+			QVector3D vs = ref_mesh->vertFromHe(neiEdgeIDs[0])->pos;
+			QVector3D ve = ref_mesh->vertFromHe(neiEdgeIDs[1])->pos;
+			QVector3D vm = (vs + ve) / 2.0;
+			patchPos[segIndex[1] + 1] = Utils::Lerp(vm, vs, patchScale);
+			patchPos[segIndex[1]] = Utils::Lerp(vm, ve, patchScale);
+			patchPos[segIndex[2] + 1] = patchPos[segIndex[3] + 1] = cornerPatchPos[neiEdgeIDs[1] * 6 + 1];
+			patchPos[segIndex[2]] = cornerPatchPos[neiEdgeIDs[1] * 6];
+			patchPos[segIndex[3]] = cornerPatchPos[neiEdgeIDs[1] * 6 + 2];
+
+			patchPos[segIndex[4] + 1] = patchPos[segIndex[5] + 1] = cornerPatchPos[neiEdgeIDs[1] * 6 + 4];
+			patchPos[segIndex[4]] = cornerPatchPos[neiEdgeIDs[1] * 6 + 3];
+			patchPos[segIndex[5]] = cornerPatchPos[neiEdgeIDs[1] * 6 + 5];
+			vs = ref_mesh->vertFromHe(neiEdgeIDs[2])->pos;
+			ve = ref_mesh->vertFromHe(neiEdgeIDs[3])->pos;
+			vm = (vs + ve) / 2.0;
+			patchPos[segIndex[6] + 1] = patchPos[segIndex[7] + 1] = Utils::Lerp(vm, vs, patchScale);
+			patchPos[segIndex[6]] = patchPos[segIndex[7]] = Utils::Lerp(vm, ve, patchScale);
+
 			//second face patch
-			patchPos[segIndex[7]] = patchPos[segIndex[8]] = cornerPatchPos[neiEdgeIDs[4] * 4 + 2];
-			patchPos[segIndex[7] + 1] = patchPos[segIndex[8] + 1] = cornerPatchPos[neiEdgeIDs[4] * 4 + 3];
-			patchPos[segIndex[9]] = patchPos[segIndex[10]] =
-				(cornerPatchPos[neiEdgeIDs[4] * 4 + 1] + cornerPatchPos[neiEdgeIDs[4] * 4 + 2]) / 2;
-			patchPos[segIndex[9] + 1] = patchPos[segIndex[10] + 1] =
-				(cornerPatchPos[neiEdgeIDs[4] * 4] + cornerPatchPos[neiEdgeIDs[4] * 4 + 3]) / 2;
-			patchPos[segIndex[11]] = patchPos[segIndex[12]] = cornerPatchPos[neiEdgeIDs[4] * 4 + 1];
-			patchPos[segIndex[11] + 1] = patchPos[segIndex[12] + 1] = cornerPatchPos[neiEdgeIDs[4] * 4];
+			patchPos[segIndex[8]] = patchPos[segIndex[9]] = cornerPatchPos[neiEdgeIDs[4] * 6 + 4];
+			patchPos[segIndex[8] + 1] = cornerPatchPos[neiEdgeIDs[4] * 6 + 5];
+			patchPos[segIndex[9] + 1] = cornerPatchPos[neiEdgeIDs[4] * 6 + 3];
+			vs = ref_mesh->vertFromHe(neiEdgeIDs[4])->pos;
+			ve = ref_mesh->vertFromHe(neiEdgeIDs[5])->pos;
+			vm = (vs + ve) / 2.0;
+			patchPos[segIndex[12] + 1] = Utils::Lerp(vm, vs, patchScale);
+			patchPos[segIndex[12]] = Utils::Lerp(vm, ve, patchScale);
+			patchPos[segIndex[10] + 1] = cornerPatchPos[neiEdgeIDs[4] * 6 + 2];
+			patchPos[segIndex[10]] = patchPos[segIndex[11]] = cornerPatchPos[neiEdgeIDs[4] * 6 + 1];
+			patchPos[segIndex[11] + 1] = cornerPatchPos[neiEdgeIDs[4] * 6];
 			//edge patch
-			patchPos[segIndex[13] + 1] = cornerPatchPos[neiEdgeIDs[5] * 4 + 1];
-			patchPos[segIndex[13]] = cornerPatchPos[neiEdgeIDs[5] * 4];
-			// reconstruct face patch
-			//first patch
-			QVector3D center = patchPos[segIndex[3] + 1];
-			QVector3D mid = (patchPos[segIndex[2] + 1] + patchPos[segIndex[3] + 1]) / 2;
-			patchPos[segIndex[2] + 1] = patchPos[segIndex[3] + 1] = mid;
-			patchPos[segIndex[2]] -= patchPos[segIndex[1] + 1] - mid;
-			patchPos[segIndex[3]] += mid - center;
-			mid = (patchPos[segIndex[4] + 1] + patchPos[segIndex[5] + 1]) / 2;
-			patchPos[segIndex[4] + 1] = patchPos[segIndex[5] + 1] = mid;
-			patchPos[segIndex[4]] += mid - center;
-			patchPos[segIndex[5]] -= patchPos[segIndex[6] + 1] - mid;
-			//second patch
-			center = patchPos[segIndex[9]];
-			mid = (patchPos[segIndex[8]] + patchPos[segIndex[9]]) / 2;
-			patchPos[segIndex[8]] = patchPos[segIndex[9]] = mid;
-			patchPos[segIndex[8]+1] -= patchPos[segIndex[7]] - mid;
-			patchPos[segIndex[9]+1] += mid - center;
-			mid = (patchPos[segIndex[10]] + patchPos[segIndex[11]]) / 2;
-			patchPos[segIndex[10]] = patchPos[segIndex[11]] = mid;
-			patchPos[segIndex[10]+1] += mid - center;
-			patchPos[segIndex[11]+1] -= patchPos[segIndex[12]] - mid;
+			patchPos[segIndex[13] + 1] = cornerPatchPos[neiEdgeIDs[5] * 6 + 1];
+			patchPos[segIndex[13]] = cornerPatchPos[neiEdgeIDs[5] * 6];
+			
 
 			auto cubicBezierPos = [](
 				QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3,
@@ -1638,21 +1633,21 @@ vector<QVector3D> heOverlap(refHeCount*4);
 				p.clear();
 			};
 			// calculate face control points
-			QVector3D cp3 = Utils::Lerp(patchPos[segIndex[3]], patchPos[segIndex[4]], 0.25);
-			QVector3D cp3_1 = Utils::Lerp(patchPos[segIndex[3]+1], patchPos[segIndex[4]+1], 0.25);
-			QVector3D cp4 = Utils::Lerp(patchPos[segIndex[3]], patchPos[segIndex[4]], 0.75);
-			QVector3D cp4_1 = Utils::Lerp(patchPos[segIndex[3] + 1], patchPos[segIndex[4] + 1], 0.75);
+			QVector3D cp3 = Utils::Lerp(patchPos[segIndex[3]], patchPos[segIndex[4]], smoothness/2.0);
+			QVector3D cp3_1 = Utils::Lerp(patchPos[segIndex[3]+1], patchPos[segIndex[4]+1], smoothness/2.0);
+			QVector3D cp4 = Utils::Lerp(patchPos[segIndex[4]], patchPos[segIndex[3]], smoothness / 2.0);
+			QVector3D cp4_1 = Utils::Lerp(patchPos[segIndex[4] + 1], patchPos[segIndex[3] + 1], smoothness / 2.0);
 			//second patch
-			QVector3D cp9 = Utils::Lerp(patchPos[segIndex[9]], patchPos[segIndex[10]], 0.25);
-			QVector3D cp9_1 = Utils::Lerp(patchPos[segIndex[9] + 1], patchPos[segIndex[10] + 1], 0.25);
-			QVector3D cp10 = Utils::Lerp(patchPos[segIndex[9]], patchPos[segIndex[10]], 0.75);
-			QVector3D cp10_1 = Utils::Lerp(patchPos[segIndex[9] + 1], patchPos[segIndex[10] + 1], 0.75);
+			QVector3D cp9 = Utils::Lerp(patchPos[segIndex[9]], patchPos[segIndex[10]], smoothness / 2.0);
+			QVector3D cp9_1 = Utils::Lerp(patchPos[segIndex[9] + 1], patchPos[segIndex[10] + 1], smoothness / 2.0);
+			QVector3D cp10 = Utils::Lerp(patchPos[segIndex[10]], patchPos[segIndex[9]], smoothness / 2.0);
+			QVector3D cp10_1 = Utils::Lerp(patchPos[segIndex[10] + 1], patchPos[segIndex[9] + 1], smoothness / 2.0);
 
 			// update bridge up/down
 			for (int i = 4; i < 10; i++)
 			{
-				patchPos[segIndex[i]] += heNorm[neiEdgeIDs[2]] * layerOffset;
-				patchPos[segIndex[i]+1] += heNorm[neiEdgeIDs[2]] * layerOffset;
+				patchPos[segIndex[i]] += heNorm[neiEdgeIDs[3]] * layerOffset;
+				patchPos[segIndex[i]+1] += heNorm[neiEdgeIDs[3]] * layerOffset;
 			}
 			for (int i = 10; i < 14; i++)
 			{
@@ -1660,23 +1655,32 @@ vector<QVector3D> heOverlap(refHeCount*4);
 				patchPos[segIndex[i] + 1] -= heNorm[neiEdgeIDs[4]] * layerOffset;
 			}
 
-			//intepolate face samples
+			//interpolate face samples
 			cubicBezierPos(
-				patchPos[segIndex[3]], cp3, cp4 + heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4]],
+				patchPos[segIndex[3]], cp3, cp4 + heNorm[neiEdgeIDs[3]] * layerOffset, patchPos[segIndex[4]],
 				&patchPos[segIndex[3]], nFSamples);
 			cubicBezierPos(
-				patchPos[segIndex[3] + 1], cp3_1, cp4_1 + heNorm[neiEdgeIDs[2]] * layerOffset, patchPos[segIndex[4] + 1],
+				patchPos[segIndex[3] + 1], cp3_1, cp4_1 + heNorm[neiEdgeIDs[3]] * layerOffset, patchPos[segIndex[4] + 1],
 				&patchPos[segIndex[3] + 1], nFSamples);
 			cubicBezierPos(
-				patchPos[segIndex[9]], cp9 + heNorm[neiEdgeIDs[2]] * layerOffset, 
+				patchPos[segIndex[9]], cp9 + heNorm[neiEdgeIDs[3]] * layerOffset, 
 				cp10 - heNorm[neiEdgeIDs[4]] * layerOffset, patchPos[segIndex[10]],
 				&patchPos[segIndex[9]], nFSamples);
 			cubicBezierPos(
-				patchPos[segIndex[9]+1], cp9_1 + heNorm[neiEdgeIDs[2]] * layerOffset,
+				patchPos[segIndex[9]+1], cp9_1 + heNorm[neiEdgeIDs[3]] * layerOffset,
 				cp10_1 - heNorm[neiEdgeIDs[4]] * layerOffset, patchPos[segIndex[10]+1],
 				&patchPos[segIndex[9]+1], nFSamples);
 
 			//interpolate edge samples
+			cubicBezierPos(patchPos[segIndex[0]], Utils::Lerp(patchPos[segIndex[0]], patchPos[segIndex[1]], smoothness / 2.0),
+				Utils::Lerp(patchPos[segIndex[2]], patchPos[segIndex[1]], smoothness / 2.0), patchPos[segIndex[2]],
+				&patchPos[segIndex[0]], nESamples + 1);
+
+			cubicBezierPos(patchPos[segIndex[0]+1], Utils::Lerp(patchPos[segIndex[0]+1], patchPos[segIndex[1]+1], smoothness / 2.0),
+				Utils::Lerp(patchPos[segIndex[2]+1], patchPos[segIndex[1]+1], smoothness / 2.0), patchPos[segIndex[2]+1],
+				&patchPos[segIndex[0]+1], nESamples + 1);
+#if 0
+
 			QVector3D cp;
 			cp = Utils::Lerp(patchPos[segIndex[1]], (patchPos[segIndex[0]] + patchPos[segIndex[1]]) / 2, smoothness);
 			cubicBezierPos(cp, Utils::Lerp(cp, patchPos[segIndex[1]], 0.5),
@@ -1686,29 +1690,24 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			cubicBezierPos(cp, Utils::Lerp(cp, patchPos[segIndex[1] + 1], 0.5),
 				patchPos[segIndex[1] + 1], patchPos[segIndex[2] + 1],
 				&patchPos[segIndex[1] + 1], nESamples);
+#endif
 
-			QVector3D cp6 = patchPos[segIndex[6]];
-			QVector3D cp6_1 = patchPos[segIndex[6] + 1];
-			QVector3D cp7 = patchPos[segIndex[7]];
-			QVector3D cp7_1 = patchPos[segIndex[7] + 1];
-			cp = Utils::Lerp(patchPos[segIndex[6]], (patchPos[segIndex[7]] + patchPos[segIndex[6]]) / 2, smoothness);
-			cubicBezierPos(patchPos[segIndex[5]], patchPos[segIndex[6]],
-				Utils::Lerp(cp, patchPos[segIndex[6]], 0.5), cp,
-				&patchPos[segIndex[5]], nESamples);
-			cp = Utils::Lerp(patchPos[segIndex[6] + 1], (patchPos[segIndex[7] + 1] + patchPos[segIndex[6] + 1]) / 2, smoothness);
-			cubicBezierPos(patchPos[segIndex[5] + 1], patchPos[segIndex[6] + 1],
-				Utils::Lerp(cp, patchPos[segIndex[6] + 1], 0.5), cp,
-				&patchPos[segIndex[5] + 1], nESamples);
+			cubicBezierPos(patchPos[segIndex[5]], Utils::Lerp(patchPos[segIndex[5]], patchPos[segIndex[6]], smoothness/2.0),
+				Utils::Lerp(patchPos[segIndex[8]], patchPos[segIndex[7]], smoothness / 2.0), patchPos[segIndex[8]],
+				&patchPos[segIndex[5]], nESamples*2+1);
 
-			cp = Utils::Lerp(cp7, (cp6 + cp7) / 2, smoothness);
-			cubicBezierPos(cp, Utils::Lerp(cp, cp7, 0.5),
-				cp7, patchPos[segIndex[8]],
-				&patchPos[segIndex[7]], nESamples);
-			cp = Utils::Lerp(cp7_1, (cp6_1 + cp7_1) / 2, smoothness);
-			cubicBezierPos(cp, Utils::Lerp(cp, cp7_1, 0.5),
-				cp7_1, patchPos[segIndex[8] + 1],
-				&patchPos[segIndex[7] + 1], nESamples);
+			cubicBezierPos(patchPos[segIndex[5]+1], Utils::Lerp(patchPos[segIndex[5]+1], patchPos[segIndex[6]+1], smoothness / 2.0),
+				Utils::Lerp(patchPos[segIndex[8]+1], patchPos[segIndex[7]+1], smoothness / 2.0), patchPos[segIndex[8]+1],
+				&patchPos[segIndex[5]+1], nESamples * 2 + 1);
 
+			cubicBezierPos(patchPos[segIndex[11]], Utils::Lerp(patchPos[segIndex[11]], patchPos[segIndex[12]], smoothness / 2.0),
+				Utils::Lerp(patchPos[segIndex[13]], patchPos[segIndex[12]], smoothness / 2.0), patchPos[segIndex[13]],
+				&patchPos[segIndex[11]], nESamples + 1);
+
+			cubicBezierPos(patchPos[segIndex[11] + 1], Utils::Lerp(patchPos[segIndex[11] + 1], patchPos[segIndex[12] + 1], smoothness / 2.0),
+				Utils::Lerp(patchPos[segIndex[13] + 1], patchPos[segIndex[12] + 1], smoothness / 2.0), patchPos[segIndex[13] + 1],
+				&patchPos[segIndex[11] + 1], nESamples + 1);
+#if 0
 			cp = Utils::Lerp(patchPos[segIndex[12]], (patchPos[segIndex[12]] + patchPos[segIndex[13]]) / 2, smoothness);
 			cubicBezierPos(patchPos[segIndex[11]], patchPos[segIndex[12]],
 				Utils::Lerp(cp, patchPos[segIndex[12]], 0.5), cp,
@@ -1717,6 +1716,7 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			cubicBezierPos(patchPos[segIndex[11] + 1], patchPos[segIndex[12] + 1],
 				Utils::Lerp(cp, patchPos[segIndex[12] + 1], 0.5), cp,
 				&patchPos[segIndex[11] + 1], nESamples);
+#endif
 
 			// Assign evaluated positions to patch
 			for (int j = 0; j < sPatchVertCount; j++)
@@ -1739,6 +1739,7 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			curHE = curHE->rotCCW()->next()->flip();
 		} while (curHE != he);
 	}
+#if 1
 
 	// cut off excessive flip region
 	for (int i = 0; i < refHeCount; i++)
@@ -1771,6 +1772,7 @@ vector<QVector3D> heOverlap(refHeCount*4);
 		QVector3D intersectN = top^mid ? intersectN1 : intersectN0;
 		QVector3D intersectV = top^mid ? intersectV1 : intersectV0;
 		Float threshold = 0;
+		vector<hdsid_t> cacheV;
 		do 
 		{
 			bool isIn0 = QVector3D::dotProduct((verts[vOffset].pos - intersectP), intersectN)>threshold;
@@ -1783,25 +1785,29 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			bool isAllOut = !isIn0 & !isIn1 & !isIn2 & !isIn3;
 			if (isAllIn) break;
 			else if (isAllOut) {
-				//delete(hide) this face
-				hes[verts[vOffset + 2].heID()].flip()->flip_offset = 0;
-				hes[verts[vOffset + 2].heID()].flip_offset = 0;
+				//(hide) this face
+				cacheV.push_back(vOffset);
 			}
 			else {
 				//calculate intersection points
 				QVector3D p0, p1;
-				Utils::LineLineIntersect(verts[vOffset].pos, verts[vOffset + 2].pos, intersectP, intersectP + intersectV, &p0);
-				Utils::LineLineIntersect(verts[vOffset+1].pos, verts[vOffset + 3].pos, intersectP, intersectP + intersectV, &p1);
+				Utils::LineLineIntersect(verts[vOffset].pos, verts[vOffset + 1].pos, intersectP, intersectP + intersectV, &p0);
+				Utils::LineLineIntersect(verts[vOffset+2].pos, verts[vOffset + 3].pos, intersectP, intersectP + intersectV, &p1);
 
+				if (!cacheV.empty()) {
+					for (auto vid: cacheV)
+						verts[vid].pos = verts[vid + 1].pos = verts[vid + 2].pos = verts[vid + 3].pos = p0;
+					cacheV.clear();
+				}
 				//move to intersection points
 				if (!isIn0) verts[vOffset].pos = p0;
-				if (!isIn1) verts[vOffset + 1].pos = p1;
-				if (!isIn2) verts[vOffset + 2].pos = p0;
+				if (!isIn1) verts[vOffset + 1].pos = p0;
+				if (!isIn2) verts[vOffset + 2].pos = p1;
 				if (!isIn3) verts[vOffset + 3].pos = p1;
 
 			}
 			vOffset += 2;
-		} while (!isAllIn && vOffset < midID * sPatchVertCount + segIndex[2]);
+		} while (!isAllIn && vOffset <= midID * sPatchVertCount + segIndex[2]);
 
 		//for all bot vertices check if is within region
 		isAllIn = false;
@@ -1822,25 +1828,30 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			if (isAllIn) break;
 			else if (isAllOut) {
 				//delete(hide) this face
-				hes[verts[vOffset + 2].heID()].flip()->flip_offset = 0;
-				hes[verts[vOffset + 2].heID()].flip_offset = 0;
+				cacheV.push_back(vOffset-2);
 			}
 			else {
 				//calculate intersection points
 				QVector3D p0, p1;
-				Utils::LineLineIntersect(verts[vOffset-2].pos, verts[vOffset].pos, intersectP, intersectP + intersectV, &p0);
-				Utils::LineLineIntersect(verts[vOffset-1].pos, verts[vOffset + 1].pos, intersectP, intersectP + intersectV, &p1);
+				Utils::LineLineIntersect(verts[vOffset-2].pos, verts[vOffset-1].pos, intersectP, intersectP + intersectV, &p0);
+				Utils::LineLineIntersect(verts[vOffset].pos, verts[vOffset + 1].pos, intersectP, intersectP + intersectV, &p1);
 
+				if (!cacheV.empty()) {
+					for (auto vid : cacheV)
+						verts[vid].pos = verts[vid + 1].pos = verts[vid + 2].pos = verts[vid + 3].pos = p0;
+				}
+				cacheV.clear();
 				//move to intersection points
 				if (!isIn0) verts[vOffset-2].pos = p0;
-				if (!isIn1) verts[vOffset - 1].pos = p1;
-				if (!isIn2) verts[vOffset].pos = p0;
+				if (!isIn1) verts[vOffset - 1].pos = p0;
+				if (!isIn2) verts[vOffset].pos = p1;
 				if (!isIn3) verts[vOffset + 1].pos = p1;
 
 			}
 			vOffset -= 2;
-		} while (!isAllIn && vOffset > botID * sPatchVertCount + segIndex[11]);
+		} while (!isAllIn && vOffset >= botID * sPatchVertCount + segIndex[11]);
 	}
+#endif
 
 	// Finalize Mesh
 	unordered_set<hdsid_t> exposedHEs;
