@@ -1580,7 +1580,7 @@ vector<QVector3D> heOverlap(refHeCount*4);
 				curHE->flip()->prev()->flip()->index
 			};
 			//get bezier control points
-			// Quad--Tri--Quad--Tri(face band)--Quad(Edge band)
+			// Tri - Quad--Tri--Quad--Tri(face band)--Quad(Edge band) - Tri(Connector region)
 			auto patchVerts = &verts[(curPatchID-1) * sPatchVertCount];
 
 			patchPos[segIndex[0] + 1] = cornerPatchPos[neiEdgeIDs[0] * 6];
@@ -1674,11 +1674,11 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			//interpolate edge samples
 			cubicBezierPos(patchPos[segIndex[0]], Utils::Lerp(patchPos[segIndex[0]], patchPos[segIndex[1]], smoothness / 2.0),
 				Utils::Lerp(patchPos[segIndex[2]], patchPos[segIndex[1]], smoothness / 2.0), patchPos[segIndex[2]],
-				&patchPos[segIndex[0]], nESamples + 1);
+				&patchPos[segIndex[1]], nESamples);
 
 			cubicBezierPos(patchPos[segIndex[0]+1], Utils::Lerp(patchPos[segIndex[0]+1], patchPos[segIndex[1]+1], smoothness / 2.0),
 				Utils::Lerp(patchPos[segIndex[2]+1], patchPos[segIndex[1]+1], smoothness / 2.0), patchPos[segIndex[2]+1],
-				&patchPos[segIndex[0]+1], nESamples + 1);
+				&patchPos[segIndex[1]+1], nESamples);
 #if 0
 
 			QVector3D cp;
@@ -1702,11 +1702,11 @@ vector<QVector3D> heOverlap(refHeCount*4);
 
 			cubicBezierPos(patchPos[segIndex[11]], Utils::Lerp(patchPos[segIndex[11]], patchPos[segIndex[12]], smoothness / 2.0),
 				Utils::Lerp(patchPos[segIndex[13]], patchPos[segIndex[12]], smoothness / 2.0), patchPos[segIndex[13]],
-				&patchPos[segIndex[11]], nESamples + 1);
+				&patchPos[segIndex[11]], nESamples);
 
 			cubicBezierPos(patchPos[segIndex[11] + 1], Utils::Lerp(patchPos[segIndex[11] + 1], patchPos[segIndex[12] + 1], smoothness / 2.0),
 				Utils::Lerp(patchPos[segIndex[13] + 1], patchPos[segIndex[12] + 1], smoothness / 2.0), patchPos[segIndex[13] + 1],
-				&patchPos[segIndex[11] + 1], nESamples + 1);
+				&patchPos[segIndex[11] + 1], nESamples);
 #if 0
 			cp = Utils::Lerp(patchPos[segIndex[12]], (patchPos[segIndex[12]] + patchPos[segIndex[13]]) / 2, smoothness);
 			cubicBezierPos(patchPos[segIndex[11]], patchPos[segIndex[12]],
@@ -1717,6 +1717,7 @@ vector<QVector3D> heOverlap(refHeCount*4);
 				Utils::Lerp(cp, patchPos[segIndex[12] + 1], 0.5), cp,
 				&patchPos[segIndex[11] + 1], nESamples);
 #endif
+
 
 			// Assign evaluated positions to patch
 			for (int j = 0; j < sPatchVertCount; j++)
