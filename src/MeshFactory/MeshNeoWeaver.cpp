@@ -1679,18 +1679,8 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			cubicBezierPos(patchPos[segIndex[0]+1], Utils::Lerp(patchPos[segIndex[0]+1], patchPos[segIndex[1]+1], smoothness / 2.0),
 				Utils::Lerp(patchPos[segIndex[2]+1], patchPos[segIndex[1]+1], smoothness / 2.0), patchPos[segIndex[2]+1],
 				&patchPos[segIndex[1]+1], nESamples);
-#if 0
 
-			QVector3D cp;
-			cp = Utils::Lerp(patchPos[segIndex[1]], (patchPos[segIndex[0]] + patchPos[segIndex[1]]) / 2, smoothness);
-			cubicBezierPos(cp, Utils::Lerp(cp, patchPos[segIndex[1]], 0.5),
-				patchPos[segIndex[1]], patchPos[segIndex[2]],
-				&patchPos[segIndex[1]], nESamples);
-			cp = Utils::Lerp(patchPos[segIndex[1] + 1], (patchPos[segIndex[0] + 1] + patchPos[segIndex[1] + 1]) / 2, smoothness);
-			cubicBezierPos(cp, Utils::Lerp(cp, patchPos[segIndex[1] + 1], 0.5),
-				patchPos[segIndex[1] + 1], patchPos[segIndex[2] + 1],
-				&patchPos[segIndex[1] + 1], nESamples);
-#endif
+			patchPos[segIndex[0] + 1] = cornerPatchPos[neiEdgeIDs[0] * 6 + 2];
 
 			cubicBezierPos(patchPos[segIndex[5]], Utils::Lerp(patchPos[segIndex[5]], patchPos[segIndex[6]], smoothness/2.0),
 				Utils::Lerp(patchPos[segIndex[8]], patchPos[segIndex[7]], smoothness / 2.0), patchPos[segIndex[8]],
@@ -1707,16 +1697,8 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			cubicBezierPos(patchPos[segIndex[11] + 1], Utils::Lerp(patchPos[segIndex[11] + 1], patchPos[segIndex[12] + 1], smoothness / 2.0),
 				Utils::Lerp(patchPos[segIndex[13] + 1], patchPos[segIndex[12] + 1], smoothness / 2.0), patchPos[segIndex[13] + 1],
 				&patchPos[segIndex[11] + 1], nESamples);
-#if 0
-			cp = Utils::Lerp(patchPos[segIndex[12]], (patchPos[segIndex[12]] + patchPos[segIndex[13]]) / 2, smoothness);
-			cubicBezierPos(patchPos[segIndex[11]], patchPos[segIndex[12]],
-				Utils::Lerp(cp, patchPos[segIndex[12]], 0.5), cp,
-				&patchPos[segIndex[11]], nESamples);
-			cp = Utils::Lerp(patchPos[segIndex[12] + 1], (patchPos[segIndex[12] + 1] + patchPos[segIndex[13] + 1]) / 2, smoothness);
-			cubicBezierPos(patchPos[segIndex[11] + 1], patchPos[segIndex[12] + 1],
-				Utils::Lerp(cp, patchPos[segIndex[12] + 1], 0.5), cp,
-				&patchPos[segIndex[11] + 1], nESamples);
-#endif
+
+			patchPos[segIndex[13]] = cornerPatchPos[neiEdgeIDs[5] * 6 + 2] - heNorm[neiEdgeIDs[4]] * layerOffset;;
 
 
 			// Assign evaluated positions to patch
@@ -1740,119 +1722,6 @@ vector<QVector3D> heOverlap(refHeCount*4);
 			curHE = curHE->rotCCW()->next()->flip();
 		} while (curHE != he);
 	}
-#if 1
-
-	// cut off excessive flip region
-	for (int i = 0; i < refHeCount; i++)
-	{
-		auto he = &ref_hes[i];
-		// mid piece region
-		bool mid = heToPatch[i * 3 + 1] > 0;
-		auto midID = abs(heToPatch[i * 3 + 1]) -1;
-		// bot piece region
-		bool bot = heToPatch[i * 3 + 2] > 0;
-		auto botID = abs(heToPatch[i * 3 + 2])-1;
-		// top piece region
-		bool top = heToPatch[i * 3] > 0;
-		auto topID = abs(heToPatch[i * 3])-1;
-
-		QVector3D intersectV1 = verts[topID * sPatchVertCount + segIndex[7] + 1].pos 
-								- verts[topID * sPatchVertCount + segIndex[6] + 1].pos;
-		QVector3D intersectP1 = verts[topID * sPatchVertCount + segIndex[6] + 1].pos;
-		QVector3D intersectN1 = QVector3D::crossProduct(heNorm[i], intersectV1).normalized();
-		QVector3D intersectV0 = verts[topID * sPatchVertCount + segIndex[7]].pos
-			- verts[topID * sPatchVertCount + segIndex[6]].pos;
-		QVector3D intersectP0 = verts[topID * sPatchVertCount + segIndex[6]].pos;
-		QVector3D intersectN0 = QVector3D::crossProduct(intersectV0, heNorm[i]).normalized();
-
-
-		//for all mid vertices check if is within region
-		bool isAllIn = false;
-		hdsid_t vOffset = midID * sPatchVertCount + segIndex[0];
-		QVector3D intersectP = top^mid ? intersectP1 : intersectP0;
-		QVector3D intersectN = top^mid ? intersectN1 : intersectN0;
-		QVector3D intersectV = top^mid ? intersectV1 : intersectV0;
-		Float threshold = 0;
-		vector<hdsid_t> cacheV;
-		do 
-		{
-			bool isIn0 = QVector3D::dotProduct((verts[vOffset].pos - intersectP), intersectN)>threshold;
-			bool isIn1 = QVector3D::dotProduct((verts[vOffset+1].pos - intersectP), intersectN)>threshold;
-			bool isIn2 = QVector3D::dotProduct((verts[vOffset+2].pos - intersectP), intersectN)>threshold;
-			bool isIn3 = QVector3D::dotProduct((verts[vOffset+3].pos - intersectP), intersectN)>threshold;
-
-			isAllIn = isIn0 & isIn1 & isIn2 & isIn3;
-
-			bool isAllOut = !isIn0 & !isIn1 & !isIn2 & !isIn3;
-			if (isAllIn) break;
-			else if (isAllOut) {
-				//(hide) this face
-				cacheV.push_back(vOffset);
-			}
-			else {
-				//calculate intersection points
-				QVector3D p0, p1;
-				Utils::LineLineIntersect(verts[vOffset].pos, verts[vOffset + 1].pos, intersectP, intersectP + intersectV, &p0);
-				Utils::LineLineIntersect(verts[vOffset+2].pos, verts[vOffset + 3].pos, intersectP, intersectP + intersectV, &p1);
-
-				if (!cacheV.empty()) {
-					for (auto vid: cacheV)
-						verts[vid].pos = verts[vid + 1].pos = verts[vid + 2].pos = verts[vid + 3].pos = p0;
-					cacheV.clear();
-				}
-				//move to intersection points
-				if (!isIn0) verts[vOffset].pos = p0;
-				if (!isIn1) verts[vOffset + 1].pos = p0;
-				if (!isIn2) verts[vOffset + 2].pos = p1;
-				if (!isIn3) verts[vOffset + 3].pos = p1;
-
-			}
-			vOffset += 2;
-		} while (!isAllIn && vOffset <= midID * sPatchVertCount + segIndex[2]);
-
-		//for all bot vertices check if is within region
-		isAllIn = false;
-		vOffset = botID * sPatchVertCount + segIndex[13];
-		 intersectP = top^bot ? intersectP0 : intersectP1;
-		 intersectN = top^bot ? intersectN0 : intersectN1;
-		 intersectV = top^bot ? intersectV0 : intersectV1;
-		do
-		{
-			bool isIn0 = QVector3D::dotProduct((verts[vOffset-2].pos - intersectP), intersectN) > threshold;
-			bool isIn1 = QVector3D::dotProduct((verts[vOffset-1].pos - intersectP), intersectN) > threshold;
-			bool isIn2 = QVector3D::dotProduct((verts[vOffset].pos - intersectP), intersectN) > threshold;
-			bool isIn3 = QVector3D::dotProduct((verts[vOffset + 1].pos - intersectP), intersectN) > threshold;
-
-			isAllIn = isIn0 & isIn1 & isIn2 & isIn3;
-
-			bool isAllOut = !isIn0 & !isIn1 & !isIn2 & !isIn3;
-			if (isAllIn) break;
-			else if (isAllOut) {
-				//delete(hide) this face
-				cacheV.push_back(vOffset-2);
-			}
-			else {
-				//calculate intersection points
-				QVector3D p0, p1;
-				Utils::LineLineIntersect(verts[vOffset-2].pos, verts[vOffset-1].pos, intersectP, intersectP + intersectV, &p0);
-				Utils::LineLineIntersect(verts[vOffset].pos, verts[vOffset + 1].pos, intersectP, intersectP + intersectV, &p1);
-
-				if (!cacheV.empty()) {
-					for (auto vid : cacheV)
-						verts[vid].pos = verts[vid + 1].pos = verts[vid + 2].pos = verts[vid + 3].pos = p0;
-				}
-				cacheV.clear();
-				//move to intersection points
-				if (!isIn0) verts[vOffset-2].pos = p0;
-				if (!isIn1) verts[vOffset - 1].pos = p0;
-				if (!isIn2) verts[vOffset].pos = p1;
-				if (!isIn3) verts[vOffset + 1].pos = p1;
-
-			}
-			vOffset -= 2;
-		} while (!isAllIn && vOffset >= botID * sPatchVertCount + segIndex[11]);
-	}
-#endif
 
 	// Finalize Mesh
 	unordered_set<hdsid_t> exposedHEs;
