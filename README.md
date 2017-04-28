@@ -58,8 +58,8 @@ Some guides for possible future developers.
 ### Documentations
 Most documentations are in-line. 
 
-Illustration and detailed description of mesh operations can be found in [You Wu's Thesis] (https://www.sharelatex.com/project/5858664985836daf6b042772), those of connectors can be found in [Shenyao Ke's Thesis](). Mesh operations algorithm(hand drawn) can be found in _docs/mesh_operation_algorithm_ folder.
+Illustration and detailed description of mesh operations can be found in [You Wu's Thesis](https://www.sharelatex.com/project/5858664985836daf6b042772), those of connectors can be found in [Shenyao Ke's Thesis](). Mesh operations algorithm(hand drawn) can be found in _docs/mesh_operation_algorithm_ folder.
 
 Flowchart: 
-![Flowchart](hhttps://github.com/TopModLab/Unfolding/blob/master/docs/diagram.png)
+![Flowchart](https://github.com/TopModLab/Unfolding/blob/master/docs/diagram.png)
 
